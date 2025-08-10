@@ -40,9 +40,9 @@ const Index = () => {
 
       <section className="min-h-screen flex items-center justify-center px-6">
         <div className="max-w-3xl w-full text-center space-y-6">
-          <h1 className="font-playfair text-5xl md:text-7xl font-bold tracking-tight">Courtney's List</h1>
+          <h1 className="text-5xl md:text-7xl font-bold tracking-tight">Courtney's List</h1>
           <p className="text-xl text-muted-foreground">Your Private Community’s Trusted Guide to Local Services</p>
-          <p className="text-base text-muted-foreground">No more guessing, random internet searches, or frantic Facebook posts.</p>
+          
 
           <form onSubmit={onSubmit} className="mx-auto mt-6 w-full">
             <div className="flex flex-col md:flex-row items-stretch gap-3 md:gap-4 max-w-2xl mx-auto">
