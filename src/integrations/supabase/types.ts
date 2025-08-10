@@ -32,6 +32,80 @@ export type Database = {
         }
         Relationships: []
       }
+      costs: {
+        Row: {
+          amount: number
+          created_at: string
+          created_by: string | null
+          currency: string
+          household_address: string
+          id: string
+          normalized_address: string
+          updated_at: string
+          vendor_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          household_address: string
+          id?: string
+          normalized_address: string
+          updated_at?: string
+          vendor_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          household_address?: string
+          id?: string
+          normalized_address?: string
+          updated_at?: string
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "costs_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      household_hoa: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          hoa_name: string
+          household_address: string
+          id: string
+          normalized_address: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          hoa_name: string
+          household_address: string
+          id?: string
+          normalized_address: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          hoa_name?: string
+          household_address?: string
+          id?: string
+          normalized_address?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       invitations: {
         Row: {
           accepted_at: string | null
@@ -39,7 +113,7 @@ export type Database = {
           id: string
           invite_token: string
           invited_by: string | null
-          invited_email: string
+          invited_email: string | null
           status: string | null
         }
         Insert: {
@@ -48,7 +122,7 @@ export type Database = {
           id?: string
           invite_token: string
           invited_by?: string | null
-          invited_email: string
+          invited_email?: string | null
           status?: string | null
         }
         Update: {
@@ -57,7 +131,7 @@ export type Database = {
           id?: string
           invite_token?: string
           invited_by?: string | null
-          invited_email?: string
+          invited_email?: string | null
           status?: string | null
         }
         Relationships: [
@@ -182,6 +256,7 @@ export type Database = {
           id: string
           name: string
           typical_cost: number | null
+          updated_at: string | null
         }
         Insert: {
           category: string
@@ -193,6 +268,7 @@ export type Database = {
           id?: string
           name: string
           typical_cost?: number | null
+          updated_at?: string | null
         }
         Update: {
           category?: string
@@ -204,6 +280,7 @@ export type Database = {
           id?: string
           name?: string
           typical_cost?: number | null
+          updated_at?: string | null
         }
         Relationships: [
           {
@@ -220,6 +297,20 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      count_my_costs: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      current_user_normalized_address: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      get_my_hoa: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          hoa_name: string
+        }[]
+      }
       is_verified: {
         Args: { _uid: string }
         Returns: boolean
@@ -227,6 +318,10 @@ export type Database = {
       mark_invite_accepted: {
         Args: { _token: string; _user_id: string }
         Returns: boolean
+      }
+      normalize_address: {
+        Args: { _addr: string }
+        Returns: string
       }
       validate_invite: {
         Args: { _token: string }
@@ -236,6 +331,13 @@ export type Database = {
           status: string
           accepted: boolean
           created_at: string
+        }[]
+      }
+      vendor_cost_stats: {
+        Args: { _vendor_id: string; _hoa_name: string }
+        Returns: {
+          avg_amount: number
+          sample_size: number
         }[]
       }
     }
