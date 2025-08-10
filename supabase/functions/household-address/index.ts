@@ -2,10 +2,29 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import type { Database } from "https://esm.sh/v135/@supabase/supabase-js@2/dist/module/lib/schema";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+// Minimal CORS helper with regex allowlist
+const ALLOWLIST = [
+  /^http:\/\/localhost(:\d+)?$/i,
+  /^http:\/\/127\.0\.0\.1(:\d+)?$/i,
+  /^https:\/\/.*\.lovable\.dev$/i,
+  /^https:\/\/.*\.lovableproject\.com$/i,
+];
+
+function cors(req: Request) {
+  const origin = req.headers.get('origin') ?? '';
+  const allowed = ALLOWLIST.some(rx => rx.test(origin));
+  const base = {
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  } as const;
+  if (req.method === 'OPTIONS') {
+    return new Response(null, {
+      status: 204,
+      headers: { ...base, ...(allowed ? { 'Access-Control-Allow-Origin': origin } : {}) },
+    });
+  }
+  return { allowed, origin, headers: { ...(allowed ? { 'Access-Control-Allow-Origin': origin } : {}), ...base } };
+}
 
 type AddressPayload = {
   household_address: string;
@@ -31,16 +50,21 @@ function normalizeToStreetName(s: string) {
 }
 
 Deno.serve(async (req) => {
-  // Handle CORS preflight
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+  const pre = cors(req);
+  if (pre instanceof Response) return pre;
+
+  if (!pre.allowed) {
+    return new Response(JSON.stringify({ error: "Origin not allowed" }), {
+      status: 403,
+      headers: { ...pre.headers, "Content-Type": "application/json", "Vary": "Origin" },
+    });
   }
 
   try {
     if (req.method !== "POST") {
       return new Response(JSON.stringify({ error: "Method not allowed" }), {
         status: 405,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { ...pre.headers, "Content-Type": "application/json", "Vary": "Origin" },
       });
     }
 
@@ -58,7 +82,7 @@ Deno.serve(async (req) => {
       console.error("[household-address] auth error:", userErr);
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { ...pre.headers, "Content-Type": "application/json", "Vary": "Origin" },
       });
     }
     const user = userRes.user;
@@ -67,7 +91,7 @@ Deno.serve(async (req) => {
     if (!payload || !payload.place_id) {
       return new Response(JSON.stringify({ error: "Missing place_id" }), {
         status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { ...pre.headers, "Content-Type": "application/json", "Vary": "Origin" },
       });
     }
 
@@ -95,19 +119,19 @@ Deno.serve(async (req) => {
       console.error("[household-address] update error:", upErr);
       return new Response(JSON.stringify({ error: upErr.message }), {
         status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { ...pre.headers, "Content-Type": "application/json", "Vary": "Origin" },
       });
     }
 
     return new Response(JSON.stringify({ ok: true }), {
       status: 200,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      headers: { ...pre.headers, "Content-Type": "application/json", "Vary": "Origin" },
     });
   } catch (e) {
     console.error("[household-address] unhandled error:", e);
     return new Response(JSON.stringify({ error: "Server error" }), {
       status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      headers: { ...pre.headers, "Content-Type": "application/json", "Vary": "Origin" },
     });
   }
 });
