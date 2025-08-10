@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
@@ -19,6 +20,7 @@ const CommunityRequest = () => {
   const [location, setLocation] = useState("");
   const [requestorName, setRequestorName] = useState("");
   const [requestorEmail, setRequestorEmail] = useState("");
+  const [resident, setResident] = useState<"" | "yes" | "no">("");
   const [notes, setNotes] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -29,13 +31,38 @@ const CommunityRequest = () => {
       toast({ title: "Community name required", description: "Please enter a community name.", variant: "destructive" });
       return;
     }
+
+    const reqName = requestorName.trim();
+    if (!reqName) {
+      toast({ title: "Your name is required", description: "Please enter your name.", variant: "destructive" });
+      return;
+    }
+
+    const email = requestorEmail.trim();
+    if (!email) {
+      toast({ title: "Email required", description: "Please enter your email address.", variant: "destructive" });
+      return;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast({ title: "Invalid email", description: "Please enter a valid email address.", variant: "destructive" });
+      return;
+    }
+
+    if (!resident) {
+      toast({ title: "Please select resident status", description: "Tell us if you're a current resident.", variant: "destructive" });
+      return;
+    }
+
     setSubmitting(true);
+    const finalNotes = `Resident status: ${resident === "yes" ? "Yes" : "No"}${notes.trim() ? " — " + notes.trim() : ""}`;
+
     const payload = {
       community_name: name,
       location: location.trim() || null,
-      requestor_name: requestorName.trim() || null,
-      requestor_email: requestorEmail.trim() || null,
-      notes: notes.trim() || null,
+      requestor_name: reqName,
+      requestor_email: email,
+      notes: finalNotes || null,
     };
 
     // Temporary cast to any until Supabase types include `community_requests`
@@ -57,6 +84,7 @@ const CommunityRequest = () => {
     setLocation("");
     setRequestorName("");
     setRequestorEmail("");
+    setResident("");
     setNotes("");
     setTimeout(() => navigate("/"), 600);
   };
@@ -102,7 +130,8 @@ const CommunityRequest = () => {
                     id="requestor_name"
                     value={requestorName}
                     onChange={(e) => setRequestorName(e.currentTarget.value)}
-                    placeholder="Optional"
+                    placeholder="Your full name"
+                    required
                   />
                 </div>
                 <div className="space-y-2">
@@ -112,9 +141,22 @@ const CommunityRequest = () => {
                     type="email"
                     value={requestorEmail}
                     onChange={(e) => setRequestorEmail(e.currentTarget.value)}
-                    placeholder="Optional"
+                    placeholder="you@example.com"
+                    required
                   />
                 </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="resident_status">Are you a current resident?</Label>
+                <Select value={resident} onValueChange={(v) => setResident(v as "yes" | "no")}>
+                  <SelectTrigger id="resident_status" aria-label="Current resident">
+                    <SelectValue placeholder="Select one" />
+                  </SelectTrigger>
+                  <SelectContent className="z-50">
+                    <SelectItem value="yes">Yes</SelectItem>
+                    <SelectItem value="no">No</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="notes">Notes</Label>
