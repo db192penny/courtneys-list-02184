@@ -127,7 +127,7 @@ const Index = () => {
         <ul className="max-w-3xl mx-auto space-y-3">
           <li className="flex items-start gap-3"><CheckCircle className="mt-0.5 text-foreground" aria-hidden="true" /><span>See who your neighbors trust — with clear ratings and costs.</span></li>
           <li className="flex items-start gap-3"><CheckCircle className="mt-0.5 text-foreground" aria-hidden="true" /><span>Compare prices and find the best local providers easily.</span></li>
-          <li className="flex items-start gap-3"><CheckCircle className="mt-0.5 text-foreground" aria-hidden="true" /><span>Skip frantic Facebook posts — get real reviews from people you know.</span></li>
+          <li className="flex items-start gap-3"><CheckCircle className="mt-0.5 text-foreground" aria-hidden="true" /><span>Skip frantic Facebook posts — always have access to the community's vendors and have a home for your providers.</span></li>
         </ul>
       </section>
 
