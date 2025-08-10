@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { ShieldCheck, Send, Search, CheckCircle } from "lucide-react";
+import heroCommunity from "@/assets/hero-community.jpg";
 
 const Index = () => {
   const canonical = typeof window !== "undefined" ? window.location.href : undefined;
@@ -38,25 +39,34 @@ const Index = () => {
         canonical={canonical}
       />
 
-      <section className="min-h-screen flex items-center justify-center px-6">
-        <div className="max-w-3xl w-full text-center space-y-6">
+      <section className="relative min-h-[80vh] md:min-h-screen overflow-hidden px-6">
+        <div
+          className="absolute inset-0 -z-10 bg-cover bg-center"
+          style={{ backgroundImage: `url(${heroCommunity})` }}
+          aria-hidden="true"
+        />
+        <div
+          className="absolute inset-0 -z-10 bg-gradient-to-b from-background/70 via-background/40 to-background/90"
+          aria-hidden="true"
+        />
+        <div className="max-w-3xl w-full text-center space-y-6 mx-auto">
           <h1 className="text-5xl md:text-7xl font-bold tracking-tight">Courtney's List</h1>
           <p className="text-xl text-muted-foreground">Your Private Community’s Trusted Guide to Local Services</p>
           
-
-          <form onSubmit={onSubmit} className="mx-auto mt-6 w-full">
-            <div className="flex flex-col md:flex-row items-stretch gap-3 md:gap-4 max-w-2xl mx-auto">
-              <Input
-                value={query}
-                onChange={(e) => setQuery(e.currentTarget.value)}
-                placeholder="Enter Your Address or HOA Name"
-                aria-label="Enter Your Address or HOA Name"
-              />
-              <Button type="submit" className="md:min-w-[180px]">View Dashboard</Button>
-            </div>
-          </form>
-
-          <p className="text-xs text-muted-foreground">*We’ll only show street-level info publicly to protect your privacy.*</p>
+          <div className="mx-auto mt-6 w-full max-w-2xl rounded-xl bg-background/70 supports-[backdrop-filter]:bg-background/60 backdrop-blur shadow-lg p-4 md:p-6">
+            <form onSubmit={onSubmit} className="w-full">
+              <div className="flex flex-col md:flex-row items-stretch gap-3 md:gap-4">
+                <Input
+                  value={query}
+                  onChange={(e) => setQuery(e.currentTarget.value)}
+                  placeholder="Enter Your Address or HOA Name"
+                  aria-label="Enter Your Address or HOA Name"
+                />
+                <Button type="submit" className="md:min-w-[180px]">View Dashboard</Button>
+              </div>
+            </form>
+            <p className="mt-3 text-xs text-muted-foreground">*We’ll only show street-level info publicly to protect your privacy.*</p>
+          </div>
         </div>
       </section>
 
