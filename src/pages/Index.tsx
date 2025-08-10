@@ -45,7 +45,7 @@ const Index = () => {
           aria-hidden="true"
         />
         <div className="relative z-10 max-w-3xl w-full text-center space-y-6 mx-auto">
-          <h1 className="text-5xl md:text-7xl font-bold tracking-tight">Courtney's List</h1>
+          <h1 className="text-5xl md:text-7xl font-normal tracking-tight">Courtney's List</h1>
           <p className="text-xl text-muted-foreground">Your Private Community’s Trusted Guide to Local Services</p>
           
           <div className="mx-auto mt-6 w-full max-w-2xl rounded-xl bg-background/70 supports-[backdrop-filter]:bg-background/60 backdrop-blur shadow-lg p-4 md:p-6">
