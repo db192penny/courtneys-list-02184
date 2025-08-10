@@ -14,6 +14,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [isVerified, setIsVerified] = useState<boolean>(false);
   const [submissionsCount, setSubmissionsCount] = useState<number>(0);
+  const [points, setPoints] = useState<number>(0);
   const [selectedCategory, setSelectedCategory] = useState<string | undefined>(undefined);
 
   useEffect(() => {
@@ -26,7 +27,7 @@ const Dashboard = () => {
       }
       const { data, error } = await supabase
         .from("users")
-        .select("is_verified, submissions_count")
+        .select("is_verified, submissions_count, points")
         .eq("id", auth.user.id)
         .single();
 
@@ -36,6 +37,7 @@ const Dashboard = () => {
       if (!cancelled) {
         setIsVerified(!!data?.is_verified);
         setSubmissionsCount(data?.submissions_count ?? 0);
+        setPoints(data?.points ?? 0);
         setLoading(false);
       }
     })();
@@ -59,7 +61,7 @@ const Dashboard = () => {
           )}
           {!loading && isVerified && (
             <p className="text-muted-foreground mt-2">
-              Full access unlocked. Thanks for contributing! Submissions: {submissionsCount}.
+              Full access unlocked. Thanks for contributing! Submissions: {submissionsCount}. Points: {points}.
             </p>
           )}
         </header>

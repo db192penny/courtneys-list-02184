@@ -54,7 +54,6 @@ export default function Household() {
   const [isInviting, setIsInviting] = useState<boolean>(false);
 
   const [points, setPoints] = useState<number>(0);
-  const [level, setLevel] = useState<string>("New");
 
   const levelInfo = useMemo(() => {
     if (points >= 50) return { label: "Leader", next: 0 };
@@ -75,12 +74,15 @@ export default function Household() {
 
       const { data: profile } = await supabase
         .from("users")
-        .select("address, submissions_count")
+        .select("address, points")
         .eq("id", auth.user.id)
         .maybeSingle();
 
       const addr = profile?.address ?? "";
-      if (!cancelled) setAddress(addr);
+      if (!cancelled) {
+        setAddress(addr);
+        setPoints((profile?.points as number | null) ?? 0);
+      }
 
       // HOA name via RPC (server-side normalization)
       const { data: hoaRes, error: hoaErr } = await supabase.rpc("get_my_hoa");
@@ -136,30 +138,10 @@ export default function Household() {
         setYourCosts(yourCostsEntries);
       }
 
-      // Activity points
-      const reviewsCountPromise = supabase
-        .from("reviews")
-        .select("id", { count: "exact", head: true })
-        .eq("user_id", auth.user.id);
-      const { data: rc, error: rErr, count: rCount } = await reviewsCountPromise;
-      if (rErr) console.warn("[Household] reviews count error:", rErr);
-
-      const { data: costsCount, error: cErr } = await supabase.rpc("count_my_costs");
-      if (cErr) console.warn("[Household] costs count error:", cErr);
-
-      const submissions = profile?.submissions_count ?? 0;
-      const reviewsCount = rCount ?? 0;
-      const myCosts = (Array.isArray(costsCount) ? (costsCount[0] as number) : (costsCount as number)) || 0;
-      const totalPoints = submissions * 10 + reviewsCount * 5 + myCosts * 5;
-      if (!cancelled) {
-        setPoints(totalPoints);
-        setLevel(levelInfo.label);
-      }
-
       setLoading(false);
     })();
     return () => { cancelled = true; };
-  }, [levelInfo.label]);
+  }, []);
 
   const openAddCost = (vendorId: string) => {
     setCostVendorId(vendorId);
@@ -205,7 +187,14 @@ export default function Household() {
       const rec = (s?.[0] as VendorStat) || { avg_amount: null, sample_size: null };
       setStats((prev) => ({ ...prev, [costVendorId]: rec }));
       setYourCosts((prev) => ({ ...prev, [costVendorId]: { amount: value, currency: curr } }));
-      setPoints((p) => p + 5);
+
+      // Refetch updated points from server (trigger updated via DB)
+      const { data: fresh } = await supabase
+        .from("users")
+        .select("points")
+        .eq("id", userId)
+        .maybeSingle();
+      setPoints((fresh?.points as number | null) ?? 0);
     }
   };
 

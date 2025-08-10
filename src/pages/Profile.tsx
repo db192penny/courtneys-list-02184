@@ -19,6 +19,7 @@ const Profile = () => {
   const [address, setAddress] = useState("");
   const [isAnonymous, setIsAnonymous] = useState(true);
   const [showNamePublic, setShowNamePublic] = useState(false);
+  const [points, setPoints] = useState<number>(0);
 
   useEffect(() => {
     let cancel = false;
@@ -30,7 +31,7 @@ const Profile = () => {
       }
       const { data, error } = await supabase
         .from("users")
-        .select("name, address, is_anonymous, show_name_public")
+        .select("name, address, is_anonymous, show_name_public, points")
         .eq("id", auth.user.id)
         .single();
 
@@ -42,6 +43,7 @@ const Profile = () => {
         setAddress(data?.address ?? "");
         setIsAnonymous(data?.is_anonymous ?? true);
         setShowNamePublic(data?.show_name_public ?? false);
+        setPoints(data?.points ?? 0);
         setLoading(false);
       }
     })();
@@ -87,6 +89,7 @@ const Profile = () => {
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Profile & Privacy</CardTitle>
+            <p className="text-sm text-muted-foreground mt-1">Activity points: {points}</p>
           </CardHeader>
           <form onSubmit={onSave}>
             <CardContent className="space-y-4">

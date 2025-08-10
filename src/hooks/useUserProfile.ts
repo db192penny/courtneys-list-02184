@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 export type UserProfile = {
   isVerified: boolean;
   submissionsCount: number;
+  points: number;
   isAuthenticated: boolean;
 };
 
@@ -16,11 +17,11 @@ export function useUserProfile() {
       const { data: auth } = await supabase.auth.getUser();
       const user = auth.user;
       if (!user) {
-        return { isVerified: false, submissionsCount: 0, isAuthenticated: false };
+        return { isVerified: false, submissionsCount: 0, points: 0, isAuthenticated: false };
       }
       const { data, error } = await supabase
         .from("users")
-        .select("is_verified, submissions_count")
+        .select("is_verified, submissions_count, points")
         .eq("id", user.id)
         .maybeSingle();
 
@@ -30,6 +31,7 @@ export function useUserProfile() {
       return {
         isVerified: !!data?.is_verified,
         submissionsCount: data?.submissions_count ?? 0,
+        points: data?.points ?? 0,
         isAuthenticated: true,
       };
     },
