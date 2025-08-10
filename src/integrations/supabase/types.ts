@@ -195,6 +195,8 @@ export type Database = {
           badges: string[] | null
           created_at: string | null
           email: string
+          formatted_address: string | null
+          google_place_id: string | null
           id: string
           invited_by: string | null
           is_anonymous: boolean | null
@@ -210,6 +212,8 @@ export type Database = {
           badges?: string[] | null
           created_at?: string | null
           email: string
+          formatted_address?: string | null
+          google_place_id?: string | null
           id?: string
           invited_by?: string | null
           is_anonymous?: boolean | null
@@ -225,6 +229,8 @@ export type Database = {
           badges?: string[] | null
           created_at?: string | null
           email?: string
+          formatted_address?: string | null
+          google_place_id?: string | null
           id?: string
           invited_by?: string | null
           is_anonymous?: boolean | null

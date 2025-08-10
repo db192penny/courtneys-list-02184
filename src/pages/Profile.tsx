@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import SEO from "@/components/SEO";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { extractStreetName } from "@/utils/address";
 import { Link } from "react-router-dom";
+import AddressInput, { AddressSelectedPayload } from "@/components/AddressInput";
 
 const Profile = () => {
   const { toast } = useToast();
@@ -77,10 +77,29 @@ const Profile = () => {
 
   const canonical = typeof window !== "undefined" ? window.location.href : undefined;
 
+  const handleAddressSelected = async (payload: AddressSelectedPayload) => {
+    // POST to backend (Supabase Edge Function)
+    const { error } = await supabase.functions.invoke("household-address", {
+      body: payload,
+    });
+    if (error) {
+      console.error("[Profile] address save error:", error);
+      toast({
+        title: "Could not save address",
+        description: error.message || "Unknown error",
+        variant: "destructive",
+      });
+      return;
+    }
+    // Optimistic/local refresh
+    setAddress(payload.household_address);
+    toast({ title: "Address saved", description: "Your household address was updated." });
+  };
+
   return (
     <main className="min-h-screen bg-background">
       <SEO
-        title="Courtney’s List | Profile"
+        title="Courtney's List | Profile"
         description="Manage your profile and privacy preferences."
         canonical={canonical}
       />
@@ -99,7 +118,13 @@ const Profile = () => {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="address">Full Address</Label>
-                <Input id="address" value={address} onChange={(e) => setAddress(e.currentTarget.value)} />
+                <AddressInput
+                  id="address"
+                  defaultValue={address}
+                  onSelected={handleAddressSelected}
+                  country={["us"]}
+                  placeholder="Start typing your address..."
+                />
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
