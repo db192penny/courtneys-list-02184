@@ -18,6 +18,7 @@ const Index = () => {
         <div className="flex items-center justify-center gap-4">
           <a href="/submit"><Button>Submit a Vendor</Button></a>
           <a href="/dashboard"><Button variant="secondary">View Dashboard</Button></a>
+          <a href="/auth"><Button variant="outline">Log In</Button></a>
         </div>
       </section>
     </main>
