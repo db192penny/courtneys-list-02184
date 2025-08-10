@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import SEO from "@/components/SEO";
@@ -57,7 +58,17 @@ const Index = () => {
                   placeholder="Enter Your Address or HOA Name"
                   aria-label="Enter Your Address or HOA Name"
                 />
-                <Button type="submit" className="md:min-w-[180px]">View Dashboard</Button>
+                <div className="flex gap-3">
+                  <Button type="submit" className="md:min-w-[180px]">View Dashboard</Button>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => navigate("/communities/request")}
+                    className="md:min-w-[180px]"
+                  >
+                    Request Your Community
+                  </Button>
+                </div>
               </div>
             </form>
             <p className="mt-3 text-xs text-muted-foreground">*We’ll only show street-level info publicly to protect your privacy.*</p>

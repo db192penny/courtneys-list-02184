@@ -6,6 +6,7 @@ import { CATEGORIES } from "@/data/categories";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import VendorList from "@/components/vendors/VendorList";
 
 const Dashboard = () => {
   const canonical = typeof window !== "undefined" ? window.location.href : undefined;
@@ -13,6 +14,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [isVerified, setIsVerified] = useState<boolean>(false);
   const [submissionsCount, setSubmissionsCount] = useState<number>(0);
+  const [selectedCategory, setSelectedCategory] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     let cancelled = false;
@@ -69,11 +71,12 @@ const Dashboard = () => {
             </CardHeader>
             <CardContent>
               <label className="text-sm mb-2 block">Service Category</label>
-              <Select>
+              <Select onValueChange={(val) => setSelectedCategory(val)}>
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="All categories" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="all">All</SelectItem>
                   {CATEGORIES.map((c) => (
                     <SelectItem key={c} value={c}>{c}</SelectItem>
                   ))}
@@ -91,22 +94,21 @@ const Dashboard = () => {
                   </CardHeader>
                   <CardContent>
                     <p className="text-muted-foreground text-sm">
-                      You can see category summaries but contact info and detailed reviews are hidden until you submit a vendor.
+                      You can see providers and categories but contact info and detailed reviews are hidden until you submit a vendor.
                     </p>
-                    <div className="mt-3">
+                    <div className="mt-3 flex gap-4">
                       <Link to="/submit" className="underline">Submit a Vendor</Link>
+                      <Link to="/profile" className="underline">Profile & Privacy</Link>
                     </div>
                   </CardContent>
                 </Card>
 
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-base">Category Summary</CardTitle>
+                    <CardTitle className="text-base">Browse Providers (Preview)</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-muted-foreground text-sm">
-                      Summary stats will appear here once Supabase is connected (provider count, avg rating, cost ranges).
-                    </p>
+                    <VendorList category={selectedCategory} isVerified={false} />
                   </CardContent>
                 </Card>
               </>
@@ -118,7 +120,7 @@ const Dashboard = () => {
                   </CardHeader>
                   <CardContent className="space-y-3">
                     <p className="text-muted-foreground text-sm">
-                      You now have full access. Provider contact info and reviews will appear here as data is added.
+                      You now have full access. Provider contact info and reviews are available.
                     </p>
                     <div className="flex gap-4">
                       <Link to="/submit" className="underline">Add a Vendor</Link>
@@ -126,6 +128,8 @@ const Dashboard = () => {
                     </div>
                   </CardContent>
                 </Card>
+
+                <VendorList category={selectedCategory} isVerified />
               </>
             )}
           </div>
