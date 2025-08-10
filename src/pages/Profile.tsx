@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { extractStreetName } from "@/utils/address";
 
 const Profile = () => {
   const { toast } = useToast();
@@ -51,10 +52,13 @@ const Profile = () => {
     const { data: auth } = await supabase.auth.getUser();
     if (!auth.user) return;
 
+    const trimmedAddress = address.trim();
     const payload = {
       id: auth.user.id,
+      email: auth.user.email ?? "", // required by DB/types
       name: name.trim(),
-      address: address.trim(),
+      address: trimmedAddress,
+      street_name: extractStreetName(trimmedAddress), // required by DB/types
       is_anonymous: isAnonymous,
       show_name_public: showNamePublic,
     };
