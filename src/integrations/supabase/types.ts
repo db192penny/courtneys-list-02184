@@ -14,13 +14,230 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      communities: {
+        Row: {
+          created_at: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      invitations: {
+        Row: {
+          accepted_at: string | null
+          created_at: string | null
+          id: string
+          invite_token: string
+          invited_by: string | null
+          invited_email: string
+          status: string | null
+        }
+        Insert: {
+          accepted_at?: string | null
+          created_at?: string | null
+          id?: string
+          invite_token: string
+          invited_by?: string | null
+          invited_email: string
+          status?: string | null
+        }
+        Update: {
+          accepted_at?: string | null
+          created_at?: string | null
+          id?: string
+          invite_token?: string
+          invited_by?: string | null
+          invited_email?: string
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invitations_invited_by_fkey"
+            columns: ["invited_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reviews: {
+        Row: {
+          comments: string | null
+          created_at: string | null
+          id: string
+          rating: number
+          recommended: boolean | null
+          user_id: string | null
+          vendor_id: string
+        }
+        Insert: {
+          comments?: string | null
+          created_at?: string | null
+          id?: string
+          rating: number
+          recommended?: boolean | null
+          user_id?: string | null
+          vendor_id: string
+        }
+        Update: {
+          comments?: string | null
+          created_at?: string | null
+          id?: string
+          rating?: number
+          recommended?: boolean | null
+          user_id?: string | null
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      users: {
+        Row: {
+          address: string
+          badges: string[] | null
+          created_at: string | null
+          email: string
+          id: string
+          invited_by: string | null
+          is_anonymous: boolean | null
+          is_verified: boolean | null
+          name: string | null
+          points: number | null
+          show_name_public: boolean | null
+          street_name: string
+          submissions_count: number | null
+        }
+        Insert: {
+          address: string
+          badges?: string[] | null
+          created_at?: string | null
+          email: string
+          id?: string
+          invited_by?: string | null
+          is_anonymous?: boolean | null
+          is_verified?: boolean | null
+          name?: string | null
+          points?: number | null
+          show_name_public?: boolean | null
+          street_name: string
+          submissions_count?: number | null
+        }
+        Update: {
+          address?: string
+          badges?: string[] | null
+          created_at?: string | null
+          email?: string
+          id?: string
+          invited_by?: string | null
+          is_anonymous?: boolean | null
+          is_verified?: boolean | null
+          name?: string | null
+          points?: number | null
+          show_name_public?: boolean | null
+          street_name?: string
+          submissions_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "users_invited_by_fkey"
+            columns: ["invited_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vendors: {
+        Row: {
+          category: string
+          community: string | null
+          contact_info: string
+          created_at: string | null
+          created_by: string | null
+          google_place_id: string | null
+          id: string
+          name: string
+          typical_cost: number | null
+        }
+        Insert: {
+          category: string
+          community?: string | null
+          contact_info: string
+          created_at?: string | null
+          created_by?: string | null
+          google_place_id?: string | null
+          id?: string
+          name: string
+          typical_cost?: number | null
+        }
+        Update: {
+          category?: string
+          community?: string | null
+          contact_info?: string
+          created_at?: string | null
+          created_by?: string | null
+          google_place_id?: string | null
+          id?: string
+          name?: string
+          typical_cost?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendors_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_verified: {
+        Args: { _uid: string }
+        Returns: boolean
+      }
+      mark_invite_accepted: {
+        Args: { _token: string; _user_id: string }
+        Returns: boolean
+      }
+      validate_invite: {
+        Args: { _token: string }
+        Returns: {
+          invite_id: string
+          invited_email: string
+          status: string
+          accepted: boolean
+          created_at: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
