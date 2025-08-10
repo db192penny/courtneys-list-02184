@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -13,6 +14,7 @@ import VendorDetail from "./pages/VendorDetail";
 import Admin from "./pages/Admin";
 import Auth from "./pages/Auth";
 import Invite from "./pages/Invite";
+import Profile from "./pages/Profile"; // Added
 
 const queryClient = new QueryClient();
 
@@ -46,10 +48,12 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/auth/signup" element={<Auth />} /> {/* Alias to Auth */}
           <Route path="/invite/:token" element={<Invite />} />
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="/submit" element={<ProtectedRoute><SubmitVendor /></ProtectedRoute>} />
           <Route path="/vendor/:id" element={<VendorDetail />} />
+          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} /> {/* New route */}
           <Route path="/admin" element={<Admin />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

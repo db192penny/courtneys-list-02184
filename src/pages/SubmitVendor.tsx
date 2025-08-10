@@ -1,4 +1,5 @@
-import { useState } from "react";
+
+import { useEffect, useMemo, useState } from "react";
 import SEO from "@/components/SEO";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -8,19 +9,119 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { CATEGORIES } from "@/data/categories";
+import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 
 const SubmitVendor = () => {
   const { toast } = useToast();
-  const [anonymous, setAnonymous] = useState(false);
+  const navigate = useNavigate();
+
+  // form state
+  const [category, setCategory] = useState<string>("");
+  const [name, setName] = useState<string>("");
+  const [contact, setContact] = useState<string>("");
+  const [cost, setCost] = useState<string>("");
+  const [rating, setRating] = useState<string>("");
+  const [comments, setComments] = useState<string>("");
+  const [recommend, setRecommend] = useState<boolean>(true);
+  const [anonymous, setAnonymous] = useState(false); // keep switch as-is (not used in MVP)
+  const [submitting, setSubmitting] = useState(false);
+
   const canonical = typeof window !== "undefined" ? window.location.href : undefined;
 
-  const onSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    console.log("[SubmitVendor] mounted");
+  }, []);
+
+  const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (submitting) return;
+
+    if (!category) {
+      toast({ title: "Category required", description: "Please select a service category.", variant: "destructive" });
+      return;
+    }
+    if (!name.trim()) {
+      toast({ title: "Provider name required", description: "Please enter the provider name.", variant: "destructive" });
+      return;
+    }
+    if (!contact.trim()) {
+      toast({ title: "Contact info required", description: "Please enter phone or email.", variant: "destructive" });
+      return;
+    }
+    if (!rating) {
+      toast({ title: "Rating required", description: "Please select a rating from 1 to 5.", variant: "destructive" });
+      return;
+    }
+
+    setSubmitting(true);
+    console.log("[SubmitVendor] starting submission");
+
+    const { data: userData, error: userErr } = await supabase.auth.getUser();
+    if (userErr || !userData.user) {
+      console.error("[SubmitVendor] auth error:", userErr);
+      toast({ title: "Not signed in", description: "Please sign in to submit a vendor.", variant: "destructive" });
+      setSubmitting(false);
+      return;
+    }
+
+    const userId = userData.user.id;
+    const costNum = cost ? Number(cost) : null;
+    if (cost && Number.isNaN(costNum)) {
+      toast({ title: "Invalid cost", description: "Please enter a valid number.", variant: "destructive" });
+      setSubmitting(false);
+      return;
+    }
+
+    // 1) Insert vendor
+    const { data: vendorInsert, error: vendorErr } = await supabase
+      .from("vendors")
+      .insert([
+        {
+          name: name.trim(),
+          category,
+          contact_info: contact.trim(),
+          typical_cost: costNum,
+          created_by: userId,
+        },
+      ])
+      .select("id")
+      .single();
+
+    if (vendorErr || !vendorInsert) {
+      console.error("[SubmitVendor] vendor insert error:", vendorErr);
+      toast({ title: "Could not submit vendor", description: vendorErr?.message || "Please try again.", variant: "destructive" });
+      setSubmitting(false);
+      return;
+    }
+
+    const vendorId = vendorInsert.id as string;
+    console.log("[SubmitVendor] vendor created:", vendorId);
+
+    // 2) Insert initial review linked to this vendor
+    const ratingInt = parseInt(rating, 10);
+    const { error: reviewErr } = await supabase.from("reviews").insert([
+      {
+        vendor_id: vendorId,
+        user_id: userId,
+        rating: ratingInt,
+        recommended: recommend,
+        comments: comments.trim() || null,
+      },
+    ]);
+
+    if (reviewErr) {
+      console.warn("[SubmitVendor] review insert error (non-fatal):", reviewErr);
+    }
+
+    // DB trigger will mark the user as verified and increment submission count
     toast({
-      title: "Supabase required",
-      description:
-        "Connect Supabase to enable submissions, approval gating, and data storage.",
+      title: "Vendor submitted!",
+      description: "Thanks for contributing. Your full access should be unlocked now.",
     });
+
+    // Navigate to dashboard (full access will reflect after trigger)
+    navigate("/dashboard");
   };
 
   return (
@@ -42,7 +143,7 @@ const SubmitVendor = () => {
           <div className="grid gap-4">
             <div className="grid gap-2">
               <Label htmlFor="category">Service Category</Label>
-              <Select>
+              <Select value={category} onValueChange={setCategory}>
                 <SelectTrigger id="category">
                   <SelectValue placeholder="Select a category" />
                 </SelectTrigger>
@@ -56,22 +157,22 @@ const SubmitVendor = () => {
 
             <div className="grid gap-2">
               <Label htmlFor="name">Provider Name</Label>
-              <Input id="name" placeholder="e.g., ABC Pool Services" />
+              <Input id="name" placeholder="e.g., ABC Pool Services" value={name} onChange={(e) => setName(e.currentTarget.value)} />
             </div>
 
             <div className="grid gap-2">
               <Label htmlFor="contact">Provider Contact Info</Label>
-              <Input id="contact" placeholder="phone or email" />
+              <Input id="contact" placeholder="phone or email" value={contact} onChange={(e) => setContact(e.currentTarget.value)} />
             </div>
 
             <div className="grid gap-2">
               <Label htmlFor="cost">Typical Cost</Label>
-              <Input id="cost" type="number" inputMode="decimal" placeholder="e.g., 150" />
+              <Input id="cost" type="number" inputMode="decimal" placeholder="e.g., 150" value={cost} onChange={(e) => setCost(e.currentTarget.value)} />
             </div>
 
             <div className="grid gap-2">
               <Label htmlFor="rating">Rating</Label>
-              <Select>
+              <Select value={rating} onValueChange={setRating}>
                 <SelectTrigger id="rating">
                   <SelectValue placeholder="Select 1–5" />
                 </SelectTrigger>
@@ -85,12 +186,12 @@ const SubmitVendor = () => {
 
             <div className="grid gap-2">
               <Label htmlFor="comments">Comments (optional)</Label>
-              <Textarea id="comments" placeholder="Share your experience" />
+              <Textarea id="comments" placeholder="Share your experience" value={comments} onChange={(e) => setComments(e.currentTarget.value)} />
             </div>
 
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Switch id="recommend" />
+                <Switch id="recommend" checked={recommend} onCheckedChange={setRecommend} />
                 <Label htmlFor="recommend">Would you recommend?</Label>
               </div>
               <div className="flex items-center gap-2">
@@ -100,7 +201,9 @@ const SubmitVendor = () => {
             </div>
           </div>
 
-          <Button type="submit" className="w-full">Submit</Button>
+          <Button type="submit" className="w-full" disabled={submitting}>
+            {submitting ? "Submitting..." : "Submit"}
+          </Button>
         </form>
       </section>
     </main>
