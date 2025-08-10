@@ -3,37 +3,37 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import SEO from "@/components/SEO";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { ShieldCheck, Send, Search, CheckCircle } from "lucide-react";
-
+import AddressInput, { AddressSelectedPayload } from "@/components/AddressInput";
 
 const Index = () => {
   const canonical = typeof window !== "undefined" ? window.location.href : undefined;
-  const [query, setQuery] = useState("");
   const [hoa, setHoa] = useState("Boca Bridges");
   
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  const onAddressSelected = async (payload: AddressSelectedPayload) => {
+    try {
+      localStorage.setItem("prefill_address", payload.formatted_address);
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        navigate("/dashboard");
+      } else {
+        navigate(`/auth/signup?address=${encodeURIComponent(payload.household_address)}`);
+      }
+    } catch (e) {
+      console.error("[Index] address select error:", e);
+      toast({ title: "Something went wrong", description: "Please try again.", variant: "destructive" });
+    }
+  };
 
   const onSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault();
-    const value = query.trim();
-    if (!value) {
-      toast({ title: "Enter your address or HOA", description: "Please type your address or HOA name.", variant: "destructive" });
-      return;
-    }
-
-    localStorage.setItem("prefill_address", value);
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session) {
-      navigate("/dashboard");
-    } else {
-      navigate(`/auth/signup?address=${encodeURIComponent(value)}`);
-    }
+    toast({ title: "Pick from suggestions", description: "Please pick an address from the list.", variant: "destructive" });
   };
 
   return (
@@ -56,11 +56,9 @@ const Index = () => {
           <div className="mx-auto mt-6 w-full max-w-2xl rounded-xl bg-background/70 supports-[backdrop-filter]:bg-background/60 backdrop-blur shadow-lg p-4 md:p-6">
             <form onSubmit={onSubmit} className="w-full">
               <div className="flex flex-col md:flex-row items-stretch gap-3 md:gap-4">
-                <Input
-                  value={query}
-                  onChange={(e) => setQuery(e.currentTarget.value)}
+                <AddressInput
                   placeholder="Enter Your Address"
-                  aria-label="Enter Your Address"
+                  onSelected={onAddressSelected}
                 />
                 <Select value={hoa} onValueChange={setHoa}>
                   <SelectTrigger aria-label="HOA Name">

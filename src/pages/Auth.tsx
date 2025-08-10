@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { useToast } from "@/hooks/use-toast";
 import { extractStreetName } from "@/utils/address";
 import SEO from "@/components/SEO";
-
+import AddressInput, { AddressSelectedPayload } from "@/components/AddressInput";
 const Auth = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -175,12 +175,11 @@ const Auth = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="address">Full Address</Label>
-                <Input
+                <AddressInput
                   id="address"
-                  value={address}
-                  onChange={(e) => setAddress(e.currentTarget.value)}
+                  defaultValue={address}
+                  onSelected={(p: AddressSelectedPayload) => setAddress(p.household_address)}
                   placeholder="123 Boca Bridges Way, Boca Raton, FL"
-                  required
                 />
                 {!!address && (
                   <p className="text-xs text-muted-foreground">

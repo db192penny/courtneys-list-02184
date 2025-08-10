@@ -1,29 +1,53 @@
-
 import { Loader } from "@googlemaps/js-api-loader";
+import { supabase } from "@/integrations/supabase/client";
 
 /**
- * Small reusable loader for Google Maps JS API.
- * - Reads API key from process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY
- * - Loads with "places" library by default
- * - Returns the global google object once loaded
+ * Google Maps JS API loader with runtime key fetch via Edge Function.
+ * - Loads once (memoized) and reuses the same loader
+ * - Libraries default to ["places"]
  */
 let loader: Loader | null = null;
+let cachedKey: string | null = null;
+let loadPromise: Promise<typeof google> | null = null;
 
-export async function loadGoogleMaps(libraries: ("places" | "geometry" | "marker")[] = ["places"]) {
-  // IMPORTANT: key is not hardcoded; read from process.env as requested.
-  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY;
-  if (!apiKey) {
-    console.error("[mapsLoader] NEXT_PUBLIC_GOOGLE_MAPS_KEY is not set.");
+async function fetchGoogleKey(): Promise<string> {
+  if (cachedKey) return cachedKey;
+  const { data, error } = await supabase.functions.invoke("get-public-config");
+  if (error) {
+    console.error("[mapsLoader] get-public-config error:", error);
+    throw new Error(error.message || "Failed to load Google Maps key");
+  }
+  const key = (data as any)?.googleMapsKey || "";
+  if (!key) {
+    console.error("[mapsLoader] Missing googleMapsKey in response");
     throw new Error("Google Maps API key is missing");
   }
+  cachedKey = key;
+  return key;
+}
 
-  if (!loader) {
-    loader = new Loader({
-      apiKey,
-      version: "weekly",
-      libraries,
-    });
+export async function loadGoogleMaps(libraries: ("places" | "geometry" | "marker")[] = ["places"]) {
+  if (typeof window === "undefined") {
+    throw new Error("Google Maps can only be loaded in the browser");
   }
-  // If loader was constructed with different libraries, it will still load those; this is fine for now.
-  return loader.load();
+
+  if (loadPromise) return loadPromise;
+
+  loadPromise = (async () => {
+    const apiKey = await fetchGoogleKey();
+    if (!loader) {
+      loader = new Loader({ apiKey, version: "weekly", libraries });
+    }
+    try {
+      const g = await loader.load();
+      return g;
+    } catch (e) {
+      console.error("[mapsLoader] Loader failed:", e);
+      // Reset promise so future attempts can retry
+      loadPromise = null;
+      throw e;
+    }
+  })();
+
+  return loadPromise;
 }
