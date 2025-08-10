@@ -27,7 +27,13 @@ const Auth = () => {
   useEffect(() => {
     const hint = localStorage.getItem("invite_email");
     if (hint && !email) setEmail(hint);
-  }, [email]);
+
+    const addrParam = (params.get("address") || "").trim();
+    const storedAddr = localStorage.getItem("prefill_address") || "";
+    if (!address && (addrParam || storedAddr)) {
+      setAddress(addrParam || storedAddr);
+    }
+  }, [email, address, params]);
 
   const finalizeOnboarding = useCallback(async (userId: string, userEmail: string | null) => {
     const pendingRaw = localStorage.getItem("pending_profile");
