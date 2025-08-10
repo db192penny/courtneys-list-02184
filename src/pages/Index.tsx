@@ -39,17 +39,17 @@ const Index = () => {
         canonical={canonical}
       />
 
-      <section className="relative min-h-[80vh] md:min-h-screen overflow-hidden px-6">
+      <section className="relative min-h-screen overflow-hidden px-6 grid place-items-center">
         <div
           className="absolute inset-0 -z-10 bg-cover bg-center"
           style={{ backgroundImage: `url(${heroCommunity})` }}
           aria-hidden="true"
         />
         <div
-          className="absolute inset-0 -z-10 bg-gradient-to-b from-background/70 via-background/40 to-background/90"
+          className="absolute inset-0 -z-10 bg-gradient-to-b from-background/40 via-background/20 to-background/70"
           aria-hidden="true"
         />
-        <div className="max-w-3xl w-full text-center space-y-6 mx-auto">
+        <div className="relative z-10 max-w-3xl w-full text-center space-y-6 mx-auto">
           <h1 className="text-5xl md:text-7xl font-bold tracking-tight">Courtney's List</h1>
           <p className="text-xl text-muted-foreground">Your Private Community’s Trusted Guide to Local Services</p>
           
