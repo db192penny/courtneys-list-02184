@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import SEO from "@/components/SEO";
 import { Button } from "@/components/ui/button";
@@ -13,25 +13,11 @@ import { ShieldCheck, Send, Search, CheckCircle } from "lucide-react";
 const Index = () => {
   const canonical = typeof window !== "undefined" ? window.location.href : undefined;
   const [query, setQuery] = useState("");
-  const [hoa, setHoa] = useState("");
-  const [communities, setCommunities] = useState<{ id: string; name: string }[]>([]);
+  const [hoa, setHoa] = useState("Boca Bridges");
+  
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  // Load community names for HOA dropdown
-  useEffect(() => {
-    let active = true;
-    supabase
-      .from("communities")
-      .select("id, name")
-      .order("name")
-      .then(({ data, error }) => {
-        if (active && data) setCommunities(data);
-      });
-    return () => {
-      active = false;
-    };
-  }, []);
 
   const onSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault();
@@ -80,29 +66,31 @@ const Index = () => {
                   <SelectTrigger aria-label="HOA Name">
                     <SelectValue placeholder="HOA Name" />
                   </SelectTrigger>
-                  <SelectContent>
-                    {communities.map((c) => (
-                      <SelectItem key={c.id} value={c.name}>
-                        {c.name}
-                      </SelectItem>
-                    ))}
+                  <SelectContent className="z-50">
+                    <SelectItem value="Boca Bridges">Boca Bridges</SelectItem>
+                    <SelectItem value="St. Andrews" disabled>St. Andrews</SelectItem>
+                    <SelectItem value="Woodfield" disabled>Woodfield</SelectItem>
+                    <SelectItem value="Seven Bridges" disabled>Seven Bridges</SelectItem>
+                    <SelectItem value="The Bridges" disabled>The Bridges</SelectItem>
+                    <SelectItem value="Addison Reserve" disabled>Addison Reserve</SelectItem>
+                    <SelectItem value="Royal Palm Yacht & Country Club" disabled>Royal Palm Yacht & Country Club</SelectItem>
                   </SelectContent>
                 </Select>
                 <Button type="submit" className="md:min-w-[180px]">View Dashboard</Button>
               </div>
-              <div className="mt-3 flex justify-center">
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={() => navigate("/communities/request")}
-                  className="md:min-w-[220px]"
-                  aria-label="Add my HOA or Community"
-                >
-                  Add my HOA/Community
-                </Button>
-              </div>
             </form>
             <p className="mt-3 text-xs text-muted-foreground">*We’ll only show street-level info publicly to protect your privacy.*</p>
+            <div className="mt-3 flex justify-center">
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => navigate("/communities/request")}
+                className="md:min-w-[220px]"
+                aria-label="Add my HOA or Community"
+              >
+                Add my HOA/Community
+              </Button>
+            </div>
           </div>
         </div>
       </section>
