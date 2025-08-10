@@ -41,12 +41,12 @@ const Index = () => {
 
       <section className="relative min-h-screen overflow-hidden px-6 grid place-items-center">
         <div
-          className="absolute inset-0 -z-10 bg-cover bg-center"
+          className="absolute inset-0 z-0 bg-cover bg-center"
           style={{ backgroundImage: `url(${heroCommunity})` }}
           aria-hidden="true"
         />
         <div
-          className="absolute inset-0 -z-10 bg-gradient-to-b from-background/40 via-background/20 to-background/70"
+          className="absolute inset-0 z-0 bg-gradient-to-b from-background/45 via-background/25 to-background/70"
           aria-hidden="true"
         />
         <div className="relative z-10 max-w-3xl w-full text-center space-y-6 mx-auto">
