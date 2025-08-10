@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { ShieldCheck, Send, Search, CheckCircle } from "lucide-react";
-import heroCommunity from "@/assets/hero-community.jpg";
+
 
 const Index = () => {
   const canonical = typeof window !== "undefined" ? window.location.href : undefined;
@@ -41,11 +41,6 @@ const Index = () => {
 
       <section className="relative min-h-screen overflow-hidden px-6 grid place-items-center">
         <div
-          className="absolute inset-0 z-0 bg-cover bg-center"
-          style={{ backgroundImage: `url(${heroCommunity})` }}
-          aria-hidden="true"
-        />
-        <div
           className="absolute inset-0 z-0 bg-gradient-to-b from-background/45 via-background/25 to-background/70"
           aria-hidden="true"
         />
@@ -78,21 +73,21 @@ const Index = () => {
               <ShieldCheck className="text-foreground" aria-hidden="true" />
             </div>
             <h3 className="text-lg font-medium">Verify Your Address</h3>
-            <p className="text-sm text-muted-foreground">Join your neighborhood’s trusted network by verifying your address.</p>
-          </article>
-          <article className="text-center motion-safe:animate-fade-in">
-            <div className="flex items-center justify-center mb-4">
-              <Send className="text-foreground" aria-hidden="true" />
-            </div>
-            <h3 className="text-lg font-medium">Submit Vendors</h3>
-            <p className="text-sm text-muted-foreground">Share your favorite local vendors to unlock full access.</p>
+            <p className="text-sm text-muted-foreground">Join your neighborhood’s trusted vendor network — connect with real experiences from neighbors.</p>
           </article>
           <article className="text-center motion-safe:animate-fade-in">
             <div className="flex items-center justify-center mb-4">
               <Search className="text-foreground" aria-hidden="true" />
             </div>
             <h3 className="text-lg font-medium">Explore Providers</h3>
-            <p className="text-sm text-muted-foreground">Browse transparent ratings and pricing from your neighbors.</p>
+            <p className="text-sm text-muted-foreground">Find transparent ratings and pricing from neighbors who’ve been there.</p>
+          </article>
+          <article className="text-center motion-safe:animate-fade-in">
+            <div className="flex items-center justify-center mb-4">
+              <Send className="text-foreground" aria-hidden="true" />
+            </div>
+            <h3 className="text-lg font-medium">Share Your Vendors</h3>
+            <p className="text-sm text-muted-foreground">Submit service providers you’ve used — positive or not — to help build an honest, useful community resource.</p>
           </article>
         </div>
       </section>
