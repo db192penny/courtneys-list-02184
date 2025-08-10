@@ -19,6 +19,7 @@ import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import Contact from "./pages/Contact";
 import CommunityRequest from "./pages/CommunityRequest";
+import Household from "./pages/Household";
 
 const queryClient = new QueryClient();
 
@@ -58,6 +59,7 @@ const App = () => (
           <Route path="/submit" element={<ProtectedRoute><SubmitVendor /></ProtectedRoute>} />
           <Route path="/vendor/:id" element={<VendorDetail />} />
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} /> {/* New route */}
+          <Route path="/household" element={<ProtectedRoute><Household /></ProtectedRoute>} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />

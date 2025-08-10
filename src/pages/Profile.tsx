@@ -9,6 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { extractStreetName } from "@/utils/address";
+import { Link } from "react-router-dom";
 
 const Profile = () => {
   const { toast } = useToast();
@@ -108,7 +109,8 @@ const Profile = () => {
                 </div>
               </div>
             </CardContent>
-            <CardFooter className="flex justify-end">
+            <CardFooter className="flex justify-between">
+              <Link to="/household" className="underline text-sm">Go to Household</Link>
               <Button type="submit" disabled={loading}>Save</Button>
             </CardFooter>
           </form>

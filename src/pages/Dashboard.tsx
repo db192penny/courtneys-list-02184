@@ -96,10 +96,11 @@ const Dashboard = () => {
                     <p className="text-muted-foreground text-sm">
                       You can see providers and categories but contact info and detailed reviews are hidden until you submit a vendor.
                     </p>
-                    <div className="mt-3 flex gap-4">
-                      <Link to="/submit" className="underline">Submit a Vendor</Link>
-                      <Link to="/profile" className="underline">Profile & Privacy</Link>
-                    </div>
+                      <div className="mt-3 flex gap-4">
+                        <Link to="/submit" className="underline">Submit a Vendor</Link>
+                        <Link to="/profile" className="underline">Profile & Privacy</Link>
+                        <Link to="/household" className="underline">Household</Link>
+                      </div>
                   </CardContent>
                 </Card>
 
@@ -125,6 +126,7 @@ const Dashboard = () => {
                     <div className="flex gap-4">
                       <Link to="/submit" className="underline">Add a Vendor</Link>
                       <Link to="/profile" className="underline">Profile & Privacy</Link>
+                      <Link to="/household" className="underline">Household</Link>
                     </div>
                   </CardContent>
                 </Card>
