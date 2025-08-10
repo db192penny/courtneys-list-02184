@@ -37,7 +37,10 @@ const CommunityRequest = () => {
       requestor_email: requestorEmail.trim() || null,
       notes: notes.trim() || null,
     };
-    const { error } = await supabase.from("community_requests").insert(payload);
+
+    // Temporary cast to any until Supabase types include `community_requests`
+    const { error } = await (supabase as any).from("community_requests").insert(payload);
+
     setSubmitting(false);
 
     if (error) {
