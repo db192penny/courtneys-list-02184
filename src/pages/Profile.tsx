@@ -105,12 +105,12 @@ useEffect(() => {
   return (
     <main className="min-h-screen bg-background">
       <SEO
-        title="Courtney's List | Profile"
+        title="Profile & Privacy — Courtney's List"
         description="Manage your profile and privacy preferences."
         canonical={canonical}
       />
       <section className="container max-w-xl py-10">
-        <h1 className="text-3xl font-semibold mb-6">Your Profile</h1>
+        <h1 className="text-3xl font-semibold mb-6">Profile & Privacy</h1>
 {onboarding && (
           <Alert className="mb-4">
             <AlertTitle>Welcome!</AlertTitle>
@@ -154,7 +154,7 @@ useEffect(() => {
               </div>
             </CardContent>
             <CardFooter className="flex justify-between">
-              <Link to="/household" className="underline text-sm">Go to Household</Link>
+              <Link to="/household" className="underline text-sm">Your Home</Link>
               <Button type="submit" disabled={loading}>Save</Button>
             </CardFooter>
           </form>

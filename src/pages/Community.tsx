@@ -24,6 +24,7 @@ export default function Community() {
   const { data: profile } = useUserProfile();
 
   const communityName = useMemo(() => slugToName(slug), [slug]);
+  const pageTitle = useMemo(() => (communityName === "Boca Bridges" ? "Boca Bridges Overview" : `${communityName} Overview`), [communityName]);
   const canonical = typeof window !== "undefined" ? window.location.href : undefined;
   const canViewFull = !!profile?.isAuthenticated && !!profile?.isVerified;
   const isPreview = !canViewFull;
@@ -45,7 +46,7 @@ export default function Community() {
   return (
     <main className="min-h-screen bg-background">
       <SEO
-        title={isPreview ? `${communityName} — Preview of Community Providers` : `${communityName} — Community Providers`}
+        title={isPreview ? `${pageTitle} — Preview` : pageTitle}
         description={isPreview ? "You’re viewing a limited preview. Sign up to request exclusive access to your community’s full vendor details, pricing, and HOA-approved membership." : `Trusted vendors recommended by ${communityName} residents.`}
         canonical={canonical}
       />
@@ -69,7 +70,7 @@ export default function Community() {
           </header>
         ) : (
           <header className="space-y-2">
-            <h1 className="text-3xl font-semibold tracking-tight">{communityName} — Community Providers</h1>
+            <h1 className="text-3xl font-semibold tracking-tight">{pageTitle}</h1>
             <p className="text-muted-foreground">{`Browse providers recommended by neighbors in ${communityName}.`}</p>
           </header>
         )}

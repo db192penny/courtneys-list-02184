@@ -24,16 +24,22 @@ const Header = () => {
         <Link to="/" className="font-semibold">Courtney's List</Link>
         <div className="flex items-center gap-2">
           {authed ? (
-            <>
+            <div className="flex items-center gap-1">
+              <Button asChild variant="ghost">
+                <Link to="/household">Your Home</Link>
+              </Button>
+              <Button asChild variant="ghost">
+                <Link to="/communities/boca-bridges">Boca Bridges Overview</Link>
+              </Button>
+              <Button asChild variant="ghost">
+                <Link to="/profile">Profile & Privacy</Link>
+              </Button>
               {isAdmin ? (
-                <Button asChild variant="outline">
+                <Button asChild variant="ghost">
                   <Link to="/admin">Admin</Link>
                 </Button>
               ) : null}
-              <Button asChild variant="secondary">
-                <Link to="/profile">My Profile</Link>
-              </Button>
-            </>
+            </div>
           ) : (
             <Button asChild>
               <Link to="/signin">Sign in</Link>

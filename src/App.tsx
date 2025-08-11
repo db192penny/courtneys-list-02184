@@ -74,7 +74,7 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/auth/signup" element={<Auth />} /> {/* Alias to Auth */}
           <Route path="/invite/:token" element={<Invite />} />
-          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="/dashboard" element={<ProtectedRoute><Navigate to="/communities/boca-bridges" replace /></ProtectedRoute>} />
           <Route path="/submit" element={<ProtectedRoute><SubmitVendor /></ProtectedRoute>} />
           <Route path="/vendor/:id" element={<VendorDetail />} />
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} /> {/* New route */}

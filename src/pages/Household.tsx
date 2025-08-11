@@ -239,15 +239,15 @@ export default function Household() {
 
   return (
     <main className="min-h-screen bg-background">
-      <SEO
-        title="Household | Trusted vendors, costs, and ratings"
-        description="All your household’s trusted vendors, costs, and ratings — organized in one place."
-        canonical={canonical}
-      />
+        <SEO
+          title="Your Home — Courtney's List"
+          description="All your household’s trusted vendors, costs, and ratings — organized in one place."
+          canonical={canonical}
+        />
 
       <section className="container py-10 space-y-6">
         <header className="space-y-2">
-          <h1 className="text-3xl font-semibold tracking-tight">Your Household</h1>
+          <h1 className="text-3xl font-semibold tracking-tight">Your Home</h1>
           <p className="text-muted-foreground">All your household’s trusted vendors, costs, and ratings — organized in one place.</p>
         </header>
 
