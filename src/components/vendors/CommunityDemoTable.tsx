@@ -66,6 +66,7 @@ export default function CommunityDemoTable({
   return (
     <section aria-label="Sample community providers" className="space-y-4">
 
+      <h2 className="text-xl font-semibold tracking-tight">{communityName} Service Providers</h2>
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
         <div className="flex-1 sm:flex-none">
           <label className="block text-xs font-medium text-muted-foreground mb-1">Category</label>
