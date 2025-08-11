@@ -3,6 +3,7 @@ import SEO from "@/components/SEO";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { toast } from "@/components/ui/sonner";
 
 interface PendingRow {
   household_address: string;
@@ -26,6 +27,8 @@ const Admin = () => {
   const [pendingHouseholds, setPendingHouseholds] = useState<PendingRow[]>([]);
   const [pendingUsers, setPendingUsers] = useState<PendingUser[]>([]);
   const [loading, setLoading] = useState(true);
+  const [userLoading, setUserLoading] = useState<Record<string, "approve" | "reject" | undefined>>({});
+  const [householdLoading, setHouseholdLoading] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     let cancelled = false;
@@ -65,23 +68,35 @@ const Admin = () => {
   }, []);
 
   const approveHousehold = async (addr: string) => {
+    setHouseholdLoading((prev) => ({ ...prev, [addr]: true }))
     const { error } = await supabase.rpc("admin_approve_household", { _addr: addr });
     if (error) {
       console.error("[Admin] approve household error:", error);
-      return;
+      toast.error("Failed to approve household");
+    } else {
+      toast.success("Household approved");
+      const { data: rows } = await supabase.rpc("admin_list_pending_households");
+      setPendingHouseholds((rows || []) as PendingRow[]);
     }
-    const { data: rows } = await supabase.rpc("admin_list_pending_households");
-    setPendingHouseholds((rows || []) as PendingRow[]);
+    setHouseholdLoading((prev) => ({ ...prev, [addr]: false }))
   };
 
   const setUserVerification = async (userId: string, verified: boolean) => {
+    setUserLoading((prev) => ({ ...prev, [userId]: verified ? "approve" : "reject" }));
     const { error } = await supabase.rpc("admin_set_user_verification", { _user_id: userId, _is_verified: verified });
     if (error) {
       console.error("[Admin] set user verification error:", error);
-      return;
+      toast.error(verified ? "Failed to approve user" : "Failed to reject user");
+    } else {
+      toast.success(verified ? "User approved" : "User rejected");
+      const { data: userRows } = await supabase.rpc("admin_list_pending_users");
+      setPendingUsers((userRows || []) as PendingUser[]);
     }
-    const { data: userRows } = await supabase.rpc("admin_list_pending_users");
-    setPendingUsers((userRows || []) as PendingUser[]);
+    setUserLoading((prev) => {
+      const next = { ...prev };
+      delete next[userId];
+      return next;
+    });
   };
 
   return (
@@ -105,7 +120,7 @@ const Admin = () => {
         {authed && isSiteAdmin && (
           <div className="grid gap-6">
             <div className="rounded-md border border-border p-4">
-              <h2 className="font-medium mb-3">Pending Users</h2>
+              <h2 className="font-medium mb-3">Pending Users ({pendingUsers.length})</h2>
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
@@ -128,8 +143,12 @@ const Admin = () => {
                         <TableCell>{u.name || "—"}</TableCell>
                         <TableCell>{u.created_at ? new Date(u.created_at).toLocaleDateString() : "—"}</TableCell>
                         <TableCell className="text-right space-x-2">
-                          <Button size="sm" variant="secondary" onClick={() => setUserVerification(u.id, false)}>Reject</Button>
-                          <Button size="sm" onClick={() => setUserVerification(u.id, true)}>Approve</Button>
+                          <Button size="sm" variant="secondary" disabled={!!userLoading?.[u.id]} onClick={() => setUserVerification(u.id, false)}>
+                            {userLoading?.[u.id] === "reject" ? "Rejecting…" : "Reject"}
+                          </Button>
+                          <Button size="sm" disabled={!!userLoading?.[u.id]} onClick={() => setUserVerification(u.id, true)}>
+                            {userLoading?.[u.id] === "approve" ? "Approving…" : "Approve"}
+                          </Button>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -143,7 +162,7 @@ const Admin = () => {
         {authed && isHoaAdmin && (
           <div className="grid gap-6 mt-6">
             <div className="rounded-md border border-border p-4">
-              <h2 className="font-medium mb-3">Pending Households</h2>
+              <h2 className="font-medium mb-3">Pending Households ({pendingHouseholds.length})</h2>
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
@@ -166,7 +185,9 @@ const Admin = () => {
                         <TableCell>{row.hoa_name}</TableCell>
                         <TableCell>{row.first_seen ? new Date(row.first_seen).toLocaleDateString() : "—"}</TableCell>
                         <TableCell className="text-right">
-                          <Button size="sm" onClick={() => approveHousehold(row.household_address)}>Approve</Button>
+                          <Button size="sm" disabled={!!householdLoading[row.household_address]} onClick={() => approveHousehold(row.household_address)}>
+                            {householdLoading[row.household_address] ? "Approving…" : "Approve"}
+                          </Button>
                         </TableCell>
                       </TableRow>
                     ))}
