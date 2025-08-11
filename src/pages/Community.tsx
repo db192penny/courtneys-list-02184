@@ -63,7 +63,7 @@ export default function Community() {
               <div>
                 <h1 className="text-3xl font-semibold tracking-tight">{communityName}</h1>
                 <p className="text-sm text-muted-foreground">Your Trusted Neighborhood — 500 Homes</p>
-                <p className="text-sm text-muted-foreground">1234 Yamato Rd, Boca Raton, FL</p>
+                <p className="text-sm text-muted-foreground">17179 Ludovica Lane, Boca Raton, FL 33496</p>
               </div>
             </div>
           </header>
