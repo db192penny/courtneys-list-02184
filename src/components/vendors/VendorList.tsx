@@ -16,9 +16,11 @@ type Vendor = {
 export default function VendorList({
   category,
   isVerified,
+  limit,
 }: {
   category?: string;
   isVerified: boolean;
+  limit?: number;
 }) {
   const { data, isLoading, error } = useQuery({
     queryKey: ["vendors", category || "all"],
@@ -47,7 +49,7 @@ export default function VendorList({
 
   return (
     <div className="grid gap-4">
-      {data.map((v) => (
+      {(limit ? data.slice(0, limit) : data).map((v) => (
         <VendorCard key={v.id} vendor={v} isVerified={isVerified} />
       ))}
     </div>

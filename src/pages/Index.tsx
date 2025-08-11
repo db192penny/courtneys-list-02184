@@ -5,7 +5,7 @@ import SEO from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+
 import { ShieldCheck, Send, Search, CheckCircle } from "lucide-react";
 import AddressInput, { AddressSelectedPayload } from "@/components/AddressInput";
 
@@ -19,12 +19,7 @@ const Index = () => {
   const onAddressSelected = async (payload: AddressSelectedPayload) => {
     try {
       localStorage.setItem("prefill_address", payload.formatted_address);
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        navigate("/dashboard");
-      } else {
-        navigate(`/auth/signup?address=${encodeURIComponent(payload.household_address)}`);
-      }
+      navigate(`/household/preview?addr=${encodeURIComponent(payload.household_address)}`);
     } catch (e) {
       console.error("[Index] address select error:", e);
       toast({ title: "Something went wrong", description: "Please try again.", variant: "destructive" });

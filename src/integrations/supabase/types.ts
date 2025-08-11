@@ -14,6 +14,35 @@ export type Database = {
   }
   public: {
     Tables: {
+      approved_households: {
+        Row: {
+          approved_at: string
+          approved_by: string
+          hoa_name: string
+          household_address: string
+        }
+        Insert: {
+          approved_at?: string
+          approved_by: string
+          hoa_name: string
+          household_address: string
+        }
+        Update: {
+          approved_at?: string
+          approved_by?: string
+          hoa_name?: string
+          household_address?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "approved_households_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       communities: {
         Row: {
           created_at: string | null
@@ -72,6 +101,29 @@ export type Database = {
             columns: ["vendor_id"]
             isOneToOne: false
             referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hoa_admins: {
+        Row: {
+          hoa_name: string
+          user_id: string
+        }
+        Insert: {
+          hoa_name: string
+          user_id: string
+        }
+        Update: {
+          hoa_name?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hoa_admins_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]
@@ -303,6 +355,22 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_approve_household: {
+        Args: { _addr: string }
+        Returns: {
+          approved: boolean
+          address: string
+          hoa_name: string
+        }[]
+      }
+      admin_list_pending_households: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          household_address: string
+          hoa_name: string
+          first_seen: string
+        }[]
+      }
       count_my_costs: {
         Args: Record<PropertyKey, never>
         Returns: number
@@ -316,6 +384,18 @@ export type Database = {
         Returns: {
           hoa_name: string
         }[]
+      }
+      is_household_approved: {
+        Args: { _addr: string }
+        Returns: boolean
+      }
+      is_user_approved: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      is_user_hoa_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
       }
       is_verified: {
         Args: { _uid: string }

@@ -54,6 +54,7 @@ export default function Household() {
   const [isInviting, setIsInviting] = useState<boolean>(false);
 
   const [points, setPoints] = useState<number>(0);
+  const [approved, setApproved] = useState<boolean | null>(null);
 
   const levelInfo = useMemo(() => {
     if (points >= 50) return { label: "Leader", next: 0 };
@@ -90,6 +91,12 @@ export default function Household() {
       const hoa = (hoaRes?.[0]?.hoa_name as string | undefined) || "";
       if (!cancelled) setHoaName(hoa);
 
+      // Approval status
+      const { data: approvedRes, error: apprErr } = await supabase.rpc("is_user_approved");
+      if (apprErr) console.warn("[Household] is_user_approved error:", apprErr);
+      const approvedFlag = !!approvedRes;
+      if (!cancelled) setApproved(approvedFlag);
+
       // Vendors: prefer community match if HOA found
       let vq = supabase.from("vendors").select("id, name, category, community, created_at, updated_at").order("created_at", { ascending: false });
       if (hoa) vq = vq.eq("community", hoa);
@@ -104,8 +111,7 @@ export default function Household() {
       if (list.length) {
         await Promise.all(
           list.map(async (v) => {
-            // Community stats
-            if (hoa) {
+            if (hoa && approvedFlag) {
               const { data: s, error: sErr } = await supabase.rpc("vendor_cost_stats", { _vendor_id: v.id, _hoa_name: hoa });
               if (sErr) {
                 console.warn("[Household] stats error", v.id, sErr);
@@ -245,6 +251,12 @@ export default function Household() {
           <p className="text-muted-foreground">All your household’s trusted vendors, costs, and ratings — organized in one place.</p>
         </header>
 
+        {approved === false && (
+          <div className="rounded-md border border-border bg-muted/30 p-3 text-sm text-muted-foreground">
+            Your HOA access is pending. You can still add vendors & earn points.
+          </div>
+        )}
+
         <div className="grid gap-6 md:grid-cols-3">
           <Card className="md:col-span-2">
             <CardHeader className="flex flex-row items-center justify-between gap-3">
@@ -310,7 +322,9 @@ export default function Household() {
                   {vendors.map((v) => {
                     const stat = stats[v.id];
                     const yc = yourCosts[v.id];
-                    const showAvg = stat && (stat.sample_size ?? 0) >= 3 ? formatCurrency(stat.avg_amount) : "—";
+                    const showAvg = approved === false
+                      ? "Locked"
+                      : (stat && (stat.sample_size ?? 0) >= 3 ? formatCurrency(stat.avg_amount) : "—");
                     const last = v.updated_at || v.created_at || null;
                     const lastStr = last ? new Date(last).toLocaleDateString() : "—";
                     const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(`${v.name} ${v.category}`)}`;
