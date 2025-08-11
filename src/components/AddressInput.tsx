@@ -71,65 +71,49 @@ export default function AddressInput({
     if (!containerRef.current) return;
 
     try {
-      // Create and mount the new Place Autocomplete Element
-      // @ts-ignore - Using new element not yet fully in @types
-      const el = new (google.maps as any).places.PlaceAutocompleteElement();
-      elementRef.current = el;
+      // Create input element
+      const input = document.createElement("input");
+      input.type = "text";
+      input.placeholder = placeholder;
+      input.className = "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50";
+      if (defaultValue) input.value = defaultValue;
 
-      // Basic configuration
-      el.style.width = "100%";
-      // Component restrictions if supported
-      try {
-        if (country && country.length) el.componentRestrictions = { country };
-      } catch (e) {
-        console.warn("[AddressInput] componentRestrictions not supported on element", e);
-      }
-
-      // Placeholder and default value
-      try {
-        el.placeholder = placeholder;
-      } catch {}
-      if (defaultValue) {
-        try {
-          el.value = defaultValue;
-        } catch {}
-      }
-
-      // Mount element
+      // Mount input
       containerRef.current.innerHTML = "";
-      containerRef.current.appendChild(el);
+      containerRef.current.appendChild(input);
 
-      // Selection handler using the new gmp-select event
-      el.addEventListener("gmp-select", async (evt: any) => {
+      // Create autocomplete
+      const autocomplete = new google.maps.places.Autocomplete(input, {
+        componentRestrictions: country && country.length ? { country } : undefined,
+        types: ["address"],
+      });
+
+      elementRef.current = autocomplete;
+
+      // Handle place selection
+      autocomplete.addListener("place_changed", () => {
         try {
-          const placePrediction = evt?.placePrediction;
-          if (!placePrediction) return;
+          const place = autocomplete.getPlace();
+          if (!place.place_id) return;
 
-          const place = placePrediction.toPlace();
-          await place.fetchFields({
-            fields: [
-              "id",
-              "displayName",
-              "formattedAddress",
-              "location",
-              "addressComponents",
-            ],
-          });
-
-          const comps = (place as any).addressComponents || (place as any).address_components || [];
-          const formatted: string = (place as any).formattedAddress || (place as any).displayName || "";
+          const comps = place.address_components || [];
+          const formatted = place.formatted_address || "";
           const { oneLine, parts } = toOneLineFromFlexible(comps);
           const normalized = normalizeLowerTrim(oneLine || formatted);
 
-          // location may be LatLng or LatLngLiteral depending on API
-          const loc: any = (place as any).location || null;
-          const lat = loc && typeof loc.lat === "function" ? loc.lat() : loc?.lat ?? null;
-          const lng = loc && typeof loc.lng === "function" ? loc.lng() : loc?.lng ?? null;
+          const loc = place.geometry?.location;
+          let lat: number | null = null;
+          let lng: number | null = null;
+          
+          if (loc) {
+            lat = typeof loc.lat === "function" ? loc.lat() : (loc.lat as unknown as number);
+            lng = typeof loc.lng === "function" ? loc.lng() : (loc.lng as unknown as number);
+          }
 
           const payload: AddressSelectedPayload = {
             household_address: normalized,
             formatted_address: formatted || oneLine,
-            place_id: (place as any).id || "",
+            place_id: place.place_id,
             components: { parts, raw: comps },
             location: { lat, lng },
           };
@@ -137,7 +121,7 @@ export default function AddressInput({
           setHelper("");
           onSelected?.(payload);
         } catch (err) {
-          console.error("[AddressInput] gmp-select handler failed:", err);
+          console.error("[AddressInput] place_changed handler failed:", err);
           setHelper("Address selection failed. Please try again.");
           toast({
             title: "Address selection failed",
@@ -147,7 +131,7 @@ export default function AddressInput({
         }
       });
     } catch (e) {
-      console.error("[AddressInput] PlaceAutocompleteElement init failed:", e);
+      console.error("[AddressInput] Autocomplete init failed:", e);
       setHelper("Address suggestions are unavailable right now.");
     }
   }, [country, defaultValue, onSelected, placeholder, toast]);
