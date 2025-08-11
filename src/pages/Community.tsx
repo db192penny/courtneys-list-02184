@@ -55,8 +55,8 @@ export default function Community() {
           <header className="space-y-0">
             <div className="flex items-center gap-4">
               <img
-                src="/placeholder.svg"
-                alt={`${communityName} HOA logo or community graphic placeholder`}
+                src="/lovable-uploads/fa4d554f-323c-4bd2-b5aa-7cd1f2289c3c.png"
+                alt={`${communityName} HOA entrance sign and community graphic`}
                 className="h-16 w-16 rounded-md object-cover border"
                 loading="lazy"
               />
