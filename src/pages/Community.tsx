@@ -74,6 +74,13 @@ export default function Community() {
           </header>
         )}
 
+        {/* Submit Vendor available to all users; unauthenticated users will be redirected to Auth */}
+        <div className="pt-2">
+          <Button variant="secondary" onClick={() => navigate(`/submit?community=${encodeURIComponent(communityName)}`)}>
+            Submit a Vendor
+          </Button>
+        </div>
+
         {isPreview && (
           <div className="flex flex-col gap-3">
             <Button onClick={() => {
@@ -100,7 +107,7 @@ export default function Community() {
             <CommunityDemoTable communityName={communityName} />
             {!isPreview && (
               <div className="pt-4">
-                <Button variant="secondary" onClick={() => navigate(`/submit-vendor?community=${encodeURIComponent(communityName)}`)}>
+                <Button variant="secondary" onClick={() => navigate(`/submit?community=${encodeURIComponent(communityName)}`)}>
                   Submit a Vendor — contribute to your community’s trusted resource
                 </Button>
               </div>

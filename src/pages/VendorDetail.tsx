@@ -4,7 +4,10 @@ import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { useUserProfile } from "@/hooks/useUserProfile";
+import useIsAdmin from "@/hooks/useIsAdmin";
+import useIsHoaAdmin from "@/hooks/useIsHoaAdmin";
 
 type Vendor = {
   id: string;
@@ -31,6 +34,9 @@ const VendorDetail = () => {
   const { data: profile } = useUserProfile();
   const isVerified = !!profile?.isVerified;
   const isAuthenticated = !!profile?.isAuthenticated;
+  const { data: isAdmin } = useIsAdmin();
+  const { data: isHoaAdmin } = useIsHoaAdmin();
+  const canEdit = !!isAdmin || !!isHoaAdmin;
 
   const { data: vendor, isLoading: vendorLoading, error: vendorError } = useQuery<Vendor | null>({
     queryKey: ["vendor", id],
@@ -109,8 +115,13 @@ const VendorDetail = () => {
                     <span>{vendor.community}</span>
                   </div>
                 )}
-                <div className="pt-2">
+                <div className="pt-2 flex items-center gap-3">
                   <Link to="/dashboard" className="underline">Back to Dashboard</Link>
+                  {canEdit && id && (
+                    <Button asChild size="sm" variant="secondary">
+                      <Link to={`/submit?vendor_id=${id}`}>Edit Vendor</Link>
+                    </Button>
+                  )}
                 </div>
               </CardContent>
             </Card>

@@ -41,7 +41,7 @@ const Admin = () => {
       setAuthed(true);
       const [{ data: hoaAdminRes }, { data: siteAdminRes }] = await Promise.all([
         supabase.rpc("is_user_hoa_admin"),
-        supabase.rpc("is_admin"),
+        supabase.rpc("is_admin" as any),
       ]);
       const hoaFlag = !!hoaAdminRes;
       const siteFlag = !!siteAdminRes;
