@@ -4,10 +4,9 @@ type SEOProps = {
   title: string;
   description?: string;
   canonical?: string;
-  structuredData?: any;
 };
 
-const SEO = ({ title, description, canonical, structuredData }: SEOProps) => {
+const SEO = ({ title, description, canonical }: SEOProps) => {
   useEffect(() => {
     document.title = title;
 
@@ -34,18 +33,7 @@ const SEO = ({ title, description, canonical, structuredData }: SEOProps) => {
       }
       link.href = canonical;
     }
-
-    if (structuredData) {
-      let script = document.querySelector('script[data-seo-ldjson="true"]') as HTMLScriptElement | null;
-      if (!script) {
-        script = document.createElement("script");
-        script.type = "application/ld+json";
-        script.setAttribute("data-seo-ldjson", "true");
-        document.head.appendChild(script);
-      }
-      script.text = JSON.stringify(structuredData);
-    }
-  }, [title, description, canonical, structuredData]);
+  }, [title, description, canonical]);
 
   return null;
 };
