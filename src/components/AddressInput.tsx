@@ -65,83 +65,126 @@ export default function AddressInput({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const elementRef = useRef<any>(null);
   const [helper, setHelper] = useState<string>("");
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const autocompleteRef = useRef<any>(null);
+  const onSelectedRef = useRef<AddressInputProps["onSelected"]>();
+  onSelectedRef.current = onSelected;
 
   const initAutocomplete = useCallback(async () => {
     const google = await loadGoogleMaps(["places"]);
     if (!containerRef.current) return;
 
     try {
-      // Create input element
-      const input = document.createElement("input");
-      input.type = "text";
-      input.placeholder = placeholder;
-      input.className = "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50";
-      if (defaultValue) input.value = defaultValue;
+      // Create input once
+      if (!inputRef.current) {
+        const input = document.createElement("input");
+        input.type = "text";
+        input.placeholder = placeholder;
+        input.className = "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50";
+        if (defaultValue) input.value = defaultValue;
+        containerRef.current.innerHTML = "";
+        containerRef.current.appendChild(input);
+        inputRef.current = input;
+      }
 
-      // Mount input
-      containerRef.current.innerHTML = "";
-      containerRef.current.appendChild(input);
+      // Create autocomplete once
+      if (!autocompleteRef.current && inputRef.current) {
+        const opts = {
+          componentRestrictions: country && country.length ? { country } : undefined,
+          types: ["address"],
+        } as any;
+        const autocomplete = new google.maps.places.Autocomplete(inputRef.current, opts);
+        autocompleteRef.current = autocomplete;
+        elementRef.current = autocomplete;
 
-      // Create autocomplete
-      const autocomplete = new google.maps.places.Autocomplete(input, {
-        componentRestrictions: country && country.length ? { country } : undefined,
-        types: ["address"],
-      });
+        autocomplete.addListener("place_changed", () => {
+          try {
+            const place = autocomplete.getPlace();
+            if (!place.place_id) return;
 
-      elementRef.current = autocomplete;
+            const comps = place.address_components || [];
+            const formatted = place.formatted_address || "";
+            const { oneLine, parts } = toOneLineFromFlexible(comps);
+            const normalized = normalizeLowerTrim(oneLine || formatted);
 
-      // Handle place selection
-      autocomplete.addListener("place_changed", () => {
-        try {
-          const place = autocomplete.getPlace();
-          if (!place.place_id) return;
+            const loc = place.geometry?.location;
+            let lat: number | null = null;
+            let lng: number | null = null;
+            if (loc) {
+              lat = typeof loc.lat === "function" ? loc.lat() : (loc.lat as unknown as number);
+              lng = typeof loc.lng === "function" ? loc.lng() : (loc.lng as unknown as number);
+            }
 
-          const comps = place.address_components || [];
-          const formatted = place.formatted_address || "";
-          const { oneLine, parts } = toOneLineFromFlexible(comps);
-          const normalized = normalizeLowerTrim(oneLine || formatted);
+            const payload: AddressSelectedPayload = {
+              household_address: normalized,
+              formatted_address: formatted || oneLine,
+              place_id: place.place_id,
+              components: { parts, raw: comps },
+              location: { lat, lng },
+            };
 
-          const loc = place.geometry?.location;
-          let lat: number | null = null;
-          let lng: number | null = null;
-          
-          if (loc) {
-            lat = typeof loc.lat === "function" ? loc.lat() : (loc.lat as unknown as number);
-            lng = typeof loc.lng === "function" ? loc.lng() : (loc.lng as unknown as number);
+            setHelper("");
+            onSelectedRef.current?.(payload);
+
+            // Keep the selected value visible in the field
+            if (inputRef.current) {
+              inputRef.current.value = payload.formatted_address || payload.household_address;
+            }
+          } catch (err) {
+            console.error("[AddressInput] place_changed handler failed:", err);
+            setHelper("Address selection failed. Please try again.");
+            toast({
+              title: "Address selection failed",
+              description: "Please try again or type a different address.",
+              variant: "destructive",
+            });
           }
-
-          const payload: AddressSelectedPayload = {
-            household_address: normalized,
-            formatted_address: formatted || oneLine,
-            place_id: place.place_id,
-            components: { parts, raw: comps },
-            location: { lat, lng },
-          };
-
-          setHelper("");
-          onSelected?.(payload);
-        } catch (err) {
-          console.error("[AddressInput] place_changed handler failed:", err);
-          setHelper("Address selection failed. Please try again.");
-          toast({
-            title: "Address selection failed",
-            description: "Please try again or type a different address.",
-            variant: "destructive",
-          });
-        }
-      });
+        });
+      }
     } catch (e) {
       console.error("[AddressInput] Autocomplete init failed:", e);
       setHelper("Address suggestions are unavailable right now.");
     }
-  }, [country, defaultValue, onSelected, placeholder, toast]);
+  }, []);
 
   useEffect(() => {
     initAutocomplete().catch((e) => {
       console.error("[AddressInput] init failed:", e);
       setHelper("Address suggestions are unavailable right now.");
     });
-  }, [initAutocomplete]);
+  }, []);
+
+  // Keep latest onSelected in a ref to avoid re-initializing Autocomplete
+  useEffect(() => {
+    onSelectedRef.current = onSelected;
+  }, [onSelected]);
+
+  // Update placeholder dynamically
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.placeholder = placeholder;
+    }
+  }, [placeholder]);
+
+  // Update input value if defaultValue changes
+  useEffect(() => {
+    if (inputRef.current && defaultValue) {
+      inputRef.current.value = defaultValue;
+    }
+  }, [defaultValue]);
+
+  // Update country restriction without re-creating Autocomplete
+  useEffect(() => {
+    if (autocompleteRef.current) {
+      try {
+        autocompleteRef.current.setOptions({
+          componentRestrictions: country && country.length ? { country } : undefined,
+        });
+      } catch (e) {
+        console.warn("[AddressInput] failed to update country restrictions", e);
+      }
+    }
+  }, [country]);
   return (
     <div className="w-full">
       <div id={id} ref={containerRef} className={cn("w-full", className)} />
