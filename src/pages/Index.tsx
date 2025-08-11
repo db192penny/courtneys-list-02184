@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ShieldCheck, Send, Search, CheckCircle, Lock } from "lucide-react";
 import AddressInput, { AddressSelectedPayload } from "@/components/AddressInput";
 import { toSlug } from "@/utils/slug";
+import heroImage from "@/assets/hero-community.jpg";
 
 
 const Index = () => {
@@ -46,48 +47,70 @@ const Index = () => {
   return (
     <main className="min-h-screen bg-background">
       <SEO
-        title="Courtney's List — Your Private Community’s Trusted Guide to Local Services"
-        description="Invite-only community vendor recommendations for your neighborhood. Enter your address to view trusted providers."
+        title="Courtney’s List — Private Community Services Guide"
+        description="Join your neighborhood’s exclusive network for vetted local service providers. Enter your home address to get started."
         canonical={canonical}
+        structuredData={{
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: "Courtney’s List",
+          url: canonical,
+        }}
       />
 
-      <section className="relative min-h-screen overflow-hidden px-6 grid place-items-center">
+      <section
+        className="relative min-h-screen overflow-hidden px-6 grid place-items-center bg-cover bg-center"
+        style={{ backgroundImage: `url(${heroImage})` }}
+        aria-label="Welcome hero"
+      >
         <div
-          className="absolute inset-0 z-0 bg-gradient-to-b from-background/45 via-background/25 to-background/70"
+          className="absolute inset-0 z-0 bg-gradient-to-b from-background/60 via-background/30 to-background/80"
           aria-hidden="true"
         />
         <div className="relative z-10 max-w-3xl w-full text-center space-y-6 mx-auto">
-          <h1 className="text-5xl md:text-7xl font-normal tracking-tight">Courtney's List</h1>
-          <p className="text-xl text-muted-foreground">Your Private Community’s Trusted Guide to Local Services</p>
+          <h1 className="font-display text-4xl md:text-6xl lg:text-7xl font-normal tracking-tight">
+            Courtney’s List — Your Private Community’s Trusted Guide to Local Services
+          </h1>
+          <p className="text-lg md:text-xl text-muted-foreground">Join your neighborhood’s exclusive network for vetted service providers.</p>
           
           <div className="mx-auto mt-6 w-full max-w-2xl rounded-xl bg-background/70 supports-[backdrop-filter]:bg-background/60 backdrop-blur shadow-lg p-4 md:p-6">
-            <form onSubmit={onSubmit} className="w-full">
-              <div className="flex flex-col md:flex-row items-stretch gap-3 md:gap-4">
+            <form onSubmit={onSubmit} className="w-full space-y-3 md:space-y-4">
+              <div className="rounded-lg ring-1 ring-primary/20 focus-within:ring-primary/40 transition-shadow shadow-md">
                 <AddressInput
-                  placeholder="Enter Your Address"
+                  placeholder="Enter your home address..."
                   onSelected={onAddressSelected}
+                  className="w-full"
                 />
-                <Select value={hoa} onValueChange={setHoa}>
-                  <SelectTrigger aria-label="HOA Name">
-                    <SelectValue placeholder="HOA Name" />
-                  </SelectTrigger>
-                  <SelectContent className="z-50">
-                    <SelectItem value="Boca Bridges">Boca Bridges</SelectItem>
-                    <SelectItem value="St. Andrews Country Club" disabled>St. Andrews Country Club</SelectItem>
-                    <SelectItem value="Woodfield Country Club" disabled>Woodfield Country Club</SelectItem>
-                    <SelectItem value="Seven Bridges" disabled>Seven Bridges</SelectItem>
-                    <SelectItem value="The Bridges" disabled>The Bridges</SelectItem>
-                    <SelectItem value="Addison Reserve Country Club" disabled>Addison Reserve Country Club</SelectItem>
-                    <SelectItem value="Royal Palm Yacht & Country Club" disabled>Royal Palm Yacht & Country Club</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Button type="submit" className="md:min-w-[180px]" disabled={!selectedAddress} aria-disabled={!selectedAddress}>View Dashboard</Button>
               </div>
+              <Select value={hoa} onValueChange={setHoa}>
+                <SelectTrigger aria-label="HOA Name">
+                  <SelectValue placeholder="HOA Name" />
+                </SelectTrigger>
+                <SelectContent className="z-50">
+                  <SelectItem value="Boca Bridges">Boca Bridges</SelectItem>
+                  <SelectItem value="St. Andrews Country Club" disabled>St. Andrews Country Club</SelectItem>
+                  <SelectItem value="Woodfield Country Club" disabled>Woodfield Country Club</SelectItem>
+                  <SelectItem value="Seven Bridges" disabled>Seven Bridges</SelectItem>
+                  <SelectItem value="The Bridges" disabled>The Bridges</SelectItem>
+                  <SelectItem value="Addison Reserve Country Club" disabled>Addison Reserve Country Club</SelectItem>
+                  <SelectItem value="Royal Palm Yacht & Country Club" disabled>Royal Palm Yacht & Country Club</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button
+                type="submit"
+                size="lg"
+                className="w-full md:w-auto md:min-w-[200px]"
+                disabled={!selectedAddress}
+                aria-disabled={!selectedAddress}
+              >
+                View Dashboard
+              </Button>
             </form>
             <div className="mt-3 flex flex-col items-center gap-1">
               <Button
                 type="button"
                 variant="outline"
+                size="lg"
                 onClick={() => navigate("/auth/signup")}
                 className="md:min-w-[260px]"
                 aria-label="Sign up to unlock exclusive access"
@@ -103,9 +126,8 @@ const Index = () => {
             <div className="mt-3 flex justify-center">
               <Button
                 type="button"
-                variant="secondary"
+                variant="link"
                 onClick={() => navigate("/communities/request")}
-                className="md:min-w-[220px]"
                 aria-label="Add my HOA or Community"
               >
                 Add my HOA/Community
