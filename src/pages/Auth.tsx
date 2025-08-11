@@ -207,7 +207,7 @@ const Auth = () => {
           <CardHeader className="space-y-1">
             <CardTitle>Request Access</CardTitle>
             <CardDescription>
-              Request access by entering your details below. After HOA approval, you’ll get a magic link to unlock exclusive vendor info.
+              Request access by entering your details below. After approval by a community admin, you’ll receive a magic link to unlock exclusive vendor info.
             </CardDescription>
           </CardHeader>
 
@@ -299,7 +299,7 @@ const Auth = () => {
         </Card>
 
         <div className="mt-4 text-center text-sm text-muted-foreground">
-          Enter your details, and once approved by your HOA, you’ll get full access to your neighborhood’s trusted providers.
+          Enter your details, and once approved by your community admin, you’ll get full access to your neighborhood’s trusted providers.
         </div>
       </section>
     </main>
