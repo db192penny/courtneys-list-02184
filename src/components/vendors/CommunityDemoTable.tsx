@@ -1,39 +1,35 @@
+import { useMemo, useState } from "react";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Star } from "lucide-react";
 
 type SampleVendor = {
   name: string;
-  category: string;
-  rating: number; // 0-5
-  reviews: number;
-  typical_cost: number; // USD
+  homes_serviced: number;
+  hoa_rating: number; // 0-5
+  google_rating: number; // 0-5
+  typical_cost: number; // USD per month
   contact: string;
 };
 
 const SAMPLE_VENDORS: SampleVendor[] = [
-  { name: "BrightNest Electric", category: "Electrician", rating: 4.8, reviews: 37, typical_cost: 425, contact: "Hidden — sign up to unlock" },
-  { name: "EverGreen Lawn Co.", category: "Landscaping", rating: 4.6, reviews: 52, typical_cost: 95, contact: "Hidden — sign up to unlock" },
-  { name: "BlueSky Roofing", category: "Roofing", rating: 4.7, reviews: 28, typical_cost: 1450, contact: "Hidden — sign up to unlock" },
-  { name: "Sparkle & Shine", category: "House Cleaning", rating: 4.5, reviews: 61, typical_cost: 140, contact: "Hidden — sign up to unlock" },
-  { name: "ClearFlow Plumbing", category: "Plumber", rating: 4.9, reviews: 44, typical_cost: 310, contact: "Hidden — sign up to unlock" },
-  { name: "Peak HVAC", category: "HVAC", rating: 4.4, reviews: 35, typical_cost: 385, contact: "Hidden — sign up to unlock" },
-  { name: "Sunrise Painting", category: "Painter", rating: 4.7, reviews: 23, typical_cost: 1200, contact: "Hidden — sign up to unlock" },
-  { name: "SafeHome Pest", category: "Pest Control", rating: 4.6, reviews: 31, typical_cost: 85, contact: "Hidden — sign up to unlock" },
+  { name: "BrightNest Electric", homes_serviced: 56, hoa_rating: 4.8, google_rating: 4.6, typical_cost: 425, contact: "Hidden — sign up to unlock" },
+  { name: "Peak HVAC", homes_serviced: 43, hoa_rating: 4.4, google_rating: 4.5, typical_cost: 385, contact: "Hidden — sign up to unlock" },
+  { name: "EverGreen Lawn Co.", homes_serviced: 24, hoa_rating: 4.6, google_rating: 4.5, typical_cost: 95, contact: "Hidden — sign up to unlock" },
 ];
 
 function Stars({ value }: { value: number }) {
-  const rounded = Math.round(value);
+  const filled = Math.floor(value);
   return (
     <div className="flex items-center" aria-label={`${value.toFixed(1)} out of 5 stars`}>
       {Array.from({ length: 5 }).map((_, i) => (
         <Star
           key={i}
-          className={i < rounded ? "text-primary" : "text-muted-foreground"}
+          className={i < filled ? "text-primary" : "text-muted-foreground"}
           size={16}
           strokeWidth={2}
-          {...(i < rounded ? { fill: "currentColor" } : { fill: "none" })}
+          {...(i < filled ? { fill: "currentColor" } : { fill: "none" })}
         />
       ))}
       <span className="ml-2 text-xs text-muted-foreground">{value.toFixed(1)}</span>
@@ -56,38 +52,83 @@ export default function CommunityDemoTable({
     maximumFractionDigits: 0,
   });
 
+  const [category, setCategory] = useState("HVAC");
+  const [sort, setSort] = useState<"homes_desc">("homes_desc");
+
+  const sortedData = useMemo(() => {
+    const arr = [...SAMPLE_VENDORS];
+    // Default and only option for now: number of homes serviced (desc)
+    arr.sort((a, b) => b.homes_serviced - a.homes_serviced);
+    return arr;
+  }, [sort]);
+
   return (
     <section aria-label="Sample community providers" className="space-y-4">
       <header className="space-y-1">
         <h2 className="text-xl font-semibold tracking-tight">Preview of {communityName} providers</h2>
         <p className="text-sm text-muted-foreground">
-          This example table shows how real, neighbor-recommended providers will appear — with ratings, reviews, and typical costs.
+          This example shows how real, neighbor-recommended providers will appear — with homes serviced, ratings, and typical costs.
         </p>
       </header>
+
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+        <div className="flex-1 sm:flex-none">
+          <label className="block text-xs font-medium text-muted-foreground mb-1">Category</label>
+          <Select value={category} onValueChange={setCategory} disabled>
+            <SelectTrigger className="w-full sm:w-56">
+              <SelectValue placeholder="Select category" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="HVAC">HVAC</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="flex-1 sm:flex-none">
+          <label className="block text-xs font-medium text-muted-foreground mb-1">Sort by</label>
+          <Select value={sort} onValueChange={(v) => setSort(v as "homes_desc")}> 
+            <SelectTrigger className="w-full sm:w-64">
+              <SelectValue placeholder="Sort" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="homes_desc"># of Homes Serviced (desc)</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
 
       <Table>
         <TableHeader>
           <TableRow>
+            <TableHead>Rank</TableHead>
+            <TableHead># Homes Serviced</TableHead>
             <TableHead>Provider</TableHead>
-            <TableHead>Category</TableHead>
-            <TableHead>Avg rating</TableHead>
-            <TableHead>Reviews</TableHead>
-            <TableHead>Typical cost</TableHead>
-            <TableHead>Contact</TableHead>
+            <TableHead>Ratings</TableHead>
+            <TableHead>Typical Cost</TableHead>
+            <TableHead>Contact Info</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {SAMPLE_VENDORS.map((v) => (
-            <TableRow key={`${v.name}-${v.category}`}>
+          {sortedData.map((v, idx) => (
+            <TableRow key={`${v.name}-${idx}`}>
+              <TableCell className="tabular-nums font-medium">{idx + 1}</TableCell>
+              <TableCell className="tabular-nums">{v.homes_serviced.toLocaleString()}</TableCell>
               <TableCell className="font-medium text-foreground">{v.name}</TableCell>
               <TableCell>
-                <Badge variant="secondary">{v.category}</Badge>
+                <div className="flex flex-col gap-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-muted-foreground">HOA:</span>
+                    <Stars value={v.hoa_rating} />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-muted-foreground">Google:</span>
+                    <Stars value={v.google_rating} />
+                  </div>
+                </div>
               </TableCell>
-              <TableCell>
-                <Stars value={v.rating} />
+              <TableCell className="tabular-nums">
+                {currency.format(v.typical_cost)} <span className="text-muted-foreground">/ month</span>
               </TableCell>
-              <TableCell className="tabular-nums">{v.reviews.toLocaleString()}</TableCell>
-              <TableCell className="tabular-nums">{currency.format(v.typical_cost)}</TableCell>
               <TableCell className="text-muted-foreground">{v.contact}</TableCell>
             </TableRow>
           ))}
