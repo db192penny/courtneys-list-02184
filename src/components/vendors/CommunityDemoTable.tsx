@@ -113,8 +113,13 @@ export default function CommunityDemoTable({
           {sortedData.map((v, idx) => (
             <TableRow key={`${v.name}-${idx}`}>
               <TableCell className="tabular-nums font-medium">{idx + 1}</TableCell>
-              <TableCell className="font-medium text-foreground pr-2">{v.name}</TableCell>
-              <TableCell className="pl-2"><Badge variant="secondary">{v.category}</Badge></TableCell>
+<TableCell
+  className="font-medium text-foreground pr-2 whitespace-nowrap overflow-hidden text-ellipsis"
+  title={v.name}
+>
+  {v.name.length > 24 ? `${v.name.slice(0, 24)}…` : v.name}
+</TableCell>
+              <TableCell className="pl-2"><Badge variant="accent">{v.category}</Badge></TableCell>
               <TableCell className="tabular-nums">{v.homes_serviced.toLocaleString()}</TableCell>
               <TableCell>
                 <div className="flex flex-col gap-1">
