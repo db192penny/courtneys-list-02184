@@ -10,11 +10,12 @@ import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { CATEGORIES } from "@/data/categories";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 const SubmitVendor = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   // form state
   const [category, setCategory] = useState<string>("");
@@ -29,9 +30,27 @@ const SubmitVendor = () => {
 
   const canonical = typeof window !== "undefined" ? window.location.href : undefined;
 
+  const vendorId = searchParams.get("vendor_id");
+
   useEffect(() => {
     console.log("[SubmitVendor] mounted");
-  }, []);
+    // If editing, prefill the form
+    const loadVendor = async () => {
+      if (!vendorId) return;
+      const { data, error } = await supabase.from("vendors").select("*").eq("id", vendorId).maybeSingle();
+      if (error) {
+        console.warn("[SubmitVendor] failed to load vendor:", error);
+        return;
+      }
+      if (data) {
+        setCategory(data.category || "");
+        setName(data.name || "");
+        setContact(data.contact_info || "");
+        setCost(data.typical_cost != null ? String(data.typical_cost) : "");
+      }
+    };
+    loadVendor();
+  }, [vendorId]);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,7 +92,30 @@ const SubmitVendor = () => {
       return;
     }
 
-    // 1) Insert vendor
+    // 1) Insert or update vendor
+    if (vendorId) {
+      const { error: updateErr } = await supabase
+        .from("vendors")
+        .update({
+          name: name.trim(),
+          category,
+          contact_info: contact.trim(),
+          typical_cost: costNum,
+        })
+        .eq("id", vendorId);
+
+      if (updateErr) {
+        console.error("[SubmitVendor] vendor update error:", updateErr);
+        toast({ title: "Could not update vendor", description: updateErr?.message || "Please try again.", variant: "destructive" });
+        setSubmitting(false);
+        return;
+      }
+
+      toast({ title: "Vendor updated!", description: "Your changes have been saved." });
+      navigate(`/vendor/${vendorId}`);
+      return;
+    }
+
     const { data: vendorInsert, error: vendorErr } = await supabase
       .from("vendors")
       .insert([
@@ -95,14 +137,14 @@ const SubmitVendor = () => {
       return;
     }
 
-    const vendorId = vendorInsert.id as string;
-    console.log("[SubmitVendor] vendor created:", vendorId);
+    const vendorIdNew = vendorInsert.id as string;
+    console.log("[SubmitVendor] vendor created:", vendorIdNew);
 
     // 2) Insert initial review linked to this vendor
     const ratingInt = parseInt(rating, 10);
     const { error: reviewErr } = await supabase.from("reviews").insert([
       {
-        vendor_id: vendorId,
+        vendor_id: vendorIdNew,
         user_id: userId,
         rating: ratingInt,
         recommended: recommend,
@@ -133,9 +175,9 @@ const SubmitVendor = () => {
       />
       <section className="container py-10 max-w-2xl">
         <header className="mb-6">
-          <h1 className="text-3xl font-bold tracking-tight">Submit a Vendor</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{vendorId ? "Edit Vendor" : "Submit a Vendor"}</h1>
           <p className="text-muted-foreground mt-2">
-            Share a provider you recommend. Your first submission unlocks full access after admin approval.
+            {vendorId ? "Update provider details for your community." : "Share a provider you recommend. Your first submission unlocks full access after admin approval."}
           </p>
         </header>
 

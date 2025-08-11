@@ -241,6 +241,27 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       users: {
         Row: {
           address: string
@@ -371,6 +392,23 @@ export type Database = {
           first_seen: string
         }[]
       }
+      admin_list_pending_users: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          id: string
+          email: string
+          name: string
+          is_verified: boolean
+          created_at: string
+        }[]
+      }
+      admin_set_user_verification: {
+        Args: { _user_id: string; _is_verified: boolean }
+        Returns: {
+          id: string
+          is_verified: boolean
+        }[]
+      }
       count_my_costs: {
         Args: Record<PropertyKey, never>
         Returns: number
@@ -388,6 +426,17 @@ export type Database = {
         Returns: {
           hoa_name: string
         }[]
+      }
+      has_role: {
+        Args: {
+          _user_id: string
+          _role: Database["public"]["Enums"]["app_role"]
+        }
+        Returns: boolean
+      }
+      is_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
       }
       is_household_approved: {
         Args: { _addr: string }
@@ -432,7 +481,7 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -559,6 +608,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin"],
+    },
   },
 } as const

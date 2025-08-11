@@ -2,9 +2,11 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import useIsAdmin from "@/hooks/useIsAdmin";
 
 const Header = () => {
   const [authed, setAuthed] = useState(false);
+  const { data: isAdmin } = useIsAdmin();
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
