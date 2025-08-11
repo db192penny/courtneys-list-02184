@@ -46,7 +46,7 @@ export default function Community() {
     <main className="min-h-screen bg-background">
       <SEO
         title={isPreview ? `${communityName} — Preview of Community Providers` : `${communityName} — Community Providers`}
-        description={isPreview ? `Limited preview of vendors recommended by ${communityName} residents. Sign up to unlock community costs and details.` : `Trusted vendors recommended by ${communityName} residents.`}
+        description={isPreview ? "You’re viewing a limited preview. Sign up to request exclusive access to your community’s full vendor details, pricing, and HOA-approved membership." : `Trusted vendors recommended by ${communityName} residents.`}
         canonical={canonical}
       />
 
