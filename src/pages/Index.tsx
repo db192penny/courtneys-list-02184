@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 
-import { ShieldCheck, Send, Search, CheckCircle } from "lucide-react";
+import { ShieldCheck, Send, Search, CheckCircle, Lock } from "lucide-react";
 import AddressInput, { AddressSelectedPayload } from "@/components/AddressInput";
 import { toSlug } from "@/utils/slug";
 
@@ -84,6 +84,21 @@ const Index = () => {
                 <Button type="submit" className="md:min-w-[180px]" disabled={!selectedAddress} aria-disabled={!selectedAddress}>View Dashboard</Button>
               </div>
             </form>
+            <div className="mt-3 flex flex-col items-center gap-1">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => navigate("/auth/signup")}
+                className="md:min-w-[260px]"
+                aria-label="Sign up to unlock exclusive access"
+              >
+                <Lock aria-hidden="true" />
+                <span>Sign Up to Unlock Exclusive Access</span>
+              </Button>
+              <p className="text-xs text-muted-foreground">
+                Members-only access to detailed ratings, reviews, and pricing.
+              </p>
+            </div>
             <p className="mt-3 text-xs text-muted-foreground">*We’ll only show street-level info publicly to protect your privacy.*</p>
             <div className="mt-3 flex justify-center">
               <Button
