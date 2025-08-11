@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import SEO from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import VendorCard from "@/components/vendors/VendorCard";
+import CommunityDemoTable from "@/components/vendors/CommunityDemoTable";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserProfile } from "@/hooks/useUserProfile";
 
@@ -72,7 +73,11 @@ export default function Community() {
         {error && <div className="text-sm text-muted-foreground">Unable to load providers.</div>}
 
         {!!data && data.length === 0 && !isLoading && (
-          <div className="text-sm text-muted-foreground">No providers yet for {communityName}.</div>
+          <CommunityDemoTable
+            communityName={communityName}
+            onSignUp={() => navigate(`/auth/signup?community=${encodeURIComponent(communityName)}`)}
+            onSubmitVendor={() => navigate(`/submit-vendor?community=${encodeURIComponent(communityName)}`)}
+          />
         )}
 
         {!!data && data.length > 0 && (
