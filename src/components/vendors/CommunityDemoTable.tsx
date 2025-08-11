@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Star } from "lucide-react";
+import { Star, Lock } from "lucide-react";
 
 type SampleVendor = {
   name: string;
@@ -101,10 +101,10 @@ export default function CommunityDemoTable({
         <TableHeader>
           <TableRow>
             <TableHead>Rank</TableHead>
-            <TableHead># Homes Serviced</TableHead>
-            <TableHead>Provider</TableHead>
+            <TableHead className="pr-2"># Homes Serviced</TableHead>
+            <TableHead className="pl-2">Provider</TableHead>
             <TableHead>Ratings</TableHead>
-            <TableHead>Typical Cost</TableHead>
+            <TableHead>Average Cost</TableHead>
             <TableHead>Contact Info</TableHead>
           </TableRow>
         </TableHeader>
@@ -112,8 +112,8 @@ export default function CommunityDemoTable({
           {sortedData.map((v, idx) => (
             <TableRow key={`${v.name}-${idx}`}>
               <TableCell className="tabular-nums font-medium">{idx + 1}</TableCell>
-              <TableCell className="tabular-nums">{v.homes_serviced.toLocaleString()}</TableCell>
-              <TableCell className="font-medium text-foreground">{v.name}</TableCell>
+              <TableCell className="tabular-nums pr-2">{v.homes_serviced.toLocaleString()}</TableCell>
+              <TableCell className="font-medium text-foreground pl-2">{v.name}</TableCell>
               <TableCell>
                 <div className="flex flex-col gap-1">
                   <div className="flex items-center gap-2">
@@ -127,7 +127,11 @@ export default function CommunityDemoTable({
                 </div>
               </TableCell>
               <TableCell className="tabular-nums">
-                {currency.format(v.typical_cost)} <span className="text-muted-foreground">/ month</span>
+                <div className="flex items-center gap-2">
+                  <Lock className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />
+                  <span className="blur-sm select-none">{currency.format(v.typical_cost)}</span>
+                  <span className="text-muted-foreground">/ month</span>
+                </div>
               </TableCell>
               <TableCell className="text-muted-foreground">{v.contact}</TableCell>
             </TableRow>
