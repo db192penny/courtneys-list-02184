@@ -181,17 +181,17 @@ const Auth = () => {
   return (
     <main className="min-h-screen bg-background">
       <SEO
-        title="Join Courtney’s List — Trusted Vendor Network"
-        description="Request access; once your HOA approves, we’ll email you a magic link to view community vendor info."
+        title="Join Courtney’s List"
+        description="Request access by entering your details below. After HOA approval, you’ll get a magic link to unlock exclusive vendor info."
         canonical={canonical}
       />
       <section className="container max-w-xl py-10">
-        <h1 className="text-3xl font-semibold mb-6">Join Courtney’s List — Your Neighborhood’s Trusted Vendor Network</h1>
+        <h1 className="text-3xl font-semibold mb-6">Join Courtney’s List</h1>
         <Card>
           <CardHeader className="space-y-1">
             <CardTitle>Request Access</CardTitle>
             <CardDescription>
-              Almost there! Request access by entering your details below. Once your membership is approved by your HOA, you’ll receive a magic link to access exclusive community vendor info.
+              Request access by entering your details below. After HOA approval, you’ll get a magic link to unlock exclusive vendor info.
             </CardDescription>
           </CardHeader>
 
