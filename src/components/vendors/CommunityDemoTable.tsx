@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 import { Star, Lock } from "lucide-react";
 
 type SampleVendor = {
@@ -101,8 +102,8 @@ export default function CommunityDemoTable({
         <TableHeader>
           <TableRow>
             <TableHead>Rank</TableHead>
-            <TableHead className="pl-2">Provider</TableHead>
-            <TableHead className="pr-2">Category</TableHead>
+            <TableHead className="pr-2">Provider</TableHead>
+            <TableHead className="pl-2">Category</TableHead>
             <TableHead># of Homes in HOA</TableHead>
             <TableHead>Ratings</TableHead>
             <TableHead>Average Cost</TableHead>
@@ -112,8 +113,8 @@ export default function CommunityDemoTable({
           {sortedData.map((v, idx) => (
             <TableRow key={`${v.name}-${idx}`}>
               <TableCell className="tabular-nums font-medium">{idx + 1}</TableCell>
-              <TableCell className="font-medium text-foreground pl-2">{v.name}</TableCell>
-              <TableCell className="text-muted-foreground">{v.category}</TableCell>
+              <TableCell className="font-medium text-foreground pr-2">{v.name}</TableCell>
+              <TableCell className="pl-2"><Badge variant="secondary">{v.category}</Badge></TableCell>
               <TableCell className="tabular-nums">{v.homes_serviced.toLocaleString()}</TableCell>
               <TableCell>
                 <div className="flex flex-col gap-1">
