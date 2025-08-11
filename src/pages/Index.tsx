@@ -101,7 +101,7 @@ const Index = () => {
         </div>
       </section>
 
-      <section aria-label="How It Works" className="container mt-24 md:mt-40 lg:mt-56 xl:mt-64 space-y-8">
+      <section aria-label="How It Works" className="container mt-12 md:mt-20 lg:mt-28 xl:mt-32 space-y-8">
         <h2 className="text-2xl md:text-3xl font-semibold text-center">How It Works</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-0 md:mt-10">
           <article className="text-center motion-safe:animate-fade-in">
