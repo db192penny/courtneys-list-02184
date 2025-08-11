@@ -24,6 +24,8 @@ export default function Community() {
 
   const communityName = useMemo(() => slugToName(slug), [slug]);
   const canonical = typeof window !== "undefined" ? window.location.href : undefined;
+  const canViewFull = !!profile?.isAuthenticated && !!profile?.isVerified;
+  const isPreview = !canViewFull;
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["community-vendors", communityName],
@@ -42,8 +44,8 @@ export default function Community() {
   return (
     <main className="min-h-screen bg-background">
       <SEO
-        title={`${communityName} — Community Providers`}
-        description={`Trusted vendors recommended by ${communityName} residents.`}
+        title={isPreview ? `${communityName} — Preview of Community Providers` : `${communityName} — Community Providers`}
+        description={isPreview ? `Limited preview of vendors recommended by ${communityName} residents. Sign up to unlock community costs and details.` : `Trusted vendors recommended by ${communityName} residents.`}
         canonical={canonical}
       />
 
@@ -51,9 +53,20 @@ export default function Community() {
         <header className="space-y-2">
           <h1 className="text-3xl font-semibold tracking-tight">{communityName} — Community Providers</h1>
           <p className="text-muted-foreground">
-            Browse providers recommended by neighbors in {communityName}.
+            {isPreview
+              ? "This is a limited preview. Sign up to unlock HOA community costs, full vendor details, and invites."
+              : `Browse providers recommended by neighbors in ${communityName}.`}
           </p>
         </header>
+
+        {isPreview && (
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Button onClick={() => navigate(`/auth/signup?community=${encodeURIComponent(communityName)}`)}>
+              Sign up to unlock
+            </Button>
+            <Button variant="secondary" onClick={() => navigate("/")}>Change address</Button>
+          </div>
+        )}
 
         {isLoading && <div className="text-sm text-muted-foreground">Loading providers…</div>}
         {error && <div className="text-sm text-muted-foreground">Unable to load providers.</div>}
@@ -63,16 +76,25 @@ export default function Community() {
         )}
 
         {!!data && data.length > 0 && (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {data.map((v: any) => (
-              <VendorCard key={v.id} vendor={v} isVerified={!!profile?.isVerified} />
-            ))}
+          <div className="space-y-3">
+            {isPreview && (
+              <p className="text-sm text-muted-foreground">
+                Contact info and HOA averages are hidden until you sign up.
+              </p>
+            )}
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {data.map((v: any) => (
+                <VendorCard key={v.id} vendor={v} isVerified={canViewFull} />
+              ))}
+            </div>
           </div>
         )}
 
-        <div className="pt-4">
-          <Button variant="secondary" onClick={() => navigate("/")}>Home</Button>
-        </div>
+        {!isPreview && (
+          <div className="pt-4">
+            <Button variant="secondary" onClick={() => navigate("/")}>Home</Button>
+          </div>
+        )}
       </section>
     </main>
   );
