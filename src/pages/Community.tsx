@@ -55,17 +55,19 @@ export default function Community() {
           <h1 className="text-3xl font-semibold tracking-tight">{communityName} — Community Providers</h1>
           <p className="text-muted-foreground">
             {isPreview
-              ? "This is a limited preview. Sign up to unlock HOA community costs, full vendor details, and invites."
+              ? "You’re viewing a limited preview. Sign up to request exclusive access to your community’s full vendor details, pricing, and HOA-approved membership."
               : `Browse providers recommended by neighbors in ${communityName}.`}
           </p>
         </header>
 
         {isPreview && (
-          <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex flex-col gap-3">
             <Button onClick={() => navigate(`/auth/signup?community=${encodeURIComponent(communityName)}`)}>
-              Sign up to unlock
+              Sign Up to Request Access
             </Button>
-            <Button variant="secondary" onClick={() => navigate("/")}>Change address</Button>
+            <p className="text-sm text-muted-foreground">
+              Membership is by HOA approval only — join your trusted community and gain exclusive vendor insights.
+            </p>
           </div>
         )}
 
@@ -73,11 +75,14 @@ export default function Community() {
         {error && <div className="text-sm text-muted-foreground">Unable to load providers.</div>}
 
         {!!data && data.length === 0 && !isLoading && (
-          <CommunityDemoTable
-            communityName={communityName}
-            onSignUp={() => navigate(`/auth/signup?community=${encodeURIComponent(communityName)}`)}
-            onSubmitVendor={() => navigate(`/submit-vendor?community=${encodeURIComponent(communityName)}`)}
-          />
+          <>
+            <CommunityDemoTable communityName={communityName} />
+            <div className="pt-4">
+              <Button variant="secondary" onClick={() => navigate(`/submit-vendor?community=${encodeURIComponent(communityName)}`)}>
+                Submit a Vendor — contribute to your community’s trusted resource
+              </Button>
+            </div>
+          </>
         )}
 
         {!!data && data.length > 0 && (
