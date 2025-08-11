@@ -26,10 +26,10 @@ const Header = () => {
           {authed ? (
             <div className="flex items-center gap-1">
               <Button asChild variant="ghost">
-                <Link to="/household">Your Home</Link>
+                <Link to="/communities/boca-bridges">Boca Bridges Overview</Link>
               </Button>
               <Button asChild variant="ghost">
-                <Link to="/communities/boca-bridges">Boca Bridges Overview</Link>
+                <Link to="/household">Your Home</Link>
               </Button>
               <Button asChild variant="ghost">
                 <Link to="/profile">Profile & Privacy</Link>
