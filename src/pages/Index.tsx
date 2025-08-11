@@ -12,14 +12,15 @@ import AddressInput, { AddressSelectedPayload } from "@/components/AddressInput"
 const Index = () => {
   const canonical = typeof window !== "undefined" ? window.location.href : undefined;
   const [hoa, setHoa] = useState("Boca Bridges");
+  const [selectedAddress, setSelectedAddress] = useState<AddressSelectedPayload | null>(null);
   
   const { toast } = useToast();
   const navigate = useNavigate();
 
   const onAddressSelected = async (payload: AddressSelectedPayload) => {
     try {
+      setSelectedAddress(payload);
       localStorage.setItem("prefill_address", payload.formatted_address);
-      navigate(`/household/preview?addr=${encodeURIComponent(payload.household_address)}`);
     } catch (e) {
       console.error("[Index] address select error:", e);
       toast({ title: "Something went wrong", description: "Please try again.", variant: "destructive" });
@@ -28,7 +29,16 @@ const Index = () => {
 
   const onSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault();
-    toast({ title: "Pick from suggestions", description: "Please pick an address from the list.", variant: "destructive" });
+    if (!selectedAddress) {
+      toast({ title: "Pick from suggestions", description: "Please pick an address from the list.", variant: "destructive" });
+      return;
+    }
+    try {
+      navigate(`/household/preview?addr=${encodeURIComponent(selectedAddress.household_address)}`);
+    } catch (e) {
+      console.error("[Index] submit error:", e);
+      toast({ title: "Something went wrong", description: "Please try again.", variant: "destructive" });
+    }
   };
 
   return (
@@ -69,7 +79,7 @@ const Index = () => {
                     <SelectItem value="Royal Palm Yacht & Country Club" disabled>Royal Palm Yacht & Country Club</SelectItem>
                   </SelectContent>
                 </Select>
-                <Button type="submit" className="md:min-w-[180px]">View Dashboard</Button>
+                <Button type="submit" className="md:min-w-[180px]" disabled={!selectedAddress} aria-disabled={!selectedAddress}>View Dashboard</Button>
               </div>
             </form>
             <p className="mt-3 text-xs text-muted-foreground">*We’ll only show street-level info publicly to protect your privacy.*</p>
