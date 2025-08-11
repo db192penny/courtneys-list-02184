@@ -18,6 +18,7 @@ const Auth = () => {
   const [email, setEmail] = useState("");
   const [address, setAddress] = useState("");
   const [resident, setResident] = useState<"yes" | "no">("yes");
+  const [errors, setErrors] = useState<{ name?: boolean; email?: boolean; address?: boolean; resident?: boolean }>({});
   const { toast } = useToast();
   const navigate = useNavigate();
   const [params] = useSearchParams();
@@ -135,17 +136,32 @@ const Auth = () => {
       return;
     }
 
-    if (!name.trim()) {
-      toast({ title: "Name is required", description: "Please enter your name.", variant: "destructive" });
+    const fieldErrors = {
+      name: !name.trim(),
+      email: !email.trim(),
+      address: !address.trim(),
+      resident: !resident,
+    };
+    const missingKeys = (Object.keys(fieldErrors) as Array<keyof typeof fieldErrors>).filter((k) => fieldErrors[k]);
+    if (missingKeys.length > 0) {
+      setErrors(fieldErrors);
+      const labelMap: Record<string, string> = {
+        name: "Name",
+        email: "Email",
+        address: "Full Address",
+        resident: "Resident status",
+      };
+      const missingLabels = missingKeys.map((k) => labelMap[k as string]);
+      toast({
+        title: "Incomplete form",
+        description: `Please complete ${missingLabels.join(", ")}`,
+        variant: "destructive",
+      });
+      const firstId = missingKeys[0] === "resident" ? "resident" : (missingKeys[0] as string);
+      setTimeout(() => document.getElementById(firstId)?.focus(), 0);
       return;
-    }
-    if (!email.trim()) {
-      toast({ title: "Email is required", description: "Please enter your email.", variant: "destructive" });
-      return;
-    }
-    if (!address.trim()) {
-      toast({ title: "Address is required", description: "Please enter your full address.", variant: "destructive" });
-      return;
+    } else {
+      setErrors({});
     }
 
     const pending = {
@@ -197,19 +213,21 @@ const Auth = () => {
 
           <CardContent className="space-y-4">
             <form onSubmit={onSubmit} className="space-y-4">
+              <p className="text-xs text-muted-foreground">* Required fields</p>
               <div className="space-y-2">
-                <Label htmlFor="name">Name</Label>
+                <Label htmlFor="name">Name <span className="text-destructive" aria-hidden>*</span></Label>
                 <Input
                   id="name"
                   value={name}
                   onChange={(e) => setName(e.currentTarget.value)}
                   placeholder="Your full name"
                   required
+                  className={errors.name ? "border-destructive focus-visible:ring-destructive" : undefined}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">Email <span className="text-destructive" aria-hidden>*</span></Label>
                 <Input
                   id="email"
                   type="email"
@@ -217,12 +235,13 @@ const Auth = () => {
                   value={email}
                   onChange={(e) => setEmail(e.currentTarget.value)}
                   required
+                  className={errors.email ? "border-destructive focus-visible:ring-destructive" : undefined}
                 />
               </div>
 
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
-                  <Label htmlFor="address">Full Address</Label>
+                  <Label htmlFor="address">Full Address <span className="text-destructive" aria-hidden>*</span></Label>
                   <TooltipProvider delayDuration={200}>
                     <Tooltip>
                       <TooltipTrigger asChild>
@@ -236,12 +255,14 @@ const Auth = () => {
                     </Tooltip>
                   </TooltipProvider>
                 </div>
-                <AddressInput
-                  id="address"
-                  defaultValue={address}
-                  onSelected={(p: AddressSelectedPayload) => setAddress(p.household_address)}
-                  placeholder="123 Boca Bridges Way, Boca Raton, FL"
-                />
+                <div className={errors.address ? "ring-2 ring-destructive rounded-md" : ""}>
+                  <AddressInput
+                    id="address"
+                    defaultValue={address}
+                    onSelected={(p: AddressSelectedPayload) => setAddress(p.household_address)}
+                    placeholder="123 Boca Bridges Way, Boca Raton, FL"
+                  />
+                </div>
                 {!!address && (
                   <p className="text-xs text-muted-foreground">
                     Street inferred as: <span className="font-medium">{extractStreetName(address)}</span>
@@ -253,9 +274,9 @@ const Auth = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="resident">Are you a current resident?</Label>
+                <Label htmlFor="resident">Are you a current resident? <span className="text-destructive" aria-hidden>*</span></Label>
                 <Select value={resident} onValueChange={(v) => setResident(v as "yes" | "no")}>
-                  <SelectTrigger id="resident">
+                  <SelectTrigger id="resident" className={errors.resident ? "border-destructive focus-visible:ring-destructive" : undefined}>
                     <SelectValue placeholder="Select an option" />
                   </SelectTrigger>
                   <SelectContent>
