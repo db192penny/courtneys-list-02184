@@ -8,8 +8,9 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { extractStreetName } from "@/utils/address";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import AddressInput, { AddressSelectedPayload } from "@/components/AddressInput";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 const Profile = () => {
   const { toast } = useToast();
@@ -21,7 +22,10 @@ const Profile = () => {
   const [showNamePublic, setShowNamePublic] = useState(false);
   const [points, setPoints] = useState<number>(0);
 
-  useEffect(() => {
+const [params] = useSearchParams();
+const onboarding = params.get("onboarding");
+
+useEffect(() => {
     let cancel = false;
     (async () => {
       const { data: auth } = await supabase.auth.getUser();
@@ -105,6 +109,16 @@ const Profile = () => {
       />
       <section className="container max-w-xl py-10">
         <h1 className="text-3xl font-semibold mb-6">Your Profile</h1>
+{onboarding && (
+          <Alert className="mb-4">
+            <AlertTitle>Welcome!</AlertTitle>
+            <AlertDescription>
+              Select or join your community to finish setup. You can request a new community if yours isn't listed.
+              <br />
+              <Link to="/communities/request" className="underline">Request a community</Link>
+            </AlertDescription>
+          </Alert>
+        )}
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Profile & Privacy</CardTitle>

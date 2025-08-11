@@ -22,6 +22,7 @@ import CommunityRequest from "./pages/CommunityRequest";
 import Household from "./pages/Household";
 import HouseholdPreview from "./pages/HouseholdPreview";
 import Community from "./pages/Community";
+import Header from "./components/Header";
 
 const queryClient = new QueryClient();
 
@@ -65,7 +66,8 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
+          <Header />
+          <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/auth/signup" element={<Auth />} /> {/* Alias to Auth */}

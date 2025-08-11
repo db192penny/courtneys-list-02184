@@ -73,19 +73,43 @@ const Auth = () => {
         localStorage.removeItem("pending_profile");
       }
 
-      // Try to detect HOA and go to its page
-      let destination = "/household";
+      // Try to detect assigned community (prefer profile slug)
+      let destination = "/profile?onboarding=1";
       try {
-        const { data: hoaRes } = await supabase.rpc("get_my_hoa");
-        const hoa = (hoaRes?.[0]?.hoa_name as string | undefined) || "";
-        if (hoa) destination = `/communities/${toSlug(hoa)}`;
+        // 1) Try to get a slug directly from the user's profile
+        const { data: profileRow } = await supabase
+          .from("users")
+          .select("hoa_slug, community_slug, hoa_name, community_name")
+          .eq("id", userId)
+          .maybeSingle();
+
+        const profileSlug =
+          (profileRow as any)?.hoa_slug ||
+          (profileRow as any)?.community_slug ||
+          ((profileRow as any)?.hoa_name && toSlug((profileRow as any).hoa_name)) ||
+          ((profileRow as any)?.community_name && toSlug((profileRow as any).community_name)) ||
+          "";
+
+        if (profileSlug) {
+          destination = `/communities/${profileSlug}`;
+        } else {
+          // 2) Fallback to RPC if available
+          try {
+            const { data: hoaRes } = await supabase.rpc("get_my_hoa");
+            const hoa = (hoaRes?.[0]?.hoa_name as string | undefined) || "";
+            if (hoa) destination = `/communities/${toSlug(hoa)}`;
+          } catch (e) {
+            console.warn("[Auth] get_my_hoa failed (non-fatal):", e);
+          }
+        }
       } catch (e) {
-        console.warn("[Auth] get_my_hoa failed (non-fatal):", e);
+        console.warn("[Auth] community detection failed (non-fatal):", e);
       }
 
       navigate(destination);
-    } catch {
-      navigate("/household");
+    } catch (e) {
+      console.warn("[Auth] finalizeOnboarding failed:", e);
+      navigate("/profile?onboarding=1");
     }
   }, [inviteToken, navigate]);
 
