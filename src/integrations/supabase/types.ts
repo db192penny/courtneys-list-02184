@@ -379,6 +379,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      get_email_status: {
+        Args: { _email: string }
+        Returns: string
+      }
       get_my_hoa: {
         Args: Record<PropertyKey, never>
         Returns: {

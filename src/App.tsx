@@ -13,6 +13,7 @@ import SubmitVendor from "./pages/SubmitVendor";
 import VendorDetail from "./pages/VendorDetail";
 import Admin from "./pages/Admin";
 import Auth from "./pages/Auth";
+import SignIn from "./pages/SignIn";
 import Invite from "./pages/Invite";
 import Profile from "./pages/Profile"; // Added
 import Privacy from "./pages/Privacy";
@@ -69,6 +70,7 @@ const App = () => (
           <Header />
           <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/signin" element={<SignIn />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/auth/signup" element={<Auth />} /> {/* Alias to Auth */}
           <Route path="/invite/:token" element={<Invite />} />
