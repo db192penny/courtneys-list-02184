@@ -155,12 +155,12 @@ const Auth = () => {
   return (
     <main className="min-h-screen bg-background">
       <SEO
-        title="Passwordless Sign In — Courtney's List"
+        title="Sign in — Courtney's List"
         description="Sign in with a magic link. Enter your name, email, and full address to get started."
         canonical={canonical}
       />
       <section className="container max-w-xl py-10">
-        <h1 className="text-3xl font-semibold mb-6">Passwordless Sign In</h1>
+        <h1 className="text-3xl font-semibold mb-6">Sign in</h1>
         <Card>
           <CardHeader className="space-y-1">
             <CardTitle>Get a magic link</CardTitle>

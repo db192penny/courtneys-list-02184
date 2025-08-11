@@ -60,6 +60,17 @@ export default function AddressInput({
   const [localValue, setLocalValue] = useState<string>(defaultValue || "");
   const [helper, setHelper] = useState<string>("");
 
+  // Keep input in sync with defaultValue when provided (e.g., prefill from homepage)
+  useEffect(() => {
+    const next = defaultValue || "";
+    // Only set if we don't already have a selected place or user input
+    if (next && (!lastPlaceIdRef.current || !localValue)) {
+      setLocalValue(next);
+    }
+    // We intentionally don't depend on localValue to avoid loops
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [defaultValue]);
+
   const initAutocomplete = useCallback(async () => {
     const google = await loadGoogleMaps(["places"]);
     if (!inputRef.current) return;
