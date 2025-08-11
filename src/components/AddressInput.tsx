@@ -1,11 +1,8 @@
 
 import React, { useEffect, useRef, useState, useCallback } from "react";
-import { Input } from "@/components/ui/input";
 import { loadGoogleMaps } from "@/utils/mapsLoader";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
-
-type CountryCodes = string[];
 
 export type AddressSelectedPayload = {
   household_address: string; // normalized lower+trim
@@ -14,6 +11,8 @@ export type AddressSelectedPayload = {
   components: Record<string, any>;
   location: { lat: number | null; lng: number | null };
 };
+
+type CountryCodes = string[];
 
 type AddressInputProps = {
   id?: string;
@@ -24,9 +23,18 @@ type AddressInputProps = {
   onSelected?: (payload: AddressSelectedPayload) => void;
 };
 
-function toOneLineFromComponents(components: google.maps.GeocoderAddressComponent[]) {
-  const get = (type: string) =>
-    components.find((c) => c.types.includes(type))?.long_name || "";
+function normalizeLowerTrim(input: string) {
+  return (input || "").trim().toLowerCase();
+}
+
+function toOneLineFromFlexible(components: any[]) {
+  const get = (type: string) => {
+    const c = components?.find((c: any) => Array.isArray(c.types) && c.types.includes(type));
+    if (!c) return "";
+    return (
+      c.longText || c.long_name || c.shortText || c.short_name || c.text || ""
+    );
+  };
 
   const streetNumber = get("street_number");
   const route = get("route");
@@ -34,15 +42,15 @@ function toOneLineFromComponents(components: google.maps.GeocoderAddressComponen
   const state = get("administrative_area_level_1");
   const postalCode = get("postal_code");
 
-  // "{streetNumber} {route}, {city}, {state}, {postalCode}"
   const left = [streetNumber, route].filter(Boolean).join(" ").trim();
   const right = [city, state, postalCode].filter(Boolean).join(", ").trim();
-  const oneLine = [left, right].filter(Boolean).join(", ").replace(/\s+,/g, ",").replace(/,\s+/g, ", ");
-  return { oneLine, parts: { streetNumber, route, city, state, postalCode } };
-}
+  const oneLine = [left, right]
+    .filter(Boolean)
+    .join(", ")
+    .replace(/\s+,/g, ",")
+    .replace(/,\s+/g, ", ");
 
-function normalizeLowerTrim(input: string) {
-  return (input || "").trim().toLowerCase();
+  return { oneLine, parts: { streetNumber, route, city, state, postalCode } };
 }
 
 export default function AddressInput({
@@ -54,213 +62,107 @@ export default function AddressInput({
   onSelected,
 }: AddressInputProps) {
   const { toast } = useToast();
-  const inputRef = useRef<HTMLInputElement | null>(null);
-  const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
-  const lastPlaceIdRef = useRef<string | null>(null);
-  const [localValue, setLocalValue] = useState<string>(defaultValue || "");
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const elementRef = useRef<any>(null);
   const [helper, setHelper] = useState<string>("");
-
-  // Keep input in sync with defaultValue when provided (e.g., prefill from homepage)
-  useEffect(() => {
-    const next = defaultValue || "";
-    // Only set if we don't already have a selected place or user input
-    if (next && (!lastPlaceIdRef.current || !localValue)) {
-      setLocalValue(next);
-    }
-    // We intentionally don't depend on localValue to avoid loops
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [defaultValue]);
 
   const initAutocomplete = useCallback(async () => {
     const google = await loadGoogleMaps(["places"]);
-    if (!inputRef.current) return;
+    if (!containerRef.current) return;
 
-    const options: google.maps.places.AutocompleteOptions = {
-      types: ["address"],
-      componentRestrictions: { country },
-      fields: ["address_components", "formatted_address", "geometry", "place_id"],
-    };
+    try {
+      // Create and mount the new Place Autocomplete Element
+      // @ts-ignore - Using new element not yet fully in @types
+      const el = new (google.maps as any).places.PlaceAutocompleteElement();
+      elementRef.current = el;
 
-    const autocomplete = new google.maps.places.Autocomplete(inputRef.current, options);
-    autocompleteRef.current = autocomplete;
-
-    autocomplete.addListener("place_changed", () => {
-      const place = autocomplete.getPlace();
-      lastPlaceIdRef.current = place.place_id || null;
-
-      const comps = place.address_components || [];
-      const { oneLine, parts } = toOneLineFromComponents(comps);
-
-      const formatted = place.formatted_address || oneLine;
-      const normalized = normalizeLowerTrim(oneLine);
-
-      const lat = place.geometry?.location ? place.geometry.location.lat() : null;
-      const lng = place.geometry?.location ? place.geometry.location.lng() : null;
-
-      const payload: AddressSelectedPayload = {
-        household_address: normalized,
-        formatted_address: formatted,
-        place_id: place.place_id || "",
-        components: {
-          parts,
-          raw: comps,
-        },
-        location: { lat, lng },
-      };
-
-      // Update visible input with Google's formatted address for better UX
-      setLocalValue(formatted);
-      setHelper("");
-
-      if (onSelected) {
-        onSelected(payload);
+      // Basic configuration
+      el.style.width = "100%";
+      // Component restrictions if supported
+      try {
+        if (country && country.length) el.componentRestrictions = { country };
+      } catch (e) {
+        console.warn("[AddressInput] componentRestrictions not supported on element", e);
       }
-    });
-  }, [country, onSelected]);
 
-  useEffect(() => {
-    initAutocomplete().catch((e) => {
-      console.error("[AddressInput] Autocomplete init failed:", e);
-      setHelper("Address suggestions are unavailable right now.");
-    });
-    // We only want to initialize once on mount
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const handleKeyDown = async (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      if (!lastPlaceIdRef.current) {
-        e.preventDefault();
-        e.stopPropagation();
-
-        const input = localValue.trim();
-        if (!input) {
-          setHelper("Please pick an address from the list.");
-          toast({
-            title: "Select from suggestions",
-            description: "Please pick an address from the list.",
-            variant: "destructive",
-          });
-          return;
-        }
-
+      // Placeholder and default value
+      try {
+        el.placeholder = placeholder;
+      } catch {}
+      if (defaultValue) {
         try {
-          const google = await loadGoogleMaps(["places"]);
-          const acService = new google.maps.places.AutocompleteService();
+          el.value = defaultValue;
+        } catch {}
+      }
 
-          const predictions = await new Promise<google.maps.places.AutocompletePrediction[]>((resolve, reject) => {
-            const req: google.maps.places.AutocompletionRequest = {
-              input,
-              componentRestrictions: { country },
-            };
-            acService.getPlacePredictions(
-              req,
-              (
-                res: google.maps.places.AutocompletePrediction[] | null,
-                status: google.maps.places.PlacesServiceStatus
-              ) => {
-                if (
-                  status !== google.maps.places.PlacesServiceStatus.OK &&
-                  status !== google.maps.places.PlacesServiceStatus.ZERO_RESULTS
-                ) {
-                  reject(new Error(`Autocomplete status: ${status}`));
-                  return;
-                }
-                resolve(res || []);
-              }
-            );
+      // Mount element
+      containerRef.current.innerHTML = "";
+      containerRef.current.appendChild(el);
+
+      // Selection handler using the new gmp-select event
+      el.addEventListener("gmp-select", async (evt: any) => {
+        try {
+          const placePrediction = evt?.placePrediction;
+          if (!placePrediction) return;
+
+          const place = placePrediction.toPlace();
+          await place.fetchFields({
+            fields: [
+              "id",
+              "displayName",
+              "formattedAddress",
+              "location",
+              "addressComponents",
+            ],
           });
 
-          if (!predictions.length) {
-            setHelper("Please pick an address from the list.");
-            toast({
-              title: "Select from suggestions",
-              description: "Please pick an address from the list.",
-              variant: "destructive",
-            });
-            return;
-          }
+          const comps = (place as any).addressComponents || (place as any).address_components || [];
+          const formatted: string = (place as any).formattedAddress || (place as any).displayName || "";
+          const { oneLine, parts } = toOneLineFromFlexible(comps);
+          const normalized = normalizeLowerTrim(oneLine || formatted);
 
-          const top = predictions[0];
-          const placeId = top.place_id;
-
-          const placeDetails = await new Promise<google.maps.places.PlaceResult | null>((resolve) => {
-            const ps = new google.maps.places.PlacesService(document.createElement("div"));
-            ps.getDetails(
-              {
-                placeId,
-                fields: ["address_components", "formatted_address", "geometry", "place_id"],
-              },
-              (res, status) => {
-                if (status === google.maps.places.PlacesServiceStatus.OK && res) resolve(res);
-                else resolve(null);
-              }
-            );
-          });
-
-          if (!placeDetails) {
-            setHelper("Please pick an address from the list.");
-            toast({
-              title: "Select from suggestions",
-              description: "Please pick an address from the list.",
-              variant: "destructive",
-            });
-            return;
-          }
-
-          const comps = placeDetails.address_components || [];
-          const { oneLine, parts } = toOneLineFromComponents(comps);
-          const formatted = placeDetails.formatted_address || oneLine;
-          const normalized = normalizeLowerTrim(oneLine);
-          const lat = placeDetails.geometry?.location ? placeDetails.geometry.location.lat() : null;
-          const lng = placeDetails.geometry?.location ? placeDetails.geometry.location.lng() : null;
+          // location may be LatLng or LatLngLiteral depending on API
+          const loc: any = (place as any).location || null;
+          const lat = loc && typeof loc.lat === "function" ? loc.lat() : loc?.lat ?? null;
+          const lng = loc && typeof loc.lng === "function" ? loc.lng() : loc?.lng ?? null;
 
           const payload: AddressSelectedPayload = {
             household_address: normalized,
-            formatted_address: formatted,
-            place_id: placeDetails.place_id || placeId,
-            components: {
-              parts,
-              raw: comps,
-            },
+            formatted_address: formatted || oneLine,
+            place_id: (place as any).id || "",
+            components: { parts, raw: comps },
             location: { lat, lng },
           };
 
-          setLocalValue(formatted);
-          lastPlaceIdRef.current = payload.place_id;
           setHelper("");
-
           onSelected?.(payload);
         } catch (err) {
-          console.error("[AddressInput] Enter fallback failed:", err);
-          setHelper("Please pick an address from the list.");
+          console.error("[AddressInput] gmp-select handler failed:", err);
+          setHelper("Address selection failed. Please try again.");
           toast({
-            title: "Select from suggestions",
-            description: "Please pick an address from the list.",
+            title: "Address selection failed",
+            description: "Please try again or type a different address.",
             variant: "destructive",
           });
         }
-      }
+      });
+    } catch (e) {
+      console.error("[AddressInput] PlaceAutocompleteElement init failed:", e);
+      setHelper("Address suggestions are unavailable right now.");
     }
-  };
+  }, [country, defaultValue, onSelected, placeholder, toast]);
+
+  useEffect(() => {
+    initAutocomplete().catch((e) => {
+      console.error("[AddressInput] init failed:", e);
+      setHelper("Address suggestions are unavailable right now.");
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="w-full">
-      <Input
-        id={id}
-        ref={inputRef}
-        value={localValue}
-        onChange={(e) => {
-          setLocalValue(e.currentTarget.value);
-          lastPlaceIdRef.current = null; // reset until a place is chosen
-          if (helper) setHelper("");
-        }}
-        onKeyDown={handleKeyDown}
-        placeholder={placeholder}
-        className={cn("w-full", className)}
-        inputMode="search"
-        autoComplete="street-address"
-      />
+      <div id={id} ref={containerRef} className={cn("w-full", className)} />
       {helper && (
         <p className="mt-1 text-sm text-muted-foreground">{helper}</p>
       )}
