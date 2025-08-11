@@ -101,9 +101,9 @@ const Index = () => {
         </div>
       </section>
 
-      <section aria-label="How It Works" className="container mt-12 md:mt-20 lg:mt-28 xl:mt-32 space-y-8">
+      <section aria-label="How It Works" className="container mt-6 md:mt-10 lg:mt-14 xl:mt-16 space-y-8">
         <h2 className="text-2xl md:text-3xl font-semibold text-center">How It Works</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-0 md:mt-10">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-12 mt-0 md:mt-10">
           <article className="text-center motion-safe:animate-fade-in">
             <div className="flex items-center justify-center mb-4">
               <ShieldCheck className="text-foreground" aria-hidden="true" />
@@ -129,7 +129,7 @@ const Index = () => {
       </section>
 
 
-      <section className="container pb-16 md:pb-24">
+      <section className="container mt-12 md:mt-16 lg:mt-20 pb-16 md:pb-24">
         <h2 className="text-2xl md:text-3xl font-semibold text-center mb-6">Why Courtney’s List</h2>
         <ul className="max-w-3xl mx-auto space-y-3">
           <li className="flex items-start gap-3"><CheckCircle className="mt-0.5 text-foreground" aria-hidden="true" /><span>See who your neighbors trust — with clear ratings and costs.</span></li>
