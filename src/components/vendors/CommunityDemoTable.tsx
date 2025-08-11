@@ -65,12 +65,6 @@ export default function CommunityDemoTable({
 
   return (
     <section aria-label="Sample community providers" className="space-y-4">
-      <header className="space-y-1">
-        <h2 className="text-xl font-semibold tracking-tight">Preview of {communityName} providers</h2>
-        <p className="text-sm text-muted-foreground">
-          This example shows how real, neighbor-recommended providers will appear — with homes serviced, ratings, and typical costs.
-        </p>
-      </header>
 
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
         <div className="flex-1 sm:flex-none">

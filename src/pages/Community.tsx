@@ -51,14 +51,28 @@ export default function Community() {
       />
 
       <section className="container py-10 space-y-6">
-        <header className="space-y-2">
-          <h1 className="text-3xl font-semibold tracking-tight">{communityName} — Community Providers</h1>
-          <p className="text-muted-foreground">
-            {isPreview
-              ? "You’re viewing a limited preview. Sign up to request exclusive access to your community’s full vendor details, pricing, and HOA-approved membership."
-              : `Browse providers recommended by neighbors in ${communityName}.`}
-          </p>
-        </header>
+        {isPreview ? (
+          <header className="space-y-0">
+            <div className="flex items-center gap-4">
+              <img
+                src="/placeholder.svg"
+                alt={`${communityName} HOA logo or community graphic placeholder`}
+                className="h-16 w-16 rounded-md object-cover border"
+                loading="lazy"
+              />
+              <div>
+                <h1 className="text-3xl font-semibold tracking-tight">{communityName}</h1>
+                <p className="text-sm text-muted-foreground">Your Trusted Neighborhood — 500 Homes</p>
+                <p className="text-sm text-muted-foreground">1234 Yamato Rd, Boca Raton, FL</p>
+              </div>
+            </div>
+          </header>
+        ) : (
+          <header className="space-y-2">
+            <h1 className="text-3xl font-semibold tracking-tight">{communityName} — Community Providers</h1>
+            <p className="text-muted-foreground">{`Browse providers recommended by neighbors in ${communityName}.`}</p>
+          </header>
+        )}
 
         {isPreview && (
           <div className="flex flex-col gap-3">
