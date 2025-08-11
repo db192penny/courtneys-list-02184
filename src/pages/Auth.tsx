@@ -215,7 +215,7 @@ const Auth = () => {
             <form onSubmit={onSubmit} className="space-y-4">
               <p className="text-xs text-muted-foreground">* Required fields</p>
               <div className="space-y-2">
-                <Label htmlFor="name">Name <span className="text-destructive" aria-hidden>*</span></Label>
+                <Label htmlFor="name">Name <span className="text-foreground" aria-hidden>*</span></Label>
                 <Input
                   id="name"
                   value={name}
@@ -227,7 +227,7 @@ const Auth = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="email">Email <span className="text-destructive" aria-hidden>*</span></Label>
+                <Label htmlFor="email">Email <span className="text-foreground" aria-hidden>*</span></Label>
                 <Input
                   id="email"
                   type="email"
@@ -241,7 +241,7 @@ const Auth = () => {
 
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
-                  <Label htmlFor="address">Full Address <span className="text-destructive" aria-hidden>*</span></Label>
+                  <Label htmlFor="address">Full Address <span className="text-foreground" aria-hidden>*</span></Label>
                   <TooltipProvider delayDuration={200}>
                     <Tooltip>
                       <TooltipTrigger asChild>
@@ -274,7 +274,7 @@ const Auth = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="resident">Are you a current resident? <span className="text-destructive" aria-hidden>*</span></Label>
+                <Label htmlFor="resident">Are you a current resident? <span className="text-foreground" aria-hidden>*</span></Label>
                 <Select value={resident} onValueChange={(v) => setResident(v as "yes" | "no")}>
                   <SelectTrigger id="resident" className={errors.resident ? "border-destructive focus-visible:ring-destructive" : undefined}>
                     <SelectValue placeholder="Select an option" />
