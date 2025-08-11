@@ -73,11 +73,11 @@ const Index = () => {
                   </SelectTrigger>
                   <SelectContent className="z-50">
                     <SelectItem value="Boca Bridges">Boca Bridges</SelectItem>
-                    <SelectItem value="St. Andrews" disabled>St. Andrews</SelectItem>
-                    <SelectItem value="Woodfield" disabled>Woodfield</SelectItem>
+                    <SelectItem value="St. Andrews Country Club" disabled>St. Andrews Country Club</SelectItem>
+                    <SelectItem value="Woodfield Country Club" disabled>Woodfield Country Club</SelectItem>
                     <SelectItem value="Seven Bridges" disabled>Seven Bridges</SelectItem>
                     <SelectItem value="The Bridges" disabled>The Bridges</SelectItem>
-                    <SelectItem value="Addison Reserve" disabled>Addison Reserve</SelectItem>
+                    <SelectItem value="Addison Reserve Country Club" disabled>Addison Reserve Country Club</SelectItem>
                     <SelectItem value="Royal Palm Yacht & Country Club" disabled>Royal Palm Yacht & Country Club</SelectItem>
                   </SelectContent>
                 </Select>
