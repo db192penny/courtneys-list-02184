@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import Index from "./pages/Index";
@@ -25,6 +25,7 @@ import HouseholdPreview from "./pages/HouseholdPreview";
 const queryClient = new QueryClient();
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const location = useLocation();
   const [loading, setLoading] = useState(true);
   const [authed, setAuthed] = useState(false);
 
@@ -42,7 +43,19 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   if (loading) return null;
-  return authed ? <>{children}</> : <Navigate to="/auth" replace />;
+  if (authed) return <>{children}</>;
+  // Unauthenticated: special handling for /household
+  if (location.pathname === "/household") {
+    let addr = "";
+    if (typeof window !== "undefined") {
+      try {
+        addr = localStorage.getItem("prefill_address") || "";
+      } catch {}
+    }
+    const dest = addr ? `/household/preview?addr=${encodeURIComponent(addr)}` : "/";
+    return <Navigate to={dest} replace />;
+  }
+  return <Navigate to="/auth" replace />;
 };
 
 const App = () => (

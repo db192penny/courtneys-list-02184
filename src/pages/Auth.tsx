@@ -64,7 +64,7 @@ const Auth = () => {
         localStorage.removeItem("pending_profile");
       }
     } finally {
-      navigate("/dashboard");
+      navigate("/household");
     }
   }, [inviteToken, navigate]);
 

@@ -323,7 +323,14 @@ export default function Household() {
                     const stat = stats[v.id];
                     const yc = yourCosts[v.id];
                     const showAvg = approved === false
-                      ? "Locked"
+                      ? (
+                        <div className="flex items-center gap-2">
+                          <span>Locked — pending HOA approval</span>
+                          <Button size="sm" variant="secondary" onClick={generateInvite}>
+                            Invite spouse
+                          </Button>
+                        </div>
+                      )
                       : (stat && (stat.sample_size ?? 0) >= 3 ? formatCurrency(stat.avg_amount) : "—");
                     const last = v.updated_at || v.created_at || null;
                     const lastStr = last ? new Date(last).toLocaleDateString() : "—";
