@@ -9,6 +9,13 @@ import { useToast } from "@/hooks/use-toast";
 import { ShieldCheck, Send, Search, CheckCircle } from "lucide-react";
 import AddressInput, { AddressSelectedPayload } from "@/components/AddressInput";
 
+const toSlug = (name: string) =>
+  name
+    .toLowerCase()
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+
 const Index = () => {
   const canonical = typeof window !== "undefined" ? window.location.href : undefined;
   const [hoa, setHoa] = useState("Boca Bridges");
@@ -34,7 +41,7 @@ const Index = () => {
       return;
     }
     try {
-      navigate(`/household/preview?addr=${encodeURIComponent(selectedAddress.household_address)}`);
+      navigate(`/communities/${toSlug(hoa)}`);
     } catch (e) {
       console.error("[Index] submit error:", e);
       toast({ title: "Something went wrong", description: "Please try again.", variant: "destructive" });
