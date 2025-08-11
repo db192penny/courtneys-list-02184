@@ -10,11 +10,14 @@ import { extractStreetName } from "@/utils/address";
 import SEO from "@/components/SEO";
 import { toSlug } from "@/utils/slug";
 import AddressInput, { AddressSelectedPayload } from "@/components/AddressInput";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Info } from "lucide-react";
 const Auth = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [address, setAddress] = useState("");
-
+  const [resident, setResident] = useState<"yes" | "no">("yes");
   const { toast } = useToast();
   const navigate = useNavigate();
   const [params] = useSearchParams();
@@ -127,6 +130,11 @@ const Auth = () => {
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
+    if (resident === "no") {
+      toast({ title: "Residents only", description: "Currently, access is restricted to residents only.", variant: "destructive" });
+      return;
+    }
+
     if (!name.trim()) {
       toast({ title: "Name is required", description: "Please enter your name.", variant: "destructive" });
       return;
@@ -173,17 +181,17 @@ const Auth = () => {
   return (
     <main className="min-h-screen bg-background">
       <SEO
-        title="Sign in — Courtney's List"
-        description="Sign in with a magic link. Enter your name, email, and full address to get started."
+        title="Join Courtney’s List — Trusted Vendor Network"
+        description="Request access; once your HOA approves, we’ll email you a magic link to view community vendor info."
         canonical={canonical}
       />
       <section className="container max-w-xl py-10">
-        <h1 className="text-3xl font-semibold mb-6">Sign in</h1>
+        <h1 className="text-3xl font-semibold mb-6">Join Courtney’s List — Your Neighborhood’s Trusted Vendor Network</h1>
         <Card>
           <CardHeader className="space-y-1">
-            <CardTitle>Get a magic link</CardTitle>
+            <CardTitle>Request Access</CardTitle>
             <CardDescription>
-              Enter your details and we'll email you a secure link to sign in.
+              Almost there! Request access by entering your details below. Once your membership is approved by your HOA, you’ll receive a magic link to access exclusive community vendor info.
             </CardDescription>
           </CardHeader>
 
@@ -213,7 +221,21 @@ const Auth = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="address">Full Address</Label>
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="address">Full Address</Label>
+                  <TooltipProvider delayDuration={200}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button type="button" aria-label="Why we need your address" className="text-muted-foreground">
+                          <Info className="h-4 w-4" />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>We use your address to verify residency for community-only access.</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
                 <AddressInput
                   id="address"
                   defaultValue={address}
@@ -230,17 +252,33 @@ const Auth = () => {
                 )}
               </div>
 
-              <Button type="submit" className="w-full">Send Magic Link</Button>
+              <div className="space-y-2">
+                <Label htmlFor="resident">Are you a current resident?</Label>
+                <Select value={resident} onValueChange={(v) => setResident(v as "yes" | "no")}>
+                  <SelectTrigger id="resident">
+                    <SelectValue placeholder="Select an option" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="yes">Yes</SelectItem>
+                    <SelectItem value="no">No</SelectItem>
+                  </SelectContent>
+                </Select>
+                {resident === "no" && (
+                  <p className="text-xs text-destructive">Currently, access is restricted to residents only.</p>
+                )}
+              </div>
+
+              <Button type="submit" className="w-full" disabled={resident === "no"}>Request Access</Button>
             </form>
           </CardContent>
 
           <CardFooter className="flex items-center justify-between">
-            <Button variant="secondary" onClick={() => navigate("/")}>Home</Button>
+            <Button variant="link" onClick={() => navigate("/")}>Back to Homepage</Button>
           </CardFooter>
         </Card>
 
         <div className="mt-4 text-center text-sm text-muted-foreground">
-          We’ll email a secure one-time link. No password required.
+          Enter your details, and once approved by your HOA, you’ll get full access to your neighborhood’s trusted providers.
         </div>
       </section>
     </main>
