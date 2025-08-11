@@ -97,32 +97,34 @@ const Index = () => {
               </Button>
             </div>
           </div>
-          <section aria-label="How It Works" className="mt-14 md:mt-28 lg:mt-32 xl:mt-36 space-y-8">
-            <h2 className="text-2xl md:text-3xl font-semibold">How It Works</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-0 md:mt-10">
-              <article className="text-center motion-safe:animate-fade-in">
-                <div className="flex items-center justify-center mb-4">
-                  <ShieldCheck className="text-foreground" aria-hidden="true" />
-                </div>
-                <h3 className="text-lg font-medium">Verify Your Address</h3>
-                <p className="text-sm text-muted-foreground">Join your neighborhood’s private community by confirming your home address and HOA. Approval comes from an HOA admin — and yes, you can be that admin if you’d like.</p>
-              </article>
-              <article className="text-center motion-safe:animate-fade-in">
-                <div className="flex items-center justify-center mb-4">
-                  <Search className="text-foreground" aria-hidden="true" />
-                </div>
-                <h3 className="text-lg font-medium">Explore Providers</h3>
-                <p className="text-sm text-muted-foreground">See real ratings, reviews, and pricing from neighbors in your exact community — sometimes even down to your street.</p>
-              </article>
-              <article className="text-center motion-safe:animate-fade-in">
-                <div className="flex items-center justify-center mb-4">
-                  <Send className="text-foreground" aria-hidden="true" />
-                </div>
-                <h3 className="text-lg font-medium">Share Your Vendors</h3>
-                <p className="text-sm text-muted-foreground">Add the service providers you’ve used (good or bad) so neighbors get an honest, growing resource they can trust.</p>
-              </article>
+          {/* How It Works moved below hero */}
+        </div>
+      </section>
+
+      <section aria-label="How It Works" className="container mt-24 md:mt-40 lg:mt-56 xl:mt-64 space-y-8">
+        <h2 className="text-2xl md:text-3xl font-semibold text-center">How It Works</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-0 md:mt-10">
+          <article className="text-center motion-safe:animate-fade-in">
+            <div className="flex items-center justify-center mb-4">
+              <ShieldCheck className="text-foreground" aria-hidden="true" />
             </div>
-          </section>
+            <h3 className="text-lg font-medium">Verify Your Address</h3>
+            <p className="text-sm text-muted-foreground">Join your neighborhood’s private community by confirming your home address and HOA. Approval comes from an HOA admin — and yes, you can be that admin if you’d like.</p>
+          </article>
+          <article className="text-center motion-safe:animate-fade-in">
+            <div className="flex items-center justify-center mb-4">
+              <Search className="text-foreground" aria-hidden="true" />
+            </div>
+            <h3 className="text-lg font-medium">Explore Providers</h3>
+            <p className="text-sm text-muted-foreground">See real ratings, reviews, and pricing from neighbors in your exact community — sometimes even down to your street.</p>
+          </article>
+          <article className="text-center motion-safe:animate-fade-in">
+            <div className="flex items-center justify-center mb-4">
+              <Send className="text-foreground" aria-hidden="true" />
+            </div>
+            <h3 className="text-lg font-medium">Share Your Vendors</h3>
+            <p className="text-sm text-muted-foreground">Add the service providers you’ve used (good or bad) so neighbors get an honest, growing resource they can trust.</p>
+          </article>
         </div>
       </section>
 
