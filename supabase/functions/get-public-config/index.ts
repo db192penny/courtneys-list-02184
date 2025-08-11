@@ -10,6 +10,7 @@ const ALLOWLIST = [
   /^http:\/\/127\.0\.0\.1(:\d+)?$/i,
   /^https:\/\/.*\.lovable\.dev$/i,
   /^https:\/\/.*\.lovableproject\.com$/i,
+  /^https:\/\/.*\.lovable\.app$/i,
 ];
 
 function cors(req: Request) {
