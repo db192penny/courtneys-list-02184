@@ -38,6 +38,15 @@ const Auth = () => {
   const finalizeOnboarding = useCallback(async (userId: string, userEmail: string | null) => {
     const pendingRaw = localStorage.getItem("pending_profile");
     const pending: null | { name: string; email: string; address: string; street_name?: string } = pendingRaw ? JSON.parse(pendingRaw) : null;
+
+    function toSlug(s: string) {
+      return (s || "")
+        .toLowerCase()
+        .replace(/&/g, "and")
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+    }
+
     try {
       if (pending) {
         const payload = {
@@ -63,7 +72,19 @@ const Auth = () => {
 
         localStorage.removeItem("pending_profile");
       }
-    } finally {
+
+      // Try to detect HOA and go to its page
+      let destination = "/household";
+      try {
+        const { data: hoaRes } = await supabase.rpc("get_my_hoa");
+        const hoa = (hoaRes?.[0]?.hoa_name as string | undefined) || "";
+        if (hoa) destination = `/communities/${toSlug(hoa)}`;
+      } catch (e) {
+        console.warn("[Auth] get_my_hoa failed (non-fatal):", e);
+      }
+
+      navigate(destination);
+    } catch {
       navigate("/household");
     }
   }, [inviteToken, navigate]);
