@@ -6,17 +6,17 @@ import { Star, Lock } from "lucide-react";
 
 type SampleVendor = {
   name: string;
+  category: string;
   homes_serviced: number;
   hoa_rating: number; // 0-5
   google_rating: number; // 0-5
   typical_cost: number; // USD per month
-  contact: string;
 };
 
 const SAMPLE_VENDORS: SampleVendor[] = [
-  { name: "BrightNest Electric", homes_serviced: 56, hoa_rating: 4.8, google_rating: 4.6, typical_cost: 425, contact: "Hidden — sign up to unlock" },
-  { name: "Peak HVAC", homes_serviced: 43, hoa_rating: 4.4, google_rating: 4.5, typical_cost: 385, contact: "Hidden — sign up to unlock" },
-  { name: "EverGreen Lawn Co.", homes_serviced: 24, hoa_rating: 4.6, google_rating: 4.5, typical_cost: 95, contact: "Hidden — sign up to unlock" },
+  { name: "Peak HVAC", category: "HVAC", homes_serviced: 56, hoa_rating: 4.8, google_rating: 4.6, typical_cost: 425 },
+  { name: "Arctic Air Systems", category: "HVAC", homes_serviced: 43, hoa_rating: 4.4, google_rating: 4.5, typical_cost: 385 },
+  { name: "BlueSky Heating & Cooling", category: "HVAC", homes_serviced: 24, hoa_rating: 4.6, google_rating: 4.5, typical_cost: 315 },
 ];
 
 function Stars({ value }: { value: number }) {
@@ -101,19 +101,20 @@ export default function CommunityDemoTable({
         <TableHeader>
           <TableRow>
             <TableHead>Rank</TableHead>
-            <TableHead className="pr-2"># Homes Serviced</TableHead>
             <TableHead className="pl-2">Provider</TableHead>
+            <TableHead className="pr-2">Category</TableHead>
+            <TableHead># of Homes in HOA</TableHead>
             <TableHead>Ratings</TableHead>
             <TableHead>Average Cost</TableHead>
-            <TableHead>Contact Info</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {sortedData.map((v, idx) => (
             <TableRow key={`${v.name}-${idx}`}>
               <TableCell className="tabular-nums font-medium">{idx + 1}</TableCell>
-              <TableCell className="tabular-nums pr-2">{v.homes_serviced.toLocaleString()}</TableCell>
               <TableCell className="font-medium text-foreground pl-2">{v.name}</TableCell>
+              <TableCell className="text-muted-foreground">{v.category}</TableCell>
+              <TableCell className="tabular-nums">{v.homes_serviced.toLocaleString()}</TableCell>
               <TableCell>
                 <div className="flex flex-col gap-1">
                   <div className="flex items-center gap-2">
@@ -133,7 +134,6 @@ export default function CommunityDemoTable({
                   <span className="text-muted-foreground">/ month</span>
                 </div>
               </TableCell>
-              <TableCell className="text-muted-foreground">{v.contact}</TableCell>
             </TableRow>
           ))}
         </TableBody>
