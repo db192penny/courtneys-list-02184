@@ -80,7 +80,7 @@ export default function Community() {
               Sign Up to Request Access
             </Button>
             <p className="text-sm text-muted-foreground">
-              Membership is by HOA approval only — join your trusted community and gain exclusive vendor insights.
+              Membership is by community admin approval only — join your trusted community and gain exclusive vendor insights.
             </p>
           </div>
         )}
