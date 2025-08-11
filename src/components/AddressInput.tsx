@@ -141,9 +141,7 @@ export default function AddressInput({
       console.error("[AddressInput] init failed:", e);
       setHelper("Address suggestions are unavailable right now.");
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
+  }, [initAutocomplete]);
   return (
     <div className="w-full">
       <div id={id} ref={containerRef} className={cn("w-full", className)} />

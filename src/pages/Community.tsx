@@ -76,7 +76,14 @@ export default function Community() {
 
         {isPreview && (
           <div className="flex flex-col gap-3">
-            <Button onClick={() => navigate(`/auth/signup?community=${encodeURIComponent(communityName)}`)}>
+            <Button onClick={() => {
+              let addr = "";
+              try {
+                addr = localStorage.getItem("prefill_address") || "";
+              } catch {}
+              const url = `/auth/signup?community=${encodeURIComponent(communityName)}${addr ? `&address=${encodeURIComponent(addr)}` : ""}`;
+              navigate(url);
+            }}>
               Sign Up to Request Access
             </Button>
             <p className="text-sm text-muted-foreground">
