@@ -8,13 +8,8 @@ import { useToast } from "@/hooks/use-toast";
 
 import { ShieldCheck, Send, Search, CheckCircle } from "lucide-react";
 import AddressInput, { AddressSelectedPayload } from "@/components/AddressInput";
+import { toSlug } from "@/utils/slug";
 
-const toSlug = (name: string) =>
-  name
-    .toLowerCase()
-    .replace(/&/g, "and")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
 
 const Index = () => {
   const canonical = typeof window !== "undefined" ? window.location.href : undefined;

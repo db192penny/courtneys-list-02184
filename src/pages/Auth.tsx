@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { useToast } from "@/hooks/use-toast";
 import { extractStreetName } from "@/utils/address";
 import SEO from "@/components/SEO";
+import { toSlug } from "@/utils/slug";
 import AddressInput, { AddressSelectedPayload } from "@/components/AddressInput";
 const Auth = () => {
   const [name, setName] = useState("");
@@ -39,13 +40,6 @@ const Auth = () => {
     const pendingRaw = localStorage.getItem("pending_profile");
     const pending: null | { name: string; email: string; address: string; street_name?: string } = pendingRaw ? JSON.parse(pendingRaw) : null;
 
-    function toSlug(s: string) {
-      return (s || "")
-        .toLowerCase()
-        .replace(/&/g, "and")
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/^-+|-+$/g, "");
-    }
 
     try {
       if (pending) {
@@ -73,31 +67,31 @@ const Auth = () => {
         localStorage.removeItem("pending_profile");
       }
 
-      // Try to detect assigned community (prefer profile slug)
+      // Determine community from household mapping; fallback to profile onboarding
       let destination = "/profile?onboarding=1";
       try {
-        // 1) Try to get a slug directly from the user's profile
-        const { data: profileRow } = await supabase
-          .from("users")
-          .select("hoa_slug, community_slug, hoa_name, community_name")
-          .eq("id", userId)
+        const { data: mapping, error: mapErr } = await supabase
+          .from("household_hoa")
+          .select("hoa_name, created_at")
+          .order("created_at", { ascending: false })
+          .limit(1)
           .maybeSingle();
 
-        const profileSlug =
-          (profileRow as any)?.hoa_slug ||
-          (profileRow as any)?.community_slug ||
-          ((profileRow as any)?.hoa_name && toSlug((profileRow as any).hoa_name)) ||
-          ((profileRow as any)?.community_name && toSlug((profileRow as any).community_name)) ||
-          "";
+        if (mapErr) {
+          console.warn("[Auth] household_hoa lookup error (non-fatal):", mapErr);
+        }
 
-        if (profileSlug) {
-          destination = `/communities/${profileSlug}`;
+        const hoaName = mapping?.hoa_name || "";
+        if (hoaName) {
+          destination = `/communities/${toSlug(hoaName)}`;
         } else {
-          // 2) Fallback to RPC if available
+          // try RPC as additional fallback if available
           try {
             const { data: hoaRes } = await supabase.rpc("get_my_hoa");
-            const hoa = (hoaRes?.[0]?.hoa_name as string | undefined) || "";
-            if (hoa) destination = `/communities/${toSlug(hoa)}`;
+            const rpcHoa = (hoaRes?.[0]?.hoa_name as string | undefined) || "";
+            if (rpcHoa) {
+              destination = `/communities/${toSlug(rpcHoa)}`;
+            }
           } catch (e) {
             console.warn("[Auth] get_my_hoa failed (non-fatal):", e);
           }
