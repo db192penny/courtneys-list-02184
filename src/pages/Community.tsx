@@ -98,11 +98,13 @@ export default function Community() {
         {!!data && data.length === 0 && !isLoading && (
           <>
             <CommunityDemoTable communityName={communityName} />
-            <div className="pt-4">
-              <Button variant="secondary" onClick={() => navigate(`/submit-vendor?community=${encodeURIComponent(communityName)}`)}>
-                Submit a Vendor — contribute to your community’s trusted resource
-              </Button>
-            </div>
+            {!isPreview && (
+              <div className="pt-4">
+                <Button variant="secondary" onClick={() => navigate(`/submit-vendor?community=${encodeURIComponent(communityName)}`)}>
+                  Submit a Vendor — contribute to your community’s trusted resource
+                </Button>
+              </div>
+            )}
           </>
         )}
 
