@@ -116,18 +116,119 @@ export default function AddressInput({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = async (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
-      // If user presses Enter without selecting a suggestion, block and show helper
       if (!lastPlaceIdRef.current) {
         e.preventDefault();
         e.stopPropagation();
-        setHelper("Please pick an address from the list.");
-        toast({
-          title: "Select from suggestions",
-          description: "Please pick an address from the list.",
-          variant: "destructive",
-        });
+
+        const input = localValue.trim();
+        if (!input) {
+          setHelper("Please pick an address from the list.");
+          toast({
+            title: "Select from suggestions",
+            description: "Please pick an address from the list.",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        try {
+          const google = await loadGoogleMaps(["places"]);
+          const acService = new google.maps.places.AutocompleteService();
+
+          const predictions = await new Promise<google.maps.places.AutocompletePrediction[]>((resolve, reject) => {
+            const req: google.maps.places.AutocompletionRequest = {
+              input,
+              componentRestrictions: { country },
+            };
+            acService.getPlacePredictions(
+              req,
+              (
+                res: google.maps.places.AutocompletePrediction[] | null,
+                status: google.maps.places.PlacesServiceStatus
+              ) => {
+                if (
+                  status !== google.maps.places.PlacesServiceStatus.OK &&
+                  status !== google.maps.places.PlacesServiceStatus.ZERO_RESULTS
+                ) {
+                  reject(new Error(`Autocomplete status: ${status}`));
+                  return;
+                }
+                resolve(res || []);
+              }
+            );
+          });
+
+          if (!predictions.length) {
+            setHelper("Please pick an address from the list.");
+            toast({
+              title: "Select from suggestions",
+              description: "Please pick an address from the list.",
+              variant: "destructive",
+            });
+            return;
+          }
+
+          const top = predictions[0];
+          const placeId = top.place_id;
+
+          const placeDetails = await new Promise<google.maps.places.PlaceResult | null>((resolve) => {
+            const ps = new google.maps.places.PlacesService(document.createElement("div"));
+            ps.getDetails(
+              {
+                placeId,
+                fields: ["address_components", "formatted_address", "geometry", "place_id"],
+              },
+              (res, status) => {
+                if (status === google.maps.places.PlacesServiceStatus.OK && res) resolve(res);
+                else resolve(null);
+              }
+            );
+          });
+
+          if (!placeDetails) {
+            setHelper("Please pick an address from the list.");
+            toast({
+              title: "Select from suggestions",
+              description: "Please pick an address from the list.",
+              variant: "destructive",
+            });
+            return;
+          }
+
+          const comps = placeDetails.address_components || [];
+          const { oneLine, parts } = toOneLineFromComponents(comps);
+          const formatted = placeDetails.formatted_address || oneLine;
+          const normalized = normalizeLowerTrim(oneLine);
+          const lat = placeDetails.geometry?.location ? placeDetails.geometry.location.lat() : null;
+          const lng = placeDetails.geometry?.location ? placeDetails.geometry.location.lng() : null;
+
+          const payload: AddressSelectedPayload = {
+            household_address: normalized,
+            formatted_address: formatted,
+            place_id: placeDetails.place_id || placeId,
+            components: {
+              parts,
+              raw: comps,
+            },
+            location: { lat, lng },
+          };
+
+          setLocalValue(formatted);
+          lastPlaceIdRef.current = payload.place_id;
+          setHelper("");
+
+          onSelected?.(payload);
+        } catch (err) {
+          console.error("[AddressInput] Enter fallback failed:", err);
+          setHelper("Please pick an address from the list.");
+          toast({
+            title: "Select from suggestions",
+            description: "Please pick an address from the list.",
+            variant: "destructive",
+          });
+        }
       }
     }
   };

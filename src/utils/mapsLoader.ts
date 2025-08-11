@@ -12,18 +12,30 @@ let loadPromise: Promise<typeof google> | null = null;
 
 async function fetchGoogleKey(): Promise<string> {
   if (cachedKey) return cachedKey;
-  const { data, error } = await supabase.functions.invoke("get-public-config");
-  if (error) {
-    console.error("[mapsLoader] get-public-config error:", error);
-    throw new Error(error.message || "Failed to load Google Maps key");
+
+  const attempt = async () => {
+    const { data, error } = await supabase.functions.invoke("get-public-config");
+    if (error) {
+      throw new Error(error.message || "Failed to load Google Maps key");
+    }
+    const key = (data as any)?.googleMapsKey || "";
+    if (!key) {
+      throw new Error("Google Maps API key is missing");
+    }
+    return key;
+  };
+
+  try {
+    const key = await attempt();
+    cachedKey = key;
+    return key;
+  } catch (e) {
+    console.warn("[mapsLoader] First attempt to fetch key failed, retrying once...", e);
+    await new Promise((r) => setTimeout(r, 500));
+    const key = await attempt();
+    cachedKey = key;
+    return key;
   }
-  const key = (data as any)?.googleMapsKey || "";
-  if (!key) {
-    console.error("[mapsLoader] Missing googleMapsKey in response");
-    throw new Error("Google Maps API key is missing");
-  }
-  cachedKey = key;
-  return key;
 }
 
 export async function loadGoogleMaps(libraries: ("places" | "geometry" | "marker")[] = ["places"]) {
