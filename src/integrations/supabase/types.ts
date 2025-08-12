@@ -279,6 +279,7 @@ export type Database = {
           show_name_public: boolean | null
           street_name: string
           submissions_count: number | null
+          updated_at: string
         }
         Insert: {
           address: string
@@ -296,6 +297,7 @@ export type Database = {
           show_name_public?: boolean | null
           street_name: string
           submissions_count?: number | null
+          updated_at?: string
         }
         Update: {
           address?: string
@@ -313,6 +315,7 @@ export type Database = {
           show_name_public?: boolean | null
           street_name?: string
           submissions_count?: number | null
+          updated_at?: string
         }
         Relationships: [
           {
