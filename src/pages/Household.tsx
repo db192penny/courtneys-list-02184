@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { ExternalLink, Plus, Rocket } from "lucide-react";
 import { Link } from "react-router-dom";
+import HomeVendorsTable from "@/components/vendors/HomeVendorsTable";
 // Minimal types
 type Vendor = {
   id: string;
@@ -337,6 +338,15 @@ export default function Household() {
                 </TableBody>
               </Table>
             </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">My Vendors</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <HomeVendorsTable />
           </CardContent>
         </Card>
       </section>

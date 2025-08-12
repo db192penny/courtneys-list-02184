@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import SEO from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import VendorCard from "@/components/vendors/VendorCard";
+import CommunityVendorTable from "@/components/vendors/CommunityVendorTable";
 import CommunityDemoTable from "@/components/vendors/CommunityDemoTable";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserProfile } from "@/hooks/useUserProfile";
@@ -152,7 +153,7 @@ export default function Community() {
           </>
         )}
 
-        {!!data && data.length > 0 && (
+{!!data && (
           <div className="space-y-3">
             {isPreview && (
               <p className="text-sm text-muted-foreground">
@@ -161,11 +162,7 @@ export default function Community() {
                   : "Contact info and HOA averages are hidden until you sign up."}
               </p>
             )}
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {data.map((v: any) => (
-                <VendorCard key={v.id} vendor={v} isVerified={canViewFull} />
-              ))}
-            </div>
+            <CommunityVendorTable communityName={communityName} showContact={canViewFull} />
           </div>
         )}
 

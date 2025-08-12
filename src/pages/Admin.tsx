@@ -229,6 +229,24 @@ const [householdLoading, setHouseholdLoading] = useState<Record<string, boolean>
     });
   };
 
+  const softDeleteUser = async (userId: string) => {
+    const ok = confirm("This will delete the user and their data. Continue?");
+    if (!ok) return;
+    const { error } = await supabase.rpc("admin_soft_delete_user", { _user_id: userId, _reason: "admin_panel" });
+    if (error) {
+      console.error("[Admin] soft delete user error:", error);
+      toast.error("Failed to delete user", { description: error.message });
+    } else {
+      toast.success("User deleted");
+      const { data: userRows } = await supabase
+        .from("users")
+        .select("id, email, name, is_verified, created_at, address, formatted_address")
+        .eq("is_verified", false)
+        .order("created_at", { ascending: true });
+      setPendingUsers((userRows as any as PendingUser[]) || []);
+    }
+  };
+
   return (
     <main className="min-h-screen bg-background">
       <SEO

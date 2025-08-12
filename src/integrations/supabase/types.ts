@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_audit_log: {
+        Row: {
+          action: string
+          actor_id: string
+          created_at: string
+          id: string
+          metadata: Json | null
+          target_id: string | null
+        }
+        Insert: {
+          action: string
+          actor_id: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          target_id?: string | null
+        }
+        Update: {
+          action?: string
+          actor_id?: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          target_id?: string | null
+        }
+        Relationships: []
+      }
       approved_households: {
         Row: {
           approved_at: string
@@ -94,6 +121,8 @@ export type Database = {
           household_address: string
           id: string
           normalized_address: string
+          notes: string | null
+          period: string | null
           updated_at: string
           vendor_id: string
         }
@@ -105,6 +134,8 @@ export type Database = {
           household_address: string
           id?: string
           normalized_address: string
+          notes?: string | null
+          period?: string | null
           updated_at?: string
           vendor_id: string
         }
@@ -116,6 +147,8 @@ export type Database = {
           household_address?: string
           id?: string
           normalized_address?: string
+          notes?: string | null
+          period?: string | null
           updated_at?: string
           vendor_id?: string
         }
@@ -151,6 +184,54 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      home_vendors: {
+        Row: {
+          amount: number | null
+          contact_override: string | null
+          created_at: string
+          currency: string
+          id: string
+          my_comments: string | null
+          my_rating: number | null
+          period: string
+          personal_notes: string | null
+          share_review_public: boolean
+          updated_at: string
+          user_id: string
+          vendor_id: string
+        }
+        Insert: {
+          amount?: number | null
+          contact_override?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          my_comments?: string | null
+          my_rating?: number | null
+          period?: string
+          personal_notes?: string | null
+          share_review_public?: boolean
+          updated_at?: string
+          user_id: string
+          vendor_id: string
+        }
+        Update: {
+          amount?: number | null
+          contact_override?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          my_comments?: string | null
+          my_rating?: number | null
+          period?: string
+          personal_notes?: string | null
+          share_review_public?: boolean
+          updated_at?: string
+          user_id?: string
+          vendor_id?: string
+        }
+        Relationships: []
       }
       household_hoa: {
         Row: {
@@ -222,6 +303,7 @@ export type Database = {
       }
       reviews: {
         Row: {
+          anonymous: boolean
           comments: string | null
           created_at: string | null
           id: string
@@ -231,6 +313,7 @@ export type Database = {
           vendor_id: string
         }
         Insert: {
+          anonymous?: boolean
           comments?: string | null
           created_at?: string | null
           id?: string
@@ -240,6 +323,7 @@ export type Database = {
           vendor_id: string
         }
         Update: {
+          anonymous?: boolean
           comments?: string | null
           created_at?: string | null
           id?: string
@@ -353,36 +437,45 @@ export type Database = {
       }
       vendors: {
         Row: {
+          additional_notes: string | null
           category: string
           community: string | null
           contact_info: string
           created_at: string | null
           created_by: string | null
           google_place_id: string | null
+          google_rating: number | null
+          google_rating_count: number | null
           id: string
           name: string
           typical_cost: number | null
           updated_at: string | null
         }
         Insert: {
+          additional_notes?: string | null
           category: string
           community?: string | null
           contact_info: string
           created_at?: string | null
           created_by?: string | null
           google_place_id?: string | null
+          google_rating?: number | null
+          google_rating_count?: number | null
           id?: string
           name: string
           typical_cost?: number | null
           updated_at?: string | null
         }
         Update: {
+          additional_notes?: string | null
           category?: string
           community?: string | null
           contact_info?: string
           created_at?: string | null
           created_by?: string | null
           google_place_id?: string | null
+          google_rating?: number | null
+          google_rating_count?: number | null
           id?: string
           name?: string
           typical_cost?: number | null
@@ -436,6 +529,10 @@ export type Database = {
           is_verified: boolean
         }[]
       }
+      admin_soft_delete_user: {
+        Args: { _user_id: string; _reason?: string }
+        Returns: boolean
+      }
       count_my_costs: {
         Args: Record<PropertyKey, never>
         Returns: number
@@ -481,9 +578,36 @@ export type Database = {
         Args: { _uid: string }
         Returns: boolean
       }
+      list_vendor_stats: {
+        Args: {
+          _hoa_name: string
+          _category?: string
+          _sort_by?: string
+          _limit?: number
+          _offset?: number
+        }
+        Returns: {
+          id: string
+          name: string
+          category: string
+          homes_serviced: number
+          homes_pct: number
+          hoa_rating: number
+          hoa_rating_count: number
+          google_rating: number
+          google_rating_count: number
+          avg_monthly_cost: number
+          contact_info: string
+          additional_notes: string
+        }[]
+      }
       mark_invite_accepted: {
         Args: { _token: string; _user_id: string }
         Returns: boolean
+      }
+      monthlyize_cost: {
+        Args: { _amount: number; _period: string }
+        Returns: number
       }
       normalize_address: {
         Args: { _addr: string }
