@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/sonner";
-import { Link } from "react-router-dom";
+
 
 export type HomeVendor = {
   id: string;
@@ -13,10 +13,8 @@ export type HomeVendor = {
   amount: number | null;
   currency: string | null;
   period: string | null;
-  personal_notes: string | null;
   contact_override: string | null;
   my_rating: number | null;
-  my_comments: string | null;
   created_at: string | null;
 };
 

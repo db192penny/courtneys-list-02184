@@ -6,9 +6,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { CATEGORIES } from "@/data/categories";
 import { toast } from "@/components/ui/sonner";
-import { Link } from "react-router-dom";
 import ReviewsHover from "@/components/vendors/ReviewsHover";
-
+import RateVendorModal from "@/components/vendors/RateVendorModal";
 export type CommunityVendorRow = {
   id: string;
   name: string;
@@ -20,8 +19,9 @@ export type CommunityVendorRow = {
   google_rating: number | null;
   google_rating_count: number | null;
   avg_monthly_cost: number | null;
+  service_call_avg: number | null;
   contact_info: string | null;
-  additional_notes: string | null;
+  typical_cost: number | null;
 };
 
 const SORTS = [
@@ -56,22 +56,19 @@ export default function CommunityVendorTable({
     enabled: !!communityName,
   });
 
-  const onAddVendor = async (vendorId: string) => {
-    const { data: auth } = await supabase.auth.getUser();
-    if (!auth.user) {
-      toast("Please sign in to add vendors to your home list.");
-      return;
-    }
-    const { error } = await supabase.from("home_vendors").insert({
-      user_id: auth.user.id,
-      vendor_id: vendorId,
-    } as any);
-    if (error) {
-      console.warn("[CommunityVendorTable] add vendor error", error);
-      toast.error("Could not add vendor", { description: error.message });
-    } else {
-      toast.success("Added to your home list");
-    }
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState<"rate" | "addHome">("rate");
+  const [selected, setSelected] = useState<{ id: string; name: string; category: string } | null>(null);
+
+  const openRate = (row: CommunityVendorRow) => {
+    setSelected({ id: row.id, name: row.name, category: row.category });
+    setModalMode("rate");
+    setModalOpen(true);
+  };
+  const openAddHome = (row: CommunityVendorRow) => {
+    setSelected({ id: row.id, name: row.name, category: row.category });
+    setModalMode("addHome");
+    setModalOpen(true);
   };
 
   const formatted = useMemo(() => data || [], [data]);
@@ -144,7 +141,7 @@ export default function CommunityVendorTable({
                 <TableCell>{idx + 1}</TableCell>
                 <TableCell>
                   <div className="flex items-center gap-2">
-                    <Link className="underline" to={`/vendor/${r.id}`}>{r.name}</Link>
+                    <span className="font-medium text-foreground" title={r.name}>{r.name}</span>
                   </div>
                 </TableCell>
                 <TableCell>
@@ -171,19 +168,19 @@ export default function CommunityVendorTable({
                     )}
                   </div>
                 </TableCell>
-                <TableCell>{r.avg_monthly_cost != null ? `$${Number(r.avg_monthly_cost).toFixed(2)}` : "—"}</TableCell>
+                <TableCell>{(() => { const v = r.avg_monthly_cost ?? r.service_call_avg ?? r.typical_cost; return v != null ? `$${Number(v).toFixed(2)}` : "—"; })()}</TableCell>
                 <TableCell>{showContact ? (r.contact_info || "—") : "Hidden"}</TableCell>
                 <TableCell className="text-right space-x-2">
-                  <Button size="sm" asChild>
-                    <Link to={`/vendor/${r.id}`}>Rate</Link>
-                  </Button>
-                  <Button size="sm" variant="secondary" onClick={() => onAddVendor(r.id)}>+ Add to My Home</Button>
+                  <Button size="sm" onClick={() => openRate(r)}>Rate</Button>
+                  <Button size="sm" variant="secondary" onClick={() => openAddHome(r)}>+ Add to My Home</Button>
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </div>
+      <RateVendorModal open={modalOpen} onOpenChange={setModalOpen} vendor={selected} mode={modalMode} onSuccess={() => { setModalOpen(false); refetch(); }} />
     </div>
   );
 }
+
