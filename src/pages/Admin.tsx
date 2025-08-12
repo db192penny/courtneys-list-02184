@@ -17,6 +17,8 @@ interface PendingUser {
   name: string | null;
   is_verified: boolean | null;
   created_at: string | null;
+  address: string | null;
+  formatted_address: string | null;
 }
 
 const Admin = () => {
@@ -58,9 +60,13 @@ const Admin = () => {
         if (!cancelled) setPendingHouseholds((rows || []) as PendingRow[]);
       }
       if (siteFlag) {
-        const { data: userRows, error: usersErr } = await supabase.rpc("admin_list_pending_users");
+        const { data: userRows, error: usersErr } = await supabase
+          .from("users")
+          .select("id, email, name, is_verified, created_at, address, formatted_address")
+          .eq("is_verified", false)
+          .order("created_at", { ascending: true });
         if (usersErr) console.warn("[Admin] pending users error:", usersErr);
-        if (!cancelled) setPendingUsers((userRows || []) as PendingUser[]);
+        if (!cancelled) setPendingUsers((userRows as any as PendingUser[]) || []);
       }
       if (!cancelled) setLoading(false);
     })();
@@ -72,7 +78,7 @@ const Admin = () => {
     const { error } = await supabase.rpc("admin_approve_household", { _addr: addr });
     if (error) {
       console.error("[Admin] approve household error:", error);
-      toast.error("Failed to approve household");
+      toast.error("Failed to approve household", { description: error.message });
     } else {
       toast.success("Household approved");
       const { data: rows } = await supabase.rpc("admin_list_pending_households");
@@ -83,14 +89,26 @@ const Admin = () => {
 
   const setUserVerification = async (userId: string, verified: boolean) => {
     setUserLoading((prev) => ({ ...prev, [userId]: verified ? "approve" : "reject" }));
-    const { error } = await supabase.rpc("admin_set_user_verification", { _user_id: userId, _is_verified: verified });
+    const { error } = await supabase
+      .from("users")
+      .update({ is_verified: verified })
+      .eq("id", userId);
     if (error) {
       console.error("[Admin] set user verification error:", error);
-      toast.error(verified ? "Failed to approve user" : "Failed to reject user");
+      toast.error(verified ? "Failed to approve user" : "Failed to reject user", {
+        description: error.message,
+      });
     } else {
       toast.success(verified ? "User approved" : "User rejected");
-      const { data: userRows } = await supabase.rpc("admin_list_pending_users");
-      setPendingUsers((userRows || []) as PendingUser[]);
+      const { data: userRows, error: usersErr } = await supabase
+        .from("users")
+        .select("id, email, name, is_verified, created_at, address, formatted_address")
+        .eq("is_verified", false)
+        .order("created_at", { ascending: true });
+      if (usersErr) {
+        console.warn("[Admin] refresh pending users error:", usersErr);
+      }
+      setPendingUsers((userRows as any as PendingUser[]) || []);
     }
     setUserLoading((prev) => {
       const next = { ...prev };
@@ -127,6 +145,7 @@ const Admin = () => {
                     <TableRow>
                       <TableHead>Email</TableHead>
                       <TableHead>Name</TableHead>
+                      <TableHead>Address</TableHead>
                       <TableHead>Joined</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
@@ -134,23 +153,24 @@ const Admin = () => {
                   <TableBody>
                     {pendingUsers.length === 0 && (
                       <TableRow>
-                        <TableCell colSpan={4} className="text-sm text-muted-foreground">No users pending approval.</TableCell>
+                        <TableCell colSpan={5} className="text-sm text-muted-foreground">No users pending approval.</TableCell>
                       </TableRow>
                     )}
                     {pendingUsers.map((u) => (
-                      <TableRow key={u.id}>
-                        <TableCell>{u.email}</TableCell>
-                        <TableCell>{u.name || "—"}</TableCell>
-                        <TableCell>{u.created_at ? new Date(u.created_at).toLocaleDateString() : "—"}</TableCell>
-                        <TableCell className="text-right space-x-2">
-                          <Button size="sm" variant="secondary" disabled={!!userLoading?.[u.id]} onClick={() => setUserVerification(u.id, false)}>
-                            {userLoading?.[u.id] === "reject" ? "Rejecting…" : "Reject"}
-                          </Button>
-                          <Button size="sm" disabled={!!userLoading?.[u.id]} onClick={() => setUserVerification(u.id, true)}>
-                            {userLoading?.[u.id] === "approve" ? "Approving…" : "Approve"}
-                          </Button>
-                        </TableCell>
-                      </TableRow>
+                        <TableRow key={u.id}>
+                          <TableCell>{u.email}</TableCell>
+                          <TableCell>{u.name || "—"}</TableCell>
+                          <TableCell>{u.formatted_address || u.address || "—"}</TableCell>
+                          <TableCell>{u.created_at ? new Date(u.created_at).toLocaleDateString() : "—"}</TableCell>
+                          <TableCell className="text-right space-x-2">
+                            <Button size="sm" variant="secondary" disabled={!!userLoading?.[u.id]} onClick={() => setUserVerification(u.id, false)}>
+                              {userLoading?.[u.id] === "reject" ? "Rejecting…" : "Reject"}
+                            </Button>
+                            <Button size="sm" disabled={!!userLoading?.[u.id]} onClick={() => setUserVerification(u.id, true)}>
+                              {userLoading?.[u.id] === "approve" ? "Approving…" : "Approve"}
+                            </Button>
+                          </TableCell>
+                        </TableRow>
                     ))}
                   </TableBody>
                 </Table>
@@ -163,6 +183,7 @@ const Admin = () => {
           <div className="grid gap-6 mt-6">
             <div className="rounded-md border border-border p-4">
               <h2 className="font-medium mb-3">Pending Households ({pendingHouseholds.length})</h2>
+              <p className="text-sm text-muted-foreground mb-3">Households are addresses in your HOA that have not yet been approved by an HOA admin. Approving allows residents at that address to access community-only features.</p>
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
