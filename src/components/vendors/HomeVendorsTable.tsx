@@ -88,11 +88,7 @@ export default function HomeVendorsTable() {
           )}
           {(hvRows || []).map((r) => {
             const v = vendorMap?.[r.vendor_id];
-            const provider = v ? (
-              <Link className="underline" to={`/vendor/${v.id}`}>{v.name}</Link>
-            ) : (
-              <span>—</span>
-            );
+            const provider = v ? v.name : "—";
             const category = v?.category ?? "—";
             const contact = r.contact_override || v?.contact_info || "—";
             const cost = r.amount != null ? `$${Number(r.amount).toFixed(2)}${r.period ? ` / ${r.period}` : ""}` : "—";
@@ -104,7 +100,6 @@ export default function HomeVendorsTable() {
                 <TableCell>
                   <div className="text-xs leading-tight">
                     <div>{myReview}</div>
-                    {r.my_comments && <div className="text-muted-foreground truncate max-w-[220px]" title={r.my_comments}>{r.my_comments}</div>}
                   </div>
                 </TableCell>
                 <TableCell>{cost}</TableCell>
