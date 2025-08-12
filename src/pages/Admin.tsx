@@ -36,6 +36,7 @@ const [householdLoading, setHouseholdLoading] = useState<Record<string, boolean>
   // Community Branding state
   const [hoaName, setHoaName] = useState<string | null>(null);
   const [brandingAddr, setBrandingAddr] = useState<string>("");
+  const [brandingPhone, setBrandingPhone] = useState<string>("");
   const [brandingPhotoPath, setBrandingPhotoPath] = useState<string | null>(null);
   const [brandingPhotoUrl, setBrandingPhotoUrl] = useState<string | null>(null);
   const [brandingSaving, setBrandingSaving] = useState(false);
@@ -44,7 +45,7 @@ const [householdLoading, setHouseholdLoading] = useState<Record<string, boolean>
   const refreshBranding = async (hoa: string) => {
     const { data, error } = await supabase
       .from("community_assets")
-      .select("hoa_name, photo_path, address_line")
+      .select("hoa_name, photo_path, address_line, contact_phone")
       .eq("hoa_name", hoa)
       .maybeSingle();
     if (error) {
@@ -52,6 +53,7 @@ const [householdLoading, setHouseholdLoading] = useState<Record<string, boolean>
       return;
     }
     setBrandingAddr((data as any)?.address_line ?? "");
+    setBrandingPhone((data as any)?.contact_phone ?? "");
     const path = (data as any)?.photo_path ?? null;
     setBrandingPhotoPath(path);
     if (path) {
@@ -96,13 +98,13 @@ const [householdLoading, setHouseholdLoading] = useState<Record<string, boolean>
       if (existing) {
         const { error: updErr } = await supabase
           .from("community_assets")
-          .update({ address_line: brandingAddr || null, photo_path: brandingPhotoPath || null })
+          .update({ address_line: brandingAddr || null, contact_phone: brandingPhone || null, photo_path: brandingPhotoPath || null })
           .eq("hoa_name", hoaName);
         opError = updErr;
       } else {
         const { error: insErr } = await supabase
           .from("community_assets")
-          .insert({ hoa_name: hoaName, address_line: brandingAddr || null, photo_path: brandingPhotoPath || null });
+          .insert({ hoa_name: hoaName, address_line: brandingAddr || null, contact_phone: brandingPhone || null, photo_path: brandingPhotoPath || null });
         opError = insErr;
       }
 
@@ -384,6 +386,16 @@ const [householdLoading, setHouseholdLoading] = useState<Record<string, boolean>
                       placeholder="HOA address line"
                       value={brandingAddr}
                       onChange={(e) => setBrandingAddr(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Label htmlFor="branding-phone">HOA Contact Phone</Label>
+                    <Input
+                      id="branding-phone"
+                      placeholder="e.g. (561) 555-1234"
+                      value={brandingPhone}
+                      onChange={(e) => setBrandingPhone(e.target.value)}
                     />
                   </div>
 

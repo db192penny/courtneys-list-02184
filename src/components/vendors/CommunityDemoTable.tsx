@@ -147,7 +147,7 @@ export default function CommunityDemoTable({
             <Button onClick={onSignUp}>Sign up to unlock community data</Button>
           )}
           {onSubmitVendor && (
-            <Button variant="secondary" onClick={onSubmitVendor}>Submit a vendor</Button>
+            <Button variant="secondary" onClick={onSubmitVendor}>+ Add a Service Provider</Button>
           )}
         </div>
       )}

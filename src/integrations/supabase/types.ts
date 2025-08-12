@@ -91,6 +91,7 @@ export type Database = {
       community_assets: {
         Row: {
           address_line: string | null
+          contact_phone: string | null
           hoa_name: string
           photo_path: string | null
           updated_at: string
@@ -98,6 +99,7 @@ export type Database = {
         }
         Insert: {
           address_line?: string | null
+          contact_phone?: string | null
           hoa_name: string
           photo_path?: string | null
           updated_at?: string
@@ -105,6 +107,7 @@ export type Database = {
         }
         Update: {
           address_line?: string | null
+          contact_phone?: string | null
           hoa_name?: string
           photo_path?: string | null
           updated_at?: string

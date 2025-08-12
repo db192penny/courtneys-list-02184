@@ -169,10 +169,10 @@ export default function CommunityVendorTable({
                 <TableCell>{showContact ? (r.contact_info || "—") : "Hidden"}</TableCell>
                 <TableCell className="max-w-[260px] truncate" title={r.additional_notes || undefined}>{r.additional_notes || "—"}</TableCell>
                 <TableCell className="text-right space-x-2">
-                  <Button size="sm" variant="secondary" onClick={() => onAddVendor(r.id)}>+ Add Vendor</Button>
                   <Button size="sm" asChild>
                     <Link to={`/vendor/${r.id}`}>Rate</Link>
                   </Button>
+                  <Button size="sm" variant="secondary" onClick={() => onAddVendor(r.id)}>+ Add to My Home</Button>
                 </TableCell>
               </TableRow>
             ))}

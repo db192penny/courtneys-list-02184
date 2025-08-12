@@ -45,13 +45,13 @@ export default function Community() {
   });
 
   // Community asset (photo and address)
-  type CommunityAsset = { hoa_name: string; photo_path: string | null; address_line: string | null };
+  type CommunityAsset = { hoa_name: string; photo_path: string | null; address_line: string | null; contact_phone: string | null };
   const { data: asset } = useQuery<CommunityAsset | null>({
     queryKey: ["community-asset", communityName],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("community_assets")
-        .select("hoa_name, photo_path, address_line")
+        .select("hoa_name, photo_path, address_line, contact_phone")
         .eq("hoa_name", communityName)
         .maybeSingle();
       if (error && (error as any).code !== "PGRST116") throw error;
@@ -68,6 +68,9 @@ export default function Community() {
   }, [asset?.photo_path]);
 
   const addressLine = asset?.address_line || "17179 Ludovica Lane, Boca Raton, FL 33496";
+  const contactPhone = asset?.contact_phone || null;
+  const phoneDigits = contactPhone?.replace(/\D/g, "");
+  const e164Phone = phoneDigits ? (phoneDigits.length === 10 ? `+1${phoneDigits}` : `+${phoneDigits}`) : null;
 
   return (
     <main className="min-h-screen bg-background">
@@ -91,6 +94,16 @@ export default function Community() {
                 <h1 className="text-3xl font-semibold tracking-tight">{communityName}</h1>
                 <p className="text-sm text-muted-foreground">Your Trusted Neighborhood — 500 Homes</p>
                 <p className="text-sm text-muted-foreground">{addressLine}</p>
+                {e164Phone && (
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    <Button variant="outline" asChild>
+                      <a href={`tel:${e164Phone}`} aria-label="Call HOA contact">Call HOA</a>
+                    </Button>
+                    <Button variant="secondary" asChild>
+                      <a href={`sms:${e164Phone}`} aria-label="Text HOA contact">Text HOA</a>
+                    </Button>
+                  </div>
+                )}
               </div>
             </div>
           </header>
@@ -107,6 +120,16 @@ export default function Community() {
                 <h1 className="text-3xl font-semibold tracking-tight">{communityName}</h1>
                 <p className="text-sm text-muted-foreground">Your Trusted Neighborhood — 500 Homes</p>
                 <p className="text-sm text-muted-foreground">{addressLine}</p>
+                {e164Phone && (
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    <Button variant="outline" asChild>
+                      <a href={`tel:${e164Phone}`} aria-label="Call HOA contact">Call HOA</a>
+                    </Button>
+                    <Button variant="secondary" asChild>
+                      <a href={`sms:${e164Phone}`} aria-label="Text HOA contact">Text HOA</a>
+                    </Button>
+                  </div>
+                )}
               </div>
             </div>
           </header>
@@ -115,7 +138,7 @@ export default function Community() {
         {/* Submit Vendor available to all users; unauthenticated users will be redirected to Auth */}
         <div className="pt-2">
           <Button variant="secondary" onClick={() => navigate(`/submit?community=${encodeURIComponent(communityName)}`)}>
-            Submit a Vendor
+            + Add a Service Provider
           </Button>
         </div>
 
@@ -146,7 +169,7 @@ export default function Community() {
             {!isPreview && (
               <div className="pt-4">
                 <Button variant="secondary" onClick={() => navigate(`/submit?community=${encodeURIComponent(communityName)}`)}>
-                  Submit a Vendor — contribute to your community’s trusted resource
+                  + Add a Service Provider
                 </Button>
               </div>
             )}
