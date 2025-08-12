@@ -248,7 +248,7 @@ export default function Household() {
           <Card className="md:col-span-2">
             <CardHeader className="flex flex-row items-center justify-between gap-3">
               <CardTitle className="text-base">Household Overview</CardTitle>
-              <Button size="sm" onClick={generateInvite} disabled={isInviting}>Copy Invite Link</Button>
+              
             </CardHeader>
             <CardContent className="space-y-2 text-sm text-muted-foreground">
               <div><span className="text-foreground font-medium">Address:</span> <span>{address || "—"}</span> <Link to="/profile" className="ml-2 text-xs underline text-muted-foreground hover:text-foreground">Edit in Profile</Link></div>
