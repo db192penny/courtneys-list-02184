@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { ExternalLink, Plus, Rocket } from "lucide-react";
-import AddressInput, { AddressSelectedPayload } from "@/components/AddressInput";
+import { Link } from "react-router-dom";
 // Minimal types
 type Vendor = {
   id: string;
@@ -149,20 +149,6 @@ export default function Household() {
     return () => { cancelled = true; };
   }, []);
 
-  const onAddressSelected = async (payload: AddressSelectedPayload) => {
-    try {
-      const { error } = await supabase.functions.invoke("household-address", { body: payload });
-      if (error) throw error;
-      setAddress(payload.formatted_address);
-      toast({ title: "Address updated", description: "Your household address has been saved." });
-      const { data: hoaRes } = await supabase.rpc("get_my_hoa");
-      const hoa = (hoaRes?.[0]?.hoa_name as string | undefined) || "";
-      setHoaName(hoa);
-    } catch (e: any) {
-      console.error("[Household] address update error:", e);
-      toast({ title: "Could not update address", description: e?.message ?? "Unknown error", variant: "destructive" });
-    }
-  };
 
   const openAddCost = (vendorId: string) => {
     setCostVendorId(vendorId);
@@ -264,17 +250,8 @@ export default function Household() {
               <Button size="sm" onClick={generateInvite} disabled={isInviting}>Copy Invite Link</Button>
             </CardHeader>
             <CardContent className="space-y-2 text-sm text-muted-foreground">
-              <div><span className="text-foreground font-medium">Address:</span> <span>{address || "—"}</span></div>
+              <div><span className="text-foreground font-medium">Address:</span> <span>{address || "—"}</span> <Link to="/profile" className="ml-2 text-xs underline text-muted-foreground hover:text-foreground">Edit in Profile</Link></div>
               <div><span className="text-foreground font-medium">HOA/Community:</span> <span>{hoaName || "—"}</span></div>
-              <div className="pt-3 space-y-2">
-                <Label htmlFor="update-address">Update address</Label>
-                <AddressInput
-                  id="update-address"
-                  defaultValue={address}
-                  onSelected={onAddressSelected}
-                />
-                <p className="text-xs text-muted-foreground">Selecting from the list will save your address and refresh your HOA.</p>
-              </div>
             </CardContent>
           </Card>
 
