@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { CATEGORIES } from "@/data/categories";
-import { toast } from "@/components/ui/sonner";
+
 import ReviewsHover from "@/components/vendors/ReviewsHover";
 import RateVendorModal from "@/components/vendors/RateVendorModal";
 import { formatUSPhoneDisplay } from "@/utils/phone";
@@ -59,17 +59,12 @@ export default function CommunityVendorTable({
   });
 
   const [modalOpen, setModalOpen] = useState(false);
-  const [modalMode, setModalMode] = useState<"rate" | "addHome">("rate");
+  const [modalMode, setModalMode] = useState<"rate">("rate");
   const [selected, setSelected] = useState<{ id: string; name: string; category: string } | null>(null);
 
   const openRate = (row: CommunityVendorRow) => {
     setSelected({ id: row.id, name: row.name, category: row.category });
     setModalMode("rate");
-    setModalOpen(true);
-  };
-  const openAddHome = (row: CommunityVendorRow) => {
-    setSelected({ id: row.id, name: row.name, category: row.category });
-    setModalMode("addHome");
     setModalOpen(true);
   };
 
@@ -176,7 +171,7 @@ export default function CommunityVendorTable({
                 <TableCell>{showContact ? (r.contact_info ? formatUSPhoneDisplay(r.contact_info) : "—") : "Hidden"}</TableCell>
                 <TableCell className="text-right space-x-2">
                   <Button size="sm" onClick={() => openRate(r)}>Rate</Button>
-                  <Button size="sm" variant="secondary" onClick={() => openAddHome(r)}>+ Add to My Home</Button>
+                  
                 </TableCell>
               </TableRow>
             ))}
