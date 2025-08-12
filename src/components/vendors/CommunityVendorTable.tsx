@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -142,7 +143,9 @@ export default function CommunityVendorTable({
                 <TableCell>{idx + 1}</TableCell>
                 <TableCell>
                   <div className="flex items-center gap-2">
-                    <span className="font-medium text-foreground" title={r.name}>{r.name}</span>
+                    <Link to={`/submit?vendor_id=${r.id}`} className="font-medium text-foreground underline-offset-2 hover:underline" title={`Rate or edit ${r.name}`}>
+                      {r.name}
+                    </Link>
                   </div>
                 </TableCell>
                 <TableCell>
