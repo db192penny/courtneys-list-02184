@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import useIsAdmin from "@/hooks/useIsAdmin";
@@ -7,6 +7,12 @@ import useIsAdmin from "@/hooks/useIsAdmin";
 const Header = () => {
   const [authed, setAuthed] = useState(false);
   const { data: isAdmin } = useIsAdmin();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    navigate("/");
+  };
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -39,6 +45,9 @@ const Header = () => {
                   <Link to="/admin">Admin</Link>
                 </Button>
               ) : null}
+              <Button variant="ghost" onClick={handleSignOut} aria-label="Sign out">
+                Sign out
+              </Button>
             </div>
           ) : (
             <Button asChild>
