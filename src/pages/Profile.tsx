@@ -11,7 +11,7 @@ import { extractStreetName } from "@/utils/address";
 import { Link, useSearchParams } from "react-router-dom";
 import AddressInput, { AddressSelectedPayload } from "@/components/AddressInput";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import useIsAdmin from "@/hooks/useIsAdmin";
+
 
 const Profile = () => {
   const { toast } = useToast();
@@ -25,7 +25,7 @@ const Profile = () => {
 
   const [params] = useSearchParams();
   const onboarding = params.get("onboarding");
-  const { data: isAdmin } = useIsAdmin();
+  
 
 useEffect(() => {
     let cancel = false;
@@ -163,23 +163,6 @@ useEffect(() => {
           Your address is used for community verification. Only your street name may be shown publicly.
         </div>
 
-        {isAdmin && (
-          <Card className="mt-6">
-            <CardHeader>
-              <CardTitle className="text-base">Admin Tools</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <div className="flex gap-2">
-                <Button asChild>
-                  <Link to="/admin">Open Admin Dashboard</Link>
-                </Button>
-                <Button asChild variant="secondary">
-                  <Link to="/submit">Submit Vendor</Link>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
       </section>
     </main>
   );
