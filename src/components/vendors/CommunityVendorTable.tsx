@@ -154,7 +154,7 @@ export default function CommunityVendorTable({
                   <div className="flex items-center gap-2">
                     <span className="font-medium text-foreground">{r.homes_serviced}</span>
                     <span className="text-xs text-muted-foreground">{r.homes_pct ? `${r.homes_pct}%` : ""}</span>
-                    <Button size="sm" variant="ghost" title="Heat map coming soon" aria-label="Show heat map">🗺️</Button>
+                    {/* Heat map hidden for now */}
                   </div>
                 </TableCell>
                 <TableCell>
