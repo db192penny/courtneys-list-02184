@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "@/components/ui/sonner";
 import { Input } from "@/components/ui/input";
-
+import { Label } from "@/components/ui/label";
 interface PendingRow {
   household_address: string;
   hoa_name: string;
@@ -83,19 +83,38 @@ const [householdLoading, setHouseholdLoading] = useState<Record<string, boolean>
   const saveBranding = async () => {
     if (!hoaName) return;
     setBrandingSaving(true);
-    const { error } = await supabase
-      .from("community_assets")
-      .upsert(
-        { hoa_name: hoaName, address_line: brandingAddr || null, photo_path: brandingPhotoPath || null },
-        { onConflict: "hoa_name" }
-      );
-    if (error) {
-      console.error("[Admin] save branding error:", error);
-      toast.error("Save failed", { description: error.message });
-    } else {
-      toast.success("Branding saved");
+    try {
+      const { data: existing, error: selErr } = await supabase
+        .from("community_assets")
+        .select("hoa_name")
+        .eq("hoa_name", hoaName)
+        .maybeSingle();
+      if (selErr && (selErr as any).code !== "PGRST116") throw selErr;
+
+      let opError: any = null;
+
+      if (existing) {
+        const { error: updErr } = await supabase
+          .from("community_assets")
+          .update({ address_line: brandingAddr || null, photo_path: brandingPhotoPath || null })
+          .eq("hoa_name", hoaName);
+        opError = updErr;
+      } else {
+        const { error: insErr } = await supabase
+          .from("community_assets")
+          .insert({ hoa_name: hoaName, address_line: brandingAddr || null, photo_path: brandingPhotoPath || null });
+        opError = insErr;
+      }
+
+      if (opError) {
+        console.error("[Admin] save branding error:", opError);
+        toast.error("Save failed", { description: opError.message });
+      } else {
+        toast.success("Branding saved");
+      }
+    } finally {
+      setBrandingSaving(false);
     }
-    setBrandingSaving(false);
   };
 
   useEffect(() => {
@@ -121,9 +140,19 @@ const [householdLoading, setHouseholdLoading] = useState<Record<string, boolean>
         setIsSiteAdmin(siteFlag);
       }
       if (hoaFlag) {
-        const { data: rows, error } = await supabase.rpc("admin_list_pending_households");
+        const [{ data: rows, error }, { data: myHoa }] = await Promise.all([
+          supabase.rpc("admin_list_pending_households"),
+          supabase.rpc("get_my_hoa"),
+        ]);
         if (error) console.warn("[Admin] pending households error:", error);
-        if (!cancelled) setPendingHouseholds((rows || []) as PendingRow[]);
+        if (!cancelled) {
+          setPendingHouseholds((rows || []) as PendingRow[]);
+          const hoa = (Array.isArray(myHoa) ? (myHoa as any[])[0]?.hoa_name : (myHoa as any)?.hoa_name) as string | undefined;
+          if (hoa) {
+            setHoaName(hoa);
+            await refreshBranding(hoa);
+          }
+        }
       }
       if (siteFlag) {
         const { data: userRows, error: usersErr } = await supabase
@@ -298,6 +327,58 @@ const [householdLoading, setHouseholdLoading] = useState<Record<string, boolean>
                   </TableBody>
                 </Table>
               </div>
+            </div>
+
+            <div className="rounded-md border border-border p-4">
+              <h2 className="font-medium mb-3">Community Branding</h2>
+              <p className="text-sm text-muted-foreground mb-4">Set your HOA’s public photo and address shown on the community page.</p>
+              {!hoaName ? (
+                <p className="text-sm text-muted-foreground">Loading HOA info…</p>
+              ) : (
+                <div className="grid gap-4">
+                  <div className="flex items-center gap-4">
+                    <img
+                      src={brandingPhotoUrl || "/lovable-uploads/fa4d554f-323c-4bd2-b5aa-7cd1f2289c3c.png"}
+                      alt={`${hoaName} community photo`}
+                      className="h-16 w-16 rounded-md object-cover border"
+                      loading="lazy"
+                    />
+                    <div className="grid gap-2">
+                      <Label htmlFor="branding-photo">Community Photo</Label>
+                      <Input
+                        id="branding-photo"
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleBrandingUpload(file);
+                        }}
+                        disabled={brandingUploading}
+                      />
+                      <p className="text-xs text-muted-foreground">First upload stores to “{hoaName}/…” in the community-photos bucket.</p>
+                    </div>
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Label htmlFor="branding-address">Displayed Address</Label>
+                    <Input
+                      id="branding-address"
+                      placeholder="HOA address line"
+                      value={brandingAddr}
+                      onChange={(e) => setBrandingAddr(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Button onClick={saveBranding} disabled={brandingSaving || !hoaName}>
+                      {brandingSaving ? "Saving…" : "Save Branding"}
+                    </Button>
+                    <Button variant="secondary" onClick={() => hoaName && refreshBranding(hoaName)} disabled={!hoaName}>
+                      Refresh
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}
