@@ -189,11 +189,6 @@ export default function Community() {
           </div>
         )}
 
-        {!isPreview && (
-          <div className="pt-4">
-            <Button variant="secondary" onClick={() => navigate("/")}>Home</Button>
-          </div>
-        )}
       </section>
     </main>
   );
