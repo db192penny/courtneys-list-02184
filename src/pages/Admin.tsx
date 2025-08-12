@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "@/components/ui/sonner";
+import { Input } from "@/components/ui/input";
 
 interface PendingRow {
   household_address: string;
@@ -30,7 +31,72 @@ const Admin = () => {
   const [pendingUsers, setPendingUsers] = useState<PendingUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [userLoading, setUserLoading] = useState<Record<string, "approve" | "reject" | undefined>>({});
-  const [householdLoading, setHouseholdLoading] = useState<Record<string, boolean>>({});
+const [householdLoading, setHouseholdLoading] = useState<Record<string, boolean>>({});
+
+  // Community Branding state
+  const [hoaName, setHoaName] = useState<string | null>(null);
+  const [brandingAddr, setBrandingAddr] = useState<string>("");
+  const [brandingPhotoPath, setBrandingPhotoPath] = useState<string | null>(null);
+  const [brandingPhotoUrl, setBrandingPhotoUrl] = useState<string | null>(null);
+  const [brandingSaving, setBrandingSaving] = useState(false);
+  const [brandingUploading, setBrandingUploading] = useState(false);
+
+  const refreshBranding = async (hoa: string) => {
+    const { data, error } = await supabase
+      .from("community_assets")
+      .select("hoa_name, photo_path, address_line")
+      .eq("hoa_name", hoa)
+      .maybeSingle();
+    if (error) {
+      console.warn("[Admin] load branding error:", error);
+      return;
+    }
+    setBrandingAddr((data as any)?.address_line ?? "");
+    const path = (data as any)?.photo_path ?? null;
+    setBrandingPhotoPath(path);
+    if (path) {
+      const url = supabase.storage.from("community-photos").getPublicUrl(path).data.publicUrl;
+      setBrandingPhotoUrl(url);
+    } else {
+      setBrandingPhotoUrl(null);
+    }
+  };
+
+  const handleBrandingUpload = async (file: File) => {
+    if (!hoaName) return;
+    setBrandingUploading(true);
+    const ext = file.name.split(".").pop() || "jpg";
+    const uploadPath = `${hoaName}/${Date.now()}.${ext}`;
+    const { error } = await supabase.storage.from("community-photos").upload(uploadPath, file, { upsert: true });
+    if (error) {
+      console.error("[Admin] upload branding photo error:", error);
+      toast.error("Upload failed", { description: error.message });
+    } else {
+      setBrandingPhotoPath(uploadPath);
+      const url = supabase.storage.from("community-photos").getPublicUrl(uploadPath).data.publicUrl;
+      setBrandingPhotoUrl(url);
+      toast.success("Photo uploaded");
+    }
+    setBrandingUploading(false);
+  };
+
+  const saveBranding = async () => {
+    if (!hoaName) return;
+    setBrandingSaving(true);
+    const { error } = await supabase
+      .from("community_assets")
+      .upsert(
+        { hoa_name: hoaName, address_line: brandingAddr || null, photo_path: brandingPhotoPath || null },
+        { onConflict: "hoa_name" }
+      );
+    if (error) {
+      console.error("[Admin] save branding error:", error);
+      toast.error("Save failed", { description: error.message });
+    } else {
+      toast.success("Branding saved");
+    }
+    setBrandingSaving(false);
+  };
 
   useEffect(() => {
     let cancelled = false;

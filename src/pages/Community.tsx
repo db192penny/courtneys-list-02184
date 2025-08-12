@@ -43,6 +43,31 @@ export default function Community() {
     enabled: !!communityName,
   });
 
+  // Community asset (photo and address)
+  type CommunityAsset = { hoa_name: string; photo_path: string | null; address_line: string | null };
+  const { data: asset } = useQuery<CommunityAsset | null>({
+    queryKey: ["community-asset", communityName],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("community_assets")
+        .select("hoa_name, photo_path, address_line")
+        .eq("hoa_name", communityName)
+        .maybeSingle();
+      if (error && (error as any).code !== "PGRST116") throw error;
+      return (data as CommunityAsset) ?? null;
+    },
+    enabled: !!communityName,
+  });
+
+  const photoUrl = useMemo(() => {
+    if (asset?.photo_path) {
+      return supabase.storage.from("community-photos").getPublicUrl(asset.photo_path).data.publicUrl;
+    }
+    return "/lovable-uploads/fa4d554f-323c-4bd2-b5aa-7cd1f2289c3c.png";
+  }, [asset?.photo_path]);
+
+  const addressLine = asset?.address_line || "17179 Ludovica Lane, Boca Raton, FL 33496";
+
   return (
     <main className="min-h-screen bg-background">
       <SEO
@@ -56,7 +81,7 @@ export default function Community() {
           <header className="space-y-0">
             <div className="flex items-center gap-4">
               <img
-                src="/lovable-uploads/fa4d554f-323c-4bd2-b5aa-7cd1f2289c3c.png"
+                src={photoUrl}
                 alt={`${communityName} HOA entrance sign and community graphic`}
                 className="h-16 w-16 rounded-md object-cover border"
                 loading="lazy"
@@ -64,14 +89,25 @@ export default function Community() {
               <div>
                 <h1 className="text-3xl font-semibold tracking-tight">{communityName}</h1>
                 <p className="text-sm text-muted-foreground">Your Trusted Neighborhood — 500 Homes</p>
-                <p className="text-sm text-muted-foreground">17179 Ludovica Lane, Boca Raton, FL 33496</p>
+                <p className="text-sm text-muted-foreground">{addressLine}</p>
               </div>
             </div>
           </header>
         ) : (
-          <header className="space-y-2">
-            <h1 className="text-3xl font-semibold tracking-tight">{pageTitle}</h1>
-            <p className="text-muted-foreground">{`Browse providers recommended by neighbors in ${communityName}.`}</p>
+          <header className="space-y-0">
+            <div className="flex items-center gap-4">
+              <img
+                src={photoUrl}
+                alt={`${communityName} HOA entrance sign and community graphic`}
+                className="h-16 w-16 rounded-md object-cover border"
+                loading="lazy"
+              />
+              <div>
+                <h1 className="text-3xl font-semibold tracking-tight">{communityName}</h1>
+                <p className="text-sm text-muted-foreground">Your Trusted Neighborhood — 500 Homes</p>
+                <p className="text-sm text-muted-foreground">{addressLine}</p>
+              </div>
+            </div>
           </header>
         )}
 

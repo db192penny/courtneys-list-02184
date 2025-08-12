@@ -61,6 +61,30 @@ export type Database = {
         }
         Relationships: []
       }
+      community_assets: {
+        Row: {
+          address_line: string | null
+          hoa_name: string
+          photo_path: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          address_line?: string | null
+          hoa_name: string
+          photo_path?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          address_line?: string | null
+          hoa_name?: string
+          photo_path?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       costs: {
         Row: {
           amount: number
