@@ -1,0 +1,255 @@
+BEGIN;
+
+-- Drop list_vendor_stats first to allow return type changes
+DROP FUNCTION IF EXISTS public.list_vendor_stats(text, text, text, integer, integer);
+
+-- 1) Extend costs table with structured cost fields
+ALTER TABLE public.costs
+  ADD COLUMN IF NOT EXISTS cost_kind text,
+  ADD COLUMN IF NOT EXISTS unit text,
+  ADD COLUMN IF NOT EXISTS quantity numeric;
+
+-- 2) Update costs trigger function to normalize new fields
+CREATE OR REPLACE FUNCTION public.trg_set_costs_fields()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path TO 'public'
+AS $function$
+BEGIN
+  NEW.normalized_address := public.normalize_address(NEW.household_address);
+  NEW.currency := upper(coalesce(NEW.currency, 'USD'));
+  NEW.amount := round(NEW.amount::numeric, 2);
+  NEW.updated_at := now();
+
+  -- Normalize new fields
+  IF NEW.cost_kind IS NOT NULL THEN
+    NEW.cost_kind := lower(trim(NEW.cost_kind));
+  END IF;
+
+  IF NEW.unit IS NOT NULL THEN
+    NEW.unit := lower(trim(NEW.unit));
+  END IF;
+
+  IF NEW.cost_kind IS NULL THEN
+    IF lower(coalesce(NEW.period, 'one_time')) IN ('monthly','quarterly','annually','weekly','biweekly') THEN
+      NEW.cost_kind := 'monthly_plan';
+    ELSE
+      NEW.cost_kind := 'one_time';
+    END IF;
+  END IF;
+
+  IF NEW.unit IS NULL THEN
+    NEW.unit := CASE NEW.cost_kind
+      WHEN 'monthly_plan' THEN 'month'
+      WHEN 'service_call' THEN 'call'
+      WHEN 'hourly' THEN 'hour'
+      WHEN 'per_visit' THEN 'visit'
+      ELSE 'job'
+    END;
+  END IF;
+
+  IF NEW.quantity IS NOT NULL THEN
+    NEW.quantity := round(NEW.quantity::numeric, 2);
+  END IF;
+
+  RETURN NEW;
+END;
+$function$;
+
+-- Ensure trigger exists (idempotent)
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_trigger WHERE tgname = 'trg_costs_set_fields'
+  ) THEN
+    CREATE TRIGGER trg_costs_set_fields
+    BEFORE INSERT OR UPDATE ON public.costs
+    FOR EACH ROW
+    EXECUTE FUNCTION public.trg_set_costs_fields();
+  END IF;
+END $$;
+
+-- 3) Remove columns we no longer use anywhere
+ALTER TABLE public.vendors DROP COLUMN IF EXISTS additional_notes;
+ALTER TABLE public.home_vendors DROP COLUMN IF EXISTS personal_notes;
+
+-- 4) Tighten RLS on vendors: only admins can UPDATE/DELETE
+-- Drop non-admin update/delete and HOA-admin policies if they exist
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname = 'public' AND tablename = 'vendors' AND policyname = 'Users can update their vendors'
+  ) THEN
+    DROP POLICY "Users can update their vendors" ON public.vendors;
+  END IF;
+  IF EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname = 'public' AND tablename = 'vendors' AND policyname = 'Users can delete their vendors'
+  ) THEN
+    DROP POLICY "Users can delete their vendors" ON public.vendors;
+  END IF;
+  IF EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname = 'public' AND tablename = 'vendors' AND policyname = 'HOA admins can update vendors in their HOA'
+  ) THEN
+    DROP POLICY "HOA admins can update vendors in their HOA" ON public.vendors;
+  END IF;
+  IF EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname = 'public' AND tablename = 'vendors' AND policyname = 'HOA admins can delete vendors in their HOA'
+  ) THEN
+    DROP POLICY "HOA admins can delete vendors in their HOA" ON public.vendors;
+  END IF;
+END $$;
+
+-- Ensure admin-only update/delete policies exist
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname='public' AND tablename='vendors' AND policyname='Admins can update vendors'
+  ) THEN
+    CREATE POLICY "Admins can update vendors"
+    ON public.vendors
+    FOR UPDATE
+    USING (public.is_admin())
+    WITH CHECK (public.is_admin());
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname='public' AND tablename='vendors' AND policyname='Admins can delete vendors'
+  ) THEN
+    CREATE POLICY "Admins can delete vendors"
+    ON public.vendors
+    FOR DELETE
+    USING (public.is_admin());
+  END IF;
+END $$;
+
+-- 5) Recreate list_vendor_stats with new return columns and logic
+CREATE FUNCTION public.list_vendor_stats(
+  _hoa_name text,
+  _category text DEFAULT NULL::text,
+  _sort_by text DEFAULT 'homes'::text,
+  _limit integer DEFAULT 100,
+  _offset integer DEFAULT 0
+)
+RETURNS TABLE(
+  id uuid,
+  name text,
+  category text,
+  homes_serviced integer,
+  homes_pct numeric,
+  hoa_rating numeric,
+  hoa_rating_count integer,
+  google_rating numeric,
+  google_rating_count integer,
+  avg_monthly_cost numeric,
+  monthly_sample_size integer,
+  service_call_avg numeric,
+  service_call_sample_size integer,
+  contact_info text
+)
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path TO 'public'
+AS $function$
+  WITH approved AS (
+    SELECT count(*)::int AS total
+    FROM public.approved_households
+    WHERE lower(hoa_name) = lower(trim(_hoa_name))
+  ),
+  households AS (
+    SELECT household_address FROM public.household_hoa
+    WHERE lower(hoa_name) = lower(trim(_hoa_name))
+  ),
+  cost_households AS (
+    SELECT c.vendor_id, count(DISTINCT c.normalized_address)::int AS homes
+    FROM public.costs c
+    JOIN households h ON h.household_address = c.normalized_address
+    GROUP BY c.vendor_id
+  ),
+  home_v_households AS (
+    SELECT hv.vendor_id, count(DISTINCT hh.household_address)::int AS homes
+    FROM public.home_vendors hv
+    JOIN public.users u ON u.id = hv.user_id
+    JOIN public.household_oa hh ON hh.household_address = public.normalize_address(u.address)
+    WHERE lower(hh.hoa_name) = lower(trim(_hoa_name))
+    GROUP BY hv.vendor_id
+  ),
+  homes AS (
+    SELECT vendor_id, sum(homes)::int AS homes
+    FROM (
+      SELECT * FROM cost_households
+      UNION ALL
+      SELECT * FROM home_v_households
+    ) s
+    GROUP BY vendor_id
+  ),
+  hoa_reviews AS (
+    SELECT r.vendor_id,
+           avg(r.rating)::numeric(4,2) AS hoa_rating,
+           count(*)::int AS hoa_rating_count
+    FROM public.reviews r
+    JOIN public.users u ON u.id = r.user_id
+    JOIN public.household_oa hh ON hh.household_address = public.normalize_address(u.address)
+    WHERE lower(hh.hoa_name) = lower(trim(_hoa_name))
+    GROUP BY r.vendor_id
+  ),
+  costs_m AS (
+    SELECT c.vendor_id,
+           round(avg(public.monthlyize_cost(c.amount, c.period))::numeric, 2) AS avg_monthly_cost,
+           count(*)::int AS monthly_sample_size
+    FROM public.costs c
+    JOIN households h ON h.household_address = c.normalized_address
+    WHERE lower(coalesce(c.cost_kind, '')) = 'monthly_plan'
+       OR lower(coalesce(c.period, '')) IN ('monthly','quarterly','annually','weekly','biweekly')
+    GROUP BY c.vendor_id
+  ),
+  costs_sc AS (
+    SELECT c.vendor_id,
+           round(avg(c.amount)::numeric, 2) AS service_call_avg,
+           count(*)::int AS service_call_sample_size
+    FROM public.costs c
+    JOIN households h ON h.household_address = c.normalized_address
+    WHERE lower(coalesce(c.cost_kind, '')) = 'service_call'
+    GROUP BY c.vendor_id
+  )
+  SELECT
+    v.id,
+    v.name,
+    v.category,
+    coalesce(h.homes, 0) AS homes_serviced,
+    CASE WHEN a.total > 0 THEN round((coalesce(h.homes, 0)::numeric / a.total::numeric) * 100.0, 1) ELSE 0 END AS homes_pct,
+    hr.hoa_rating,
+    hr.hoa_rating_count,
+    v.google_rating,
+    v.google_rating_count,
+    cm.avg_monthly_cost,
+    cm.monthly_sample_size,
+    sc.service_call_avg,
+    sc.service_call_sample_size,
+    v.contact_info
+  FROM public.vendors v
+  LEFT JOIN homes h ON h.vendor_id = v.id
+  LEFT JOIN hoa_reviews hr ON hr.vendor_id = v.id
+  LEFT JOIN costs_m cm ON cm.vendor_id = v.id
+  LEFT JOIN costs_sc sc ON sc.vendor_id = v.id
+  CROSS JOIN approved a
+  WHERE lower(v.community) = lower(trim(_hoa_name))
+    AND (_category IS NULL OR lower(v.category) = lower(_category))
+  ORDER BY CASE
+             WHEN _sort_by = 'hoa_rating' THEN coalesce(hr.hoa_rating, 0)
+             WHEN _sort_by = 'google_rating' THEN coalesce(v.google_rating, 0)
+             ELSE coalesce(h.homes, 0)
+           END DESC,
+           v.name ASC
+  LIMIT coalesce(_limit, 100)
+  OFFSET coalesce(_offset, 0);
+$function$;
+
+COMMIT;
