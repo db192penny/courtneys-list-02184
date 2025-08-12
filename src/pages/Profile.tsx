@@ -4,7 +4,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { extractStreetName } from "@/utils/address";
@@ -19,10 +18,7 @@ const Profile = () => {
 
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
-  const [isAnonymous, setIsAnonymous] = useState(true);
-  const [showNamePublic, setShowNamePublic] = useState(false);
   const [points, setPoints] = useState<number>(0);
-
   const [params] = useSearchParams();
   const onboarding = params.get("onboarding");
   
@@ -37,7 +33,7 @@ useEffect(() => {
       }
       const { data, error } = await supabase
         .from("users")
-        .select("name, address, is_anonymous, show_name_public, points")
+        .select("name, address, points")
         .eq("id", auth.user.id)
         .single();
 
@@ -47,8 +43,6 @@ useEffect(() => {
       if (!cancel) {
         setName(data?.name ?? "");
         setAddress(data?.address ?? "");
-        setIsAnonymous(data?.is_anonymous ?? true);
-        setShowNamePublic(data?.show_name_public ?? false);
         setPoints(data?.points ?? 0);
         setLoading(false);
       }
@@ -68,8 +62,6 @@ useEffect(() => {
       name: name.trim(),
       address: trimmedAddress,
       street_name: extractStreetName(trimmedAddress), // required by DB/types
-      is_anonymous: isAnonymous,
-      show_name_public: showNamePublic,
     };
 
     const { error } = await supabase.from("users").upsert(payload);
@@ -141,16 +133,6 @@ useEffect(() => {
                   country={["us"]}
                   placeholder="Start typing your address..."
                 />
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Switch id="is_anonymous" checked={isAnonymous} onCheckedChange={setIsAnonymous} />
-                  <Label htmlFor="is_anonymous">Post as Anonymous</Label>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Switch id="show_name_public" checked={showNamePublic} onCheckedChange={setShowNamePublic} />
-                  <Label htmlFor="show_name_public">Show Name Publicly</Label>
-                </div>
               </div>
             </CardContent>
             <CardFooter className="flex justify-between">

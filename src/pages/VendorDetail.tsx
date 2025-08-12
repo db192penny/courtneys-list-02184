@@ -25,6 +25,7 @@ type Review = {
   recommended: boolean | null;
   comments: string | null;
   created_at: string | null;
+  author_label: string;
 };
 
 const VendorDetail = () => {
@@ -52,11 +53,7 @@ const VendorDetail = () => {
   const { data: reviews } = useQuery<Review[]>({
     queryKey: ["reviews", id],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("reviews")
-        .select("id, rating, recommended, comments, created_at")
-        .eq("vendor_id", id as string)
-        .order("created_at", { ascending: false });
+      const { data, error } = await supabase.rpc("list_vendor_reviews", { _vendor_id: id as string });
       if (error) throw error;
       return (data || []) as Review[];
     },
@@ -150,6 +147,7 @@ const VendorDetail = () => {
                               {r.recommended ? "Recommended" : "Not recommended"}
                             </span>
                           )}
+                          <span className="ml-2 text-muted-foreground">by {r.author_label}</span>
                         </div>
                         {r.comments && (
                           <p className="text-sm text-muted-foreground mt-1">{r.comments}</p>

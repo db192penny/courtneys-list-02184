@@ -49,7 +49,20 @@ const SubmitVendor = () => {
         setCost(data.typical_cost != null ? String(data.typical_cost) : "");
       }
     };
+
+    const prefillAnon = async () => {
+      const { data: auth } = await supabase.auth.getUser();
+      if (!auth.user) return;
+      const { data } = await supabase
+        .from("users")
+        .select("is_anonymous")
+        .eq("id", auth.user.id)
+        .maybeSingle();
+      setAnonymous(!!data?.is_anonymous);
+    };
+
     loadVendor();
+    prefillAnon();
   }, [vendorId]);
 
   const onSubmit = async (e: React.FormEvent) => {
@@ -149,6 +162,7 @@ const SubmitVendor = () => {
         rating: ratingInt,
         recommended: recommend,
         comments: comments.trim() || null,
+        anonymous: anonymous,
       },
     ]);
 
@@ -238,7 +252,7 @@ const SubmitVendor = () => {
               </div>
               <div className="flex items-center gap-2">
                 <Switch id="anonymous" checked={anonymous} onCheckedChange={setAnonymous} />
-                <Label htmlFor="anonymous">Post as Anonymous</Label>
+                <Label htmlFor="anonymous">Hide my name on this review</Label>
               </div>
             </div>
           </div>

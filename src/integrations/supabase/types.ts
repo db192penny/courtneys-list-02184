@@ -581,6 +581,17 @@ export type Database = {
         Args: { _uid: string }
         Returns: boolean
       }
+      list_vendor_reviews: {
+        Args: { _vendor_id: string }
+        Returns: {
+          id: string
+          rating: number
+          recommended: boolean
+          comments: string
+          created_at: string
+          author_label: string
+        }[]
+      }
       list_vendor_stats: {
         Args: {
           _hoa_name: string
