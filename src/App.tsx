@@ -10,7 +10,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Dashboard from "./pages/Dashboard";
 import SubmitVendor from "./pages/SubmitVendor";
-import VendorDetail from "./pages/VendorDetail";
+
 import Admin from "./pages/Admin";
 import Auth from "./pages/Auth";
 import SignIn from "./pages/SignIn";
@@ -107,7 +107,7 @@ const App = () => (
           <Route path="/invite/:token" element={<Invite />} />
           <Route path="/dashboard" element={<ProtectedRoute><Navigate to="/communities/boca-bridges" replace /></ProtectedRoute>} />
           <Route path="/submit" element={<ProtectedRoute><SubmitVendor /></ProtectedRoute>} />
-          <Route path="/vendor/:id" element={<VendorDetail />} />
+          
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} /> {/* New route */}
           <Route path="/household/preview" element={<HouseholdPreview />} />
           <Route path="/household" element={<ProtectedRoute><Household /></ProtectedRoute>} />

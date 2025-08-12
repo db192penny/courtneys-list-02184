@@ -49,16 +49,13 @@ export default function VendorCard({
             <span>{vendor.community}</span>
           </div>
         )}
-        <div className="pt-2 flex items-center gap-3">
-          <Link to={`/vendor/${vendor.id}`} className="underline">
-            View details
-          </Link>
-          {canEdit && (
+{canEdit && (
+          <div className="pt-2 flex items-center gap-3">
             <Button asChild size="sm" variant="secondary">
               <Link to={`/submit?vendor_id=${vendor.id}`}>Edit</Link>
             </Button>
-          )}
-        </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

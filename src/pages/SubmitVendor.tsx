@@ -11,7 +11,9 @@ import { useToast } from "@/hooks/use-toast";
 import { CATEGORIES } from "@/data/categories";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate, useSearchParams } from "react-router-dom";
-
+import CostInputs, { buildDefaultCosts, type CostEntry } from "@/components/vendors/CostInputs";
+import useIsAdmin from "@/hooks/useIsAdmin";
+import useIsHoaAdmin from "@/hooks/useIsHoaAdmin";
 const SubmitVendor = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -21,16 +23,19 @@ const SubmitVendor = () => {
   const [category, setCategory] = useState<string>("");
   const [name, setName] = useState<string>("");
   const [contact, setContact] = useState<string>("");
-  const [cost, setCost] = useState<string>("");
+  const [costEntries, setCostEntries] = useState<CostEntry[]>(buildDefaultCosts());
   const [rating, setRating] = useState<string>("");
   const [comments, setComments] = useState<string>("");
   const [anonymous, setAnonymous] = useState(false);
   const [myReviewId, setMyReviewId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const { data: isAdmin } = useIsAdmin();
+  const { data: isHoaAdmin } = useIsHoaAdmin();
 
   const canonical = typeof window !== "undefined" ? window.location.href : undefined;
 
   const vendorId = searchParams.get("vendor_id");
+  const canEditCore = !!isAdmin || !!isHoaAdmin || !vendorId;
 
   useEffect(() => {
     console.log("[SubmitVendor] mounted");
@@ -46,7 +51,9 @@ const SubmitVendor = () => {
         setCategory(data.category || "");
         setName(data.name || "");
         setContact(data.contact_info || "");
-        setCost(data.typical_cost != null ? String(data.typical_cost) : "");
+        const defaults = buildDefaultCosts(data.category || "");
+        if (data.typical_cost != null && defaults.length) defaults[0].amount = Number(data.typical_cost);
+        setCostEntries(defaults);
       }
     };
 
@@ -88,17 +95,19 @@ const SubmitVendor = () => {
     e.preventDefault();
     if (submitting) return;
 
-    if (!category) {
-      toast({ title: "Category required", description: "Please select a service category.", variant: "destructive" });
-      return;
-    }
-    if (!name.trim()) {
-      toast({ title: "Provider name required", description: "Please enter the provider name.", variant: "destructive" });
-      return;
-    }
-    if (!contact.trim()) {
-      toast({ title: "Contact info required", description: "Please enter phone or email.", variant: "destructive" });
-      return;
+    if (!vendorId || canEditCore) {
+      if (!category) {
+        toast({ title: "Category required", description: "Please select a service category.", variant: "destructive" });
+        return;
+      }
+      if (!name.trim()) {
+        toast({ title: "Provider name required", description: "Please enter the provider name.", variant: "destructive" });
+        return;
+      }
+      if (!contact.trim()) {
+        toast({ title: "Contact info required", description: "Please enter phone or email.", variant: "destructive" });
+        return;
+      }
     }
     if (!vendorId && !rating) {
       toast({ title: "Rating required", description: "Please select a rating from 1 to 5.", variant: "destructive" });
@@ -117,30 +126,33 @@ const SubmitVendor = () => {
     }
 
     const userId = userData.user.id;
-    const costNum = cost ? Number(cost) : null;
-    if (cost && Number.isNaN(costNum)) {
-      toast({ title: "Invalid cost", description: "Please enter a valid number.", variant: "destructive" });
-      setSubmitting(false);
-      return;
-    }
+    // Derive a typical cost number from dynamic cost entries
+    const pickCostNum = () => {
+      const byKind = (k: "monthly_plan" | "service_call" | "hourly") =>
+        costEntries.find((e) => e.cost_kind === k && e.amount != null)?.amount ?? null;
+      return byKind("monthly_plan") ?? byKind("service_call") ?? byKind("hourly") ?? null;
+    };
+    const costNum = pickCostNum();
 
     // 1) Insert or update vendor
     if (vendorId) {
-      const { error: updateErr } = await supabase
-        .from("vendors")
-        .update({
-          name: name.trim(),
-          category,
-          contact_info: contact.trim(),
-          typical_cost: costNum,
-        })
-        .eq("id", vendorId);
+      if (canEditCore) {
+        const { error: updateErr } = await supabase
+          .from("vendors")
+          .update({
+            name: name.trim(),
+            category,
+            contact_info: contact.trim(),
+            typical_cost: costNum,
+          })
+          .eq("id", vendorId);
 
-      if (updateErr) {
-        console.error("[SubmitVendor] vendor update error:", updateErr);
-        toast({ title: "Could not update vendor", description: updateErr?.message || "Please try again.", variant: "destructive" });
-        setSubmitting(false);
-        return;
+        if (updateErr) {
+          console.error("[SubmitVendor] vendor update error:", updateErr);
+          toast({ title: "Could not update vendor", description: updateErr?.message || "Please try again.", variant: "destructive" });
+          setSubmitting(false);
+          return;
+        }
       }
 
       // Upsert my review if provided or exists
@@ -178,7 +190,7 @@ const SubmitVendor = () => {
       }
 
       toast({ title: "Saved!", description: "Your changes have been saved." });
-      navigate(`/vendor/${vendorId}`);
+      navigate("/dashboard");
       return;
     }
 
@@ -252,7 +264,7 @@ const SubmitVendor = () => {
             <div className="grid gap-2">
               <Label htmlFor="category">Service Category</Label>
               <Select value={category} onValueChange={setCategory}>
-                <SelectTrigger id="category">
+                <SelectTrigger id="category" disabled={!!(vendorId && !canEditCore)}>
                   <SelectValue placeholder="Select a category" />
                 </SelectTrigger>
                 <SelectContent>
@@ -265,17 +277,17 @@ const SubmitVendor = () => {
 
             <div className="grid gap-2">
               <Label htmlFor="name">Provider Name</Label>
-              <Input id="name" placeholder="e.g., ABC Pool Services" value={name} onChange={(e) => setName(e.currentTarget.value)} />
+              <Input id="name" placeholder="e.g., ABC Pool Services" value={name} onChange={(e) => setName(e.currentTarget.value)} disabled={!!(vendorId && !canEditCore)} />
             </div>
 
             <div className="grid gap-2">
               <Label htmlFor="contact">Provider Contact Info</Label>
-              <Input id="contact" placeholder="phone or email" value={contact} onChange={(e) => setContact(e.currentTarget.value)} />
+              <Input id="contact" placeholder="phone or email" value={contact} onChange={(e) => setContact(e.currentTarget.value)} disabled={!!(vendorId && !canEditCore)} />
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="cost">Typical Cost</Label>
-              <Input id="cost" type="number" inputMode="decimal" placeholder="e.g., 150" value={cost} onChange={(e) => setCost(e.currentTarget.value)} />
+              <Label>Typical Cost</Label>
+              <CostInputs category={category} value={costEntries} onChange={setCostEntries} />
             </div>
 
             <div className="grid gap-2">
