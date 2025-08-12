@@ -87,7 +87,7 @@ const Admin = () => {
     setHouseholdLoading((prev) => ({ ...prev, [addr]: false }))
   };
 
-  const setUserVerification = async (userId: string, verified: boolean) => {
+  const setUserVerification = async (userId: string, verified: boolean, email?: string | null) => {
     setUserLoading((prev) => ({ ...prev, [userId]: verified ? "approve" : "reject" }));
     const { error } = await supabase
       .from("users")
@@ -100,6 +100,23 @@ const Admin = () => {
       });
     } else {
       toast.success(verified ? "User approved" : "User rejected");
+
+      // Send approval email with magic link (fail-soft)
+      if (verified && email) {
+        const { error: fnErr } = await supabase.functions.invoke("send-approval-email", {
+          body: {
+            email,
+            redirectUrl: typeof window !== "undefined" ? window.location.origin : undefined,
+          },
+        });
+        if (fnErr) {
+          console.warn("[Admin] send-approval-email error:", fnErr);
+          toast.error("Approved, but email failed", { description: fnErr.message });
+        } else {
+          toast.success("Approval email sent");
+        }
+      }
+
       const { data: userRows, error: usersErr } = await supabase
         .from("users")
         .select("id, email, name, is_verified, created_at, address, formatted_address")
@@ -163,10 +180,10 @@ const Admin = () => {
                           <TableCell>{u.formatted_address || u.address || "—"}</TableCell>
                           <TableCell>{u.created_at ? new Date(u.created_at).toLocaleDateString() : "—"}</TableCell>
                           <TableCell className="text-right space-x-2">
-                            <Button size="sm" variant="secondary" disabled={!!userLoading?.[u.id]} onClick={() => setUserVerification(u.id, false)}>
+                            <Button size="sm" variant="secondary" disabled={!!userLoading?.[u.id]} onClick={() => setUserVerification(u.id, false, u.email)}>
                               {userLoading?.[u.id] === "reject" ? "Rejecting…" : "Reject"}
                             </Button>
-                            <Button size="sm" disabled={!!userLoading?.[u.id]} onClick={() => setUserVerification(u.id, true)}>
+                            <Button size="sm" disabled={!!userLoading?.[u.id]} onClick={() => setUserVerification(u.id, true, u.email)}>
                               {userLoading?.[u.id] === "approve" ? "Approving…" : "Approve"}
                             </Button>
                           </TableCell>

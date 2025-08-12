@@ -4,3 +4,6 @@ project_id = "iuxacgyocpwblpmmbwwc"
 
 [functions.get-public-config]
 verify_jwt = false
+
+[functions.send-approval-email]
+verify_jwt = true
