@@ -118,6 +118,7 @@ export type Database = {
       costs: {
         Row: {
           amount: number
+          cost_kind: string | null
           created_at: string
           created_by: string | null
           currency: string
@@ -126,11 +127,14 @@ export type Database = {
           normalized_address: string
           notes: string | null
           period: string | null
+          quantity: number | null
+          unit: string | null
           updated_at: string
           vendor_id: string
         }
         Insert: {
           amount: number
+          cost_kind?: string | null
           created_at?: string
           created_by?: string | null
           currency?: string
@@ -139,11 +143,14 @@ export type Database = {
           normalized_address: string
           notes?: string | null
           period?: string | null
+          quantity?: number | null
+          unit?: string | null
           updated_at?: string
           vendor_id: string
         }
         Update: {
           amount?: number
+          cost_kind?: string | null
           created_at?: string
           created_by?: string | null
           currency?: string
@@ -152,6 +159,8 @@ export type Database = {
           normalized_address?: string
           notes?: string | null
           period?: string | null
+          quantity?: number | null
+          unit?: string | null
           updated_at?: string
           vendor_id?: string
         }
@@ -198,7 +207,6 @@ export type Database = {
           my_comments: string | null
           my_rating: number | null
           period: string
-          personal_notes: string | null
           share_review_public: boolean
           updated_at: string
           user_id: string
@@ -213,7 +221,6 @@ export type Database = {
           my_comments?: string | null
           my_rating?: number | null
           period?: string
-          personal_notes?: string | null
           share_review_public?: boolean
           updated_at?: string
           user_id: string
@@ -228,7 +235,6 @@ export type Database = {
           my_comments?: string | null
           my_rating?: number | null
           period?: string
-          personal_notes?: string | null
           share_review_public?: boolean
           updated_at?: string
           user_id?: string
@@ -440,7 +446,6 @@ export type Database = {
       }
       vendors: {
         Row: {
-          additional_notes: string | null
           category: string
           community: string | null
           contact_info: string
@@ -455,7 +460,6 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
-          additional_notes?: string | null
           category: string
           community?: string | null
           contact_info: string
@@ -470,7 +474,6 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
-          additional_notes?: string | null
           category?: string
           community?: string | null
           contact_info?: string
@@ -611,8 +614,10 @@ export type Database = {
           google_rating: number
           google_rating_count: number
           avg_monthly_cost: number
+          monthly_sample_size: number
+          service_call_avg: number
+          service_call_sample_size: number
           contact_info: string
-          additional_notes: string
         }[]
       }
       mark_invite_accepted: {
