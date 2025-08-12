@@ -82,7 +82,7 @@ export default function Community() {
           </Button>
         </div>
 
-        {isPreview && (
+        {isPreview && !profile?.isAuthenticated && (
           <div className="flex flex-col gap-3">
             <Button onClick={() => {
               let addr = "";
@@ -120,7 +120,9 @@ export default function Community() {
           <div className="space-y-3">
             {isPreview && (
               <p className="text-sm text-muted-foreground">
-                Contact info and HOA averages are hidden until you sign up.
+                {profile?.isAuthenticated
+                  ? "Contact info and HOA averages are hidden until you’re approved."
+                  : "Contact info and HOA averages are hidden until you sign up."}
               </p>
             )}
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
