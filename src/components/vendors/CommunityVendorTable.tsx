@@ -7,6 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { CATEGORIES } from "@/data/categories";
 import { toast } from "@/components/ui/sonner";
 import { Link } from "react-router-dom";
+import ReviewsHover from "@/components/vendors/ReviewsHover";
 
 export type CommunityVendorRow = {
   id: string;
@@ -119,24 +120,23 @@ export default function CommunityVendorTable({
               <TableHead>HOA / Google</TableHead>
               <TableHead>$ / Month</TableHead>
               <TableHead>Contact</TableHead>
-              <TableHead>Notes</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading && (
               <TableRow>
-                <TableCell colSpan={9} className="text-sm text-muted-foreground">Loading…</TableCell>
+                <TableCell colSpan={8} className="text-sm text-muted-foreground">Loading…</TableCell>
               </TableRow>
             )}
             {error && (
               <TableRow>
-                <TableCell colSpan={9} className="text-sm text-muted-foreground">Unable to load providers.</TableCell>
+                <TableCell colSpan={8} className="text-sm text-muted-foreground">Unable to load providers.</TableCell>
               </TableRow>
             )}
             {!isLoading && !error && formatted.length === 0 && (
               <TableRow>
-                <TableCell colSpan={9} className="text-sm text-muted-foreground">No vendors found.</TableCell>
+                <TableCell colSpan={8} className="text-sm text-muted-foreground">No vendors found.</TableCell>
               </TableRow>
             )}
             {formatted.map((r, idx) => (
@@ -160,14 +160,19 @@ export default function CommunityVendorTable({
                   </div>
                 </TableCell>
                 <TableCell>
-                  <div className="text-xs leading-tight">
-                    <div>HOA: <span className="font-medium text-foreground">{r.hoa_rating?.toFixed(1) ?? "—"}</span>{r.hoa_rating_count ? ` (${r.hoa_rating_count})` : ""}</div>
-                    <div>Google: <span className="font-medium text-foreground">{r.google_rating?.toFixed(1) ?? "—"}</span>{r.google_rating_count ? ` (${r.google_rating_count})` : ""}</div>
+                  <div className="text-xs leading-tight space-y-1">
+                    <ReviewsHover vendorId={r.id}>
+                      <div>HOA: <span className="font-medium text-foreground">{r.hoa_rating?.toFixed(1) ?? "—"}</span>{r.hoa_rating_count ? ` (${r.hoa_rating_count})` : ""}</div>
+                    </ReviewsHover>
+                    {r.google_rating != null && (
+                      <ReviewsHover vendorId={r.id}>
+                        <div>Google: <span className="font-medium text-foreground">{r.google_rating?.toFixed(1) ?? "—"}</span>{r.google_rating_count ? ` (${r.google_rating_count})` : ""}</div>
+                      </ReviewsHover>
+                    )}
                   </div>
                 </TableCell>
                 <TableCell>{r.avg_monthly_cost != null ? `$${Number(r.avg_monthly_cost).toFixed(2)}` : "—"}</TableCell>
                 <TableCell>{showContact ? (r.contact_info || "—") : "Hidden"}</TableCell>
-                <TableCell className="max-w-[260px] truncate" title={r.additional_notes || undefined}>{r.additional_notes || "—"}</TableCell>
                 <TableCell className="text-right space-x-2">
                   <Button size="sm" asChild>
                     <Link to={`/vendor/${r.id}`}>Rate</Link>

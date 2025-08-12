@@ -69,24 +69,23 @@ export default function HomeVendorsTable() {
             <TableHead>My Review</TableHead>
             <TableHead>$ Cost</TableHead>
             <TableHead>Contact</TableHead>
-            <TableHead>Personal Notes</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {isLoading && (
             <TableRow>
-              <TableCell colSpan={7} className="text-sm text-muted-foreground">Loading…</TableCell>
+              <TableCell colSpan={6} className="text-sm text-muted-foreground">Loading…</TableCell>
             </TableRow>
           )}
           {error && (
             <TableRow>
-              <TableCell colSpan={7} className="text-sm text-muted-foreground">Unable to load your vendors.</TableCell>
+              <TableCell colSpan={6} className="text-sm text-muted-foreground">Unable to load your vendors.</TableCell>
             </TableRow>
           )}
           {!isLoading && !error && (!hvRows || hvRows.length === 0) && (
             <TableRow>
-              <TableCell colSpan={7} className="text-sm text-muted-foreground">No vendors in your list yet. Add from the Community page.</TableCell>
+              <TableCell colSpan={6} className="text-sm text-muted-foreground">No vendors in your list yet. Add from the Community page.</TableCell>
             </TableRow>
           )}
           {(hvRows || []).map((r) => {
@@ -112,7 +111,6 @@ export default function HomeVendorsTable() {
                 </TableCell>
                 <TableCell>{cost}</TableCell>
                 <TableCell className="truncate max-w-[220px]" title={contact}>{contact}</TableCell>
-                <TableCell className="truncate max-w-[260px]" title={r.personal_notes || undefined}>{r.personal_notes || "—"}</TableCell>
                 <TableCell className="text-right">
                   <Button size="sm" variant="secondary" onClick={() => onRemove(r.id)}>Remove</Button>
                 </TableCell>

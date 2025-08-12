@@ -24,8 +24,8 @@ const SubmitVendor = () => {
   const [cost, setCost] = useState<string>("");
   const [rating, setRating] = useState<string>("");
   const [comments, setComments] = useState<string>("");
-  const [recommend, setRecommend] = useState<boolean>(true);
-  const [anonymous, setAnonymous] = useState(false); // keep switch as-is (not used in MVP)
+  const [anonymous, setAnonymous] = useState(false);
+  const [myReviewId, setMyReviewId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   const canonical = typeof window !== "undefined" ? window.location.href : undefined;
@@ -61,8 +61,27 @@ const SubmitVendor = () => {
       setAnonymous(!!data?.is_anonymous);
     };
 
+    const loadMyReview = async () => {
+      if (!vendorId) return;
+      const { data: auth } = await supabase.auth.getUser();
+      if (!auth.user) return;
+      const { data } = await supabase
+        .from("reviews")
+        .select("id, rating, comments, anonymous")
+        .eq("vendor_id", vendorId)
+        .eq("user_id", auth.user.id)
+        .maybeSingle();
+      if (data) {
+        setMyReviewId(data.id as string);
+        setRating(String(data.rating ?? ""));
+        setComments(data.comments ?? "");
+        setAnonymous(!!data.anonymous);
+      }
+    };
+
     loadVendor();
     prefillAnon();
+    loadMyReview();
   }, [vendorId]);
 
   const onSubmit = async (e: React.FormEvent) => {
@@ -81,7 +100,7 @@ const SubmitVendor = () => {
       toast({ title: "Contact info required", description: "Please enter phone or email.", variant: "destructive" });
       return;
     }
-    if (!rating) {
+    if (!vendorId && !rating) {
       toast({ title: "Rating required", description: "Please select a rating from 1 to 5.", variant: "destructive" });
       return;
     }
@@ -124,7 +143,41 @@ const SubmitVendor = () => {
         return;
       }
 
-      toast({ title: "Vendor updated!", description: "Your changes have been saved." });
+      // Upsert my review if provided or exists
+      const ratingInt = rating ? parseInt(rating, 10) : null;
+      if (ratingInt || comments.trim() || myReviewId) {
+        if (myReviewId) {
+          const { error: reviewUpdateErr } = await supabase
+            .from("reviews")
+            .update({
+              rating: ratingInt!,
+              comments: comments.trim() || null,
+              anonymous,
+            })
+            .eq("id", myReviewId);
+          if (reviewUpdateErr) {
+            console.warn("[SubmitVendor] review update error (non-fatal):", reviewUpdateErr);
+          }
+        } else if (ratingInt) {
+          const { data: userData2 } = await supabase.auth.getUser();
+          if (userData2?.user) {
+            const { error: reviewInsertErr } = await supabase.from("reviews").insert([
+              {
+                vendor_id: vendorId,
+                user_id: userData2.user.id,
+                rating: ratingInt,
+                comments: comments.trim() || null,
+                anonymous,
+              },
+            ]);
+            if (reviewInsertErr) {
+              console.warn("[SubmitVendor] review insert error (non-fatal):", reviewInsertErr);
+            }
+          }
+        }
+      }
+
+      toast({ title: "Saved!", description: "Your changes have been saved." });
       navigate(`/vendor/${vendorId}`);
       return;
     }
@@ -160,7 +213,6 @@ const SubmitVendor = () => {
         vendor_id: vendorIdNew,
         user_id: userId,
         rating: ratingInt,
-        recommended: recommend,
         comments: comments.trim() || null,
         anonymous: anonymous,
       },
@@ -245,20 +297,16 @@ const SubmitVendor = () => {
               <Textarea id="comments" placeholder="Share your experience" value={comments} onChange={(e) => setComments(e.currentTarget.value)} />
             </div>
 
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Switch id="recommend" checked={recommend} onCheckedChange={setRecommend} />
-                <Label htmlFor="recommend">Would you recommend?</Label>
-              </div>
+            {!vendorId && (
               <div className="flex items-center gap-2">
                 <Switch id="anonymous" checked={anonymous} onCheckedChange={setAnonymous} />
                 <Label htmlFor="anonymous">Hide my name on this review</Label>
               </div>
-            </div>
+            )}
           </div>
 
           <Button type="submit" className="w-full" disabled={submitting}>
-            {submitting ? "Submitting..." : "Submit"}
+            {submitting ? (vendorId ? "Saving..." : "Submitting...") : (vendorId ? "Save changes" : "Submit")}
           </Button>
         </form>
       </section>
