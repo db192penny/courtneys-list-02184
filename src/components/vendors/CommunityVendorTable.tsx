@@ -8,6 +8,7 @@ import { CATEGORIES } from "@/data/categories";
 import { toast } from "@/components/ui/sonner";
 import ReviewsHover from "@/components/vendors/ReviewsHover";
 import RateVendorModal from "@/components/vendors/RateVendorModal";
+import { formatUSPhoneDisplay } from "@/utils/phone";
 export type CommunityVendorRow = {
   id: string;
   name: string;
@@ -169,7 +170,7 @@ export default function CommunityVendorTable({
                   </div>
                 </TableCell>
                 <TableCell>{(() => { const v = r.avg_monthly_cost ?? r.service_call_avg ?? r.typical_cost; return v != null ? `$${Number(v).toFixed(2)}` : "—"; })()}</TableCell>
-                <TableCell>{showContact ? (r.contact_info || "—") : "Hidden"}</TableCell>
+                <TableCell>{showContact ? (r.contact_info ? formatUSPhoneDisplay(r.contact_info) : "—") : "Hidden"}</TableCell>
                 <TableCell className="text-right space-x-2">
                   <Button size="sm" onClick={() => openRate(r)}>Rate</Button>
                   <Button size="sm" variant="secondary" onClick={() => openAddHome(r)}>+ Add to My Home</Button>
