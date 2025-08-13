@@ -3,10 +3,53 @@ import { Button } from "@/components/ui/button";
 import { Lightbulb, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { usePointRewards } from "@/hooks/usePointRewards";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { useUserData } from "@/hooks/useUserData";
+import { useState } from "react";
 
 export default function ActivityGuide() {
   const navigate = useNavigate();
   const { data: rewards = [] } = usePointRewards();
+  const { toast } = useToast();
+  const { data: userData } = useUserData();
+  const [isInviting, setIsInviting] = useState(false);
+
+  const generateInvite = async () => {
+    if (!userData?.isAuthenticated) return;
+    try {
+      setIsInviting(true);
+      const { data: authData } = await supabase.auth.getUser();
+      const userId = authData.user?.id;
+      if (!userId) throw new Error("Not authenticated");
+      
+      const token = (typeof crypto !== 'undefined' && 'randomUUID' in crypto) 
+        ? crypto.randomUUID() 
+        : Math.random().toString(36).slice(2) + Date.now().toString(36);
+      
+      const { error } = await supabase
+        .from("invitations")
+        .insert({ invite_token: token, invited_by: userId });
+      
+      if (error) throw error;
+      
+      const link = `${window.location.origin}/invite/${token}`;
+      await navigator.clipboard.writeText(link);
+      toast({ 
+        title: "Invite link copied!", 
+        description: "Share it with your neighbor." 
+      });
+    } catch (e: any) {
+      console.error("[ActivityGuide] invite error:", e);
+      toast({ 
+        title: "Could not create invite", 
+        description: e?.message ?? "Unknown error", 
+        variant: "destructive" 
+      });
+    } finally {
+      setIsInviting(false);
+    }
+  };
 
   const activities = [
     {
@@ -14,23 +57,23 @@ export default function ActivityGuide() {
       title: "Rate a Vendor",
       description: "Share your experience with a vendor (unique per vendor)",
       points: rewards.find(r => r.activity === "rate_vendor")?.points || 5,
-      action: () => navigate("/community"),
-      buttonText: "Browse Vendors"
+      action: () => navigate("/communities/boca-bridges"),
+      buttonText: "Rate Vendors"
     },
     {
       type: "invite_neighbor",
       title: "Invite a Neighbor", 
       description: "Invite someone from your community to join",
       points: rewards.find(r => r.activity === "invite_neighbor")?.points || 10,
-      action: () => navigate("/invite"),
-      buttonText: "Send Invite"
+      action: generateInvite,
+      buttonText: isInviting ? "Generating..." : "Send Invite"
     },
     {
       type: "vendor_submission",
       title: "Submit a New Vendor",
       description: "Add a new service provider to help your community",
       points: rewards.find(r => r.activity === "vendor_submission")?.points || 5,
-      action: () => navigate("/submit-vendor"),
+      action: () => navigate("/submit?community=Boca%20Bridges"),
       buttonText: "Add Vendor"
     }
   ];
