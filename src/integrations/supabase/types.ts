@@ -94,6 +94,7 @@ export type Database = {
           contact_phone: string | null
           hoa_name: string
           photo_path: string | null
+          total_homes: number | null
           updated_at: string
           updated_by: string | null
         }
@@ -102,6 +103,7 @@ export type Database = {
           contact_phone?: string | null
           hoa_name: string
           photo_path?: string | null
+          total_homes?: number | null
           updated_at?: string
           updated_by?: string | null
         }
@@ -110,6 +112,7 @@ export type Database = {
           contact_phone?: string | null
           hoa_name?: string
           photo_path?: string | null
+          total_homes?: number | null
           updated_at?: string
           updated_by?: string | null
         }

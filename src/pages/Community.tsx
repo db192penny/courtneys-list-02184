@@ -45,13 +45,13 @@ export default function Community() {
   });
 
   // Community asset (photo and address)
-  type CommunityAsset = { hoa_name: string; photo_path: string | null; address_line: string | null; contact_phone: string | null };
+  type CommunityAsset = { hoa_name: string; photo_path: string | null; address_line: string | null; contact_phone: string | null; total_homes?: number | null };
   const { data: asset } = useQuery<CommunityAsset | null>({
     queryKey: ["community-asset", communityName],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("community_assets")
-        .select("hoa_name, photo_path, address_line, contact_phone")
+        .select("hoa_name, photo_path, address_line, contact_phone, total_homes")
         .eq("hoa_name", communityName)
         .maybeSingle();
       if (error && (error as any).code !== "PGRST116") throw error;
@@ -71,7 +71,8 @@ export default function Community() {
   const contactPhone = asset?.contact_phone || null;
   const phoneDigits = contactPhone?.replace(/\D/g, "");
   const e164Phone = phoneDigits ? (phoneDigits.length === 10 ? `+1${phoneDigits}` : `+${phoneDigits}`) : null;
-
+  const homesCount = (asset as any)?.total_homes ?? 500;
+  const homesLabel = typeof homesCount === "number" ? homesCount.toLocaleString() : "500";
   return (
     <main className="min-h-screen bg-background">
       <SEO
@@ -92,7 +93,7 @@ export default function Community() {
               />
               <div>
                 <h1 className="text-3xl font-semibold tracking-tight">{communityName}</h1>
-                <p className="text-sm text-muted-foreground">Your Trusted Neighborhood — 500 Homes</p>
+                <p className="text-sm text-muted-foreground">Your Trusted Neighborhood — {homesLabel} Homes</p>
                 <p className="text-sm text-muted-foreground">{addressLine}</p>
                 {e164Phone && (
                   <div className="mt-2 flex flex-wrap gap-2">
@@ -118,7 +119,7 @@ export default function Community() {
               />
               <div>
                 <h1 className="text-3xl font-semibold tracking-tight">{communityName}</h1>
-                <p className="text-sm text-muted-foreground">Your Trusted Neighborhood — 500 Homes</p>
+                <p className="text-sm text-muted-foreground">Your Trusted Neighborhood — {homesLabel} Homes</p>
                 <p className="text-sm text-muted-foreground">{addressLine}</p>
                 {e164Phone && (
                   <div className="mt-2 flex flex-wrap gap-2">

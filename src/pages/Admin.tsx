@@ -41,11 +41,11 @@ const [householdLoading, setHouseholdLoading] = useState<Record<string, boolean>
   const [brandingPhotoUrl, setBrandingPhotoUrl] = useState<string | null>(null);
   const [brandingSaving, setBrandingSaving] = useState(false);
   const [brandingUploading, setBrandingUploading] = useState(false);
-
+  const [totalHomes, setTotalHomes] = useState<number | "">("");
   const refreshBranding = async (hoa: string) => {
     const { data, error } = await supabase
       .from("community_assets")
-      .select("hoa_name, photo_path, address_line, contact_phone")
+      .select("hoa_name, photo_path, address_line, contact_phone, total_homes")
       .eq("hoa_name", hoa)
       .maybeSingle();
     if (error) {
@@ -54,6 +54,7 @@ const [householdLoading, setHouseholdLoading] = useState<Record<string, boolean>
     }
     setBrandingAddr((data as any)?.address_line ?? "");
     setBrandingPhone((data as any)?.contact_phone ?? "");
+    setTotalHomes((data as any)?.total_homes ?? "");
     const path = (data as any)?.photo_path ?? null;
     setBrandingPhotoPath(path);
     if (path) {
@@ -98,13 +99,24 @@ const [householdLoading, setHouseholdLoading] = useState<Record<string, boolean>
       if (existing) {
         const { error: updErr } = await supabase
           .from("community_assets")
-          .update({ address_line: brandingAddr || null, contact_phone: brandingPhone || null, photo_path: brandingPhotoPath || null })
+          .update({
+            address_line: brandingAddr || null,
+            contact_phone: brandingPhone || null,
+            photo_path: brandingPhotoPath || null,
+            total_homes: totalHomes === "" ? null : Number(totalHomes),
+          })
           .eq("hoa_name", hoaName);
         opError = updErr;
       } else {
         const { error: insErr } = await supabase
           .from("community_assets")
-          .insert({ hoa_name: hoaName, address_line: brandingAddr || null, contact_phone: brandingPhone || null, photo_path: brandingPhotoPath || null });
+          .insert({
+            hoa_name: hoaName,
+            address_line: brandingAddr || null,
+            contact_phone: brandingPhone || null,
+            photo_path: brandingPhotoPath || null,
+            total_homes: totalHomes === "" ? null : Number(totalHomes),
+          });
         opError = insErr;
       }
 
@@ -397,6 +409,23 @@ const [householdLoading, setHouseholdLoading] = useState<Record<string, boolean>
                       value={brandingPhone}
                       onChange={(e) => setBrandingPhone(e.target.value)}
                     />
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Label htmlFor="total-homes">Number of Homes in HOA</Label>
+                    <Input
+                      id="total-homes"
+                      type="number"
+                      inputMode="numeric"
+                      min={0}
+                      placeholder="e.g. 500"
+                      value={totalHomes}
+                      onChange={(e) => {
+                        const v = e.target.value;
+                        setTotalHomes(v === "" ? "" : Math.max(0, Number(v)));
+                      }}
+                    />
+                    <p className="text-xs text-muted-foreground">Used to calculate % of homes serviced and shown under the community name.</p>
                   </div>
 
                   <div className="flex gap-2">
