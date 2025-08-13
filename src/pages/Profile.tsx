@@ -102,7 +102,7 @@ useEffect(() => {
         canonical={canonical}
       />
       <section className="container max-w-xl py-10">
-        <h1 className="text-3xl font-semibold mb-6">Profile & Privacy</h1>
+        <h1 className="text-3xl font-semibold mb-6">Your Profile</h1>
 {onboarding && (
           <Alert className="mb-4">
             <AlertTitle>Welcome!</AlertTitle>
@@ -115,7 +115,7 @@ useEffect(() => {
         )}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Profile & Privacy</CardTitle>
+            <CardTitle className="text-base">Your Profile</CardTitle>
             <p className="text-sm text-muted-foreground mt-1">Activity points: {points}</p>
           </CardHeader>
           <form onSubmit={onSave}>
@@ -135,8 +135,7 @@ useEffect(() => {
                 />
               </div>
             </CardContent>
-            <CardFooter className="flex justify-between">
-              <Link to="/household" className="underline text-sm">Your Home</Link>
+            <CardFooter className="flex justify-end">
               <Button type="submit" disabled={loading}>Save</Button>
             </CardFooter>
           </form>

@@ -100,8 +100,7 @@ const Dashboard = () => {
                     </p>
                       <div className="mt-3 flex gap-4">
                         <Link to="/submit" className="underline">Submit a Vendor</Link>
-                        <Link to="/profile" className="underline">Profile & Privacy</Link>
-                        <Link to="/household" className="underline">Household</Link>
+                        <Link to="/profile" className="underline">Your Profile</Link>
                       </div>
                   </CardContent>
                 </Card>
@@ -127,8 +126,7 @@ const Dashboard = () => {
                     </p>
                     <div className="flex gap-4">
                       <Link to="/submit" className="underline">Add a Vendor</Link>
-                      <Link to="/profile" className="underline">Profile & Privacy</Link>
-                      <Link to="/household" className="underline">Household</Link>
+                      <Link to="/profile" className="underline">Your Profile</Link>
                     </div>
                   </CardContent>
                 </Card>
