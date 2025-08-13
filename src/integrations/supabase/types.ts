@@ -542,6 +542,14 @@ export type Database = {
         Args: { _user_id: string; _reason?: string }
         Returns: boolean
       }
+      check_vendor_duplicate: {
+        Args: { _name: string; _community: string }
+        Returns: {
+          vendor_id: string
+          vendor_name: string
+          vendor_category: string
+        }[]
+      }
       count_my_costs: {
         Args: Record<PropertyKey, never>
         Returns: number
