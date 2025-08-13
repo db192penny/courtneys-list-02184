@@ -231,8 +231,10 @@ export default function RateVendorModal({ open, onOpenChange, vendor, onSuccess 
           .eq("user_id", userId);
       }
 
-      // Invalidate review hover caches to ensure fresh data
+      // Invalidate relevant caches to ensure fresh data
       queryClient.invalidateQueries({ queryKey: ["reviews-hover"] });
+      queryClient.invalidateQueries({ queryKey: ["community-stats"] });
+      queryClient.invalidateQueries({ queryKey: ["vendor-costs"] });
       
       toast({ title: "Saved", description: "Thanks for contributing!" });
       onOpenChange(false);
