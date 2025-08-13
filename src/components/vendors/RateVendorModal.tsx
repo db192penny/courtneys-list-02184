@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { StarRating } from "@/components/ui/star-rating";
 import { useToast } from "@/hooks/use-toast";
 import CostInputs, { CostEntry, buildDefaultCosts } from "./CostInputs";
 import { supabase } from "@/integrations/supabase/client";
@@ -22,7 +22,7 @@ type Props = {
 export default function RateVendorModal({ open, onOpenChange, vendor, onSuccess }: Props) {
   const { toast } = useToast();
   const { data: userData } = useUserData();
-  const [rating, setRating] = useState<string>("");
+  const [rating, setRating] = useState<number>(0);
   const [comments, setComments] = useState<string>("");
   const [showNameInReview, setShowNameInReview] = useState<boolean>(true);
   const [useForHome, setUseForHome] = useState<boolean>(true);
@@ -35,7 +35,7 @@ export default function RateVendorModal({ open, onOpenChange, vendor, onSuccess 
     const prefill = async () => {
       if (!vendor) {
         setCosts([]);
-        setRating("");
+        setRating(0);
         setComments("");
         setShowNameInReview(true);
         setUseForHome(false);
@@ -49,7 +49,7 @@ export default function RateVendorModal({ open, onOpenChange, vendor, onSuccess 
         const user = auth.user;
         if (!user) {
           setCosts(baseCosts);
-          setRating("");
+          setRating(0);
           setComments("");
           setShowNameInReview(true);
           setUseForHome(false);
@@ -88,7 +88,7 @@ export default function RateVendorModal({ open, onOpenChange, vendor, onSuccess 
 
         if (!isActive) return;
 
-        setRating(review?.rating ? review.rating.toString() : "");
+        setRating(review?.rating ? review.rating : 0);
         setComments(review?.comments || "");
         // If there's an existing review, use its anonymous setting; otherwise use user's global preference
         setShowNameInReview(review ? !review.anonymous : (userProfile?.show_name_public ?? true));
@@ -151,8 +151,7 @@ export default function RateVendorModal({ open, onOpenChange, vendor, onSuccess 
       toast({ title: "Sign in required", description: "Please sign in to continue.", variant: "destructive" });
       return;
     }
-    const ratingInt = parseInt(rating, 10);
-    if (!ratingInt || ratingInt < 1 || ratingInt > 5) {
+    if (!rating || rating < 1 || rating > 5) {
       toast({ title: "Rating required", description: "Please select a rating from 1 to 5.", variant: "destructive" });
       return;
     }
@@ -182,9 +181,9 @@ export default function RateVendorModal({ open, onOpenChange, vendor, onSuccess 
         .maybeSingle();
 
       if (existing?.id) {
-        await supabase.from("reviews").update({ rating: ratingInt, comments: comments || null, anonymous: !showNameInReview }).eq("id", existing.id);
+        await supabase.from("reviews").update({ rating: rating, comments: comments || null, anonymous: !showNameInReview }).eq("id", existing.id);
       } else {
-        await supabase.from("reviews").insert({ vendor_id: vendor.id, user_id: userId, rating: ratingInt, comments: comments || null, anonymous: !showNameInReview });
+        await supabase.from("reviews").insert({ vendor_id: vendor.id, user_id: userId, rating: rating, comments: comments || null, anonymous: !showNameInReview });
       }
 
       // 2) Insert cost rows for this household
@@ -213,7 +212,7 @@ export default function RateVendorModal({ open, onOpenChange, vendor, onSuccess 
         const hv = {
           user_id: userId,
           vendor_id: vendor.id,
-          my_rating: ratingInt,
+          my_rating: rating,
           amount: primary?.amount ?? null,
           currency: primary?.amount != null ? "USD" : null,
           period: primary?.cost_kind === "monthly_plan" ? "monthly" : (primary?.cost_kind === "hourly" ? "hourly" : null),
@@ -251,16 +250,7 @@ export default function RateVendorModal({ open, onOpenChange, vendor, onSuccess 
           <div className="space-y-4">
             <div className="grid gap-2">
               <Label>Rating</Label>
-              <Select value={rating} onValueChange={setRating}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select 1–5" />
-                </SelectTrigger>
-                <SelectContent>
-                  {[1,2,3,4,5].map((r) => (
-                    <SelectItem key={r} value={String(r)}>{r}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <StarRating value={rating} onChange={setRating} />
             </div>
             <div className="grid gap-2">
               <Label>Comments (optional)</Label>
@@ -275,9 +265,9 @@ export default function RateVendorModal({ open, onOpenChange, vendor, onSuccess 
                 <Checkbox checked={showNameInReview} onCheckedChange={(v) => setShowNameInReview(!!v)} />
                 <label className="text-sm font-medium">Show My Name in Review</label>
               </div>
-              {rating && (
+              {rating > 0 && (
                 <ReviewPreview 
-                  rating={parseInt(rating) || 0}
+                  rating={rating}
                   showName={showNameInReview}
                   userName={userData?.name}
                   streetName={userData?.streetName}

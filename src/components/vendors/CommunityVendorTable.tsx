@@ -178,7 +178,7 @@ export default function CommunityVendorTable({
                 </TableCell>
                 <TableCell>{showContact ? (r.contact_info ? formatUSPhoneDisplay(r.contact_info) : "—") : "Hidden"}</TableCell>
                 <TableCell className="text-right space-x-2">
-                  <Button size="sm" onClick={() => openRate(r)}>Rate</Button>
+                  <Button size="sm" variant="outline" className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700" onClick={() => openRate(r)}>Rate</Button>
                   
                 </TableCell>
               </TableRow>

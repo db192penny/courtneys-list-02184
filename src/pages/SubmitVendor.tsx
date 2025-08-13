@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
+import { StarRating } from "@/components/ui/star-rating";
 import { useToast } from "@/hooks/use-toast";
 import { CATEGORIES } from "@/data/categories";
 import { supabase } from "@/integrations/supabase/client";
@@ -27,7 +28,7 @@ const SubmitVendor = () => {
   const [name, setName] = useState<string>("");
   const [contact, setContact] = useState<string>("");
   const [costEntries, setCostEntries] = useState<CostEntry[]>(buildDefaultCosts());
-  const [rating, setRating] = useState<string>("4");
+  const [rating, setRating] = useState<number>(4);
   const [comments, setComments] = useState<string>("");
   const [showNameInReview, setShowNameInReview] = useState(true);
   const [useForHome, setUseForHome] = useState(true);
@@ -85,7 +86,7 @@ const SubmitVendor = () => {
         .maybeSingle();
       if (data) {
         setMyReviewId(data.id as string);
-        setRating(String(data.rating ?? ""));
+        setRating(data.rating ?? 0);
         setComments(data.comments ?? "");
         // For existing reviews, prefer the review's anonymous setting over user's global setting
         setShowNameInReview(!data.anonymous);
@@ -203,13 +204,12 @@ const SubmitVendor = () => {
       }
 
       // Upsert my review if provided or exists
-      const ratingInt = rating ? parseInt(rating, 10) : null;
-      if (ratingInt || comments.trim() || myReviewId) {
+      if (rating || comments.trim() || myReviewId) {
         if (myReviewId) {
           const { error: reviewUpdateErr } = await supabase
             .from("reviews")
             .update({
-              rating: ratingInt!,
+              rating: rating!,
               comments: comments.trim() || null,
               anonymous: !showNameInReview,
             })
@@ -217,14 +217,14 @@ const SubmitVendor = () => {
           if (reviewUpdateErr) {
             console.warn("[SubmitVendor] review update error (non-fatal):", reviewUpdateErr);
           }
-        } else if (ratingInt) {
+        } else if (rating) {
           const { data: userData2 } = await supabase.auth.getUser();
           if (userData2?.user) {
             const { error: reviewInsertErr } = await supabase.from("reviews").insert([
               {
                 vendor_id: vendorId,
                 user_id: userData2.user.id,
-                rating: ratingInt,
+                rating: rating,
                 comments: comments.trim() || null,
                 anonymous: !showNameInReview,
               },
@@ -242,7 +242,7 @@ const SubmitVendor = () => {
         const hv = {
           user_id: userId,
           vendor_id: vendorId,
-          my_rating: ratingInt || undefined,
+          my_rating: rating || undefined,
           amount: primary?.amount ?? null,
           currency: primary?.amount != null ? "USD" : null,
           period: primary?.cost_kind === "monthly_plan" ? "monthly" : (primary?.cost_kind === "hourly" ? "hourly" : null),
@@ -288,12 +288,11 @@ const SubmitVendor = () => {
     console.log("[SubmitVendor] vendor created:", vendorIdNew);
 
     // 2) Insert initial review linked to this vendor
-    const ratingInt = parseInt(rating, 10);
     const { error: reviewErr } = await supabase.from("reviews").insert([
       {
         vendor_id: vendorIdNew,
         user_id: userId,
-        rating: ratingInt,
+        rating: rating,
         comments: comments.trim() || null,
         anonymous: !showNameInReview,
       },
@@ -309,7 +308,7 @@ const SubmitVendor = () => {
       const hv = {
         user_id: userId,
         vendor_id: vendorIdNew,
-        my_rating: ratingInt,
+        my_rating: rating,
         amount: primary?.amount ?? null,
         currency: primary?.amount != null ? "USD" : null,
         period: primary?.cost_kind === "monthly_plan" ? "monthly" : (primary?.cost_kind === "hourly" ? "hourly" : null),
@@ -375,16 +374,7 @@ const SubmitVendor = () => {
 
             <div className="grid gap-2">
               <Label htmlFor="rating">Rating</Label>
-              <Select value={rating} onValueChange={setRating}>
-                <SelectTrigger id="rating">
-                  <SelectValue placeholder="Select 1–5" />
-                </SelectTrigger>
-                <SelectContent>
-                  {[1,2,3,4,5].map((r) => (
-                    <SelectItem key={r} value={String(r)}>{r}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <StarRating value={rating} onChange={setRating} />
             </div>
 
             <div className="grid gap-2">
@@ -403,9 +393,9 @@ const SubmitVendor = () => {
                   <label className="text-sm font-medium">Show My Name in Review</label>
                 </div>
               )}
-              {rating && (
+              {rating > 0 && (
                 <ReviewPreview 
-                  rating={parseInt(rating) || 0}
+                  rating={rating}
                   showName={showNameInReview}
                   userName={userData?.name}
                   streetName={userData?.streetName}
