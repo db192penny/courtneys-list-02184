@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { CATEGORIES } from "@/data/categories";
 import { supabase } from "@/integrations/supabase/client";
@@ -27,6 +28,7 @@ const SubmitVendor = () => {
   const [rating, setRating] = useState<string>("");
   const [comments, setComments] = useState<string>("");
   const [anonymous, setAnonymous] = useState(false);
+  const [useForHome, setUseForHome] = useState(false);
   const [myReviewId, setMyReviewId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const { data: isAdmin } = useIsAdmin();
@@ -84,6 +86,15 @@ const SubmitVendor = () => {
         setComments(data.comments ?? "");
         setAnonymous(!!data.anonymous);
       }
+
+      // Check if vendor is in user's home list
+      const { data: homeVendor } = await supabase
+        .from("home_vendors")
+        .select("id")
+        .eq("vendor_id", vendorId)
+        .eq("user_id", auth.user.id)
+        .maybeSingle();
+      setUseForHome(!!homeVendor);
     };
 
     loadVendor();
@@ -208,6 +219,28 @@ const SubmitVendor = () => {
         }
       }
 
+      // 3) Handle home vendor association for existing vendors
+      if (useForHome) {
+        const primary = costEntries.find(c => c.cost_kind === "monthly_plan" && c.amount != null) || costEntries.find(c => c.amount != null);
+        const hv = {
+          user_id: userId,
+          vendor_id: vendorId,
+          my_rating: ratingInt || undefined,
+          amount: primary?.amount ?? null,
+          currency: primary?.amount != null ? "USD" : null,
+          period: primary?.cost_kind === "monthly_plan" ? "monthly" : (primary?.cost_kind === "hourly" ? "hourly" : null),
+        } as any;
+        const { error: hvErr } = await supabase.from("home_vendors").upsert(hv, { onConflict: "user_id,vendor_id" });
+        if (hvErr) console.warn("[SubmitVendor] home_vendors upsert error", hvErr);
+      } else {
+        // Remove from home_vendors if unchecked
+        await supabase
+          .from("home_vendors")
+          .delete()
+          .eq("vendor_id", vendorId)
+          .eq("user_id", userId);
+      }
+
       toast({ title: "Saved!", description: "Your changes have been saved." });
       navigate("/dashboard");
       return;
@@ -251,6 +284,21 @@ const SubmitVendor = () => {
 
     if (reviewErr) {
       console.warn("[SubmitVendor] review insert error (non-fatal):", reviewErr);
+    }
+
+    // 3) Add to home_vendors table if user selected to use this vendor
+    if (useForHome) {
+      const primary = costEntries.find(c => c.cost_kind === "monthly_plan" && c.amount != null) || costEntries.find(c => c.amount != null);
+      const hv = {
+        user_id: userId,
+        vendor_id: vendorIdNew,
+        my_rating: ratingInt,
+        amount: primary?.amount ?? null,
+        currency: primary?.amount != null ? "USD" : null,
+        period: primary?.cost_kind === "monthly_plan" ? "monthly" : (primary?.cost_kind === "hourly" ? "hourly" : null),
+      } as any;
+      const { error: hvErr } = await supabase.from("home_vendors").upsert(hv, { onConflict: "user_id,vendor_id" });
+      if (hvErr) console.warn("[SubmitVendor] home_vendors upsert error", hvErr);
     }
 
     // DB trigger will mark the user as verified and increment submission count
@@ -328,12 +376,18 @@ const SubmitVendor = () => {
               <Textarea id="comments" placeholder="Share your experience" value={comments} onChange={(e) => setComments(e.currentTarget.value)} />
             </div>
 
-            {!vendorId && (
-              <div className="flex items-center gap-2">
-                <Switch id="anonymous" checked={anonymous} onCheckedChange={setAnonymous} />
-                <Label htmlFor="anonymous">Hide my name on this review</Label>
+            <div className="space-y-3">
+              <div className="flex items-center space-x-2">
+                <Checkbox checked={useForHome} onCheckedChange={(v) => setUseForHome(!!v)} />
+                <label className="text-sm font-medium">Do you currently use this vendor for your home?</label>
               </div>
-            )}
+              {!vendorId && (
+                <div className="flex items-center space-x-2">
+                  <Checkbox checked={anonymous} onCheckedChange={(v) => setAnonymous(!!v)} />
+                  <label className="text-sm">Submit review anonymously</label>
+                </div>
+              )}
+            </div>
           </div>
 
           <Button type="submit" className="w-full" disabled={submitting}>
