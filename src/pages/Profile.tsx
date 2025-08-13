@@ -15,6 +15,11 @@ import { useIsAdmin } from "@/hooks/useIsAdmin";
 import UserBadge from "@/components/badges/UserBadge";
 import AdminBadge from "@/components/badges/AdminBadge";
 import BadgeProgress from "@/components/badges/BadgeProgress";
+import PointHistoryTable from "@/components/badges/PointHistoryTable";
+import PointBreakdown from "@/components/badges/PointBreakdown";
+import ActivityGuide from "@/components/badges/ActivityGuide";
+import BadgeLevelChart from "@/components/badges/BadgeLevelChart";
+import ProgressInsights from "@/components/badges/ProgressInsights";
 
 
 const Profile = () => {
@@ -112,7 +117,7 @@ useEffect(() => {
         description="Manage your profile and privacy preferences."
         canonical={canonical}
       />
-      <section className="container max-w-xl py-10">
+      <section className="container max-w-4xl py-10">
         <h1 className="text-3xl font-semibold mb-6">Your Profile</h1>
 {onboarding && (
           <Alert className="mb-4">
@@ -173,7 +178,23 @@ useEffect(() => {
             </CardFooter>
           </form>
         </Card>
-        <div className="mt-4 text-sm text-muted-foreground">
+        
+        {/* Point History and Insights Section */}
+        <div className="mt-8 space-y-6">
+          <div className="grid gap-6 lg:grid-cols-2">
+            <PointHistoryTable />
+            <PointBreakdown />
+          </div>
+          
+          <div className="grid gap-6 lg:grid-cols-2">
+            <ActivityGuide />
+            <ProgressInsights currentPoints={points} />
+          </div>
+          
+          <BadgeLevelChart currentPoints={points} />
+        </div>
+        
+        <div className="mt-6 text-sm text-muted-foreground">
           Your address is used for community verification. Only your street name may be shown publicly.
         </div>
 
