@@ -16,10 +16,8 @@ import UserBadge from "@/components/badges/UserBadge";
 import AdminBadge from "@/components/badges/AdminBadge";
 import BadgeProgress from "@/components/badges/BadgeProgress";
 import PointHistoryTable from "@/components/badges/PointHistoryTable";
-import PointBreakdown from "@/components/badges/PointBreakdown";
 import ActivityGuide from "@/components/badges/ActivityGuide";
 import BadgeLevelChart from "@/components/badges/BadgeLevelChart";
-import ProgressInsights from "@/components/badges/ProgressInsights";
 
 
 const Profile = () => {
@@ -181,16 +179,8 @@ useEffect(() => {
         
         {/* Point History and Insights Section */}
         <div className="mt-8 space-y-6">
-          <div className="grid gap-6 lg:grid-cols-2">
-            <PointHistoryTable />
-            <PointBreakdown />
-          </div>
-          
-          <div className="grid gap-6 lg:grid-cols-2">
-            <ActivityGuide />
-            <ProgressInsights currentPoints={points} />
-          </div>
-          
+          <PointHistoryTable />
+          <ActivityGuide />
           <BadgeLevelChart currentPoints={points} />
         </div>
         
