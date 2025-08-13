@@ -5,27 +5,24 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import CostInputs, { CostEntry, buildDefaultCosts } from "./CostInputs";
 import { supabase } from "@/integrations/supabase/client";
 
-export default function RateVendorModal({
-  open,
-  onOpenChange,
-  vendor,
-  mode = "rate",
-  onSuccess,
-}: {
+type Props = {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   vendor: { id: string; name: string; category: string } | null;
-  mode?: "rate" | "addHome";
   onSuccess?: () => void;
-}) {
+};
+
+export default function RateVendorModal({ open, onOpenChange, vendor, onSuccess }: Props) {
   const { toast } = useToast();
   const [rating, setRating] = useState<string>("");
   const [comments, setComments] = useState<string>("");
   const [anonymous, setAnonymous] = useState<boolean>(false);
+  const [useForHome, setUseForHome] = useState<boolean>(false);
   const [costs, setCosts] = useState<CostEntry[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -38,6 +35,7 @@ export default function RateVendorModal({
         setRating("");
         setComments("");
         setAnonymous(false);
+        setUseForHome(false);
         return;
       }
 
@@ -51,6 +49,7 @@ export default function RateVendorModal({
           setRating("");
           setComments("");
           setAnonymous(false);
+          setUseForHome(false);
           return;
         }
 
@@ -58,6 +57,14 @@ export default function RateVendorModal({
         const { data: review } = await supabase
           .from("reviews")
           .select("rating, comments, anonymous")
+          .eq("vendor_id", vendor.id)
+          .eq("user_id", user.id)
+          .maybeSingle();
+
+        // Check if vendor is in user's home list
+        const { data: homeVendor } = await supabase
+          .from("home_vendors")
+          .select("id")
           .eq("vendor_id", vendor.id)
           .eq("user_id", user.id)
           .maybeSingle();
@@ -80,6 +87,8 @@ export default function RateVendorModal({
           setComments("");
           setAnonymous(false);
         }
+
+        setUseForHome(!!homeVendor);
 
         let mergedCosts: CostEntry[] = baseCosts;
         if (costRows && costRows.length) {
@@ -129,8 +138,6 @@ export default function RateVendorModal({
       isActive = false;
     };
   }, [vendor?.id]);
-
-  const title = vendor ? `${mode === "addHome" ? "Add to My Home" : "Rate Vendor"} — ${vendor.name}` : "Rate Vendor";
 
   const onSubmit = async () => {
     if (!vendor) return;
@@ -183,8 +190,8 @@ export default function RateVendorModal({
         }
       }
 
-      // 3) Upsert to home_vendors when needed
-      if (mode === "addHome") {
+      // 3) Add to home_vendors table if user selected to use this vendor
+      if (useForHome) {
         const primary = (costs || []).find(c => c.cost_kind === "monthly_plan" && c.amount != null) || (costs || []).find(c => c.amount != null);
         const hv = {
           user_id: userId,
@@ -197,6 +204,13 @@ export default function RateVendorModal({
         // upsert requires unique index on (user_id, vendor_id)
         const { error: hvErr } = await supabase.from("home_vendors").upsert(hv, { onConflict: "user_id,vendor_id" });
         if (hvErr) console.warn("[RateVendorModal] home_vendors upsert error", hvErr);
+      } else {
+        // Remove from home_vendors if unchecked
+        await supabase
+          .from("home_vendors")
+          .delete()
+          .eq("vendor_id", vendor.id)
+          .eq("user_id", userId);
       }
 
       toast({ title: "Saved", description: "Thanks for contributing!" });
@@ -214,7 +228,7 @@ export default function RateVendorModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
+          <DialogTitle>Rate Vendor — {vendor?.name}</DialogTitle>
         </DialogHeader>
         {vendor && (
           <div className="space-y-4">
@@ -235,9 +249,15 @@ export default function RateVendorModal({
               <Label>Comments (optional)</Label>
               <Textarea value={comments} onChange={(e) => setComments(e.currentTarget.value)} placeholder="Share your experience" />
             </div>
-            <div className="flex items-center gap-2">
-              <Switch id="anonymous" checked={anonymous} onCheckedChange={setAnonymous} />
-              <Label htmlFor="anonymous">Hide my name on this review</Label>
+            <div className="space-y-3">
+              <div className="flex items-center space-x-2">
+                <Checkbox checked={useForHome} onCheckedChange={(v) => setUseForHome(!!v)} />
+                <label className="text-sm font-medium">Do you currently use this vendor for your home?</label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox checked={anonymous} onCheckedChange={(v) => setAnonymous(!!v)} />
+                <label className="text-sm">Submit review anonymously</label>
+              </div>
             </div>
             <div className="grid gap-2">
               <Label>Costs</Label>
@@ -245,7 +265,7 @@ export default function RateVendorModal({
             </div>
             <div className="pt-2 flex justify-end gap-2">
               <Button variant="secondary" onClick={() => onOpenChange(false)} disabled={loading}>Cancel</Button>
-              <Button onClick={onSubmit} disabled={loading}>{loading ? "Saving..." : (mode === "addHome" ? "Save & Add" : "Save")}</Button>
+              <Button onClick={onSubmit} disabled={loading}>{loading ? "Saving..." : "Save"}</Button>
             </div>
           </div>
         )}

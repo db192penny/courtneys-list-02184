@@ -117,6 +117,25 @@ const SubmitVendor = () => {
     setSubmitting(true);
     console.log("[SubmitVendor] starting submission");
 
+    // Check for duplicate vendor before new submission
+    if (!vendorId) {
+      const { data: duplicates } = await supabase.rpc("check_vendor_duplicate", {
+        _name: name.trim(),
+        _community: "Boca Bridges"
+      });
+      
+      if (duplicates && duplicates.length > 0) {
+        const existing = duplicates[0];
+        toast({ 
+          title: "Vendor already exists", 
+          description: `"${existing.vendor_name}" (${existing.vendor_category}) is already in our database. Please rate the existing vendor instead.`,
+          variant: "destructive"
+        });
+        setSubmitting(false);
+        return;
+      }
+    }
+
     const { data: userData, error: userErr } = await supabase.auth.getUser();
     if (userErr || !userData.user) {
       console.error("[SubmitVendor] auth error:", userErr);

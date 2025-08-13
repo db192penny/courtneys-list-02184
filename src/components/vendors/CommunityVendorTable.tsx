@@ -59,12 +59,10 @@ export default function CommunityVendorTable({
   });
 
   const [modalOpen, setModalOpen] = useState(false);
-  const [modalMode, setModalMode] = useState<"rate">("rate");
   const [selected, setSelected] = useState<{ id: string; name: string; category: string } | null>(null);
 
   const openRate = (row: CommunityVendorRow) => {
     setSelected({ id: row.id, name: row.name, category: row.category });
-    setModalMode("rate");
     setModalOpen(true);
   };
 
@@ -138,9 +136,9 @@ export default function CommunityVendorTable({
                 <TableCell>{idx + 1}</TableCell>
                 <TableCell>
                   <div className="flex items-center gap-2">
-                    <Link to={`/submit?vendor_id=${r.id}`} className="font-medium text-foreground underline-offset-2 hover:underline" title={`Rate or edit ${r.name}`}>
+                    <span className="font-medium text-foreground">
                       {r.name}
-                    </Link>
+                    </span>
                   </div>
                 </TableCell>
                 <TableCell>
@@ -178,7 +176,7 @@ export default function CommunityVendorTable({
           </TableBody>
         </Table>
       </div>
-      <RateVendorModal open={modalOpen} onOpenChange={setModalOpen} vendor={selected} mode={modalMode} onSuccess={() => { setModalOpen(false); refetch(); }} />
+      <RateVendorModal open={modalOpen} onOpenChange={setModalOpen} vendor={selected} onSuccess={() => { setModalOpen(false); refetch(); }} />
     </div>
   );
 }

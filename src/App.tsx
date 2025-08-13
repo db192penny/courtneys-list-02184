@@ -10,7 +10,6 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Dashboard from "./pages/Dashboard";
 import SubmitVendor from "./pages/SubmitVendor";
-
 import Admin from "./pages/Admin";
 import Auth from "./pages/Auth";
 import SignIn from "./pages/SignIn";
