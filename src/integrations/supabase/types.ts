@@ -70,6 +70,36 @@ export type Database = {
           },
         ]
       }
+      badge_levels: {
+        Row: {
+          color: string
+          created_at: string
+          icon: string
+          id: string
+          min_points: number
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          color?: string
+          created_at?: string
+          icon?: string
+          id?: string
+          min_points: number
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          icon?: string
+          id?: string
+          min_points?: number
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       communities: {
         Row: {
           created_at: string | null
@@ -312,6 +342,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      point_rewards: {
+        Row: {
+          activity: string
+          created_at: string
+          description: string | null
+          id: string
+          points: number
+          updated_at: string
+        }
+        Insert: {
+          activity: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          points: number
+          updated_at?: string
+        }
+        Update: {
+          activity?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          points?: number
+          updated_at?: string
+        }
+        Relationships: []
       }
       reviews: {
         Row: {

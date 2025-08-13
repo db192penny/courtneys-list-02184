@@ -22,6 +22,7 @@ import CommunityRequest from "./pages/CommunityRequest";
 import Household from "./pages/Household";
 import HouseholdPreview from "./pages/HouseholdPreview";
 import Community from "./pages/Community";
+import AdminBadges from "./pages/AdminBadges";
 import Header from "./components/Header";
 
 const queryClient = new QueryClient();
@@ -111,6 +112,7 @@ const App = () => (
           <Route path="/household/preview" element={<HouseholdPreview />} />
           <Route path="/household" element={<ProtectedRoute><Household /></ProtectedRoute>} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/admin/badges" element={<ProtectedRoute><AdminBadges /></ProtectedRoute>} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/contact" element={<Contact />} />
