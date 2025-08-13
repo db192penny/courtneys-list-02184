@@ -1,6 +1,7 @@
 export const CATEGORIES = [
   "Pool",
-  "Landscaping",
+  "Landscaping", 
+  "HVAC",
   "Plumbing",
   "Electrical",
   "Roofing",

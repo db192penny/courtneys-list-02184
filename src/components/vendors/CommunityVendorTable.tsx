@@ -24,6 +24,8 @@ export type CommunityVendorRow = {
   service_call_avg: number | null;
   contact_info: string | null;
   typical_cost: number | null;
+  avg_cost_display: string | null;
+  avg_cost_amount: number | null;
 };
 
 const SORTS = [
@@ -110,7 +112,7 @@ export default function CommunityVendorTable({
               <TableHead>Category</TableHead>
               <TableHead># Homes</TableHead>
               <TableHead>HOA / Google</TableHead>
-              <TableHead>$ / Month</TableHead>
+              <TableHead>Avg Cost</TableHead>
               <TableHead>Contact</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
@@ -165,7 +167,15 @@ export default function CommunityVendorTable({
                     )}
                   </div>
                 </TableCell>
-                <TableCell>{(() => { const v = r.avg_monthly_cost ?? r.service_call_avg ?? r.typical_cost; return v != null ? `$${Number(v).toFixed(2)}` : "—"; })()}</TableCell>
+                <TableCell>
+                  {r.avg_cost_display === "See in Reviews" ? (
+                    <span className="text-xs text-muted-foreground">See in Reviews</span>
+                  ) : r.avg_cost_amount != null ? (
+                    <span>${Number(r.avg_cost_amount).toFixed(2)} {r.avg_cost_display}</span>
+                  ) : (
+                    "—"
+                  )}
+                </TableCell>
                 <TableCell>{showContact ? (r.contact_info ? formatUSPhoneDisplay(r.contact_info) : "—") : "Hidden"}</TableCell>
                 <TableCell className="text-right space-x-2">
                   <Button size="sm" onClick={() => openRate(r)}>Rate</Button>

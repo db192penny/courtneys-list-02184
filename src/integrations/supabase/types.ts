@@ -630,6 +630,8 @@ export type Database = {
           service_call_sample_size: number
           contact_info: string
           typical_cost: number
+          avg_cost_display: string
+          avg_cost_amount: number
         }[]
       }
       mark_invite_accepted: {

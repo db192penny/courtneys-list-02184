@@ -3,32 +3,51 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export type CostEntry = {
-  cost_kind: "monthly_plan" | "service_call" | "hourly";
+  cost_kind: "monthly_plan" | "yearly_plan" | "service_call" | "hourly";
   amount: number | null;
-  period?: string | null; // e.g., monthly
-  unit?: string | null;   // e.g., month, call, hour, visit
-  quantity?: number | null; // e.g., visits per month
+  period?: string | null; // e.g., monthly, yearly
+  unit?: string | null;   // e.g., month, year, visit, hour
+  quantity?: number | null; // e.g., visits per month/year
 };
 
 export function buildDefaultCosts(category?: string): CostEntry[] {
   const c = (category || "").toLowerCase();
+  
+  // Pool/Landscaping/Pest Control: Maintenance Plan with visits
+  if (c === "pool" || c === "pool service" || c === "landscaping" || c === "pest control") {
+    return [
+      { cost_kind: "monthly_plan", amount: null, period: "monthly", unit: "month", quantity: null },
+    ];
+  }
+  
+  // HVAC: Service Call + Yearly Maintenance Plan
   if (c === "hvac") {
     return [
-      { cost_kind: "service_call", amount: null, unit: "call" },
-      { cost_kind: "monthly_plan", amount: null, period: "monthly", unit: "month" },
+      { cost_kind: "service_call", amount: null, unit: "visit" },
+      { cost_kind: "yearly_plan", amount: null, period: "yearly", unit: "year", quantity: null },
     ];
   }
-  if (c === "pool" || c === "pool service") {
+  
+  // Plumbing/Electrical: Service Call only
+  if (c === "plumbing" || c === "electrical") {
     return [
-      { cost_kind: "monthly_plan", amount: null, period: "monthly", unit: "month", quantity: null }, // visits/mo in quantity
+      { cost_kind: "service_call", amount: null, unit: "visit" },
     ];
   }
+  
+  // Handyman: Hourly Rate
   if (c === "handyman") {
     return [
       { cost_kind: "hourly", amount: null, unit: "hour" },
     ];
   }
-  // Default: allow monthly plan optional
+  
+  // Roofing/General Contractor: No structured fields
+  if (c === "roofing" || c === "general contractor") {
+    return [];
+  }
+  
+  // Default: monthly plan
   return [
     { cost_kind: "monthly_plan", amount: null, period: "monthly", unit: "month" },
   ];
@@ -69,44 +88,71 @@ export default function CostInputs({
     });
   };
 
-  const sections = useMemo(() => entries.map((entry, idx) => {
-    const label =
-      entry.cost_kind === "service_call" ? "Cost per service call" :
-      entry.cost_kind === "hourly" ? "Hourly rate" :
-      "Monthly cost";
-
-    return (
-      <div key={`${entry.cost_kind}-${idx}`} className="grid gap-2">
-        <Label>{label}</Label>
-        <div className="flex items-center gap-2">
-          <Input
-            type="number"
-            inputMode="decimal"
-            placeholder="e.g., 150"
-            value={entry.amount ?? ""}
-            onChange={(e) => onField(idx, { amount: e.currentTarget.value === "" ? null : Number(e.currentTarget.value) })}
-          />
-          <span className="text-sm text-muted-foreground">USD{entry.cost_kind === "monthly_plan" ? "/mo" : entry.cost_kind === "hourly" ? "/hr" : ""}</span>
+  const sections = useMemo(() => {
+    const c = (category || "").toLowerCase();
+    
+    // Show no cost fields for roofing/general contractor
+    if (c === "roofing" || c === "general contractor") {
+      return [
+        <div key="no-costs" className="text-sm text-muted-foreground">
+          Please provide any additional cost guidance/experience in Comments below
         </div>
-        {entry.cost_kind === "monthly_plan" && (category || "").toLowerCase().includes("pool") && (
-          <div className="grid gap-2">
-            <Label>Visits per month (optional)</Label>
+      ];
+    }
+    
+    return entries.map((entry, idx) => {
+      const label =
+        entry.cost_kind === "service_call" ? "Service Call" :
+        entry.cost_kind === "hourly" ? "Hourly Rate" :
+        entry.cost_kind === "yearly_plan" ? "Maintenance Plan" :
+        "Maintenance Plan";
+
+      const unitDisplay = 
+        entry.cost_kind === "service_call" ? " per Visit" :
+        entry.cost_kind === "hourly" ? " per Hour" :
+        entry.cost_kind === "yearly_plan" ? " per Year" :
+        " per Month";
+
+      return (
+        <div key={`${entry.cost_kind}-${idx}`} className="grid gap-2">
+          <Label>{label}</Label>
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">$</span>
             <Input
               type="number"
-              inputMode="numeric"
-              placeholder="e.g., 4"
-              value={entry.quantity ?? ""}
-              onChange={(e) => onField(idx, { quantity: e.currentTarget.value === "" ? null : Number(e.currentTarget.value), unit: "visit" })}
+              inputMode="decimal"
+              placeholder="e.g., 150"
+              value={entry.amount ?? ""}
+              onChange={(e) => onField(idx, { amount: e.currentTarget.value === "" ? null : Number(e.currentTarget.value) })}
             />
+            <span className="text-sm text-muted-foreground">{unitDisplay}</span>
           </div>
-        )}
-      </div>
-    );
-  }), [entries, category]);
+          {/* Show visits quantity for Pool/Landscaping/Pest Control monthly plans and HVAC yearly plans */}
+          {((entry.cost_kind === "monthly_plan" && (c === "pool" || c === "pool service" || c === "landscaping" || c === "pest control")) ||
+            (entry.cost_kind === "yearly_plan" && c === "hvac")) && (
+            <div className="grid gap-2">
+              <Label># of Visits: {entry.cost_kind === "monthly_plan" ? "visits per Month" : "visits per Year"}</Label>
+              <Input
+                type="number"
+                inputMode="numeric"
+                placeholder="e.g., 4"
+                value={entry.quantity ?? ""}
+                onChange={(e) => onField(idx, { quantity: e.currentTarget.value === "" ? null : Number(e.currentTarget.value) })}
+              />
+            </div>
+          )}
+        </div>
+      );
+    });
+  }, [entries, category]);
 
   return (
     <div className="grid gap-4">
       {sections}
+      {/* Always show guidance text */}
+      <div className="text-xs text-muted-foreground mt-2">
+        Please provide any additional cost guidance/experience in Comments below
+      </div>
     </div>
   );
 }
