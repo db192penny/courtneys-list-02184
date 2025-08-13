@@ -378,8 +378,8 @@ const SubmitVendor = () => {
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="comments">Comments (optional)</Label>
-              <Textarea id="comments" placeholder="Share your experience" value={comments} onChange={(e) => setComments(e.currentTarget.value)} />
+              <Label htmlFor="comments">Comments (Additional Color)</Label>
+              <Textarea id="comments" placeholder="Any helpful insights — pricing, professionalism, customer service, responsiveness — the more detailed the better for your neighbors." value={comments} onChange={(e) => setComments(e.currentTarget.value)} />
             </div>
 
             <div className="space-y-4">

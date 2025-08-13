@@ -253,8 +253,8 @@ export default function RateVendorModal({ open, onOpenChange, vendor, onSuccess 
               <StarRating value={rating} onChange={setRating} />
             </div>
             <div className="grid gap-2">
-              <Label>Comments (optional)</Label>
-              <Textarea value={comments} onChange={(e) => setComments(e.currentTarget.value)} placeholder="Share your experience" />
+              <Label>Comments (Additional Color)</Label>
+              <Textarea value={comments} onChange={(e) => setComments(e.currentTarget.value)} placeholder="Any helpful insights — pricing, professionalism, customer service, responsiveness — the more detailed the better for your neighbors." />
             </div>
             <div className="space-y-4">
               <div className="flex items-center space-x-2">
