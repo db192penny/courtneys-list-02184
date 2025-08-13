@@ -27,7 +27,7 @@ const SubmitVendor = () => {
   const [name, setName] = useState<string>("");
   const [contact, setContact] = useState<string>("");
   const [costEntries, setCostEntries] = useState<CostEntry[]>(buildDefaultCosts());
-  const [rating, setRating] = useState<string>("");
+  const [rating, setRating] = useState<string>("4");
   const [comments, setComments] = useState<string>("");
   const [showNameInReview, setShowNameInReview] = useState(true);
   const [useForHome, setUseForHome] = useState(true);
