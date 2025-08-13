@@ -8,15 +8,15 @@ import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
 
 const activityTypeLabels = {
-  vendor_submission: "Vendor Submission",
-  review_submission: "Review Submission", 
-  cost_submission: "Cost Information"
+  vendor_submission: "Submit a New Vendor",
+  rate_vendor: "Rate a Vendor", 
+  invite_neighbor: "Invite a Neighbor"
 };
 
 const activityTypeIcons = {
   vendor_submission: "🏢",
-  review_submission: "⭐",
-  cost_submission: "💰"
+  rate_vendor: "⭐",
+  invite_neighbor: "👥"
 };
 
 export default function PointHistoryTable() {

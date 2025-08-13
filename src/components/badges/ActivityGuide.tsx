@@ -11,27 +11,27 @@ export default function ActivityGuide() {
   const activities = [
     {
       type: "vendor_submission",
-      title: "Submit a Vendor",
+      title: "Submit a New Vendor",
       description: "Add a new service provider to help your community",
-      points: rewards.find(r => r.activity === "vendor_submission")?.points || 10,
+      points: rewards.find(r => r.activity === "vendor_submission")?.points || 5,
       action: () => navigate("/submit-vendor"),
       buttonText: "Add Vendor"
     },
     {
-      type: "review_submission", 
-      title: "Write a Review",
-      description: "Share your experience with a vendor",
-      points: rewards.find(r => r.activity === "review_submission")?.points || 5,
+      type: "rate_vendor", 
+      title: "Rate a Vendor",
+      description: "Share your experience with a vendor (unique per vendor)",
+      points: rewards.find(r => r.activity === "rate_vendor")?.points || 5,
       action: () => navigate("/community"),
       buttonText: "Browse Vendors"
     },
     {
-      type: "cost_submission",
-      title: "Share Cost Information", 
-      description: "Help neighbors understand service pricing",
-      points: rewards.find(r => r.activity === "cost_submission")?.points || 5,
-      action: () => navigate("/community"),
-      buttonText: "Add Costs"
+      type: "invite_neighbor",
+      title: "Invite a Neighbor", 
+      description: "Invite someone from your community to join",
+      points: rewards.find(r => r.activity === "invite_neighbor")?.points || 10,
+      action: () => navigate("/invite"),
+      buttonText: "Send Invite"
     }
   ];
 
