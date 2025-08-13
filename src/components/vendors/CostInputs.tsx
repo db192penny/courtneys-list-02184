@@ -149,10 +149,6 @@ export default function CostInputs({
   return (
     <div className="grid gap-4">
       {sections}
-      {/* Always show guidance text */}
-      <div className="text-xs text-muted-foreground mt-2">
-        Please provide any additional cost guidance/experience in Comments below
-      </div>
     </div>
   );
 }

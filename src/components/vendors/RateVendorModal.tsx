@@ -25,7 +25,7 @@ export default function RateVendorModal({ open, onOpenChange, vendor, onSuccess 
   const [rating, setRating] = useState<string>("");
   const [comments, setComments] = useState<string>("");
   const [showNameInReview, setShowNameInReview] = useState<boolean>(true);
-  const [useForHome, setUseForHome] = useState<boolean>(false);
+  const [useForHome, setUseForHome] = useState<boolean>(true);
   const [costs, setCosts] = useState<CostEntry[]>([]);
   const [loading, setLoading] = useState(false);
 

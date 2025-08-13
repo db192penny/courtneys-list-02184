@@ -30,7 +30,7 @@ const SubmitVendor = () => {
   const [rating, setRating] = useState<string>("");
   const [comments, setComments] = useState<string>("");
   const [showNameInReview, setShowNameInReview] = useState(true);
-  const [useForHome, setUseForHome] = useState(false);
+  const [useForHome, setUseForHome] = useState(true);
   const [myReviewId, setMyReviewId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const { data: isAdmin } = useIsAdmin();
@@ -356,7 +356,6 @@ const SubmitVendor = () => {
             </div>
 
             <div className="grid gap-2">
-              <Label>Typical Cost</Label>
               <CostInputs category={category} value={costEntries} onChange={setCostEntries} />
             </div>
 
@@ -390,7 +389,7 @@ const SubmitVendor = () => {
                   <label className="text-sm font-medium">Show My Name in Review</label>
                 </div>
               )}
-              {!vendorId && rating && (
+              {rating && (
                 <ReviewPreview 
                   rating={parseInt(rating) || 0}
                   showName={showNameInReview}
