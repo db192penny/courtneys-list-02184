@@ -67,10 +67,10 @@ const SubmitVendor = () => {
       if (!auth.user) return;
       const { data } = await supabase
         .from("users")
-        .select("is_anonymous")
+        .select("show_name_public")
         .eq("id", auth.user.id)
         .maybeSingle();
-      setShowNameInReview(!data?.is_anonymous);
+      setShowNameInReview(data?.show_name_public ?? true);
     };
 
     const loadMyReview = async () => {
@@ -87,6 +87,7 @@ const SubmitVendor = () => {
         setMyReviewId(data.id as string);
         setRating(String(data.rating ?? ""));
         setComments(data.comments ?? "");
+        // For existing reviews, prefer the review's anonymous setting over user's global setting
         setShowNameInReview(!data.anonymous);
       }
 

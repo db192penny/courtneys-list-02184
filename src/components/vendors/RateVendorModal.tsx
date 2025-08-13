@@ -56,6 +56,13 @@ export default function RateVendorModal({ open, onOpenChange, vendor, onSuccess 
           return;
         }
 
+        // Get user's current show_name_public setting
+        const { data: userProfile } = await supabase
+          .from("users")
+          .select("show_name_public")
+          .eq("id", user.id)
+          .maybeSingle();
+
         // Prefill existing review by this user for this vendor
         const { data: review } = await supabase
           .from("reviews")
@@ -81,15 +88,10 @@ export default function RateVendorModal({ open, onOpenChange, vendor, onSuccess 
 
         if (!isActive) return;
 
-        if (review) {
-          setRating(String(review.rating ?? ""));
-          setComments(review.comments ?? "");
-          setShowNameInReview(!review.anonymous);
-        } else {
-          setRating("");
-          setComments("");
-          setShowNameInReview(true);
-        }
+        setRating(review?.rating ? review.rating.toString() : "");
+        setComments(review?.comments || "");
+        // If there's an existing review, use its anonymous setting; otherwise use user's global preference
+        setShowNameInReview(review ? !review.anonymous : (userProfile?.show_name_public ?? true));
 
         setUseForHome(!!homeVendor);
 
