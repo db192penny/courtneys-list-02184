@@ -30,14 +30,105 @@ export default function RateVendorModal({
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (vendor) {
-      setCosts(buildDefaultCosts(vendor.category));
-    } else {
-      setCosts([]);
-    }
-    setRating("");
-    setComments("");
-  }, [vendor?.id, open]);
+    let isActive = true;
+
+    const prefill = async () => {
+      if (!vendor) {
+        setCosts([]);
+        setRating("");
+        setComments("");
+        setAnonymous(false);
+        return;
+      }
+
+      const baseCosts = buildDefaultCosts(vendor.category);
+
+      try {
+        const { data: auth } = await supabase.auth.getUser();
+        const user = auth.user;
+        if (!user) {
+          setCosts(baseCosts);
+          setRating("");
+          setComments("");
+          setAnonymous(false);
+          return;
+        }
+
+        // Prefill existing review by this user for this vendor
+        const { data: review } = await supabase
+          .from("reviews")
+          .select("rating, comments, anonymous")
+          .eq("vendor_id", vendor.id)
+          .eq("user_id", user.id)
+          .maybeSingle();
+
+        // Prefill latest costs for this vendor limited to current user's household (RLS enforces it)
+        const { data: costRows } = await supabase
+          .from("costs")
+          .select("amount, period, unit, quantity, cost_kind, created_at")
+          .eq("vendor_id", vendor.id)
+          .order("created_at", { ascending: false });
+
+        if (!isActive) return;
+
+        if (review) {
+          setRating(String(review.rating ?? ""));
+          setComments(review.comments ?? "");
+          setAnonymous(!!review.anonymous);
+        } else {
+          setRating("");
+          setComments("");
+          setAnonymous(false);
+        }
+
+        let mergedCosts: CostEntry[] = baseCosts;
+        if (costRows && costRows.length) {
+          const byKind = new Map<string, typeof costRows[number]>();
+          for (const row of costRows) {
+            const k = String(row.cost_kind || "");
+            if (k && !byKind.has(k)) byKind.set(k, row);
+          }
+
+          // Start from defaults then overlay user's latest values per kind
+          mergedCosts = baseCosts.map((c) => {
+            const hit = byKind.get(c.cost_kind);
+            return hit
+              ? {
+                  ...c,
+                  amount: (hit.amount as number) ?? c.amount,
+                  period: (hit.period as any) ?? c.period,
+                  unit: (hit.unit as any) ?? c.unit,
+                  quantity: (hit.quantity as number | undefined) ?? c.quantity,
+                }
+              : c;
+          });
+
+          // Include extra kinds the user has that aren't in defaults
+          byKind.forEach((row, kind) => {
+            if (!mergedCosts.find((c) => c.cost_kind === kind)) {
+              mergedCosts.push({
+                cost_kind: kind as any,
+                amount: row.amount as number,
+                period: row.period ?? undefined,
+                unit: row.unit ?? undefined,
+                quantity: (row.quantity as number | undefined) ?? undefined,
+              } as CostEntry);
+            }
+          });
+        }
+
+        setCosts(mergedCosts);
+      } catch (e) {
+        console.warn("[RateVendorModal] prefill error", e);
+        setCosts(baseCosts);
+      }
+    };
+
+    prefill();
+    return () => {
+      isActive = false;
+    };
+  }, [vendor?.id]);
 
   const title = vendor ? `${mode === "addHome" ? "Add to My Home" : "Rate Vendor"} — ${vendor.name}` : "Rate Vendor";
 
