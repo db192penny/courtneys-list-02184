@@ -10,14 +10,6 @@ export default function ActivityGuide() {
 
   const activities = [
     {
-      type: "vendor_submission",
-      title: "Submit a New Vendor",
-      description: "Add a new service provider to help your community",
-      points: rewards.find(r => r.activity === "vendor_submission")?.points || 5,
-      action: () => navigate("/submit-vendor"),
-      buttonText: "Add Vendor"
-    },
-    {
       type: "rate_vendor", 
       title: "Rate a Vendor",
       description: "Share your experience with a vendor (unique per vendor)",
@@ -32,6 +24,14 @@ export default function ActivityGuide() {
       points: rewards.find(r => r.activity === "invite_neighbor")?.points || 10,
       action: () => navigate("/invite"),
       buttonText: "Send Invite"
+    },
+    {
+      type: "vendor_submission",
+      title: "Submit a New Vendor",
+      description: "Add a new service provider to help your community",
+      points: rewards.find(r => r.activity === "vendor_submission")?.points || 5,
+      action: () => navigate("/submit-vendor"),
+      buttonText: "Add Vendor"
     }
   ];
 
@@ -58,7 +58,8 @@ export default function ActivityGuide() {
             <Button 
               onClick={activity.action}
               size="sm"
-              className="ml-4 flex items-center gap-1"
+              variant="outline"
+              className="ml-4 flex items-center gap-1 bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700"
             >
               {activity.buttonText}
               <ArrowRight className="w-3 h-3" />
