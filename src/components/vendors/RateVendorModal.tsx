@@ -159,6 +159,18 @@ export default function RateVendorModal({ open, onOpenChange, vendor, onSuccess 
     try {
       const userId = auth.user.id;
 
+      // Update user's global show_name_public setting if they want to show their name
+      if (showNameInReview) {
+        const { error: userUpdateErr } = await supabase
+          .from("users")
+          .update({ show_name_public: true })
+          .eq("id", userId);
+        
+        if (userUpdateErr) {
+          console.warn("[RateVendorModal] user update error (non-fatal):", userUpdateErr);
+        }
+      }
+
       // 1) Upsert review
       const { data: existing } = await supabase
         .from("reviews")

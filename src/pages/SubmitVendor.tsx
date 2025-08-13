@@ -159,6 +159,19 @@ const SubmitVendor = () => {
     }
 
     const userId = userData.user.id;
+    
+    // Update user's global show_name_public setting if they want to show their name
+    if (showNameInReview) {
+      const { error: userUpdateErr } = await supabase
+        .from("users")
+        .update({ show_name_public: true })
+        .eq("id", userId);
+      
+      if (userUpdateErr) {
+        console.warn("[SubmitVendor] user update error (non-fatal):", userUpdateErr);
+      }
+    }
+    
     // Derive a typical cost number from dynamic cost entries
     const pickCostNum = () => {
       const byKind = (k: "monthly_plan" | "service_call" | "hourly") =>
