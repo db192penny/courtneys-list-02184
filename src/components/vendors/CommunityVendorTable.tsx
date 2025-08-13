@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { RatingStars } from "@/components/ui/rating-stars";
 import { CATEGORIES } from "@/data/categories";
 
 import ReviewsHover from "@/components/vendors/ReviewsHover";
@@ -111,7 +112,7 @@ export default function CommunityVendorTable({
               <TableHead>Provider</TableHead>
               <TableHead>Category</TableHead>
               <TableHead># Homes</TableHead>
-              <TableHead>HOA / Google</TableHead>
+              <TableHead>Ratings</TableHead>
               <TableHead>Avg Cost</TableHead>
               <TableHead>Contact</TableHead>
               <TableHead className="text-right">Actions</TableHead>
@@ -156,13 +157,29 @@ export default function CommunityVendorTable({
                   </div>
                 </TableCell>
                 <TableCell>
-                  <div className="text-xs leading-tight space-y-1">
+                  <div className="space-y-1">
                     <ReviewsHover vendorId={r.id}>
-                      <div>HOA: <span className="font-medium text-foreground">{r.hoa_rating?.toFixed(1) ?? "—"}</span>{r.hoa_rating_count ? ` (${r.hoa_rating_count})` : ""}</div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-muted-foreground">HOA:</span>
+                        {r.hoa_rating ? (
+                          <div className="flex items-center gap-1">
+                            <RatingStars rating={r.hoa_rating} showValue />
+                            {r.hoa_rating_count ? <span className="text-xs text-muted-foreground">({r.hoa_rating_count})</span> : null}
+                          </div>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">—</span>
+                        )}
+                      </div>
                     </ReviewsHover>
                     {r.google_rating != null && (
                       <ReviewsHover vendorId={r.id}>
-                        <div>Google: <span className="font-medium text-foreground">{r.google_rating?.toFixed(1) ?? "—"}</span>{r.google_rating_count ? ` (${r.google_rating_count})` : ""}</div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-muted-foreground">Google:</span>
+                          <div className="flex items-center gap-1">
+                            <RatingStars rating={r.google_rating} showValue />
+                            {r.google_rating_count ? <span className="text-xs text-muted-foreground">({r.google_rating_count})</span> : null}
+                          </div>
+                        </div>
                       </ReviewsHover>
                     )}
                   </div>
