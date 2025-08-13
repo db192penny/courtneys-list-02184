@@ -9,6 +9,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import CostInputs, { CostEntry, buildDefaultCosts } from "./CostInputs";
 import { supabase } from "@/integrations/supabase/client";
+import { useUserData } from "@/hooks/useUserData";
+import ReviewPreview from "@/components/ReviewPreview";
 
 type Props = {
   open: boolean;
@@ -19,9 +21,10 @@ type Props = {
 
 export default function RateVendorModal({ open, onOpenChange, vendor, onSuccess }: Props) {
   const { toast } = useToast();
+  const { data: userData } = useUserData();
   const [rating, setRating] = useState<string>("");
   const [comments, setComments] = useState<string>("");
-  const [anonymous, setAnonymous] = useState<boolean>(false);
+  const [showNameInReview, setShowNameInReview] = useState<boolean>(true);
   const [useForHome, setUseForHome] = useState<boolean>(false);
   const [costs, setCosts] = useState<CostEntry[]>([]);
   const [loading, setLoading] = useState(false);
@@ -34,7 +37,7 @@ export default function RateVendorModal({ open, onOpenChange, vendor, onSuccess 
         setCosts([]);
         setRating("");
         setComments("");
-        setAnonymous(false);
+        setShowNameInReview(true);
         setUseForHome(false);
         return;
       }
@@ -48,7 +51,7 @@ export default function RateVendorModal({ open, onOpenChange, vendor, onSuccess 
           setCosts(baseCosts);
           setRating("");
           setComments("");
-          setAnonymous(false);
+          setShowNameInReview(true);
           setUseForHome(false);
           return;
         }
@@ -81,11 +84,11 @@ export default function RateVendorModal({ open, onOpenChange, vendor, onSuccess 
         if (review) {
           setRating(String(review.rating ?? ""));
           setComments(review.comments ?? "");
-          setAnonymous(!!review.anonymous);
+          setShowNameInReview(!review.anonymous);
         } else {
           setRating("");
           setComments("");
-          setAnonymous(false);
+          setShowNameInReview(true);
         }
 
         setUseForHome(!!homeVendor);
@@ -165,9 +168,9 @@ export default function RateVendorModal({ open, onOpenChange, vendor, onSuccess 
         .maybeSingle();
 
       if (existing?.id) {
-        await supabase.from("reviews").update({ rating: ratingInt, comments: comments || null, anonymous }).eq("id", existing.id);
+        await supabase.from("reviews").update({ rating: ratingInt, comments: comments || null, anonymous: !showNameInReview }).eq("id", existing.id);
       } else {
-        await supabase.from("reviews").insert({ vendor_id: vendor.id, user_id: userId, rating: ratingInt, comments: comments || null, anonymous });
+        await supabase.from("reviews").insert({ vendor_id: vendor.id, user_id: userId, rating: ratingInt, comments: comments || null, anonymous: !showNameInReview });
       }
 
       // 2) Insert cost rows for this household
@@ -249,15 +252,23 @@ export default function RateVendorModal({ open, onOpenChange, vendor, onSuccess 
               <Label>Comments (optional)</Label>
               <Textarea value={comments} onChange={(e) => setComments(e.currentTarget.value)} placeholder="Share your experience" />
             </div>
-            <div className="space-y-3">
+            <div className="space-y-4">
               <div className="flex items-center space-x-2">
                 <Checkbox checked={useForHome} onCheckedChange={(v) => setUseForHome(!!v)} />
                 <label className="text-sm font-medium">Do you currently use this vendor for your home?</label>
               </div>
               <div className="flex items-center space-x-2">
-                <Checkbox checked={anonymous} onCheckedChange={(v) => setAnonymous(!!v)} />
-                <label className="text-sm">Submit review anonymously</label>
+                <Checkbox checked={showNameInReview} onCheckedChange={(v) => setShowNameInReview(!!v)} />
+                <label className="text-sm font-medium">Show My Name in Review</label>
               </div>
+              {rating && (
+                <ReviewPreview 
+                  rating={parseInt(rating) || 0}
+                  showName={showNameInReview}
+                  userName={userData?.name}
+                  streetName={userData?.streetName}
+                />
+              )}
             </div>
             <div className="grid gap-2">
               <Label>Costs</Label>

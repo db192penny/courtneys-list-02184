@@ -15,6 +15,8 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import CostInputs, { buildDefaultCosts, type CostEntry } from "@/components/vendors/CostInputs";
 import useIsAdmin from "@/hooks/useIsAdmin";
 import useIsHoaAdmin from "@/hooks/useIsHoaAdmin";
+import { useUserData } from "@/hooks/useUserData";
+import ReviewPreview from "@/components/ReviewPreview";
 const SubmitVendor = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -27,12 +29,13 @@ const SubmitVendor = () => {
   const [costEntries, setCostEntries] = useState<CostEntry[]>(buildDefaultCosts());
   const [rating, setRating] = useState<string>("");
   const [comments, setComments] = useState<string>("");
-  const [anonymous, setAnonymous] = useState(false);
+  const [showNameInReview, setShowNameInReview] = useState(true);
   const [useForHome, setUseForHome] = useState(false);
   const [myReviewId, setMyReviewId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const { data: isAdmin } = useIsAdmin();
   const { data: isHoaAdmin } = useIsHoaAdmin();
+  const { data: userData } = useUserData();
 
   const canonical = typeof window !== "undefined" ? window.location.href : undefined;
 
@@ -59,7 +62,7 @@ const SubmitVendor = () => {
       }
     };
 
-    const prefillAnon = async () => {
+    const prefillShowName = async () => {
       const { data: auth } = await supabase.auth.getUser();
       if (!auth.user) return;
       const { data } = await supabase
@@ -67,7 +70,7 @@ const SubmitVendor = () => {
         .select("is_anonymous")
         .eq("id", auth.user.id)
         .maybeSingle();
-      setAnonymous(!!data?.is_anonymous);
+      setShowNameInReview(!data?.is_anonymous);
     };
 
     const loadMyReview = async () => {
@@ -84,7 +87,7 @@ const SubmitVendor = () => {
         setMyReviewId(data.id as string);
         setRating(String(data.rating ?? ""));
         setComments(data.comments ?? "");
-        setAnonymous(!!data.anonymous);
+        setShowNameInReview(!data.anonymous);
       }
 
       // Check if vendor is in user's home list
@@ -98,7 +101,7 @@ const SubmitVendor = () => {
     };
 
     loadVendor();
-    prefillAnon();
+    prefillShowName();
     loadMyReview();
   }, [vendorId]);
 
@@ -194,7 +197,7 @@ const SubmitVendor = () => {
             .update({
               rating: ratingInt!,
               comments: comments.trim() || null,
-              anonymous,
+              anonymous: !showNameInReview,
             })
             .eq("id", myReviewId);
           if (reviewUpdateErr) {
@@ -209,7 +212,7 @@ const SubmitVendor = () => {
                 user_id: userData2.user.id,
                 rating: ratingInt,
                 comments: comments.trim() || null,
-                anonymous,
+                anonymous: !showNameInReview,
               },
             ]);
             if (reviewInsertErr) {
@@ -278,7 +281,7 @@ const SubmitVendor = () => {
         user_id: userId,
         rating: ratingInt,
         comments: comments.trim() || null,
-        anonymous: anonymous,
+        anonymous: !showNameInReview,
       },
     ]);
 
@@ -376,16 +379,24 @@ const SubmitVendor = () => {
               <Textarea id="comments" placeholder="Share your experience" value={comments} onChange={(e) => setComments(e.currentTarget.value)} />
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-4">
               <div className="flex items-center space-x-2">
                 <Checkbox checked={useForHome} onCheckedChange={(v) => setUseForHome(!!v)} />
                 <label className="text-sm font-medium">Do you currently use this vendor for your home?</label>
               </div>
               {!vendorId && (
                 <div className="flex items-center space-x-2">
-                  <Checkbox checked={anonymous} onCheckedChange={(v) => setAnonymous(!!v)} />
-                  <label className="text-sm">Submit review anonymously</label>
+                  <Checkbox checked={showNameInReview} onCheckedChange={(v) => setShowNameInReview(!!v)} />
+                  <label className="text-sm font-medium">Show My Name in Review</label>
                 </div>
+              )}
+              {!vendorId && rating && (
+                <ReviewPreview 
+                  rating={parseInt(rating) || 0}
+                  showName={showNameInReview}
+                  userName={userData?.name}
+                  streetName={userData?.streetName}
+                />
               )}
             </div>
           </div>
