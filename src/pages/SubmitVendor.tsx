@@ -375,15 +375,6 @@ const SubmitVendor = () => {
             <div className="grid gap-2">
               <Label htmlFor="rating">Rating</Label>
               <StarRating value={rating} onChange={setRating} />
-              <div className="mt-2 text-xs text-muted-foreground">
-                <div className="grid grid-cols-2 gap-1">
-                  <div><span className="font-medium">1 Star:</span> Avoid like a plague</div>
-                  <div><span className="font-medium">2 Stars:</span> Needs caution / Mixed experience</div>
-                  <div><span className="font-medium">3 Stars:</span> Average / Acceptable</div>
-                  <div><span className="font-medium">4 Stars:</span> Good / Recommended</div>
-                  <div><span className="font-medium">5 Stars:</span> Amazing vendor / Highly recommended</div>
-                </div>
-              </div>
             </div>
 
             <div className="grid gap-2">
