@@ -11,6 +11,7 @@ import CostInputs, { CostEntry, buildDefaultCosts } from "./CostInputs";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserData } from "@/hooks/useUserData";
 import ReviewPreview from "@/components/ReviewPreview";
+import { useQueryClient } from "@tanstack/react-query";
 
 type Props = {
   open: boolean;
@@ -22,6 +23,7 @@ type Props = {
 export default function RateVendorModal({ open, onOpenChange, vendor, onSuccess }: Props) {
   const { toast } = useToast();
   const { data: userData } = useUserData();
+  const queryClient = useQueryClient();
   const [rating, setRating] = useState<number>(0);
   const [comments, setComments] = useState<string>("");
   const [showNameInReview, setShowNameInReview] = useState<boolean>(true);
@@ -229,6 +231,9 @@ export default function RateVendorModal({ open, onOpenChange, vendor, onSuccess 
           .eq("user_id", userId);
       }
 
+      // Invalidate review hover caches to ensure fresh data
+      queryClient.invalidateQueries({ queryKey: ["reviews-hover"] });
+      
       toast({ title: "Saved", description: "Thanks for contributing!" });
       onOpenChange(false);
       onSuccess?.();
