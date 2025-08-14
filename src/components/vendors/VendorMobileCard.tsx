@@ -1,3 +1,4 @@
+import { Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { RatingStars } from "@/components/ui/rating-stars";
@@ -68,9 +69,10 @@ export default function VendorMobileCard({
             <Button 
               size="sm" 
               variant="outline"
-              className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700"
+              className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700 flex items-center gap-1"
               onClick={() => onRate(vendor)}
             >
+              <Star className="h-3 w-3" />
               Rate
             </Button>
             <Button 

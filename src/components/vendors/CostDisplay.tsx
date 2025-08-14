@@ -58,7 +58,7 @@ export function CostDisplay({
         <span className="text-xs text-muted-foreground min-w-[70px]">Community:</span>
         <div className="px-2 py-1.5 rounded-md bg-blue-50 hover:bg-blue-100 transition-colors border border-blue-200 hover:border-blue-300 min-h-[28px] flex items-center">
           {communityPrice ? (
-            <span className="text-sm font-medium">
+            <span className="text-xs font-medium">
               {communitySampleSize && communitySampleSize > 0 ? (
                 <CostsHover vendorId={vendorId}>
                   {communityPrice}
@@ -73,7 +73,7 @@ export function CostDisplay({
               )}
             </span>
           ) : (
-            <span className="text-sm text-muted-foreground">TBD</span>
+            <span className="text-xs text-muted-foreground">TBD</span>
           )}
         </div>
       </div>
@@ -84,7 +84,7 @@ export function CostDisplay({
         <div className="px-2 py-1.5 rounded-md bg-orange-50 hover:bg-orange-100 transition-colors border border-orange-200 hover:border-orange-300 min-h-[28px] flex items-center">
           {marketPrice ? (
             <div className="flex items-center gap-1">
-              <span className="text-sm font-medium">{marketPrice}</span>
+              <span className="text-xs font-medium">{marketPrice}</span>
               {isAdmin && (
                 <Button
                   variant="ghost"
@@ -98,7 +98,7 @@ export function CostDisplay({
             </div>
           ) : (
             <div className="flex items-center gap-1">
-              <span className="text-sm text-muted-foreground">—</span>
+              <span className="text-xs text-muted-foreground">—</span>
               {isAdmin && (
                 <Button
                   variant="ghost"

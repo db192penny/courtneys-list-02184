@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { RatingStars } from "@/components/ui/rating-stars";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Star } from "lucide-react";
 import { CATEGORIES } from "@/data/categories";
 import { useUserHomeVendors } from "@/hooks/useUserHomeVendors";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -292,7 +293,10 @@ export default function CommunityVendorTable({
                   <TableCell>{showContact ? (r.contact_info ? formatUSPhoneDisplay(r.contact_info) : "—") : "Hidden"}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex gap-1 justify-end">
-                      <Button size="sm" variant="outline" className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700" onClick={() => openRate(r)}>Rate</Button>
+                      <Button size="sm" variant="outline" className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700 flex items-center gap-1" onClick={() => openRate(r)}>
+                        <Star className="h-3 w-3" />
+                        Rate
+                      </Button>
                       <Button size="sm" variant="outline" className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700" onClick={() => openCosts(r)}>+ Costs</Button>
                     </div>
                   </TableCell>
