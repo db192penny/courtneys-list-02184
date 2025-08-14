@@ -201,10 +201,21 @@ export default function RateVendorModal({ open, onOpenChange, vendor, onSuccess 
           quantity: c.quantity ?? undefined,
           cost_kind: c.cost_kind,
           household_address,
+          created_by: userId,
         }));
         if (payloads.length) {
+          console.log("[RateVendorModal] Inserting costs:", payloads);
           const { error: costErr } = await supabase.from("costs").insert(payloads as any);
-          if (costErr) console.warn("[RateVendorModal] cost insert error", costErr);
+          if (costErr) {
+            console.error("[RateVendorModal] cost insert error", costErr);
+            toast({
+              title: "Error saving cost information",
+              description: "Your rating was saved but cost information couldn't be saved.",
+              variant: "destructive",
+            });
+          } else {
+            console.log("[RateVendorModal] Costs inserted successfully");
+          }
         }
       }
 
@@ -234,6 +245,7 @@ export default function RateVendorModal({ open, onOpenChange, vendor, onSuccess 
       // Invalidate relevant caches to ensure fresh data
       queryClient.invalidateQueries({ queryKey: ["reviews-hover"] });
       queryClient.invalidateQueries({ queryKey: ["community-stats"] });
+      queryClient.invalidateQueries({ queryKey: ["community-vendors"] });
       queryClient.invalidateQueries({ queryKey: ["vendor-costs"] });
       
       toast({ title: "Saved", description: "Thanks for contributing!" });
