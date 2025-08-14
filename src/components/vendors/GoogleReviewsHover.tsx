@@ -27,8 +27,8 @@ export default function GoogleReviewsHover({
   const [refreshing, setRefreshing] = useState(false);
 
   // Parse existing Google reviews from the vendor data
-  const existingReviews: GoogleReview[] = Array.isArray(googleReviewsJson?.reviews) 
-    ? googleReviewsJson.reviews 
+  const existingReviews: GoogleReview[] = Array.isArray(googleReviewsJson) 
+    ? googleReviewsJson 
     : [];
 
   const { data: freshReviews, refetch } = useQuery({
