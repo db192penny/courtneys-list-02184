@@ -177,15 +177,19 @@ useEffect(() => {
           </form>
         </Card>
         
-        {/* Point History and Insights Section */}
+        {/* Activity Insights Section */}
         <div className="mt-8 space-y-6">
-          <PointHistoryTable />
           <ActivityGuide />
           <BadgeLevelChart currentPoints={points} />
         </div>
         
         <div className="mt-6 text-sm text-muted-foreground">
           Your address is used for community verification. Only your street name may be shown publicly.
+        </div>
+        
+        {/* Point History Section - Moved to Bottom */}
+        <div className="mt-8">
+          <PointHistoryTable />
         </div>
 
       </section>
