@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { format } from "date-fns";
+import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -29,6 +30,7 @@ interface AdminCostTableProps {
 export function AdminCostTable({ costs, isLoading, onUpdate }: AdminCostTableProps) {
   const [editingCost, setEditingCost] = useState<any>(null);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const handleSoftDelete = async (costId: string) => {
     try {
@@ -46,6 +48,11 @@ export function AdminCostTable({ costs, isLoading, onUpdate }: AdminCostTablePro
         title: "Cost entry deleted",
         description: "The cost entry has been soft deleted and excluded from community calculations.",
       });
+      
+      // Invalidate vendor-costs cache to update hover tooltips
+      queryClient.invalidateQueries({ queryKey: ["vendor-costs"] });
+      queryClient.invalidateQueries({ queryKey: ["community-stats"] });
+      
       onUpdate();
     } catch (error) {
       toast({
@@ -72,6 +79,11 @@ export function AdminCostTable({ costs, isLoading, onUpdate }: AdminCostTablePro
         title: "Cost entry restored",
         description: "The cost entry has been restored and included in community calculations.",
       });
+      
+      // Invalidate vendor-costs cache to update hover tooltips
+      queryClient.invalidateQueries({ queryKey: ["vendor-costs"] });
+      queryClient.invalidateQueries({ queryKey: ["community-stats"] });
+      
       onUpdate();
     } catch (error) {
       toast({
