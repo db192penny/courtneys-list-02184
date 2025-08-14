@@ -22,23 +22,16 @@ serve(async (req) => {
       );
     }
 
-    // Get Google Maps API key from Supabase edge function
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
-    // Get API key from the get-public-config function
-    const { data: configData, error: configError } = await supabase.functions.invoke('get-public-config');
+    // Get Google Maps API key from environment
+    const apiKey = Deno.env.get('GOOGLE_MAPS_KEY');
     
-    if (configError || !configData?.googleMapsKey) {
-      console.error('Failed to get Google Maps API key:', configError);
+    if (!apiKey) {
+      console.error('Google Maps API key not configured');
       return new Response(
         JSON.stringify({ error: 'Google Maps API key not available' }), 
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
-
-    const apiKey = configData.googleMapsKey;
 
     // Fetch place details from Google Places API
     const fields = 'name,rating,user_ratings_total,reviews,formatted_phone_number,formatted_address';
