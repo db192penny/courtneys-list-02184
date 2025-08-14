@@ -144,7 +144,7 @@ export default function VendorNameInput({
 
   // Update input value if defaultValue changes
   useEffect(() => {
-    if (inputRef.current && defaultValue) {
+    if (inputRef.current && defaultValue !== undefined) {
       inputRef.current.value = defaultValue;
     }
   }, [defaultValue]);

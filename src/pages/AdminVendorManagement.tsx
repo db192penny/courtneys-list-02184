@@ -5,13 +5,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { CATEGORIES } from "@/data/categories";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import useIsAdmin from "@/hooks/useIsAdmin";
-import VendorNameInput, { type VendorSelectedPayload } from "@/components/VendorNameInput";
 import { formatUSPhoneDisplay } from "@/utils/phone";
 
 interface Vendor {
@@ -39,17 +37,6 @@ const AdminVendorManagement = () => {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [communityFilter, setCommunityFilter] = useState("all");
 
-  // Edit modal state
-  const [editModalOpen, setEditModalOpen] = useState(false);
-  const [editingVendor, setEditingVendor] = useState<Vendor | null>(null);
-  const [editFormData, setEditFormData] = useState({
-    name: "",
-    category: "",
-    contact_info: "",
-    community: "",
-    google_place_id: "",
-  });
-  const [saving, setSaving] = useState(false);
 
   const canonical = typeof window !== "undefined" ? window.location.href : undefined;
 
@@ -104,150 +91,11 @@ const AdminVendorManagement = () => {
   // Get unique communities for filter
   const communities = Array.from(new Set(vendors.map(v => v.community))).sort();
 
-  // Open edit modal
-  const openEditModal = (vendor: Vendor) => {
-    setEditingVendor(vendor);
-    setEditFormData({
-      name: vendor.name,
-      category: vendor.category,
-      contact_info: vendor.contact_info,
-      community: vendor.community,
-      google_place_id: vendor.google_place_id || "",
-    });
-    setEditModalOpen(true);
+  // Open edit page
+  const openEditPage = (vendor: Vendor) => {
+    navigate(`/admin/vendors/edit?vendor_id=${vendor.id}`);
   };
 
-  // Handle vendor selection from Google autocomplete
-  const handleVendorSelected = async (payload: VendorSelectedPayload) => {
-    setEditFormData(prev => ({
-      ...prev,
-      name: payload.name,
-      google_place_id: payload.place_id,
-      contact_info: payload.phone || prev.contact_info,
-    }));
-
-    // Fetch additional Google details
-    try {
-      const { data, error } = await supabase.functions.invoke('fetch-google-place-details', {
-        body: { place_id: payload.place_id }
-      });
-
-      if (!error && data?.formatted_phone_number && !editFormData.contact_info.trim()) {
-        setEditFormData(prev => ({
-          ...prev,
-          contact_info: data.formatted_phone_number,
-        }));
-      }
-    } catch (err) {
-      console.warn("Error fetching Google place details:", err);
-    }
-  };
-
-  // Handle manual name input
-  const handleManualNameInput = (inputName: string) => {
-    setEditFormData(prev => ({
-      ...prev,
-      name: inputName,
-      google_place_id: "",
-    }));
-  };
-
-  // Save vendor edits
-  const saveVendorEdits = async () => {
-    if (!editingVendor) return;
-
-    // Validation
-    if (!editFormData.name.trim()) {
-      toast({
-        title: "Validation Error",
-        description: "Provider name is required",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!editFormData.contact_info.trim()) {
-      toast({
-        title: "Validation Error",
-        description: "Contact info is required",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!editFormData.category) {
-      toast({
-        title: "Validation Error",
-        description: "Category is required",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!editFormData.community.trim()) {
-      toast({
-        title: "Validation Error",
-        description: "Community is required",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setSaving(true);
-    try {
-      // Prepare update data
-      const updateData: any = {
-        name: editFormData.name.trim(),
-        contact_info: editFormData.contact_info.trim(),
-        category: editFormData.category,
-        community: editFormData.community.trim(),
-        google_place_id: editFormData.google_place_id || null,
-      };
-
-      // If we have a new Google Place ID, fetch and update Google data
-      if (editFormData.google_place_id && editFormData.google_place_id !== editingVendor.google_place_id) {
-        try {
-          const { data: googleData, error: googleError } = await supabase.functions.invoke('fetch-google-place-details', {
-            body: { place_id: editFormData.google_place_id }
-          });
-
-          if (!googleError && googleData) {
-            updateData.google_rating = googleData.rating;
-            updateData.google_rating_count = googleData.user_ratings_total;
-            updateData.google_last_updated = new Date().toISOString();
-            updateData.google_reviews_json = googleData.reviews;
-          }
-        } catch (err) {
-          console.warn("Failed to fetch Google data during vendor update:", err);
-        }
-      }
-
-      const { error } = await supabase
-        .from("vendors")
-        .update(updateData)
-        .eq("id", editingVendor.id);
-
-      if (error) throw error;
-
-      toast({
-        title: "Success",
-        description: "Vendor updated successfully",
-      });
-
-      setEditModalOpen(false);
-      setEditingVendor(null);
-      loadVendors(); // Refresh the list
-    } catch (error) {
-      console.error("Failed to update vendor:", error);
-      toast({
-        title: "Error",
-        description: "Failed to update vendor",
-        variant: "destructive",
-      });
-    } finally {
-      setSaving(false);
-    }
-  };
 
   // Delete vendor
   const deleteVendor = async (vendor: Vendor) => {
@@ -398,7 +246,7 @@ const AdminVendorManagement = () => {
                   </TableCell>
                   <TableCell>{new Date(vendor.created_at).toLocaleDateString()}</TableCell>
                   <TableCell className="text-right space-x-2">
-                    <Button size="sm" variant="outline" onClick={() => openEditModal(vendor)}>
+                    <Button size="sm" variant="outline" onClick={() => openEditPage(vendor)}>
                       Edit
                     </Button>
                     <Button size="sm" variant="destructive" onClick={() => deleteVendor(vendor)}>
@@ -416,80 +264,6 @@ const AdminVendorManagement = () => {
           Showing {filteredVendors.length} of {vendors.length} vendors
         </div>
 
-        {/* Edit Modal */}
-        <Dialog open={editModalOpen} onOpenChange={setEditModalOpen}>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle>Edit Vendor</DialogTitle>
-            </DialogHeader>
-            
-            <div className="space-y-4">
-              <div className="grid gap-2">
-                <Label htmlFor="edit-category">Service Category</Label>
-                <Select 
-                  value={editFormData.category} 
-                  onValueChange={(value) => setEditFormData(prev => ({ ...prev, category: value }))}
-                >
-                  <SelectTrigger id="edit-category">
-                    <SelectValue placeholder="Select a category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {CATEGORIES.map((c) => (
-                      <SelectItem key={c} value={c}>{c}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="grid gap-2">
-                <Label htmlFor="edit-name">Provider Name</Label>
-                <VendorNameInput
-                  id="edit-name"
-                  placeholder="Search business name or enter manually..."
-                  defaultValue={editFormData.name}
-                  onSelected={handleVendorSelected}
-                  onManualInput={handleManualNameInput}
-                />
-                {editFormData.google_place_id && (
-                  <p className="text-xs text-green-600">✓ Verified business from Google</p>
-                )}
-              </div>
-
-              <div className="grid gap-2">
-                <Label htmlFor="edit-contact">Contact Info</Label>
-                <Input 
-                  id="edit-contact"
-                  placeholder="Phone or email"
-                  value={editFormData.contact_info}
-                  onChange={(e) => setEditFormData(prev => ({ ...prev, contact_info: e.target.value }))}
-                />
-              </div>
-
-              <div className="grid gap-2">
-                <Label htmlFor="edit-community">Community/HOA</Label>
-                <Input 
-                  id="edit-community"
-                  placeholder="Community name"
-                  value={editFormData.community}
-                  onChange={(e) => setEditFormData(prev => ({ ...prev, community: e.target.value }))}
-                />
-              </div>
-
-              <div className="flex justify-end gap-2 pt-4">
-                <Button 
-                  variant="outline" 
-                  onClick={() => setEditModalOpen(false)}
-                  disabled={saving}
-                >
-                  Cancel
-                </Button>
-                <Button onClick={saveVendorEdits} disabled={saving}>
-                  {saving ? "Saving..." : "Save Changes"}
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
       </section>
     </main>
   );
