@@ -62,23 +62,7 @@ export default function CommunityVendorTable({
         _offset: 0,
       });
       if (error) throw error;
-      
-      // Map the data to include the missing fields from the vendors table
-      const mappedData = await Promise.all((data || []).map(async (row: any) => {
-        const { data: vendorData } = await supabase
-          .from('vendors')
-          .select('google_reviews_json, google_place_id')
-          .eq('id', row.id)
-          .single();
-        
-        return {
-          ...row,
-          google_reviews_json: vendorData?.google_reviews_json || null,
-          google_place_id: vendorData?.google_place_id || null,
-        };
-      }));
-      
-      return mappedData as CommunityVendorRow[];
+      return (data || []) as any[];
     },
     enabled: !!communityName,
   });
