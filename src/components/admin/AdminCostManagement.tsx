@@ -51,7 +51,8 @@ export function AdminCostManagement() {
         .from("costs")
         .select(`
           *,
-          vendors!inner(name, category)
+          vendors!inner(name, category),
+          users!left(id, name, email)
         `)
         .order("created_at", { ascending: false });
 
