@@ -103,5 +103,3 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
-
-/* Google Places CSS no longer needed - using React Portal dropdown */

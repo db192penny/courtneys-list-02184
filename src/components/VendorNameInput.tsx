@@ -1,8 +1,7 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import { loadGoogleMaps } from "@/utils/mapsLoader";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
-import { Input } from "@/components/ui/input";
 
 export type VendorSelectedPayload = {
   name: string;
@@ -22,15 +21,6 @@ type VendorNameInputProps = {
   onManualInput?: (name: string) => void;
 };
 
-interface PlacePrediction {
-  description: string;
-  place_id: string;
-  structured_formatting: {
-    main_text: string;
-    secondary_text: string;
-  };
-}
-
 export default function VendorNameInput({
   id,
   className,
@@ -40,227 +30,111 @@ export default function VendorNameInput({
   onManualInput,
 }: VendorNameInputProps) {
   const { toast } = useToast();
-  const [inputValue, setInputValue] = useState(defaultValue || "");
-  const [predictions, setPredictions] = useState<PlacePrediction[]>([]);
-  const [showDropdown, setShowDropdown] = useState(false);
-  const [selectedIndex, setSelectedIndex] = useState(-1);
-  const [helper, setHelper] = useState("");
-  const [loading, setLoading] = useState(false);
-  
-  const inputRef = useRef<HTMLInputElement>(null);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-  const autocompleteService = useRef<google.maps.places.AutocompleteService | null>(null);
-  const placesService = useRef<google.maps.places.PlacesService | null>(null);
-  
-  // Initialize Google Places services
-  useEffect(() => {
-    const initServices = async () => {
-      try {
-        const google = await loadGoogleMaps(["places"]);
-        autocompleteService.current = new google.maps.places.AutocompleteService();
-        
-        // Create a dummy div for PlacesService (required by API)
-        const dummyDiv = document.createElement('div');
-        placesService.current = new google.maps.places.PlacesService(dummyDiv);
-      } catch (error) {
-        console.error("Failed to initialize Google Places services:", error);
-        setHelper("Business suggestions are unavailable right now.");
-      }
-    };
-    
-    initServices();
-  }, []);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [helper, setHelper] = useState<string>("");
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const autocompleteRef = useRef<any>(null);
+  const onSelectedRef = useRef<VendorNameInputProps["onSelected"]>();
+  const onManualInputRef = useRef<VendorNameInputProps["onManualInput"]>();
+  onSelectedRef.current = onSelected;
+  onManualInputRef.current = onManualInput;
 
-  // Handle input changes and fetch predictions
-  const handleInputChange = useCallback(async (value: string) => {
-    setInputValue(value);
-    onManualInput?.(value);
-    setSelectedIndex(-1);
-    
-    if (!value.trim() || !autocompleteService.current) {
-      setPredictions([]);
-      setShowDropdown(false);
-      return;
-    }
+  const initAutocomplete = useCallback(async () => {
+    const google = await loadGoogleMaps(["places"]);
+    if (!containerRef.current) return;
 
     try {
-      setLoading(true);
-      autocompleteService.current.getPlacePredictions({
-        input: value,
-        types: ['establishment'],
-      }, (predictions, status) => {
-        setLoading(false);
-        if (status === google.maps.places.PlacesServiceStatus.OK && predictions) {
-          setPredictions(predictions);
-          setShowDropdown(true);
-        } else {
-          setPredictions([]);
-          setShowDropdown(false);
-        }
-      });
-    } catch (error) {
-      console.error("Error fetching predictions:", error);
-      setLoading(false);
-      setPredictions([]);
-      setShowDropdown(false);
-    }
-  }, [onManualInput]);
+      // Create input once
+      if (!inputRef.current) {
+        const input = document.createElement("input");
+        input.type = "text";
+        input.placeholder = placeholder;
+        input.className = "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50";
+        if (defaultValue) input.value = defaultValue;
+        containerRef.current.innerHTML = "";
+        containerRef.current.appendChild(input);
+        inputRef.current = input;
 
-  // Get place details when a prediction is selected
-  const selectPrediction = useCallback(async (prediction: PlacePrediction) => {
-    console.log("🎯 Selecting prediction:", prediction);
-    if (!placesService.current) return;
-    
-    setLoading(true);
-    setShowDropdown(false);
-    setInputValue(prediction.description);
-    
-    placesService.current.getDetails({
-      placeId: prediction.place_id,
-      fields: ['name', 'place_id', 'formatted_phone_number', 'formatted_address', 'rating', 'user_ratings_total']
-    }, (place, status) => {
-      setLoading(false);
-      
-      if (status === google.maps.places.PlacesServiceStatus.OK && place) {
-        const payload: VendorSelectedPayload = {
-          name: place.name || prediction.structured_formatting.main_text,
-          place_id: place.place_id!,
-          phone: place.formatted_phone_number,
-          formatted_address: place.formatted_address,
-          rating: place.rating,
-          user_ratings_total: place.user_ratings_total,
-        };
-        
-        setHelper(`Selected: ${payload.name}`);
-        onSelected?.(payload);
-        setInputValue(payload.name);
-      } else {
-        toast({
-          title: "Failed to get business details",
-          description: "Please try selecting a different business.",
-          variant: "destructive",
+        // Handle manual input changes
+        input.addEventListener('input', (e) => {
+          const value = (e.target as HTMLInputElement).value;
+          onManualInputRef.current?.(value);
         });
-        setHelper("Failed to get business details.");
       }
-    });
-  }, [onSelected, toast]);
 
-  // Handle keyboard navigation
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (!showDropdown || predictions.length === 0) return;
-    
-    switch (e.key) {
-      case 'ArrowDown':
-        e.preventDefault();
-        setSelectedIndex(prev => 
-          prev < predictions.length - 1 ? prev + 1 : prev
-        );
-        break;
-      case 'ArrowUp':
-        e.preventDefault();
-        setSelectedIndex(prev => prev > 0 ? prev - 1 : -1);
-        break;
-      case 'Enter':
-        e.preventDefault();
-        if (selectedIndex >= 0) {
-          selectPrediction(predictions[selectedIndex]);
-        }
-        break;
-      case 'Escape':
-        setShowDropdown(false);
-        setSelectedIndex(-1);
-        break;
+      // Create autocomplete once
+      if (!autocompleteRef.current && inputRef.current) {
+        const opts = {
+          types: ["establishment"],
+          fields: ["name", "place_id", "formatted_phone_number", "formatted_address", "rating", "user_ratings_total"]
+        } as any;
+        const autocomplete = new google.maps.places.Autocomplete(inputRef.current, opts);
+        autocompleteRef.current = autocomplete;
+
+        autocomplete.addListener("place_changed", () => {
+          try {
+            const place = autocomplete.getPlace();
+            if (!place.place_id || !place.name) return;
+
+            const payload: VendorSelectedPayload = {
+              name: place.name,
+              place_id: place.place_id,
+              phone: place.formatted_phone_number,
+              formatted_address: place.formatted_address,
+              rating: place.rating,
+              user_ratings_total: place.user_ratings_total,
+            };
+
+            setHelper(`Selected: ${place.name}`);
+            onSelectedRef.current?.(payload);
+
+            // Keep the selected value visible in the field
+            if (inputRef.current) {
+              inputRef.current.value = place.name;
+            }
+          } catch (err) {
+            console.error("[VendorNameInput] place_changed handler failed:", err);
+            setHelper("Business selection failed. Please try again.");
+            toast({
+              title: "Business selection failed",
+              description: "Please try again or type a different business name.",
+              variant: "destructive",
+            });
+          }
+        });
+      }
+    } catch (e) {
+      console.error("[VendorNameInput] Autocomplete init failed:", e);
+      setHelper("Business suggestions are unavailable right now.");
     }
-  }, [showDropdown, predictions, selectedIndex, selectPrediction]);
-
-  // Handle clicking outside to close dropdown
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        inputRef.current && 
-        !inputRef.current.contains(event.target as Node) &&
-        dropdownRef.current && 
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        setShowDropdown(false);
-        setSelectedIndex(-1);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    initAutocomplete().catch((e) => {
+      console.error("[VendorNameInput] init failed:", e);
+      setHelper("Business suggestions are unavailable right now.");
+    });
+  }, []);
+
+  // Update placeholder dynamically
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.placeholder = placeholder;
+    }
+  }, [placeholder]);
+
+  // Update input value if defaultValue changes
+  useEffect(() => {
+    if (inputRef.current && defaultValue) {
+      inputRef.current.value = defaultValue;
+    }
+  }, [defaultValue]);
 
   return (
-    <div className="w-full relative">
-      <Input
-        ref={inputRef}
-        id={id}
-        className={className}
-        placeholder={placeholder}
-        value={inputValue}
-        onChange={(e) => handleInputChange(e.target.value)}
-        onKeyDown={handleKeyDown}
-        onFocus={() => {
-          if (predictions.length > 0) {
-            setShowDropdown(true);
-          }
-        }}
-      />
-      
+    <div className="w-full">
+      <div id={id} ref={containerRef} className={cn("w-full", className)} />
       {helper && (
         <p className="mt-1 text-sm text-muted-foreground">{helper}</p>
-      )}
-      
-      {loading && (
-        <p className="mt-1 text-sm text-muted-foreground">Searching...</p>
-      )}
-
-      {/* Dropdown rendered directly in component tree */}
-      {showDropdown && predictions.length > 0 && (
-        <div
-          ref={dropdownRef}
-          className="absolute top-full left-0 right-0 z-50 bg-background border border-border rounded-md shadow-lg max-h-60 overflow-y-auto mt-1"
-          onMouseDown={(e) => {
-            console.log("🖱️ Dropdown mousedown");
-            e.stopPropagation();
-          }}
-          onClick={(e) => {
-            console.log("🖱️ Dropdown click");
-            e.stopPropagation();
-          }}
-        >
-          {predictions.map((prediction, index) => (
-            <div
-              key={prediction.place_id}
-              className={cn(
-                "px-3 py-2 cursor-pointer border-b border-border last:border-b-0",
-                "hover:bg-accent hover:text-accent-foreground",
-                selectedIndex === index && "bg-accent text-accent-foreground"
-              )}
-              onClick={(e) => {
-                console.log("🖱️ Prediction clicked:", prediction);
-                e.stopPropagation();
-                e.preventDefault();
-                selectPrediction(prediction);
-              }}
-              onMouseDown={(e) => {
-                console.log("🖱️ Prediction mousedown:", prediction);
-                e.stopPropagation();
-                e.preventDefault();
-              }}
-              onMouseEnter={() => setSelectedIndex(index)}
-            >
-              <div className="font-medium">
-                {prediction.structured_formatting.main_text}
-              </div>
-              <div className="text-sm text-muted-foreground">
-                {prediction.structured_formatting.secondary_text}
-              </div>
-            </div>
-          ))}
-        </div>
       )}
     </div>
   );
