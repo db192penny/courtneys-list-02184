@@ -363,7 +363,42 @@ const SubmitVendor = () => {
       console.warn("[SubmitVendor] review insert error (non-fatal):", reviewErr);
     }
 
-    // 3) Add to home_vendors table if user selected to use this vendor
+    // 3) Save cost entries to costs table
+    const validCostEntries = costEntries.filter(entry => entry.amount != null && entry.amount > 0);
+    if (validCostEntries.length > 0) {
+      // Get user's address for cost entries
+      const { data: userProfile } = await supabase
+        .from("users")
+        .select("address")
+        .eq("id", userId)
+        .single();
+
+      if (userProfile?.address) {
+        const costInserts = validCostEntries.map(entry => ({
+          vendor_id: vendorIdNew,
+          created_by: userId,
+          household_address: userProfile.address,
+          normalized_address: userProfile.address, // Will be processed by trigger
+          amount: entry.amount,
+          cost_kind: entry.cost_kind || null,
+          unit: entry.unit || null,
+          period: entry.period || null,
+          quantity: entry.quantity || null,
+          anonymous: !showNameInReview,
+          currency: "USD",
+        }));
+
+        const { error: costsErr } = await supabase
+          .from("costs")
+          .insert(costInserts);
+
+        if (costsErr) {
+          console.warn("[SubmitVendor] costs insert error (non-fatal):", costsErr);
+        }
+      }
+    }
+
+    // 4) Add to home_vendors table if user selected to use this vendor
     if (useForHome) {
       const primary = costEntries.find(c => c.cost_kind === "monthly_plan" && c.amount != null) || costEntries.find(c => c.amount != null);
       const hv = {
