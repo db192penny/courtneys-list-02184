@@ -16,6 +16,7 @@ import ReviewsHover from "@/components/vendors/ReviewsHover";
 import GoogleReviewsHover from "@/components/vendors/GoogleReviewsHover";
 import RateVendorModal from "@/components/vendors/RateVendorModal";
 import VendorMobileCard from "@/components/vendors/VendorMobileCard";
+import { CostDisplay } from "@/components/vendors/CostDisplay";
 import { formatUSPhoneDisplay } from "@/utils/phone";
 export type CommunityVendorRow = {
   id: string;
@@ -35,6 +36,11 @@ export type CommunityVendorRow = {
   typical_cost: number | null;
   avg_cost_display: string | null;
   avg_cost_amount: number | null;
+  community_amount: number | null;
+  community_unit: string | null;
+  community_sample_size: number | null;
+  market_amount: number | null;
+  market_unit: string | null;
 };
 
 const SORTS = [
@@ -256,20 +262,17 @@ export default function CommunityVendorTable({
                     </div>
                   </TableCell>
                   <TableCell>
-                    {r.avg_cost_amount != null ? (
-                      <span>${Number(r.avg_cost_amount).toFixed(2)} {r.avg_cost_display}</span>
-                    ) : (
-                      <Tooltip delayDuration={300}>
-                        <TooltipTrigger asChild>
-                          <span className="text-xs text-muted-foreground cursor-help underline decoration-dotted">
-                            TBD
-                          </span>
-                        </TooltipTrigger>
-                        <TooltipContent side="top" className="bg-background border shadow-lg">
-                          <p className="text-sm">Submit cost info to help your neighbors</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    )}
+                    <CostDisplay
+                      vendorId={r.id}
+                      vendorName={r.name}
+                      category={r.category}
+                      communityAmount={r.community_amount}
+                      communityUnit={r.community_unit}
+                      communitySampleSize={r.community_sample_size}
+                      marketAmount={r.market_amount}
+                      marketUnit={r.market_unit}
+                      showContact={!!showContact}
+                    />
                   </TableCell>
                   <TableCell>{showContact ? (r.contact_info ? formatUSPhoneDisplay(r.contact_info) : "—") : "Hidden"}</TableCell>
                   <TableCell className="text-right space-x-2">

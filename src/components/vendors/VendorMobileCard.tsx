@@ -6,6 +6,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { formatUSPhoneDisplay } from "@/utils/phone";
 import ReviewsHover from "@/components/vendors/ReviewsHover";
 import GoogleReviewsHover from "@/components/vendors/GoogleReviewsHover";
+import { CostDisplay } from "@/components/vendors/CostDisplay";
 import type { CommunityVendorRow } from "@/components/vendors/CommunityVendorTable";
 
 interface VendorMobileCardProps {
@@ -122,26 +123,18 @@ export default function VendorMobileCard({
         </div>
 
         {/* Cost and contact info */}
-        <div className="flex items-center justify-between pt-2 border-t">
-          <div className="text-sm">
-            <span className="text-muted-foreground">Cost: </span>
-            {vendor.avg_cost_amount != null ? (
-              <span className="font-medium">
-                ${Number(vendor.avg_cost_amount).toFixed(2)} {vendor.avg_cost_display}
-              </span>
-            ) : (
-              <Tooltip delayDuration={300}>
-                <TooltipTrigger asChild>
-                  <span className="text-muted-foreground cursor-help underline decoration-dotted">
-                    TBD
-                  </span>
-                </TooltipTrigger>
-                <TooltipContent side="top" className="bg-background border shadow-lg">
-                  <p className="text-sm">Submit cost info to help your neighbors</p>
-                </TooltipContent>
-              </Tooltip>
-            )}
-          </div>
+        <div className="space-y-3 pt-2 border-t">
+          <CostDisplay
+            vendorId={vendor.id}
+            vendorName={vendor.name}
+            category={vendor.category}
+            communityAmount={vendor.community_amount}
+            communityUnit={vendor.community_unit}
+            communitySampleSize={vendor.community_sample_size}
+            marketAmount={vendor.market_amount}
+            marketUnit={vendor.market_unit}
+            showContact={showContact}
+          />
           <div className="text-sm">
             <span className="text-muted-foreground">Contact: </span>
             <span className="font-medium">

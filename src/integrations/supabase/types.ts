@@ -534,6 +534,38 @@ export type Database = {
           },
         ]
       }
+      vendor_market_prices: {
+        Row: {
+          amount: number
+          unit: string
+          updated_at: string
+          updated_by: string
+          vendor_id: string
+        }
+        Insert: {
+          amount: number
+          unit: string
+          updated_at?: string
+          updated_by: string
+          vendor_id: string
+        }
+        Update: {
+          amount?: number
+          unit?: string
+          updated_at?: string
+          updated_by?: string
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_market_prices_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: true
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vendors: {
         Row: {
           category: string
@@ -724,6 +756,9 @@ export type Database = {
           avg_cost_display: string
           avg_monthly_cost: number
           category: string
+          community_amount: number
+          community_sample_size: number
+          community_unit: string
           contact_info: string
           google_place_id: string
           google_rating: number
@@ -734,6 +769,8 @@ export type Database = {
           homes_pct: number
           homes_serviced: number
           id: string
+          market_amount: number
+          market_unit: string
           monthly_sample_size: number
           name: string
           service_call_avg: number
