@@ -152,6 +152,14 @@ export default function CommunityVendorTable({
                     <span className="font-medium text-foreground">
                       {r.name}
                     </span>
+                    {r.homes_serviced === 0 && (
+                      <Badge 
+                        variant="secondary" 
+                        className="text-xs px-2 py-0.5 bg-orange-100 text-orange-800 hover:bg-orange-200"
+                      >
+                        New
+                      </Badge>
+                    )}
                     {userHomeVendors?.has(r.id) && (
                       <Badge 
                         variant="secondary" 
