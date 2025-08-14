@@ -1,14 +1,14 @@
 export const CATEGORIES = [
   "Pool",
-  "Landscaping", 
   "HVAC",
-  "Plumbing",
-  "Electrical",
-  "Roofing",
-  "General Contractor",
+  "Landscaping", 
   "Pest Control",
-  "Handyman",
+  "Electrical",
+  "Plumbing",
   "Power Washing",
+  "Handyman",
+  "General Contractor",
+  "Roofing",
 ] as const;
 
 export type Category = (typeof CATEGORIES)[number];
