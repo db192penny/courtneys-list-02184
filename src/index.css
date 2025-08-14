@@ -106,5 +106,16 @@ All colors MUST be HSL.
 
 /* Google Places Autocomplete z-index fix for modals */
 .pac-container {
-  z-index: 9999 !important;
+  z-index: 99999 !important;
+  position: fixed !important;
+  pointer-events: auto !important;
+}
+
+.pac-item {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+}
+
+.pac-item:hover {
+  background-color: #f0f0f0 !important;
 }
