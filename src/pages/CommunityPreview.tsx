@@ -94,6 +94,7 @@ const CommunityPreview = () => {
   const title = previewLink?.title || `${communityName} — Vendor Preview`;
   const description = previewLink?.description || `Preview vendor listings and community reviews for ${communityName}. Early access to neighbor recommendations.`;
 
+  console.log("CommunityPreview rendering with changes:", { communityName, slug });
   return (
     <main className="min-h-screen bg-background">
       <SEO
