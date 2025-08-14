@@ -102,8 +102,6 @@ All colors MUST be HSL.
   body {
     @apply bg-background text-foreground;
   }
-
-  }
 }
 
 /* Google Places Autocomplete z-index fix for modals */
