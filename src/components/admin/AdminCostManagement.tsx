@@ -6,29 +6,57 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AdminCostTable } from "./AdminCostTable";
-import { Search, Filter } from "lucide-react";
+import { Search, Filter, AlertTriangle } from "lucide-react";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export function AdminCostManagement() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedVendor, setSelectedVendor] = useState<string>("all");
   const [selectedCostKind, setSelectedCostKind] = useState<string>("all");
   const queryClient = useQueryClient();
+  const { data: isAdmin, isLoading: adminLoading } = useIsAdmin();
 
-  const { data: costs, isLoading } = useQuery({
+  // Show loading state
+  if (adminLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-center h-48">
+          <div className="text-muted-foreground">Checking permissions...</div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show unauthorized message
+  if (!isAdmin) {
+    return (
+      <div className="space-y-6">
+        <Alert>
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription>
+            You need admin permissions to access cost management. Contact a site administrator.
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
+  const { data: costs, isLoading, error } = useQuery({
     queryKey: ["admin-costs", searchTerm, selectedVendor, selectedCostKind],
     queryFn: async () => {
+      console.log("Fetching admin costs...");
+      
       let query = supabase
         .from("costs")
         .select(`
           *,
-          vendor:vendors(name, category),
-          created_by_user:users!costs_created_by_fkey(name, email),
-          admin_modified_by_user:users!costs_admin_modified_by_fkey(name, email)
+          vendors!inner(name, category)
         `)
         .order("created_at", { ascending: false });
 
       if (searchTerm) {
-        query = query.or(`vendor.name.ilike.%${searchTerm}%,notes.ilike.%${searchTerm}%`);
+        query = query.or(`vendors.name.ilike.%${searchTerm}%,notes.ilike.%${searchTerm}%`);
       }
 
       if (selectedVendor !== "all") {
@@ -40,9 +68,17 @@ export function AdminCostManagement() {
       }
 
       const { data, error } = await query;
-      if (error) throw error;
-      return data;
+      
+      console.log("Admin costs query result:", { data, error, count: data?.length });
+      
+      if (error) {
+        console.error("Admin costs query error:", error);
+        throw error;
+      }
+      
+      return data || [];
     },
+    enabled: isAdmin, // Only run if user is admin
   });
 
   const { data: vendors } = useQuery({
@@ -53,11 +89,26 @@ export function AdminCostManagement() {
         .select("id, name")
         .order("name");
       if (error) throw error;
-      return data;
+      return data || [];
     },
+    enabled: isAdmin, // Only run if user is admin
   });
 
   const costKinds = ["monthly_plan", "service_call", "hourly", "one_time"];
+
+  // Show error if query failed
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <Alert>
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription>
+            Error loading cost data: {error.message}
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

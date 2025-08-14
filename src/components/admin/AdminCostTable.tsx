@@ -119,12 +119,12 @@ export function AdminCostTable({ costs, isLoading, onUpdate }: AdminCostTablePro
               <TableBody>
                 {costs.map((cost) => (
                   <TableRow key={cost.id} className={cost.deleted_at ? "opacity-50" : ""}>
-                    <TableCell>
-                      <div>
-                        <div className="font-medium">{cost.vendor?.name || "Unknown Vendor"}</div>
-                        <div className="text-sm text-muted-foreground">{cost.vendor?.category}</div>
-                      </div>
-                    </TableCell>
+                  <TableCell>
+                    <div>
+                      <div className="font-medium">{cost.vendors?.name || "Unknown Vendor"}</div>
+                      <div className="text-sm text-muted-foreground">{cost.vendors?.category}</div>
+                    </div>
+                  </TableCell>
                     <TableCell>
                       <div className="font-medium">{formatAmount(cost.amount, cost.unit)}</div>
                       {cost.period && cost.period !== "one_time" && (
@@ -136,12 +136,12 @@ export function AdminCostTable({ costs, isLoading, onUpdate }: AdminCostTablePro
                         {cost.cost_kind?.replace("_", " ") || "N/A"}
                       </Badge>
                     </TableCell>
-                    <TableCell>
-                      <div>
-                        <div className="text-sm">{cost.created_by_user?.name || "Anonymous"}</div>
-                        <div className="text-xs text-muted-foreground">{cost.created_by_user?.email}</div>
-                      </div>
-                    </TableCell>
+                  <TableCell>
+                    <div>
+                      <div className="text-sm">Anonymous User</div>
+                      <div className="text-xs text-muted-foreground">Identity protected</div>
+                    </div>
+                  </TableCell>
                     <TableCell>
                       <div className="text-sm">{format(new Date(cost.created_at), "MMM d, yyyy")}</div>
                       <div className="text-xs text-muted-foreground">{format(new Date(cost.created_at), "h:mm a")}</div>
