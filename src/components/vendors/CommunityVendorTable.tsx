@@ -207,13 +207,18 @@ export default function CommunityVendorTable({
                     <span>${Number(r.avg_cost_amount).toFixed(2)} {r.avg_cost_display}</span>
                   ) : r.homes_serviced === 0 ? (
                     <span 
-                      className="text-xs text-muted-foreground"
+                      className="text-xs text-muted-foreground cursor-help"
                       title="Submit cost info to help your neighbors"
                     >
                       TBD
                     </span>
                   ) : (
-                    "—"
+                    <span 
+                      className="text-xs text-muted-foreground cursor-help"
+                      title="No cost information available yet"
+                    >
+                      —
+                    </span>
                   )}
                 </TableCell>
                 <TableCell>{showContact ? (r.contact_info ? formatUSPhoneDisplay(r.contact_info) : "—") : "Hidden"}</TableCell>
