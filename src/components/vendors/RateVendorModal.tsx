@@ -292,14 +292,12 @@ export default function RateVendorModal({ open, onOpenChange, vendor, onSuccess 
                 <Checkbox checked={showNameInReview} onCheckedChange={(v) => setShowNameInReview(!!v)} />
                 <label className="text-sm font-medium">Show My Name in Review</label>
               </div>
-              {rating > 0 && (
-                <ReviewPreview 
-                  rating={rating}
-                  showName={showNameInReview}
-                  userName={userData?.name}
-                  streetName={userData?.streetName}
-                />
-              )}
+              <ReviewPreview 
+                rating={rating}
+                showName={showNameInReview}
+                userName={userData?.name}
+                streetName={userData?.streetName}
+              />
             </div>
             <div className="grid gap-2">
               <Label>Costs</Label>
