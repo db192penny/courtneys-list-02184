@@ -32,19 +32,73 @@ export default function PreviewReviewsHover({
   const { data: reviews, isLoading } = useQuery({
     queryKey: ["preview-vendor-reviews", vendorId],
     queryFn: async () => {
-      const { data: reviewsData, error: reviewsError } = await supabase
-        .from("preview_reviews")
-        .select("*")
-        .eq("vendor_id", vendorId)
-        .order("created_at", { ascending: false });
+      // Fetch both real reviews and preview reviews
+      const [realReviewsResponse, previewReviewsResponse] = await Promise.all([
+        // Fetch real community reviews directly (without RPC which requires auth)
+        supabase
+          .from("reviews")
+          .select(`
+            id,
+            rating,
+            recommended,
+            comments,
+            created_at,
+            anonymous,
+            users!inner(name, street_name, show_name_public)
+          `)
+          .eq("vendor_id", vendorId)
+          .order("created_at", { ascending: false }),
+        // Fetch preview reviews
+        supabase
+          .from("preview_reviews")
+          .select("*")
+          .eq("vendor_id", vendorId)
+          .order("created_at", { ascending: false })
+      ]);
 
-      if (reviewsError) {
-        console.error("Failed to fetch preview reviews:", reviewsError);
-        return [];
+      // Handle real reviews
+      const realReviews = realReviewsResponse.data || [];
+      const formattedRealReviews = realReviews.map((review: any) => {
+        // Generate author label similar to the RPC function
+        const user = review.users;
+        let authorLabel = "Neighbor";
+        
+        if (!review.anonymous && user?.show_name_public && user?.name?.trim()) {
+          const name = user.name.trim();
+          if (name.includes(' ')) {
+            const parts = name.split(' ');
+            authorLabel = `${parts[0]} ${parts[parts.length - 1].charAt(0)}.`;
+          } else {
+            authorLabel = name;
+          }
+          
+          if (user.street_name?.trim()) {
+            authorLabel += ` on ${user.street_name.trim()}`;
+          }
+        }
+
+        return {
+          id: review.id,
+          rating: review.rating,
+          comments: review.comments,
+          created_at: review.created_at,
+          anonymous: review.anonymous,
+          author_label: authorLabel,
+          type: 'real'
+        };
+      });
+
+      // Handle preview reviews
+      if (previewReviewsResponse.error) {
+        console.error("Failed to fetch preview reviews:", previewReviewsResponse.error);
+        // Return only real reviews if preview reviews fail
+        return formattedRealReviews;
       }
 
-      // Get unique session IDs
-      const sessionIds = [...new Set(reviewsData?.map(r => r.session_id) || [])];
+      const previewReviewsData = previewReviewsResponse.data || [];
+      
+      // Get unique session IDs for preview reviews
+      const sessionIds = [...new Set(previewReviewsData.map(r => r.session_id))];
       
       // Fetch session data for author labels
       const { data: sessionsData } = await supabase
@@ -54,16 +108,31 @@ export default function PreviewReviewsHover({
 
       const sessionsMap = new Map(sessionsData?.map(s => [s.id, s]) || []);
 
-      // Combine reviews with session data
-      return reviewsData?.map(review => ({
-        ...review,
-        session: sessionsMap.get(review.session_id)
-      })) || [];
+      // Format preview reviews
+      const formattedPreviewReviews = previewReviewsData.map(review => ({
+        id: `preview-${review.id}`,
+        rating: review.rating,
+        comments: review.comments,
+        created_at: review.created_at,
+        anonymous: review.anonymous,
+        session: sessionsMap.get(review.session_id),
+        type: 'preview'
+      }));
+
+      // Combine both types of reviews and sort by creation date
+      const allReviews = [...formattedRealReviews, ...formattedPreviewReviews];
+      return allReviews.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
     },
     enabled: !!vendorId,
   });
 
   const getAuthorLabel = (review: any) => {
+    // If it's a real review, use the provided author_label
+    if (review.type === 'real') {
+      return review.author_label;
+    }
+    
+    // For preview reviews, generate the label from session data
     if (review.anonymous || !review.session?.name) {
       return "Neighbor";
     }
