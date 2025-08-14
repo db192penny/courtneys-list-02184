@@ -35,12 +35,9 @@ export default function BadgeProgress({
 
   return (
     <div className={cn("space-y-3", className)}>
-      <div className="flex justify-between items-center">
+      <div className="flex justify-center">
         <span className="text-sm font-medium text-foreground">
           Progress to {nextBadge.name}
-        </span>
-        <span className="text-sm text-muted-foreground">
-          {pointsInLevel}/{totalPointsForLevel} points
         </span>
       </div>
       
