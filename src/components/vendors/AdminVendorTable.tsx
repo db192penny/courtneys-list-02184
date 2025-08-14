@@ -373,15 +373,19 @@ export function AdminVendorTable() {
                         variant="outline"
                         size="sm"
                         onClick={() => setEditingVendor(vendor)}
+                        className="gap-1"
                       >
                         <Pencil className="h-4 w-4" />
+                        Edit
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => setDeletingVendor(vendor)}
+                        className="gap-1"
                       >
                         <Trash2 className="h-4 w-4" />
+                        Delete
                       </Button>
                     </div>
                   </TableCell>
