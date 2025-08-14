@@ -6,6 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { toast } from "@/components/ui/sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Link } from "react-router-dom";
 interface PendingRow {
   household_address: string;
   hoa_name: string;
@@ -281,6 +282,23 @@ const [householdLoading, setHouseholdLoading] = useState<Record<string, boolean>
 
         {authed && isSiteAdmin && (
           <div className="grid gap-6">
+            <div className="rounded-md border border-border p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="font-medium">Admin Tools</h2>
+                <div className="flex gap-2">
+                  <Button asChild variant="outline" size="sm">
+                    <Link to="/admin/vendors/seed">Seed Vendor</Link>
+                  </Button>
+                  <Button asChild variant="outline" size="sm">
+                    <Link to="/admin/badges">Manage Badges</Link>
+                  </Button>
+                </div>
+              </div>
+              <p className="text-sm text-muted-foreground mb-4">
+                Use these tools to manage the platform and seed initial vendor data for communities.
+              </p>
+            </div>
+
             <div className="rounded-md border border-border p-4">
               <h2 className="font-medium mb-3">Pending Users ({pendingUsers.length})</h2>
               <div className="overflow-x-auto">
