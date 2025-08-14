@@ -45,22 +45,24 @@ export default function ReviewsHover({ vendorId, children }: { vendorId: string;
           <div className="max-h-64 overflow-y-auto space-y-3">
             {data.map((r) => (
               <div key={r.id} className="border rounded-md p-2">
-                <div className="text-xs text-foreground flex items-center gap-2">
-                  <div className="flex items-center gap-1">
-                    <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
-                    <span className="font-medium">{r.rating}/5</span>
+                <div className="text-xs text-foreground flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1">
+                      <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
+                      <span className="font-medium">{r.rating}/5</span>
+                    </div>
+                    <Badge variant="outline" className="text-xs px-2 py-0.5 bg-blue-50 text-blue-700 border-blue-200">
+                      by {r.author_label}
+                    </Badge>
                   </div>
-                  <Badge variant="outline" className="text-xs px-2 py-0.5 bg-blue-50 text-blue-700 border-blue-200">
-                    by {r.author_label}
-                  </Badge>
+                  {r.created_at && (
+                    <div className="text-[10px] text-muted-foreground">
+                      {new Date(r.created_at).toLocaleDateString()}
+                    </div>
+                  )}
                 </div>
                 {r.comments && (
                   <p className="text-sm text-muted-foreground mt-1">{r.comments}</p>
-                )}
-                {r.created_at && (
-                  <div className="text-[10px] text-muted-foreground mt-1">
-                    {new Date(r.created_at).toLocaleDateString()}
-                  </div>
                 )}
               </div>
             ))}
