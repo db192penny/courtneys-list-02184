@@ -8,15 +8,25 @@ import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
 
 const activityTypeLabels = {
-  vendor_submission: "Submit a New Vendor",
-  rate_vendor: "Rate a Vendor", 
-  invite_neighbor: "Invite a Neighbor"
+  join_site: "Joined Courtney's List",
+  vendor_submission: "Submitted a New Vendor",
+  review_submission: "Rated a Vendor", 
+  rate_vendor: "Rated a Vendor",
+  invite_neighbor: "Invited a Neighbor",
+  cost_submission: "Shared Cost Information",
+  system_correction: "System Correction",
+  validation_warning: "Validation Warning"
 };
 
 const activityTypeIcons = {
+  join_site: "🎉",
   vendor_submission: "🏢",
+  review_submission: "⭐",
   rate_vendor: "⭐",
-  invite_neighbor: "👥"
+  invite_neighbor: "👥",
+  cost_submission: "💰",
+  system_correction: "🔧",
+  validation_warning: "⚠️"
 };
 
 export default function PointHistoryTable() {
