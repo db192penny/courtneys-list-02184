@@ -7,9 +7,8 @@ import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { usePreviewSession } from "@/hooks/usePreviewSession";
 import IdentityGateModal from "@/components/preview/IdentityGateModal";
-import CostInputs from "@/components/vendors/CostInputs";
+import CostInputs, { CostEntry, buildDefaultCosts } from "@/components/vendors/CostInputs";
 import CostPreview from "@/components/vendors/CostPreview";
-import { CATEGORIES } from "@/data/categories";
 
 interface Props {
   open: boolean;
@@ -21,7 +20,7 @@ interface Props {
 
 export default function PreviewCostManagementModal({ open, onOpenChange, vendor, onSuccess, communityName }: Props) {
   const { session, createSession, trackEvent, getAuthorLabel } = usePreviewSession();
-  const [costs, setCosts] = useState<any[]>([]);
+  const [costs, setCosts] = useState<CostEntry[]>([]);
   const [loading, setLoading] = useState(false);
   const [showNameInCosts, setShowNameInCosts] = useState(false);
   const [showIdentityGate, setShowIdentityGate] = useState(false);
@@ -39,17 +38,7 @@ export default function PreviewCostManagementModal({ open, onOpenChange, vendor,
 
     const initializeCosts = async () => {
       // Build default costs based on category
-      let defaultCosts: any[] = [];
-
-      if (["Pool", "Pool Service", "Landscaping", "Pest Control"].includes(vendor.category)) {
-        defaultCosts = [{ cost_kind: "monthly_plan", unit: "month", amount: null, period: "monthly" }];
-      } else if (["HVAC", "Power Washing", "Pressure Washing", "Plumbing", "Electrical"].includes(vendor.category)) {
-        defaultCosts = [{ cost_kind: "service_call", unit: "call", amount: null, period: "one_time" }];
-      } else if (vendor.category === "Handyman") {
-        defaultCosts = [{ cost_kind: "hourly", unit: "hour", amount: null, period: "one_time" }];
-      } else {
-        defaultCosts = [{ cost_kind: "one_time", unit: "job", amount: null, period: "one_time" }];
-      }
+      let defaultCosts = buildDefaultCosts(vendor.category);
 
       // Try to fetch existing costs for this session
       if (session) {
@@ -62,14 +51,14 @@ export default function PreviewCostManagementModal({ open, onOpenChange, vendor,
             .order("created_at", { ascending: false });
 
           if (existingCosts && existingCosts.length > 0) {
-            setCosts(existingCosts.map(cost => ({
-              cost_kind: cost.cost_kind,
-              unit: cost.unit,
-              amount: cost.amount,
+            const mappedCosts: CostEntry[] = existingCosts.map(cost => ({
+              cost_kind: cost.cost_kind as CostEntry["cost_kind"],
+              amount: Number(cost.amount),
               period: cost.period,
-              notes: cost.notes,
-              quantity: cost.quantity,
-            })));
+              unit: cost.unit,
+              quantity: cost.quantity ? Number(cost.quantity) : null,
+            }));
+            setCosts(mappedCosts);
             setShowNameInCosts(!existingCosts[0].anonymous);
             return;
           }
@@ -121,13 +110,13 @@ export default function PreviewCostManagementModal({ open, onOpenChange, vendor,
       const costsToInsert = validCosts.map(cost => ({
         vendor_id: vendor.id,
         session_id: session.id,
-        amount: parseFloat(cost.amount),
+        amount: Number(cost.amount),
         currency: "USD",
         cost_kind: cost.cost_kind,
         unit: cost.unit,
         period: cost.period,
-        quantity: cost.quantity ? parseFloat(cost.quantity) : null,
-        notes: cost.notes || null,
+        quantity: cost.quantity ? Number(cost.quantity) : null,
+        notes: null,
         anonymous: !showNameInCosts,
       }));
 
@@ -182,7 +171,7 @@ export default function PreviewCostManagementModal({ open, onOpenChange, vendor,
 
         <div className="space-y-6">
           <CostInputs 
-            category={vendor.category} 
+            category={vendor?.category} 
             value={costs} 
             onChange={setCosts} 
           />

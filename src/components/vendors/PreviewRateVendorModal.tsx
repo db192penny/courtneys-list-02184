@@ -159,6 +159,7 @@ export default function PreviewRateVendorModal({ open, onOpenChange, vendor, onS
               <StarRating
                 value={rating}
                 onChange={setRating}
+                size="lg"
               />
             </div>
           </div>
