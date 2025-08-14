@@ -119,7 +119,7 @@ export default function CommunityDemoTable({
               <TableCell>
                 <div className="flex flex-col gap-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-muted-foreground">HOA:</span>
+                    <span className="text-xs text-muted-foreground">Community:</span>
                     <Stars value={v.hoa_rating} />
                   </div>
                   <div className="flex items-center gap-2">

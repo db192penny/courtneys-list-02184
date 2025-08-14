@@ -33,7 +33,7 @@ export type CommunityVendorRow = {
 
 const SORTS = [
   { key: "homes", label: "# of Homes Serviced" },
-  { key: "hoa_rating", label: "HOA Rating" },
+  { key: "hoa_rating", label: "Community Rating" },
   { key: "google_rating", label: "Google Rating" },
 ] as const;
 
