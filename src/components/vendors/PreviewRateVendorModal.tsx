@@ -23,7 +23,7 @@ export default function PreviewRateVendorModal({ open, onOpenChange, vendor, onS
   const { session, createSession, trackEvent, getAuthorLabel } = usePreviewSession();
   const [rating, setRating] = useState(0);
   const [comments, setComments] = useState("");
-  const [showNameInReview, setShowNameInReview] = useState(false);
+  const [showNameInReview, setShowNameInReview] = useState(true);
   const [loading, setLoading] = useState(false);
   const [showIdentityGate, setShowIdentityGate] = useState(false);
 
@@ -39,7 +39,7 @@ export default function PreviewRateVendorModal({ open, onOpenChange, vendor, onS
     if (!open) {
       setRating(0);
       setComments("");
-      setShowNameInReview(false);
+      setShowNameInReview(true);
     }
   }, [open]);
 

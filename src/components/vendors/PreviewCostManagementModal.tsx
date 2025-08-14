@@ -22,7 +22,7 @@ export default function PreviewCostManagementModal({ open, onOpenChange, vendor,
   const { session, createSession, trackEvent, getAuthorLabel } = usePreviewSession();
   const [costs, setCosts] = useState<CostEntry[]>([]);
   const [loading, setLoading] = useState(false);
-  const [showNameInCosts, setShowNameInCosts] = useState(false);
+  const [showNameInCosts, setShowNameInCosts] = useState(true);
   const [showIdentityGate, setShowIdentityGate] = useState(false);
 
   // Check if we need to show identity gate on first open
