@@ -55,59 +55,63 @@ export function CostDisplay({
     <div className="text-sm space-y-1">
       {/* Community Price Line */}
       <div className="flex items-center gap-1">
-        <span className="text-muted-foreground">Community:</span>
-        {communityPrice ? (
-          <span className="font-medium">
-            {communitySampleSize && communitySampleSize > 0 ? (
-              <CostsHover vendorId={vendorId}>
-                {communityPrice}
-              </CostsHover>
-            ) : (
-              communityPrice
-            )}
-            {communitySampleSize && (
-              <span className="text-xs text-muted-foreground ml-1">
-                ({communitySampleSize})
-              </span>
-            )}
-          </span>
-        ) : (
-          <span className="text-muted-foreground">TBD</span>
-        )}
+        <span className="text-xs text-muted-foreground min-w-[70px]">Community:</span>
+        <div className="px-2 py-1.5 rounded-md bg-blue-50 hover:bg-blue-100 transition-colors border border-blue-200 hover:border-blue-300 min-h-[28px] flex items-center">
+          {communityPrice ? (
+            <span className="font-medium">
+              {communitySampleSize && communitySampleSize > 0 ? (
+                <CostsHover vendorId={vendorId}>
+                  {communityPrice}
+                </CostsHover>
+              ) : (
+                communityPrice
+              )}
+              {communitySampleSize && (
+                <span className="text-xs text-muted-foreground ml-1">
+                  ({communitySampleSize})
+                </span>
+              )}
+            </span>
+          ) : (
+            <span className="text-muted-foreground">TBD</span>
+          )}
+        </div>
       </div>
 
       {/* Market Price Line */}
       <div className="flex items-center gap-1">
-        <span className="text-muted-foreground">Market:</span>
-        {marketPrice ? (
-          <div className="flex items-center gap-1">
-            <span className="font-medium">{marketPrice}</span>
-            {isAdmin && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-auto p-0 text-muted-foreground hover:text-foreground"
-                onClick={() => setShowEditMarket(true)}
-              >
-                <Pencil className="h-3 w-3" />
-              </Button>
-            )}
-          </div>
-        ) : (
-          <div className="flex items-center gap-1">
-            <span className="text-muted-foreground">—</span>
-            {isAdmin && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-auto p-0 text-muted-foreground hover:text-foreground"
-                onClick={() => setShowEditMarket(true)}
-              >
-                <Pencil className="h-3 w-3" />
-              </Button>
-            )}
-          </div>
-        )}
+        <span className="text-xs text-muted-foreground min-w-[70px]">Market:</span>
+        <div className="px-2 py-1.5 rounded-md bg-orange-50 hover:bg-orange-100 transition-colors border border-orange-200 hover:border-orange-300 min-h-[28px] flex items-center">
+          {marketPrice ? (
+            <div className="flex items-center gap-1">
+              <span className="font-medium">{marketPrice}</span>
+              {isAdmin && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-auto p-0 text-muted-foreground hover:text-foreground"
+                  onClick={() => setShowEditMarket(true)}
+                >
+                  <Pencil className="h-3 w-3" />
+                </Button>
+              )}
+            </div>
+          ) : (
+            <div className="flex items-center gap-1">
+              <span className="text-muted-foreground">—</span>
+              {isAdmin && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-auto p-0 text-muted-foreground hover:text-foreground"
+                  onClick={() => setShowEditMarket(true)}
+                >
+                  <Pencil className="h-3 w-3" />
+                </Button>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Modals */}
