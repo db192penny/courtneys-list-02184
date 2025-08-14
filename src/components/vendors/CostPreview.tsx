@@ -1,4 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { CostEntry } from "./CostInputs";
 
 type Props = {
@@ -35,19 +36,21 @@ export default function CostPreview({ costs, showNameInCosts, authorLabel }: Pro
           <div className="space-y-1">
             {validCosts.map((cost, index) => (
               <div key={index} className="text-sm">
-                <div className="font-medium">
-                  {formatCost(cost.amount as number, cost.unit, cost.period)}
-                  {cost.cost_kind && (
-                    <span className="text-muted-foreground ml-1">
-                      ({cost.cost_kind.replace("_", " ")})
-                    </span>
-                  )}
-                </div>
-                <div className="text-muted-foreground text-xs">
-                  by {showNameInCosts ? authorLabel : (() => {
-                    const streetMatch = authorLabel.match(/ on (.+)$/);
-                    return streetMatch ? `Neighbor on ${streetMatch[1]}` : "Neighbor";
-                  })()}
+                <div className="flex items-center gap-2">
+                  <div className="font-medium">
+                    {formatCost(cost.amount as number, cost.unit, cost.period)}
+                    {cost.cost_kind && (
+                      <span className="text-muted-foreground ml-1">
+                        ({cost.cost_kind.replace("_", " ")})
+                      </span>
+                    )}
+                  </div>
+                  <Badge variant="outline" className="text-xs px-2 py-0.5 bg-blue-50 text-blue-700 border-blue-200">
+                    by {showNameInCosts ? authorLabel : (() => {
+                      const streetMatch = authorLabel.match(/ on (.+)$/);
+                      return streetMatch ? `Neighbor on ${streetMatch[1]}` : "Neighbor";
+                    })()}
+                  </Badge>
                 </div>
               </div>
             ))}
