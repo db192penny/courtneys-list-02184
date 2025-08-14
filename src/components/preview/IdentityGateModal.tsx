@@ -141,12 +141,12 @@ export default function IdentityGateModal({ open, onOpenChange, community, onSuc
           
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">First Name</Label>
+              <Label htmlFor="name">Full Name</Label>
               <Input
                 id="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Enter your first name"
+                placeholder="Enter your full name"
                 required
               />
             </div>
@@ -162,7 +162,7 @@ export default function IdentityGateModal({ open, onOpenChange, community, onSuc
                 required
               />
               <p className="text-xs text-muted-foreground">
-                We use this to show you relevant neighborhood information
+                We will not share your address but will help make sure you are a part of the community
               </p>
             </div>
             

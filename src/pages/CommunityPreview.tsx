@@ -106,7 +106,7 @@ const CommunityPreview = () => {
       <div className="bg-primary text-primary-foreground py-3">
         <div className="container text-center">
           <p className="text-sm font-medium">
-            🚀 Early Preview — See what your neighbors recommend
+            Hi - thanks for helping with this list. Please rate at least three vendors (more if we have them :)
           </p>
         </div>
       </div>
@@ -136,11 +136,6 @@ const CommunityPreview = () => {
                 Community Contact: {community.contact_phone}
               </p>
             )}
-            {community.total_homes && (
-              <p className="text-sm text-muted-foreground">
-                Serving {community.total_homes} homes
-              </p>
-            )}
           </div>
         )}
 
@@ -155,25 +150,11 @@ const CommunityPreview = () => {
           
           <CommunityVendorTable 
             communityName={communityName} 
-            showContact={false}
+            showContact={true}
             isPreviewMode={true}
           />
         </div>
 
-        {/* Footer */}
-        <div className="pt-8 border-t text-center space-y-4">
-          <p className="text-sm text-muted-foreground">
-            This is a preview of Courtney's List for {communityName}
-          </p>
-          <Button 
-            variant="outline" 
-            onClick={() => window.open("/", "_blank")}
-            className="gap-2"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Visit Full Site
-          </Button>
-        </div>
       </div>
     </main>
   );

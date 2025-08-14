@@ -14,6 +14,7 @@ import { useUserHomeVendors } from "@/hooks/useUserHomeVendors";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 import ReviewsHover from "@/components/vendors/ReviewsHover";
+import PreviewReviewsHover from "@/components/vendors/PreviewReviewsHover";
 import GoogleReviewsHover from "@/components/vendors/GoogleReviewsHover";
 import RateVendorModalWrapper from "@/components/vendors/RateVendorModalWrapper";
 import VendorMobileCard from "@/components/vendors/VendorMobileCard";
@@ -244,24 +245,45 @@ export default function CommunityVendorTable({
                   </TableCell>
                   <TableCell>
                     <div className="space-y-4">
-                      <ReviewsHover vendorId={r.id}>
-                        <div className="flex items-center gap-2 cursor-pointer group">
-                          <span className="text-xs text-muted-foreground min-w-[70px]">Community:</span>
-                          {r.hoa_rating ? (
-                            <div className="flex items-center gap-1 px-2 py-1.5 rounded-md bg-blue-50 hover:bg-blue-100 transition-colors border border-blue-200 hover:border-blue-300 min-h-[28px]">
-                              <RatingStars rating={r.hoa_rating} showValue />
-                              {r.hoa_rating_count ? <span className="text-xs text-muted-foreground">({r.hoa_rating_count})</span> : null}
-                            </div>
-                          ) : (
-                            <span 
-                              className="text-xs text-muted-foreground px-2 py-1.5 rounded-md bg-blue-50 hover:bg-blue-100 transition-colors border border-blue-200 hover:border-blue-300 min-h-[28px] flex items-center"
-                              title="Be the first to rate this provider"
-                            >
-                              No Ratings Yet
-                            </span>
-                          )}
-                        </div>
-                      </ReviewsHover>
+                      {isPreviewMode ? (
+                        <PreviewReviewsHover vendorId={r.id}>
+                          <div className="flex items-center gap-2 cursor-pointer group">
+                            <span className="text-xs text-muted-foreground min-w-[70px]">Community:</span>
+                            {r.hoa_rating ? (
+                              <div className="flex items-center gap-1 px-2 py-1.5 rounded-md bg-blue-50 hover:bg-blue-100 transition-colors border border-blue-200 hover:border-blue-300 min-h-[28px]">
+                                <RatingStars rating={r.hoa_rating} showValue />
+                                {r.hoa_rating_count ? <span className="text-xs text-muted-foreground">({r.hoa_rating_count})</span> : null}
+                              </div>
+                            ) : (
+                              <span 
+                                className="text-xs text-muted-foreground px-2 py-1.5 rounded-md bg-blue-50 hover:bg-blue-100 transition-colors border border-blue-200 hover:border-blue-300 min-h-[28px] flex items-center"
+                                title="Be the first to rate this provider"
+                              >
+                                No Ratings Yet
+                              </span>
+                            )}
+                          </div>
+                        </PreviewReviewsHover>
+                      ) : (
+                        <ReviewsHover vendorId={r.id}>
+                          <div className="flex items-center gap-2 cursor-pointer group">
+                            <span className="text-xs text-muted-foreground min-w-[70px]">Community:</span>
+                            {r.hoa_rating ? (
+                              <div className="flex items-center gap-1 px-2 py-1.5 rounded-md bg-blue-50 hover:bg-blue-100 transition-colors border border-blue-200 hover:border-blue-300 min-h-[28px]">
+                                <RatingStars rating={r.hoa_rating} showValue />
+                                {r.hoa_rating_count ? <span className="text-xs text-muted-foreground">({r.hoa_rating_count})</span> : null}
+                              </div>
+                            ) : (
+                              <span 
+                                className="text-xs text-muted-foreground px-2 py-1.5 rounded-md bg-blue-50 hover:bg-blue-100 transition-colors border border-blue-200 hover:border-blue-300 min-h-[28px] flex items-center"
+                                title="Be the first to rate this provider"
+                              >
+                                No Ratings Yet
+                              </span>
+                            )}
+                          </div>
+                        </ReviewsHover>
+                      )}
                       {r.google_rating != null && (
                         <GoogleReviewsHover 
                           vendorId={r.id} 
