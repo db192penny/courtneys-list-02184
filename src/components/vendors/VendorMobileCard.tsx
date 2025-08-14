@@ -35,18 +35,8 @@ export default function VendorMobileCard({
         {/* Header with rank, name, and badges */}
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-lg font-semibold text-muted-foreground">#{rank}</span>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <h3 className="font-medium text-foreground max-w-[140px] truncate">{vendor.name}</h3>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>{vendor.name}</p>
-                </TooltipContent>
-              </Tooltip>
-            </div>
-            <div className="flex flex-wrap gap-1">
+            {/* Labels above provider name */}
+            <div className="flex flex-wrap gap-1 mb-2">
               {vendor.homes_serviced === 0 && (
                 <Badge 
                   variant="secondary" 
@@ -63,6 +53,18 @@ export default function VendorMobileCard({
                   Your Provider
                 </Badge>
               )}
+            </div>
+            {/* Rank and full provider name */}
+            <div className="flex items-center gap-2">
+              <span className="text-lg font-semibold text-muted-foreground">#{rank}</span>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <h3 className="font-medium text-foreground break-words leading-tight">{vendor.name}</h3>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{vendor.name}</p>
+                </TooltipContent>
+              </Tooltip>
             </div>
           </div>
           <div className="flex gap-1 shrink-0">

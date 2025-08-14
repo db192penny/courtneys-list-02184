@@ -30,16 +30,20 @@ export default function VendorCard({
     <Card>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <CardTitle className="text-base">{vendor.name}</CardTitle>
-            {vendor.homes_serviced === 0 && (
-              <Badge 
-                variant="secondary" 
-                className="text-xs px-2 py-0.5 bg-orange-100 text-orange-800 hover:bg-orange-200"
-              >
-                New
-              </Badge>
-            )}
+          <div className="space-y-1">
+            {/* Labels above provider name */}
+            <div className="flex flex-wrap gap-1">
+              {vendor.homes_serviced === 0 && (
+                <Badge 
+                  variant="secondary" 
+                  className="text-xs px-2 py-0.5 bg-orange-100 text-orange-800 hover:bg-orange-200"
+                >
+                  New
+                </Badge>
+              )}
+            </div>
+            {/* Full provider name */}
+            <CardTitle className="text-base break-words leading-tight">{vendor.name}</CardTitle>
           </div>
           <span className="text-xs text-muted-foreground">{vendor.category}</span>
         </div>

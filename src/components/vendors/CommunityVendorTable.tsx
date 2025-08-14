@@ -200,33 +200,39 @@ export default function CommunityVendorTable({
                 <TableRow key={r.id}>
                   <TableCell>{idx + 1}</TableCell>
                   <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span className="font-medium text-foreground max-w-[140px] truncate">
-                            {r.name}
-                          </span>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>{r.name}</p>
-                        </TooltipContent>
-                      </Tooltip>
-                      {r.homes_serviced === 0 && (
-                        <Badge 
-                          variant="secondary" 
-                          className="text-[10px] px-1 py-0 bg-orange-100 text-orange-800 hover:bg-orange-200 whitespace-nowrap"
-                        >
-                          New
-                        </Badge>
-                      )}
-                      {userHomeVendors?.has(r.id) && (
-                        <Badge 
-                          variant="secondary" 
-                          className="text-[10px] px-1 py-0 bg-green-100 text-green-800 hover:bg-green-200 whitespace-nowrap"
-                        >
-                          Your Provider
-                        </Badge>
-                      )}
+                    <div className="space-y-1">
+                      {/* Labels above provider name */}
+                      <div className="flex flex-wrap gap-1">
+                        {r.homes_serviced === 0 && (
+                          <Badge 
+                            variant="secondary" 
+                            className="text-[10px] px-1 py-0 bg-orange-100 text-orange-800 hover:bg-orange-200 whitespace-nowrap"
+                          >
+                            New
+                          </Badge>
+                        )}
+                        {userHomeVendors?.has(r.id) && (
+                          <Badge 
+                            variant="secondary" 
+                            className="text-[10px] px-1 py-0 bg-green-100 text-green-800 hover:bg-green-200 whitespace-nowrap"
+                          >
+                            Your Provider
+                          </Badge>
+                        )}
+                      </div>
+                      {/* Full provider name */}
+                      <div>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="font-medium text-foreground break-words leading-tight block">
+                              {r.name}
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>{r.name}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </div>
                     </div>
                   </TableCell>
                   <TableCell>
