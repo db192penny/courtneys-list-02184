@@ -16,6 +16,7 @@ import ReviewsHover from "@/components/vendors/ReviewsHover";
 import GoogleReviewsHover from "@/components/vendors/GoogleReviewsHover";
 import RateVendorModal from "@/components/vendors/RateVendorModal";
 import VendorMobileCard from "@/components/vendors/VendorMobileCard";
+import CostManagementModal from "@/components/vendors/CostManagementModal";
 import { CostDisplay } from "@/components/vendors/CostDisplay";
 import { formatUSPhoneDisplay } from "@/utils/phone";
 export type CommunityVendorRow = {
@@ -78,13 +79,19 @@ export default function CommunityVendorTable({
 
   const { data: userHomeVendors } = useUserHomeVendors();
   
-  // Rate modal state
-  const [modalOpen, setModalOpen] = useState(false);
-  const [selected, setSelected] = useState<{ id: string; name: string; category: string } | null>(null);
+  // Modal states
+  const [rateModalOpen, setRateModalOpen] = useState(false);
+  const [costModalOpen, setCostModalOpen] = useState(false);
+  const [selectedVendor, setSelectedVendor] = useState<{ id: string; name: string; category: string } | null>(null);
 
   const openRate = (row: CommunityVendorRow) => {
-    setSelected({ id: row.id, name: row.name, category: row.category });
-    setModalOpen(true);
+    setSelectedVendor({ id: row.id, name: row.name, category: row.category });
+    setRateModalOpen(true);
+  };
+
+  const openCosts = (row: CommunityVendorRow) => {
+    setSelectedVendor({ id: row.id, name: row.name, category: row.category });
+    setCostModalOpen(true);
   };
 
   const formatted = useMemo(() => data || [], [data]);
@@ -149,6 +156,7 @@ export default function CommunityVendorTable({
               showContact={showContact}
               onCategoryClick={setCategory}
               onRate={openRate}
+              onCosts={openCosts}
               userHomeVendors={userHomeVendors}
             />
           ))}
@@ -163,7 +171,7 @@ export default function CommunityVendorTable({
                 <TableHead>Category</TableHead>
                 <TableHead># Homes</TableHead>
                 <TableHead>Ratings/Reviews</TableHead>
-                <TableHead>Avg Cost</TableHead>
+                <TableHead>Cost</TableHead>
                 <TableHead>Contact</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
@@ -277,6 +285,7 @@ export default function CommunityVendorTable({
                   <TableCell>{showContact ? (r.contact_info ? formatUSPhoneDisplay(r.contact_info) : "—") : "Hidden"}</TableCell>
                   <TableCell className="text-right space-x-2">
                     <Button size="sm" variant="outline" className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700" onClick={() => openRate(r)}>Rate</Button>
+                    <Button size="sm" variant="outline" onClick={() => openCosts(r)}>+ Costs</Button>
                   </TableCell>
                 </TableRow>
               ))}
@@ -284,7 +293,8 @@ export default function CommunityVendorTable({
           </Table>
         </div>
       )}
-      <RateVendorModal open={modalOpen} onOpenChange={setModalOpen} vendor={selected} onSuccess={() => { setModalOpen(false); refetch(); }} />
+      <RateVendorModal open={rateModalOpen} onOpenChange={setRateModalOpen} vendor={selectedVendor} onSuccess={() => { setRateModalOpen(false); refetch(); }} />
+      <CostManagementModal open={costModalOpen} onOpenChange={setCostModalOpen} vendor={selectedVendor} onSuccess={() => { setCostModalOpen(false); refetch(); }} />
     </div>
     </TooltipProvider>
   );

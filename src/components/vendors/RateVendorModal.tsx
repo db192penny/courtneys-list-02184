@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { StarRating } from "@/components/ui/star-rating";
 import { useToast } from "@/hooks/use-toast";
-import CostInputs, { CostEntry, buildDefaultCosts } from "./CostInputs";
+
 import { supabase } from "@/integrations/supabase/client";
 import { useUserData } from "@/hooks/useUserData";
 import ReviewPreview from "@/components/ReviewPreview";
@@ -28,7 +28,7 @@ export default function RateVendorModal({ open, onOpenChange, vendor, onSuccess 
   const [comments, setComments] = useState<string>("");
   const [showNameInReview, setShowNameInReview] = useState<boolean>(true);
   const [useForHome, setUseForHome] = useState<boolean>(true);
-  const [costs, setCosts] = useState<CostEntry[]>([]);
+  
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -36,7 +36,6 @@ export default function RateVendorModal({ open, onOpenChange, vendor, onSuccess 
 
     const prefill = async () => {
       if (!vendor) {
-        setCosts([]);
         setRating(0);
         setComments("");
         setShowNameInReview(true);
@@ -44,13 +43,10 @@ export default function RateVendorModal({ open, onOpenChange, vendor, onSuccess 
         return;
       }
 
-      const baseCosts = buildDefaultCosts(vendor.category);
-
       try {
         const { data: auth } = await supabase.auth.getUser();
         const user = auth.user;
         if (!user) {
-          setCosts(baseCosts);
           setRating(0);
           setComments("");
           setShowNameInReview(true);
@@ -81,13 +77,6 @@ export default function RateVendorModal({ open, onOpenChange, vendor, onSuccess 
           .eq("user_id", user.id)
           .maybeSingle();
 
-        // Prefill latest costs for this vendor limited to current user's household (RLS enforces it)
-        const { data: costRows } = await supabase
-          .from("costs")
-          .select("amount, period, unit, quantity, cost_kind, created_at")
-          .eq("vendor_id", vendor.id)
-          .order("created_at", { ascending: false });
-
         if (!isActive) return;
 
         setRating(review?.rating ? review.rating : 0);
@@ -96,48 +85,9 @@ export default function RateVendorModal({ open, onOpenChange, vendor, onSuccess 
         setShowNameInReview(review ? !review.anonymous : (userProfile?.show_name_public ?? true));
 
         // Default to true for "use for home" when rating from community tab
-        setUseForHome(true);
-
-        let mergedCosts: CostEntry[] = baseCosts;
-        if (costRows && costRows.length) {
-          const byKind = new Map<string, typeof costRows[number]>();
-          for (const row of costRows) {
-            const k = String(row.cost_kind || "");
-            if (k && !byKind.has(k)) byKind.set(k, row);
-          }
-
-          // Start from defaults then overlay user's latest values per kind
-          mergedCosts = baseCosts.map((c) => {
-            const hit = byKind.get(c.cost_kind);
-            return hit
-              ? {
-                  ...c,
-                  amount: (hit.amount as number) ?? c.amount,
-                  period: (hit.period as any) ?? c.period,
-                  unit: (hit.unit as any) ?? c.unit,
-                  quantity: (hit.quantity as number | undefined) ?? c.quantity,
-                }
-              : c;
-          });
-
-          // Include extra kinds the user has that aren't in defaults
-          byKind.forEach((row, kind) => {
-            if (!mergedCosts.find((c) => c.cost_kind === kind)) {
-              mergedCosts.push({
-                cost_kind: kind as any,
-                amount: row.amount as number,
-                period: row.period ?? undefined,
-                unit: row.unit ?? undefined,
-                quantity: (row.quantity as number | undefined) ?? undefined,
-              } as CostEntry);
-            }
-          });
-        }
-
-        setCosts(mergedCosts);
+        setUseForHome(!!homeVendor?.id);
       } catch (e) {
         console.warn("[RateVendorModal] prefill error", e);
-        setCosts(baseCosts);
       }
     };
 
@@ -189,49 +139,15 @@ export default function RateVendorModal({ open, onOpenChange, vendor, onSuccess 
         await supabase.from("reviews").insert({ vendor_id: vendor.id, user_id: userId, rating: rating, comments: comments || null, anonymous: !showNameInReview });
       }
 
-      // 2) Insert cost rows for this household
-      const { data: me } = await supabase.from("users").select("address").eq("id", userId).maybeSingle();
-      const household_address = me?.address;
-      if (household_address) {
-        const payloads = (costs || []).filter(c => c.amount != null).map((c) => ({
-          vendor_id: vendor.id,
-          amount: c.amount as number,
-          currency: "USD",
-          period: c.period ?? (c.cost_kind === "monthly_plan" ? "monthly" : null),
-          unit: c.unit ?? undefined,
-          quantity: c.quantity ?? undefined,
-          cost_kind: c.cost_kind,
-          household_address,
-          created_by: userId,
-        }));
-        if (payloads.length) {
-          console.log("[RateVendorModal] Upserting costs:", payloads);
-          const { error: costErr } = await supabase.from("costs").upsert(payloads as any, {
-            onConflict: 'created_by,vendor_id,cost_kind'
-          });
-          if (costErr) {
-            console.error("[RateVendorModal] cost upsert error", costErr);
-            toast({
-              title: "Error saving cost information",
-              description: "Your rating was saved but cost information couldn't be saved.",
-              variant: "destructive",
-            });
-          } else {
-            console.log("[RateVendorModal] Costs upserted successfully");
-          }
-        }
-      }
-
-      // 3) Add to home_vendors table if user selected to use this vendor
+      // 2) Add to home_vendors table if user selected to use this vendor
       if (useForHome) {
-        const primary = (costs || []).find(c => c.cost_kind === "monthly_plan" && c.amount != null) || (costs || []).find(c => c.amount != null);
         const hv = {
           user_id: userId,
           vendor_id: vendor.id,
           my_rating: rating,
-          amount: primary?.amount ?? null,
-          currency: primary?.amount != null ? "USD" : null,
-          period: primary?.cost_kind === "monthly_plan" ? "monthly" : (primary?.cost_kind === "hourly" ? "hourly" : "monthly"),
+          amount: null,
+          currency: null,
+          period: "monthly",
         } as any;
         // upsert requires unique index on (user_id, vendor_id)
         const { error: hvErr } = await supabase.from("home_vendors").upsert(hv, { onConflict: "user_id,vendor_id" });
@@ -298,10 +214,6 @@ export default function RateVendorModal({ open, onOpenChange, vendor, onSuccess 
                 userName={userData?.name}
                 streetName={userData?.streetName}
               />
-            </div>
-            <div className="grid gap-2">
-              <Label>Costs</Label>
-              <CostInputs category={vendor.category} value={costs} onChange={setCosts} />
             </div>
             <div className="pt-2 flex justify-end gap-2">
               <Button variant="secondary" onClick={() => onOpenChange(false)} disabled={loading}>Cancel</Button>

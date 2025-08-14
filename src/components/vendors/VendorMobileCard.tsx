@@ -15,6 +15,7 @@ interface VendorMobileCardProps {
   showContact: boolean;
   onCategoryClick: (category: string) => void;
   onRate: (vendor: CommunityVendorRow) => void;
+  onCosts: (vendor: CommunityVendorRow) => void;
   userHomeVendors?: Set<string>;
 }
 
@@ -24,6 +25,7 @@ export default function VendorMobileCard({
   showContact,
   onCategoryClick,
   onRate,
+  onCosts,
   userHomeVendors,
 }: VendorMobileCardProps) {
   return (
@@ -55,14 +57,23 @@ export default function VendorMobileCard({
               )}
             </div>
           </div>
-          <Button 
-            size="sm" 
-            variant="outline" 
-            className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700 shrink-0" 
-            onClick={() => onRate(vendor)}
-          >
-            Rate
-          </Button>
+          <div className="flex gap-2 shrink-0">
+            <Button 
+              size="sm" 
+              variant="outline" 
+              className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700" 
+              onClick={() => onRate(vendor)}
+            >
+              Rate
+            </Button>
+            <Button 
+              size="sm" 
+              variant="outline"
+              onClick={() => onCosts(vendor)}
+            >
+              + Costs
+            </Button>
+          </div>
         </div>
 
         {/* Category and homes serviced */}

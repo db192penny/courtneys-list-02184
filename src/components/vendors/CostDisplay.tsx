@@ -1,8 +1,7 @@
 import { useState } from "react";
-import { Pencil, Plus } from "lucide-react";
+import { Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
-import { AddCostModal } from "./AddCostModal";
 import { EditMarketPriceModal } from "./EditMarketPriceModal";
 
 type CostDisplayProps = {
@@ -46,16 +45,10 @@ export function CostDisplay({
   showContact
 }: CostDisplayProps) {
   const { data: isAdmin } = useIsAdmin();
-  const [showAddCost, setShowAddCost] = useState(false);
   const [showEditMarket, setShowEditMarket] = useState(false);
 
   const communityPrice = formatPrice(communityAmount, communityUnit);
   const marketPrice = formatPrice(marketAmount, marketUnit);
-
-  // Hide cost inputs for roofing/GC categories
-  const showCostInput = !["roofing", "general contractor"].some(cat => 
-    category.toLowerCase().includes(cat)
-  );
 
   return (
     <div className="text-sm space-y-1">
@@ -72,20 +65,7 @@ export function CostDisplay({
             )}
           </span>
         ) : (
-          <div className="flex items-center gap-1">
-            <span className="text-muted-foreground">TBD</span>
-            {showCostInput && showContact && (
-              <Button
-                variant="link"
-                size="sm"
-                className="h-auto p-0 text-xs text-primary"
-                onClick={() => setShowAddCost(true)}
-              >
-                <Plus className="h-3 w-3 mr-1" />
-                Add cost
-              </Button>
-            )}
-          </div>
+          <span className="text-muted-foreground">TBD</span>
         )}
       </div>
 
@@ -124,16 +104,6 @@ export function CostDisplay({
       </div>
 
       {/* Modals */}
-      {showAddCost && (
-        <AddCostModal
-          open={showAddCost}
-          onOpenChange={setShowAddCost}
-          vendorId={vendorId}
-          vendorName={vendorName}
-          category={category}
-        />
-      )}
-
       {showEditMarket && (
         <EditMarketPriceModal
           open={showEditMarket}
