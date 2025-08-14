@@ -217,7 +217,7 @@ export default function RateVendorModal({ open, onOpenChange, vendor, onSuccess 
           my_rating: rating,
           amount: primary?.amount ?? null,
           currency: primary?.amount != null ? "USD" : null,
-          period: primary?.cost_kind === "monthly_plan" ? "monthly" : (primary?.cost_kind === "hourly" ? "hourly" : null),
+          period: primary?.cost_kind === "monthly_plan" ? "monthly" : (primary?.cost_kind === "hourly" ? "hourly" : "monthly"),
         } as any;
         // upsert requires unique index on (user_id, vendor_id)
         const { error: hvErr } = await supabase.from("home_vendors").upsert(hv, { onConflict: "user_id,vendor_id" });
