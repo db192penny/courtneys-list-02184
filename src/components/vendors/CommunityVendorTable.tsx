@@ -12,6 +12,7 @@ import { CATEGORIES } from "@/data/categories";
 import { useUserHomeVendors } from "@/hooks/useUserHomeVendors";
 
 import ReviewsHover from "@/components/vendors/ReviewsHover";
+import GoogleReviewsHover from "@/components/vendors/GoogleReviewsHover";
 import RateVendorModal from "@/components/vendors/RateVendorModal";
 import { formatUSPhoneDisplay } from "@/utils/phone";
 export type CommunityVendorRow = {
@@ -24,6 +25,8 @@ export type CommunityVendorRow = {
   hoa_rating_count: number | null;
   google_rating: number | null;
   google_rating_count: number | null;
+  google_reviews_json: any | null;
+  google_place_id: string | null;
   avg_monthly_cost: number | null;
   service_call_avg: number | null;
   contact_info: string | null;
@@ -59,7 +62,23 @@ export default function CommunityVendorTable({
         _offset: 0,
       });
       if (error) throw error;
-      return (data || []) as CommunityVendorRow[];
+      
+      // Map the data to include the missing fields from the vendors table
+      const mappedData = await Promise.all((data || []).map(async (row: any) => {
+        const { data: vendorData } = await supabase
+          .from('vendors')
+          .select('google_reviews_json, google_place_id')
+          .eq('id', row.id)
+          .single();
+        
+        return {
+          ...row,
+          google_reviews_json: vendorData?.google_reviews_json || null,
+          google_place_id: vendorData?.google_place_id || null,
+        };
+      }));
+      
+      return mappedData as CommunityVendorRow[];
     },
     enabled: !!communityName,
   });
@@ -194,13 +213,19 @@ export default function CommunityVendorTable({
                       </div>
                     </ReviewsHover>
                     {r.google_rating != null && (
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs text-muted-foreground">Google:</span>
-                        <div className="flex items-center gap-1">
-                          <RatingStars rating={r.google_rating} showValue />
-                          {r.google_rating_count ? <span className="text-xs text-muted-foreground">({r.google_rating_count})</span> : null}
+                      <GoogleReviewsHover 
+                        vendorId={r.id} 
+                        googleReviewsJson={r.google_reviews_json}
+                        googlePlaceId={r.google_place_id}
+                      >
+                        <div className="flex items-center gap-2 cursor-pointer group">
+                          <span className="text-xs text-muted-foreground">Google:</span>
+                          <div className="flex items-center gap-1 border-b border-green-400 group-hover:border-green-600 pb-0.5">
+                            <RatingStars rating={r.google_rating} showValue />
+                            {r.google_rating_count ? <span className="text-xs text-muted-foreground">({r.google_rating_count})</span> : null}
+                          </div>
                         </div>
-                      </div>
+                      </GoogleReviewsHover>
                     )}
                   </div>
                 </TableCell>
