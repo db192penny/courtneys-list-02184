@@ -18,6 +18,7 @@ import useIsAdmin from "@/hooks/useIsAdmin";
 import useIsHoaAdmin from "@/hooks/useIsHoaAdmin";
 import { useUserData } from "@/hooks/useUserData";
 import ReviewPreview from "@/components/ReviewPreview";
+import VendorNameInput, { type VendorSelectedPayload } from "@/components/VendorNameInput";
 const SubmitVendor = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -27,6 +28,8 @@ const SubmitVendor = () => {
   const [category, setCategory] = useState<string>("");
   const [name, setName] = useState<string>("");
   const [contact, setContact] = useState<string>("");
+  const [googlePlaceId, setGooglePlaceId] = useState<string>("");
+  const [isManualEntry, setIsManualEntry] = useState<boolean>(false);
   const [costEntries, setCostEntries] = useState<CostEntry[]>(buildDefaultCosts());
   const [rating, setRating] = useState<number>(4);
   const [comments, setComments] = useState<string>("");
@@ -57,6 +60,8 @@ const SubmitVendor = () => {
         setCategory(data.category || "");
         setName(data.name || "");
         setContact(data.contact_info || "");
+        setGooglePlaceId(data.google_place_id || "");
+        setIsManualEntry(!data.google_place_id);
         const defaults = buildDefaultCosts(data.category || "");
         if (data.typical_cost != null && defaults.length) defaults[0].amount = Number(data.typical_cost);
         setCostEntries(defaults);
@@ -106,6 +111,41 @@ const SubmitVendor = () => {
     prefillShowName();
     loadMyReview();
   }, [vendorId]);
+
+  const handleVendorSelected = async (payload: VendorSelectedPayload) => {
+    setName(payload.name);
+    setGooglePlaceId(payload.place_id);
+    setIsManualEntry(false);
+    
+    // Auto-populate contact info if available
+    if (payload.phone) {
+      setContact(payload.phone);
+    }
+
+    // Fetch additional Google details and update vendor data
+    try {
+      const { data, error } = await supabase.functions.invoke('fetch-google-place-details', {
+        body: { place_id: payload.place_id }
+      });
+
+      if (error) {
+        console.warn("Failed to fetch Google place details:", error);
+        return;
+      }
+
+      if (data?.formatted_phone_number && !contact.trim()) {
+        setContact(data.formatted_phone_number);
+      }
+    } catch (err) {
+      console.warn("Error fetching Google place details:", err);
+    }
+  };
+
+  const handleManualNameInput = (inputName: string) => {
+    setName(inputName);
+    setIsManualEntry(true);
+    setGooglePlaceId("");
+  };
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -192,6 +232,7 @@ const SubmitVendor = () => {
             category,
             contact_info: contact.trim(),
             typical_cost: costNum,
+            google_place_id: googlePlaceId || null,
           })
           .eq("id", vendorId);
 
@@ -263,17 +304,37 @@ const SubmitVendor = () => {
       return;
     }
 
+    // Create vendor data with Google integration
+    const vendorData: any = {
+      name: name.trim(),
+      category,
+      contact_info: contact.trim(),
+      typical_cost: costNum,
+      created_by: userId,
+      google_place_id: googlePlaceId || null,
+    };
+
+    // If we have Google place data, fetch and store Google ratings
+    if (googlePlaceId) {
+      try {
+        const { data: googleData, error: googleError } = await supabase.functions.invoke('fetch-google-place-details', {
+          body: { place_id: googlePlaceId }
+        });
+
+        if (!googleError && googleData) {
+          vendorData.google_rating = googleData.rating;
+          vendorData.google_rating_count = googleData.user_ratings_total;
+          vendorData.google_last_updated = new Date().toISOString();
+          vendorData.google_reviews_json = googleData.reviews;
+        }
+      } catch (err) {
+        console.warn("Failed to fetch Google data during vendor creation:", err);
+      }
+    }
+
     const { data: vendorInsert, error: vendorErr } = await supabase
       .from("vendors")
-      .insert([
-        {
-          name: name.trim(),
-          category,
-          contact_info: contact.trim(),
-          typical_cost: costNum,
-          created_by: userId,
-        },
-      ])
+      .insert([vendorData])
       .select("id")
       .single();
 
@@ -360,7 +421,20 @@ const SubmitVendor = () => {
 
             <div className="grid gap-2">
               <Label htmlFor="name">Provider Name</Label>
-              <Input id="name" placeholder="e.g., ABC Pool Services" value={name} onChange={(e) => setName(e.currentTarget.value)} disabled={!!(vendorId && !canEditCore)} />
+              {vendorId && !canEditCore ? (
+                <Input id="name" value={name} disabled />
+              ) : (
+                <VendorNameInput
+                  id="name"
+                  placeholder="Search business name or enter manually..."
+                  defaultValue={name}
+                  onSelected={handleVendorSelected}
+                  onManualInput={handleManualNameInput}
+                />
+              )}
+              {!isManualEntry && googlePlaceId && (
+                <p className="text-xs text-green-600">✓ Verified business from Google</p>
+              )}
             </div>
 
             <div className="grid gap-2">

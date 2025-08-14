@@ -541,9 +541,11 @@ export type Database = {
           contact_info: string
           created_at: string | null
           created_by: string | null
+          google_last_updated: string | null
           google_place_id: string | null
           google_rating: number | null
           google_rating_count: number | null
+          google_reviews_json: Json | null
           id: string
           name: string
           typical_cost: number | null
@@ -555,9 +557,11 @@ export type Database = {
           contact_info: string
           created_at?: string | null
           created_by?: string | null
+          google_last_updated?: string | null
           google_place_id?: string | null
           google_rating?: number | null
           google_rating_count?: number | null
+          google_reviews_json?: Json | null
           id?: string
           name: string
           typical_cost?: number | null
@@ -569,9 +573,11 @@ export type Database = {
           contact_info?: string
           created_at?: string | null
           created_by?: string | null
+          google_last_updated?: string | null
           google_place_id?: string | null
           google_rating?: number | null
           google_rating_count?: number | null
+          google_reviews_json?: Json | null
           id?: string
           name?: string
           typical_cost?: number | null
