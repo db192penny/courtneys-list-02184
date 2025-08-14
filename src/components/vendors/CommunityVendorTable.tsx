@@ -10,10 +10,12 @@ import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { CATEGORIES } from "@/data/categories";
 import { useUserHomeVendors } from "@/hooks/useUserHomeVendors";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 import ReviewsHover from "@/components/vendors/ReviewsHover";
 import GoogleReviewsHover from "@/components/vendors/GoogleReviewsHover";
 import RateVendorModal from "@/components/vendors/RateVendorModal";
+import VendorMobileCard from "@/components/vendors/VendorMobileCard";
 import { formatUSPhoneDisplay } from "@/utils/phone";
 export type CommunityVendorRow = {
   id: string;
@@ -50,6 +52,7 @@ export default function CommunityVendorTable({
 }) {
   const [category, setCategory] = useState<string>("all");
   const [sortBy, setSortBy] = useState<typeof SORTS[number]["key"]>("homes");
+  const isMobile = useIsMobile();
 
   const { data, isLoading, error, refetch, isFetching } = useQuery<CommunityVendorRow[]>({
     queryKey: ["community-stats", communityName, category, sortBy],
@@ -84,8 +87,8 @@ export default function CommunityVendorTable({
     <TooltipProvider>
     <div className="space-y-4">
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-52">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="w-full sm:w-52">
             <Select value={category} onValueChange={setCategory}>
               <SelectTrigger aria-label="Filter by category">
                 <SelectValue placeholder="All" />
@@ -98,7 +101,7 @@ export default function CommunityVendorTable({
               </SelectContent>
             </Select>
           </div>
-          <div className="w-56">
+          <div className="w-full sm:w-56">
             <Select value={sortBy} onValueChange={(v) => setSortBy(v as any)}>
               <SelectTrigger aria-label="Sort by">
                 <SelectValue placeholder="# of Homes Serviced" />
@@ -110,142 +113,174 @@ export default function CommunityVendorTable({
               </SelectContent>
             </Select>
           </div>
-          <Button variant="secondary" onClick={() => refetch()} disabled={isFetching}>Refresh</Button>
+          <Button 
+            variant="secondary" 
+            onClick={() => refetch()} 
+            disabled={isFetching}
+            className="w-full sm:w-auto"
+          >
+            Refresh
+          </Button>
         </div>
       </div>
 
-      <div className="overflow-x-auto">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Rank</TableHead>
-              <TableHead>Provider</TableHead>
-              <TableHead>Category</TableHead>
-              <TableHead># Homes</TableHead>
-              <TableHead>Ratings/Reviews</TableHead>
-              <TableHead>Avg Cost</TableHead>
-              <TableHead>Contact</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoading && (
+      {isMobile ? (
+        <div className="space-y-3">
+          {isLoading && (
+            <div className="text-sm text-muted-foreground text-center py-8">Loading…</div>
+          )}
+          {error && (
+            <div className="text-sm text-muted-foreground text-center py-8">Unable to load providers.</div>
+          )}
+          {!isLoading && !error && formatted.length === 0 && (
+            <div className="text-sm text-muted-foreground text-center py-8">No vendors found.</div>
+          )}
+          {formatted.map((vendor, idx) => (
+            <VendorMobileCard
+              key={vendor.id}
+              vendor={vendor}
+              rank={idx + 1}
+              showContact={showContact}
+              onCategoryClick={setCategory}
+              onRate={openRate}
+              userHomeVendors={userHomeVendors}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
               <TableRow>
-                <TableCell colSpan={8} className="text-sm text-muted-foreground">Loading…</TableCell>
+                <TableHead>Rank</TableHead>
+                <TableHead>Provider</TableHead>
+                <TableHead>Category</TableHead>
+                <TableHead># Homes</TableHead>
+                <TableHead>Ratings/Reviews</TableHead>
+                <TableHead>Avg Cost</TableHead>
+                <TableHead>Contact</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
-            )}
-            {error && (
-              <TableRow>
-                <TableCell colSpan={8} className="text-sm text-muted-foreground">Unable to load providers.</TableCell>
-              </TableRow>
-            )}
-            {!isLoading && !error && formatted.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={8} className="text-sm text-muted-foreground">No vendors found.</TableCell>
-              </TableRow>
-            )}
-            {formatted.map((r, idx) => (
-              <TableRow key={r.id}>
-                <TableCell>{idx + 1}</TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium text-foreground">
-                      {r.name}
-                    </span>
-                    {r.homes_serviced === 0 && (
-                      <Badge 
-                        variant="secondary" 
-                        className="text-xs px-2 py-0.5 bg-orange-100 text-orange-800 hover:bg-orange-200"
-                      >
-                        New
-                      </Badge>
-                    )}
-                    {userHomeVendors?.has(r.id) && (
-                      <Badge 
-                        variant="secondary" 
-                        className="text-xs px-2 py-0.5 bg-green-100 text-green-800 hover:bg-green-200"
-                      >
-                        Your Provider
-                      </Badge>
-                    )}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <Button size="sm" variant="outline" onClick={() => setCategory(r.category)}>
-                    {r.category}
-                  </Button>
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium text-foreground">
-                      {r.homes_serviced === 0 ? "–" : r.homes_serviced}
-                    </span>
-                    <span className="text-xs text-muted-foreground">{r.homes_pct ? `${r.homes_pct}%` : ""}</span>
-                    {/* Heat map hidden for now */}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <div className="space-y-4">
-                    <ReviewsHover vendorId={r.id}>
-                      <div className="flex items-center gap-2 cursor-pointer group">
-                        <span className="text-xs text-muted-foreground min-w-[70px]">Community:</span>
-                        {r.hoa_rating ? (
-                          <div className="flex items-center gap-1 px-2 py-1.5 rounded-md bg-blue-50 hover:bg-blue-100 transition-colors border border-blue-200 hover:border-blue-300 min-h-[28px]">
-                            <RatingStars rating={r.hoa_rating} showValue />
-                            {r.hoa_rating_count ? <span className="text-xs text-muted-foreground">({r.hoa_rating_count})</span> : null}
-                          </div>
-                        ) : (
-                          <span 
-                            className="text-xs text-muted-foreground px-2 py-1.5 rounded-md bg-blue-50 hover:bg-blue-100 transition-colors border border-blue-200 hover:border-blue-300 min-h-[28px] flex items-center"
-                            title="Be the first to rate this provider"
-                          >
-                            No Ratings Yet
-                          </span>
-                        )}
-                      </div>
-                    </ReviewsHover>
-                    {r.google_rating != null && (
-                      <GoogleReviewsHover 
-                        vendorId={r.id} 
-                        googleReviewsJson={r.google_reviews_json}
-                        googlePlaceId={r.google_place_id}
-                      >
+            </TableHeader>
+            <TableBody>
+              {isLoading && (
+                <TableRow>
+                  <TableCell colSpan={8} className="text-sm text-muted-foreground">Loading…</TableCell>
+                </TableRow>
+              )}
+              {error && (
+                <TableRow>
+                  <TableCell colSpan={8} className="text-sm text-muted-foreground">Unable to load providers.</TableCell>
+                </TableRow>
+              )}
+              {!isLoading && !error && formatted.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={8} className="text-sm text-muted-foreground">No vendors found.</TableCell>
+                </TableRow>
+              )}
+              {formatted.map((r, idx) => (
+                <TableRow key={r.id}>
+                  <TableCell>{idx + 1}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium text-foreground">
+                        {r.name}
+                      </span>
+                      {r.homes_serviced === 0 && (
+                        <Badge 
+                          variant="secondary" 
+                          className="text-xs px-2 py-0.5 bg-orange-100 text-orange-800 hover:bg-orange-200"
+                        >
+                          New
+                        </Badge>
+                      )}
+                      {userHomeVendors?.has(r.id) && (
+                        <Badge 
+                          variant="secondary" 
+                          className="text-xs px-2 py-0.5 bg-green-100 text-green-800 hover:bg-green-200"
+                        >
+                          Your Provider
+                        </Badge>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Button size="sm" variant="outline" onClick={() => setCategory(r.category)}>
+                      {r.category}
+                    </Button>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium text-foreground">
+                        {r.homes_serviced === 0 ? "–" : r.homes_serviced}
+                      </span>
+                      <span className="text-xs text-muted-foreground">{r.homes_pct ? `${r.homes_pct}%` : ""}</span>
+                      {/* Heat map hidden for now */}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="space-y-4">
+                      <ReviewsHover vendorId={r.id}>
                         <div className="flex items-center gap-2 cursor-pointer group">
-                          <span className="text-xs text-muted-foreground min-w-[70px]">Google:</span>
-                          <div className="flex items-center gap-1 px-2 py-1.5 rounded-md bg-green-50 hover:bg-green-100 transition-colors border border-green-200 hover:border-green-300 min-h-[28px]">
-                            <RatingStars rating={r.google_rating} showValue />
-                            {r.google_rating_count ? <span className="text-xs text-muted-foreground">({r.google_rating_count})</span> : null}
-                          </div>
+                          <span className="text-xs text-muted-foreground min-w-[70px]">Community:</span>
+                          {r.hoa_rating ? (
+                            <div className="flex items-center gap-1 px-2 py-1.5 rounded-md bg-blue-50 hover:bg-blue-100 transition-colors border border-blue-200 hover:border-blue-300 min-h-[28px]">
+                              <RatingStars rating={r.hoa_rating} showValue />
+                              {r.hoa_rating_count ? <span className="text-xs text-muted-foreground">({r.hoa_rating_count})</span> : null}
+                            </div>
+                          ) : (
+                            <span 
+                              className="text-xs text-muted-foreground px-2 py-1.5 rounded-md bg-blue-50 hover:bg-blue-100 transition-colors border border-blue-200 hover:border-blue-300 min-h-[28px] flex items-center"
+                              title="Be the first to rate this provider"
+                            >
+                              No Ratings Yet
+                            </span>
+                          )}
                         </div>
-                      </GoogleReviewsHover>
+                      </ReviewsHover>
+                      {r.google_rating != null && (
+                        <GoogleReviewsHover 
+                          vendorId={r.id} 
+                          googleReviewsJson={r.google_reviews_json}
+                          googlePlaceId={r.google_place_id}
+                        >
+                          <div className="flex items-center gap-2 cursor-pointer group">
+                            <span className="text-xs text-muted-foreground min-w-[70px]">Google:</span>
+                            <div className="flex items-center gap-1 px-2 py-1.5 rounded-md bg-green-50 hover:bg-green-100 transition-colors border border-green-200 hover:border-green-300 min-h-[28px]">
+                              <RatingStars rating={r.google_rating} showValue />
+                              {r.google_rating_count ? <span className="text-xs text-muted-foreground">({r.google_rating_count})</span> : null}
+                            </div>
+                          </div>
+                        </GoogleReviewsHover>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    {r.avg_cost_amount != null ? (
+                      <span>${Number(r.avg_cost_amount).toFixed(2)} {r.avg_cost_display}</span>
+                    ) : (
+                      <Tooltip delayDuration={300}>
+                        <TooltipTrigger asChild>
+                          <span className="text-xs text-muted-foreground cursor-help underline decoration-dotted">
+                            TBD
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" className="bg-background border shadow-lg">
+                          <p className="text-sm">Submit cost info to help your neighbors</p>
+                        </TooltipContent>
+                      </Tooltip>
                     )}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  {r.avg_cost_amount != null ? (
-                    <span>${Number(r.avg_cost_amount).toFixed(2)} {r.avg_cost_display}</span>
-                  ) : (
-                    <Tooltip delayDuration={300}>
-                      <TooltipTrigger asChild>
-                        <span className="text-xs text-muted-foreground cursor-help underline decoration-dotted">
-                          TBD
-                        </span>
-                      </TooltipTrigger>
-                      <TooltipContent side="top" className="bg-background border shadow-lg">
-                        <p className="text-sm">Submit cost info to help your neighbors</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  )}
-                </TableCell>
-                <TableCell>{showContact ? (r.contact_info ? formatUSPhoneDisplay(r.contact_info) : "—") : "Hidden"}</TableCell>
-                <TableCell className="text-right space-x-2">
-                  <Button size="sm" variant="outline" className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700" onClick={() => openRate(r)}>Rate</Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+                  </TableCell>
+                  <TableCell>{showContact ? (r.contact_info ? formatUSPhoneDisplay(r.contact_info) : "—") : "Hidden"}</TableCell>
+                  <TableCell className="text-right space-x-2">
+                    <Button size="sm" variant="outline" className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700" onClick={() => openRate(r)}>Rate</Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      )}
       <RateVendorModal open={modalOpen} onOpenChange={setModalOpen} vendor={selected} onSuccess={() => { setModalOpen(false); refetch(); }} />
     </div>
     </TooltipProvider>

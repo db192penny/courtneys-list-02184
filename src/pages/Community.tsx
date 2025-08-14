@@ -82,77 +82,56 @@ export default function Community() {
       />
 
       <section className="container py-10 space-y-6">
-        {isPreview ? (
-          <header className="space-y-0">
-            <div className="flex items-center gap-4">
-              <img
-                src={photoUrl}
-                alt={`${communityName} HOA entrance sign and community graphic`}
-                className="h-16 w-16 rounded-md object-cover border"
-                loading="lazy"
-              />
-              <div>
-                <h1 className="text-3xl font-semibold tracking-tight">{communityName}</h1>
-                <p className="text-sm text-muted-foreground">Your Trusted Neighborhood — {homesLabel} Homes</p>
-                <p className="text-sm text-muted-foreground">{addressLine}</p>
-                {e164Phone && (
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    <Button variant="outline" asChild>
-                      <a href={`tel:${e164Phone}`} aria-label="Call HOA contact">Call HOA</a>
-                    </Button>
-                    <Button variant="secondary" asChild>
-                      <a href={`sms:${e164Phone}`} aria-label="Text HOA contact">Text HOA</a>
-                    </Button>
-                  </div>
-                )}
-              </div>
+        <header className="space-y-0">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+            <img
+              src={photoUrl}
+              alt={`${communityName} HOA entrance sign and community graphic`}
+              className="h-16 w-16 rounded-md object-cover border"
+              loading="lazy"
+            />
+            <div className="flex-1">
+              <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight">{communityName}</h1>
+              <p className="text-sm text-muted-foreground">Your Trusted Neighborhood — {homesLabel} Homes</p>
+              <p className="text-sm text-muted-foreground">{addressLine}</p>
+              {e164Phone && (
+                <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+                  <Button variant="outline" asChild size="sm">
+                    <a href={`tel:${e164Phone}`} aria-label="Call HOA contact">Call HOA</a>
+                  </Button>
+                  <Button variant="secondary" asChild size="sm">
+                    <a href={`sms:${e164Phone}`} aria-label="Text HOA contact">Text HOA</a>
+                  </Button>
+                </div>
+              )}
             </div>
-          </header>
-        ) : (
-          <header className="space-y-0">
-            <div className="flex items-center gap-4">
-              <img
-                src={photoUrl}
-                alt={`${communityName} HOA entrance sign and community graphic`}
-                className="h-16 w-16 rounded-md object-cover border"
-                loading="lazy"
-              />
-              <div>
-                <h1 className="text-3xl font-semibold tracking-tight">{communityName}</h1>
-                <p className="text-sm text-muted-foreground">Your Trusted Neighborhood — {homesLabel} Homes</p>
-                <p className="text-sm text-muted-foreground">{addressLine}</p>
-                {e164Phone && (
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    <Button variant="outline" asChild>
-                      <a href={`tel:${e164Phone}`} aria-label="Call HOA contact">Call HOA</a>
-                    </Button>
-                    <Button variant="secondary" asChild>
-                      <a href={`sms:${e164Phone}`} aria-label="Text HOA contact">Text HOA</a>
-                    </Button>
-                  </div>
-                )}
-              </div>
-            </div>
-          </header>
-        )}
+          </div>
+        </header>
 
         {/* Submit Vendor available to all users; unauthenticated users will be redirected to Auth */}
         <div className="pt-2">
-          <Button variant="secondary" onClick={() => navigate(`/submit?community=${encodeURIComponent(communityName)}`)}>
+          <Button 
+            variant="secondary" 
+            onClick={() => navigate(`/submit?community=${encodeURIComponent(communityName)}`)}
+            className="w-full sm:w-auto"
+          >
             + Add a Service Provider
           </Button>
         </div>
 
         {isPreview && !profile?.isAuthenticated && (
           <div className="flex flex-col gap-3">
-            <Button onClick={() => {
-              let addr = "";
-              try {
-                addr = localStorage.getItem("prefill_address") || "";
-              } catch {}
-              const url = `/auth/signup?community=${encodeURIComponent(communityName)}${addr ? `&address=${encodeURIComponent(addr)}` : ""}`;
-              navigate(url);
-            }}>
+            <Button 
+              onClick={() => {
+                let addr = "";
+                try {
+                  addr = localStorage.getItem("prefill_address") || "";
+                } catch {}
+                const url = `/auth/signup?community=${encodeURIComponent(communityName)}${addr ? `&address=${encodeURIComponent(addr)}` : ""}`;
+                navigate(url);
+              }}
+              className="w-full sm:w-auto"
+            >
               Sign Up to Request Access
             </Button>
             <p className="text-sm text-muted-foreground">
@@ -170,7 +149,11 @@ export default function Community() {
             <CommunityDemoTable communityName={communityName} />
             {!isPreview && (
               <div className="pt-4">
-                <Button variant="secondary" onClick={() => navigate(`/submit?community=${encodeURIComponent(communityName)}`)}>
+                <Button 
+                  variant="secondary" 
+                  onClick={() => navigate(`/submit?community=${encodeURIComponent(communityName)}`)}
+                  className="w-full sm:w-auto"
+                >
                   + Add a Service Provider
                 </Button>
               </div>

@@ -62,26 +62,37 @@ const Index = () => {
           
           <div className="mx-auto mt-6 w-full max-w-2xl rounded-xl bg-background/70 supports-[backdrop-filter]:bg-background/60 backdrop-blur shadow-lg p-4 md:p-6">
             <form onSubmit={onSubmit} className="w-full">
-              <div className="flex flex-col md:flex-row items-stretch gap-3 md:gap-4">
-                <AddressInput
-                  placeholder="Enter Your Address"
-                  onSelected={onAddressSelected}
-                />
-                <Select value={hoa} onValueChange={setHoa}>
-                  <SelectTrigger aria-label="HOA Name">
-                    <SelectValue placeholder="HOA Name" />
-                  </SelectTrigger>
-                  <SelectContent className="z-50">
-                    <SelectItem value="Boca Bridges">Boca Bridges</SelectItem>
-                    <SelectItem value="St. Andrews Country Club" disabled>St. Andrews Country Club</SelectItem>
-                    <SelectItem value="Woodfield Country Club" disabled>Woodfield Country Club</SelectItem>
-                    <SelectItem value="Seven Bridges" disabled>Seven Bridges</SelectItem>
-                    <SelectItem value="The Bridges" disabled>The Bridges</SelectItem>
-                    <SelectItem value="Addison Reserve Country Club" disabled>Addison Reserve Country Club</SelectItem>
-                    <SelectItem value="Royal Palm Yacht & Country Club" disabled>Royal Palm Yacht & Country Club</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Button type="submit" className="md:min-w-[180px]" disabled={!selectedAddress} aria-disabled={!selectedAddress}>View Dashboard</Button>
+              <div className="flex flex-col gap-3 md:flex-row md:items-stretch md:gap-4">
+                <div className="flex-1">
+                  <AddressInput
+                    placeholder="Enter Your Address"
+                    onSelected={onAddressSelected}
+                  />
+                </div>
+                <div className="flex-1 md:max-w-xs">
+                  <Select value={hoa} onValueChange={setHoa}>
+                    <SelectTrigger aria-label="HOA Name" className="w-full">
+                      <SelectValue placeholder="HOA Name" />
+                    </SelectTrigger>
+                    <SelectContent className="z-50">
+                      <SelectItem value="Boca Bridges">Boca Bridges</SelectItem>
+                      <SelectItem value="St. Andrews Country Club" disabled>St. Andrews Country Club</SelectItem>
+                      <SelectItem value="Woodfield Country Club" disabled>Woodfield Country Club</SelectItem>
+                      <SelectItem value="Seven Bridges" disabled>Seven Bridges</SelectItem>
+                      <SelectItem value="The Bridges" disabled>The Bridges</SelectItem>
+                      <SelectItem value="Addison Reserve Country Club" disabled>Addison Reserve Country Club</SelectItem>
+                      <SelectItem value="Royal Palm Yacht & Country Club" disabled>Royal Palm Yacht & Country Club</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Button 
+                  type="submit" 
+                  className="w-full md:w-auto md:min-w-[160px]" 
+                  disabled={!selectedAddress} 
+                  aria-disabled={!selectedAddress}
+                >
+                  View Dashboard
+                </Button>
               </div>
             </form>
             <div className="mt-3 flex flex-col items-center gap-1">
@@ -89,13 +100,13 @@ const Index = () => {
                 type="button"
                 variant="outline"
                 onClick={() => navigate("/auth/signup")}
-                className="md:min-w-[260px]"
+                className="w-full md:w-auto md:min-w-[260px]"
                 aria-label="Sign up to unlock exclusive access"
               >
                 <Lock aria-hidden="true" />
                 <span>Sign Up to Unlock Exclusive Access</span>
               </Button>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-muted-foreground text-center">
                 Members-only access to detailed ratings, reviews, and pricing.
               </p>
             </div>
@@ -105,7 +116,7 @@ const Index = () => {
                 type="button"
                 variant="secondary"
                 onClick={() => navigate("/communities/request")}
-                className="md:min-w-[220px]"
+                className="w-full md:w-auto md:min-w-[220px]"
                 aria-label="Add my HOA or Community"
               >
                 Add my HOA/Community
