@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
+import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 
 type Props = {
@@ -64,17 +65,24 @@ export default function CostsHover({ vendorId, children }: Props) {
           <h4 className="text-sm font-semibold">Community Cost Submissions</h4>
           <div className="space-y-2">
             {costs.map((cost) => (
-              <div key={cost.id} className="text-sm">
-                <div className="font-medium">
-                  {formatCost(cost.amount, cost.unit, cost.period)}
-                  {cost.cost_kind && cost.cost_kind !== "one_time" && (
-                    <span className="text-muted-foreground ml-1">
-                      ({cost.cost_kind.replace("_", " ")})
-                    </span>
-                  )}
-                </div>
-                <div className="text-muted-foreground text-xs">
-                  by {cost.author_label} • {new Date(cost.created_at).toLocaleDateString()}
+              <div key={cost.id} className="border rounded-md p-2">
+                <div className="text-xs text-foreground flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="font-medium">
+                      {formatCost(cost.amount, cost.unit, cost.period)}
+                      {cost.cost_kind && cost.cost_kind !== "one_time" && (
+                        <span className="text-muted-foreground ml-1">
+                          ({cost.cost_kind.replace("_", " ")})
+                        </span>
+                      )}
+                    </div>
+                    <Badge variant="outline" className="text-xs px-2 py-0.5 bg-blue-50 text-blue-700 border-blue-200">
+                      by {cost.author_label}
+                    </Badge>
+                  </div>
+                  <div className="text-[10px] text-muted-foreground">
+                    {new Date(cost.created_at).toLocaleDateString()}
+                  </div>
                 </div>
               </div>
             ))}
