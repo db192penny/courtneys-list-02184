@@ -17,6 +17,7 @@ type CostDisplayProps = {
   marketUnit?: string;
   showContact: boolean;
   isPreviewMode?: boolean;
+  communityName?: string;
 };
 
 const formatUnit = (unit?: string) => {
@@ -46,7 +47,8 @@ export function CostDisplay({
   marketAmount,
   marketUnit,
   showContact,
-  isPreviewMode
+  isPreviewMode,
+  communityName
 }: CostDisplayProps) {
   const { data: isAdmin } = useIsAdmin();
   const [showEditMarket, setShowEditMarket] = useState(false);
@@ -58,7 +60,7 @@ export function CostDisplay({
     <div className="text-sm space-y-1">
       {/* Community Price Line */}
       <div className="flex items-center gap-1">
-        <span className="text-xs text-muted-foreground min-w-[70px]">Community:</span>
+        <span className="text-xs text-muted-foreground min-w-[70px]">{communityName || "Community"}:</span>
         <div className="px-2 py-1.5 rounded-md bg-blue-50 hover:bg-blue-100 transition-colors border border-blue-200 hover:border-blue-300 min-h-[28px] flex items-center">
           {communityPrice ? (
             <span className="text-xs font-medium">

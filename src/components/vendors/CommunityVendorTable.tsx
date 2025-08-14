@@ -254,7 +254,7 @@ export default function CommunityVendorTable({
                       {isPreviewMode ? (
                         <PreviewReviewsHover vendorId={r.id}>
                           <div className="flex items-center gap-2 cursor-pointer group">
-                            <span className="text-xs text-muted-foreground min-w-[70px]">Community:</span>
+                            <span className="text-xs text-muted-foreground min-w-[70px]">{communityName}:</span>
                             {r.hoa_rating ? (
                               <div className="flex items-center gap-1 px-2 py-1.5 rounded-md bg-blue-50 hover:bg-blue-100 transition-colors border border-blue-200 hover:border-blue-300 min-h-[28px]">
                                 <RatingStars rating={r.hoa_rating} showValue />
@@ -273,7 +273,7 @@ export default function CommunityVendorTable({
                       ) : (
                         <ReviewsHover vendorId={r.id}>
                           <div className="flex items-center gap-2 cursor-pointer group">
-                            <span className="text-xs text-muted-foreground min-w-[70px]">Community:</span>
+                            <span className="text-xs text-muted-foreground min-w-[70px]">{communityName}:</span>
                             {r.hoa_rating ? (
                               <div className="flex items-center gap-1 px-2 py-1.5 rounded-md bg-blue-50 hover:bg-blue-100 transition-colors border border-blue-200 hover:border-blue-300 min-h-[28px]">
                                 <RatingStars rating={r.hoa_rating} showValue />
@@ -319,6 +319,7 @@ export default function CommunityVendorTable({
                       marketUnit={r.market_unit}
                       showContact={!!showContact}
                       isPreviewMode={isPreviewMode}
+                      communityName={communityName}
                     />
                   </TableCell>
                   <TableCell>{showContact ? (r.contact_info ? formatUSPhoneDisplay(r.contact_info) : "—") : "Hidden"}</TableCell>
