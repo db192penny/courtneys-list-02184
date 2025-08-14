@@ -77,7 +77,7 @@ export default function Community() {
     <main className="min-h-screen bg-background">
       <SEO
         title={isPreview ? `${pageTitle} — Preview` : pageTitle}
-        description={isPreview ? "You’re viewing a limited preview. Sign up to request exclusive access to your community’s full vendor details, pricing, and HOA-approved membership." : `Trusted vendors recommended by ${communityName} residents.`}
+        description={isPreview ? "You're viewing a limited preview. Sign up to request exclusive access to your community's full vendor details, pricing, and HOA-approved membership." : `Trusted vendors recommended by ${communityName} residents.`}
         canonical={canonical}
       />
 
@@ -164,6 +164,7 @@ export default function Community() {
         {isLoading && <div className="text-sm text-muted-foreground">Loading providers…</div>}
         {error && <div className="text-sm text-muted-foreground">Unable to load providers.</div>}
 
+        {/* Show demo data only when no real data exists */}
         {!!data && data.length === 0 && !isLoading && (
           <>
             <CommunityDemoTable communityName={communityName} />
@@ -177,12 +178,13 @@ export default function Community() {
           </>
         )}
 
-{!!data && (
+        {/* Show real data when it exists */}
+        {!!data && data.length > 0 && (
           <div className="space-y-3">
             {isPreview && (
               <p className="text-sm text-muted-foreground">
                 {profile?.isAuthenticated
-                  ? "Contact info and HOA averages are hidden until you’re approved."
+                  ? "Contact info and HOA averages are hidden until you're approved."
                   : "Contact info and HOA averages are hidden until you sign up."}
               </p>
             )}
