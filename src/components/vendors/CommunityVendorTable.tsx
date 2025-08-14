@@ -15,9 +15,9 @@ import { useIsMobile } from "@/hooks/use-mobile";
 
 import ReviewsHover from "@/components/vendors/ReviewsHover";
 import GoogleReviewsHover from "@/components/vendors/GoogleReviewsHover";
-import RateVendorModal from "@/components/vendors/RateVendorModal";
+import RateVendorModalWrapper from "@/components/vendors/RateVendorModalWrapper";
 import VendorMobileCard from "@/components/vendors/VendorMobileCard";
-import CostManagementModal from "@/components/vendors/CostManagementModal";
+import CostManagementModalWrapper from "@/components/vendors/CostManagementModalWrapper";
 import { CostDisplay } from "@/components/vendors/CostDisplay";
 import { formatUSPhoneDisplay } from "@/utils/phone";
 export type CommunityVendorRow = {
@@ -54,9 +54,11 @@ const SORTS = [
 export default function CommunityVendorTable({
   communityName,
   showContact,
+  isPreviewMode,
 }: {
   communityName: string;
   showContact?: boolean;
+  isPreviewMode?: boolean;
 }) {
   const [category, setCategory] = useState<string>("all");
   const [sortBy, setSortBy] = useState<typeof SORTS[number]["key"]>("homes");
@@ -306,8 +308,22 @@ export default function CommunityVendorTable({
           </Table>
         </div>
       )}
-      <RateVendorModal open={rateModalOpen} onOpenChange={setRateModalOpen} vendor={selectedVendor} onSuccess={() => { setRateModalOpen(false); refetch(); }} />
-      <CostManagementModal open={costModalOpen} onOpenChange={setCostModalOpen} vendor={selectedVendor} onSuccess={() => { setCostModalOpen(false); refetch(); }} />
+      <RateVendorModalWrapper 
+        open={rateModalOpen} 
+        onOpenChange={setRateModalOpen} 
+        vendor={selectedVendor} 
+        onSuccess={() => { setRateModalOpen(false); refetch(); }}
+        isPreviewMode={isPreviewMode}
+        communityName={communityName}
+      />
+      <CostManagementModalWrapper 
+        open={costModalOpen} 
+        onOpenChange={setCostModalOpen} 
+        vendor={selectedVendor} 
+        onSuccess={() => { setCostModalOpen(false); refetch(); }}
+        isPreviewMode={isPreviewMode}
+        communityName={communityName}
+      />
     </div>
     </TooltipProvider>
   );

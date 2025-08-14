@@ -388,6 +388,219 @@ export type Database = {
         }
         Relationships: []
       }
+      preview_costs: {
+        Row: {
+          amount: number
+          anonymous: boolean
+          cost_kind: string | null
+          created_at: string
+          currency: string
+          id: string
+          notes: string | null
+          period: string | null
+          quantity: number | null
+          session_id: string
+          unit: string | null
+          updated_at: string
+          vendor_id: string
+        }
+        Insert: {
+          amount: number
+          anonymous?: boolean
+          cost_kind?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          notes?: string | null
+          period?: string | null
+          quantity?: number | null
+          session_id: string
+          unit?: string | null
+          updated_at?: string
+          vendor_id: string
+        }
+        Update: {
+          amount?: number
+          anonymous?: boolean
+          cost_kind?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          notes?: string | null
+          period?: string | null
+          quantity?: number | null
+          session_id?: string
+          unit?: string | null
+          updated_at?: string
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "preview_costs_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "preview_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      preview_links: {
+        Row: {
+          community: string
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          is_active: boolean
+          slug: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          community: string
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          slug: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          community?: string
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          slug?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      preview_metrics: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          metadata: Json | null
+          session_id: string | null
+          vendor_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: string
+          metadata?: Json | null
+          session_id?: string | null
+          vendor_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          metadata?: Json | null
+          session_id?: string | null
+          vendor_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "preview_metrics_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "preview_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      preview_reviews: {
+        Row: {
+          anonymous: boolean
+          comments: string | null
+          created_at: string | null
+          id: string
+          rating: number
+          recommended: boolean | null
+          session_id: string
+          vendor_id: string
+        }
+        Insert: {
+          anonymous?: boolean
+          comments?: string | null
+          created_at?: string | null
+          id?: string
+          rating: number
+          recommended?: boolean | null
+          session_id: string
+          vendor_id: string
+        }
+        Update: {
+          anonymous?: boolean
+          comments?: string | null
+          created_at?: string | null
+          id?: string
+          rating?: number
+          recommended?: boolean | null
+          session_id?: string
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "preview_reviews_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "preview_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      preview_sessions: {
+        Row: {
+          address: string
+          community: string
+          created_at: string
+          expires_at: string
+          formatted_address: string | null
+          google_place_id: string | null
+          id: string
+          name: string
+          normalized_address: string
+          session_token: string
+          source: string | null
+          street_name: string | null
+        }
+        Insert: {
+          address: string
+          community: string
+          created_at?: string
+          expires_at?: string
+          formatted_address?: string | null
+          google_place_id?: string | null
+          id?: string
+          name: string
+          normalized_address: string
+          session_token: string
+          source?: string | null
+          street_name?: string | null
+        }
+        Update: {
+          address?: string
+          community?: string
+          created_at?: string
+          expires_at?: string
+          formatted_address?: string | null
+          google_place_id?: string | null
+          id?: string
+          name?: string
+          normalized_address?: string
+          session_token?: string
+          source?: string | null
+          street_name?: string | null
+        }
+        Relationships: []
+      }
       reviews: {
         Row: {
           anonymous: boolean

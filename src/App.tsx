@@ -22,6 +22,7 @@ import CommunityRequest from "./pages/CommunityRequest";
 import Household from "./pages/Household";
 import HouseholdPreview from "./pages/HouseholdPreview";
 import Community from "./pages/Community";
+import CommunityPreview from "./pages/CommunityPreview";
 import AdminBadges from "./pages/AdminBadges";
 import AdminVendorSeed from "./pages/AdminVendorSeed";
 import AdminVendorManagement from "./pages/AdminVendorManagement";
@@ -126,6 +127,7 @@ const App = () => (
           <Route path="/contact" element={<Contact />} />
           <Route path="/communities/:slug" element={<Community />} />
           <Route path="/communities/request" element={<CommunityRequest />} />
+          <Route path="/community-preview/:slug" element={<CommunityPreview />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

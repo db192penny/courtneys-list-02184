@@ -14,9 +14,10 @@ type Props = {
   onOpenChange: (v: boolean) => void;
   vendor: { id: string; name: string; category: string } | null;
   onSuccess?: () => void;
+  isPreviewMode?: boolean;
 };
 
-export default function CostManagementModal({ open, onOpenChange, vendor, onSuccess }: Props) {
+export default function CostManagementModal({ open, onOpenChange, vendor, onSuccess, isPreviewMode }: Props) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [costs, setCosts] = useState<CostEntry[]>([]);

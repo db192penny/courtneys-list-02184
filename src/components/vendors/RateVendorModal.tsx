@@ -18,9 +18,10 @@ type Props = {
   onOpenChange: (v: boolean) => void;
   vendor: { id: string; name: string; category: string } | null;
   onSuccess?: () => void;
+  isPreviewMode?: boolean;
 };
 
-export default function RateVendorModal({ open, onOpenChange, vendor, onSuccess }: Props) {
+export default function RateVendorModal({ open, onOpenChange, vendor, onSuccess, isPreviewMode }: Props) {
   const { toast } = useToast();
   const { data: userData } = useUserData();
   const queryClient = useQueryClient();
