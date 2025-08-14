@@ -206,14 +206,14 @@ export default function CommunityVendorTable({
                   {r.avg_cost_amount != null ? (
                     <span>${Number(r.avg_cost_amount).toFixed(2)} {r.avg_cost_display}</span>
                   ) : (
-                    <Tooltip>
+                    <Tooltip delayDuration={300}>
                       <TooltipTrigger asChild>
-                        <span className="text-xs text-muted-foreground cursor-help">
+                        <span className="text-xs text-muted-foreground cursor-help underline decoration-dotted">
                           TBD
                         </span>
                       </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Submit cost info to help your neighbors</p>
+                      <TooltipContent side="top" className="bg-background border shadow-lg">
+                        <p className="text-sm">Submit cost info to help your neighbors</p>
                       </TooltipContent>
                     </Tooltip>
                   )}
