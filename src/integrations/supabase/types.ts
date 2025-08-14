@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "13.0.4"
@@ -601,58 +601,58 @@ export type Database = {
       admin_approve_household: {
         Args: { _addr: string }
         Returns: {
-          approved: boolean
           address: string
+          approved: boolean
           hoa_name: string
         }[]
       }
       admin_list_pending_households: {
         Args: Record<PropertyKey, never>
         Returns: {
-          household_address: string
-          hoa_name: string
           first_seen: string
+          hoa_name: string
+          household_address: string
         }[]
       }
       admin_list_pending_users: {
         Args: Record<PropertyKey, never>
         Returns: {
-          id: string
-          email: string
-          name: string
-          is_verified: boolean
           created_at: string
+          email: string
+          id: string
+          is_verified: boolean
+          name: string
         }[]
       }
       admin_set_user_verification: {
-        Args: { _user_id: string; _is_verified: boolean }
+        Args: { _is_verified: boolean; _user_id: string }
         Returns: {
           id: string
           is_verified: boolean
         }[]
       }
       admin_soft_delete_user: {
-        Args: { _user_id: string; _reason?: string }
+        Args: { _reason?: string; _user_id: string }
         Returns: boolean
       }
       audit_and_fix_user_points: {
         Args: Record<PropertyKey, never>
         Returns: {
-          user_id: string
-          old_points: number
           calculated_points: number
-          vendor_submissions: number
-          reviews: number
           cost_submissions: number
+          old_points: number
           points_fixed: boolean
+          reviews: number
+          user_id: string
+          vendor_submissions: number
         }[]
       }
       check_vendor_duplicate: {
-        Args: { _name: string; _community: string }
+        Args: { _community: string; _name: string }
         Returns: {
+          vendor_category: string
           vendor_id: string
           vendor_name: string
-          vendor_category: string
         }[]
       }
       count_my_costs: {
@@ -675,8 +675,8 @@ export type Database = {
       }
       has_role: {
         Args: {
-          _user_id: string
           _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
         }
         Returns: boolean
       }
@@ -703,42 +703,42 @@ export type Database = {
       list_vendor_reviews: {
         Args: { _vendor_id: string }
         Returns: {
+          author_label: string
+          comments: string
+          created_at: string
           id: string
           rating: number
           recommended: boolean
-          comments: string
-          created_at: string
-          author_label: string
         }[]
       }
       list_vendor_stats: {
         Args: {
-          _hoa_name: string
           _category?: string
-          _sort_by?: string
+          _hoa_name: string
           _limit?: number
           _offset?: number
+          _sort_by?: string
         }
         Returns: {
-          id: string
-          name: string
+          avg_cost_amount: number
+          avg_cost_display: string
+          avg_monthly_cost: number
           category: string
-          homes_serviced: number
-          homes_pct: number
-          hoa_rating: number
-          hoa_rating_count: number
+          contact_info: string
+          google_place_id: string
           google_rating: number
           google_rating_count: number
           google_reviews_json: Json
-          google_place_id: string
-          avg_monthly_cost: number
+          hoa_rating: number
+          hoa_rating_count: number
+          homes_pct: number
+          homes_serviced: number
+          id: string
           monthly_sample_size: number
+          name: string
           service_call_avg: number
           service_call_sample_size: number
-          contact_info: string
           typical_cost: number
-          avg_cost_display: string
-          avg_cost_amount: number
         }[]
       }
       mark_invite_accepted: {
@@ -756,15 +756,15 @@ export type Database = {
       validate_invite: {
         Args: { _token: string }
         Returns: {
+          accepted: boolean
+          created_at: string
           invite_id: string
           invited_email: string
           status: string
-          accepted: boolean
-          created_at: string
         }[]
       }
       vendor_cost_stats: {
-        Args: { _vendor_id: string; _hoa_name: string }
+        Args: { _hoa_name: string; _vendor_id: string }
         Returns: {
           avg_amount: number
           sample_size: number
