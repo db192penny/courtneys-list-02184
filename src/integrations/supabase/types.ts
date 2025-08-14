@@ -629,6 +629,18 @@ export type Database = {
         Args: { _user_id: string; _reason?: string }
         Returns: boolean
       }
+      audit_and_fix_user_points: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          user_id: string
+          old_points: number
+          calculated_points: number
+          vendor_submissions: number
+          reviews: number
+          cost_submissions: number
+          points_fixed: boolean
+        }[]
+      }
       check_vendor_duplicate: {
         Args: { _name: string; _community: string }
         Returns: {
