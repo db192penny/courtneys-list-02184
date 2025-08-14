@@ -47,6 +47,10 @@ export function AdminCostManagement() {
     queryFn: async () => {
       console.log("Fetching admin costs...");
       
+      // First check current session
+      const { data: { session } } = await supabase.auth.getSession();
+      console.log("Current session:", session?.user?.id);
+      
       let query = supabase
         .from("costs")
         .select(`
