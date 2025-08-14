@@ -44,7 +44,10 @@ export default function CostPreview({ costs, showNameInCosts, authorLabel }: Pro
                   )}
                 </div>
                 <div className="text-muted-foreground text-xs">
-                  by {showNameInCosts ? authorLabel : "Neighbor"}
+                  by {showNameInCosts ? authorLabel : (() => {
+                    const streetMatch = authorLabel.match(/ on (.+)$/);
+                    return streetMatch ? `Neighbor on ${streetMatch[1]}` : "Neighbor";
+                  })()}
                 </div>
               </div>
             ))}
