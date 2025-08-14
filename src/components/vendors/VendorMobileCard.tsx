@@ -57,7 +57,7 @@ export default function VendorMobileCard({
               {userHomeVendors?.has(vendor.id) && (
                 <Badge 
                   variant="secondary" 
-                  className="text-xs px-2 py-0.5 bg-green-100 text-green-800"
+                  className="text-[10px] px-1 py-0 bg-green-100 text-green-800"
                 >
                   Your Provider
                 </Badge>
@@ -68,6 +68,7 @@ export default function VendorMobileCard({
             <Button 
               size="sm" 
               variant="outline"
+              className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700"
               onClick={() => onRate(vendor)}
             >
               Rate
@@ -75,6 +76,7 @@ export default function VendorMobileCard({
             <Button 
               size="sm" 
               variant="outline"
+              className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700"
               onClick={() => onCosts(vendor)}
             >
               + Costs

@@ -218,7 +218,7 @@ export default function CommunityVendorTable({
                       {userHomeVendors?.has(r.id) && (
                         <Badge 
                           variant="secondary" 
-                          className="text-xs px-2 py-0.5 bg-green-100 text-green-800 hover:bg-green-200"
+                          className="text-[10px] px-1 py-0 bg-green-100 text-green-800 hover:bg-green-200"
                         >
                           Your Provider
                         </Badge>
@@ -290,10 +290,10 @@ export default function CommunityVendorTable({
                     />
                   </TableCell>
                   <TableCell>{showContact ? (r.contact_info ? formatUSPhoneDisplay(r.contact_info) : "—") : "Hidden"}</TableCell>
-                   <TableCell className="text-right">
+                  <TableCell className="text-right">
                     <div className="flex gap-1 justify-end">
-                      <Button size="sm" variant="outline" onClick={() => openRate(r)}>Rate</Button>
-                      <Button size="sm" variant="outline" onClick={() => openCosts(r)}>+ Costs</Button>
+                      <Button size="sm" variant="outline" className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700" onClick={() => openRate(r)}>Rate</Button>
+                      <Button size="sm" variant="outline" className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700" onClick={() => openCosts(r)}>+ Costs</Button>
                     </div>
                   </TableCell>
                 </TableRow>
