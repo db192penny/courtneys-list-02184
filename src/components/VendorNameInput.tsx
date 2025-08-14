@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import { createPortal } from "react-dom";
 import { loadGoogleMaps } from "@/utils/mapsLoader";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
@@ -192,25 +191,9 @@ export default function VendorNameInput({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Position dropdown relative to input
-  const getDropdownPosition = () => {
-    if (!inputRef.current) return { top: 0, left: 0, width: 0 };
-    
-    const rect = inputRef.current.getBoundingClientRect();
-    console.log("🔍 Input position:", rect);
-    console.log("🔍 Window scroll:", { x: window.scrollX, y: window.scrollY });
-    
-    return {
-      top: rect.bottom + window.scrollY + 4, // Add small gap
-      left: rect.left + window.scrollX,
-      width: rect.width,
-    };
-  };
-
-  const dropdownPosition = showDropdown ? getDropdownPosition() : null;
 
   return (
-    <div className="w-full">
+    <div className="w-full relative">
       <Input
         ref={inputRef}
         id={id}
@@ -234,18 +217,11 @@ export default function VendorNameInput({
         <p className="mt-1 text-sm text-muted-foreground">Searching...</p>
       )}
 
-      {/* Dropdown rendered via portal */}
-      {showDropdown && predictions.length > 0 && dropdownPosition && createPortal(
+      {/* Dropdown rendered directly in component tree */}
+      {showDropdown && predictions.length > 0 && (
         <div
           ref={dropdownRef}
-          style={{
-            position: 'absolute',
-            top: dropdownPosition.top,
-            left: dropdownPosition.left,
-            width: dropdownPosition.width,
-            zIndex: 9999999,
-          }}
-          className="bg-background border border-border rounded-md shadow-lg max-h-60 overflow-y-auto"
+          className="absolute top-full left-0 right-0 z-50 bg-background border border-border rounded-md shadow-lg max-h-60 overflow-y-auto mt-1"
           onMouseDown={(e) => {
             console.log("🖱️ Dropdown mousedown");
             e.stopPropagation();
@@ -284,8 +260,7 @@ export default function VendorNameInput({
               </div>
             </div>
           ))}
-        </div>,
-        document.body
+        </div>
       )}
     </div>
   );
