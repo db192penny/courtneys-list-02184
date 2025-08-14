@@ -31,6 +31,9 @@ import Header from "./components/Header";
 
 const queryClient = new QueryClient();
 
+// Global session state to ensure proper authentication across the app
+let globalSession: any = null;
+
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
   const [loading, setLoading] = useState(true);
@@ -38,12 +41,21 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      globalSession = session;
       setAuthed(!!session);
+      if (session) {
+        // Force query client to refetch queries when session changes
+        queryClient.invalidateQueries();
+      }
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
+      globalSession = session;
       setAuthed(!!session);
       setLoading(false);
+      if (session) {
+        queryClient.invalidateQueries();
+      }
     });
 
     return () => subscription.unsubscribe();
