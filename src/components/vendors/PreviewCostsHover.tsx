@@ -61,10 +61,11 @@ export default function PreviewCostsHover({ vendorId, children }: Props) {
   const { data: costs, isLoading } = useQuery({
     queryKey: ["preview-vendor-costs", vendorId],
     queryFn: async () => {
-      // Fetch both real costs and preview costs
-      const [realCostsResponse, previewCostsResponse] = await Promise.all([
-        // Fetch real costs directly without RPC (to avoid auth requirement)
-        supabase
+      let formattedRealCosts: any[] = [];
+      
+      // Try to fetch real costs, but handle RLS errors gracefully
+      try {
+        const realCostsResponse = await supabase
           .from("costs")
           .select(`
             id,
@@ -78,49 +79,52 @@ export default function PreviewCostsHover({ vendorId, children }: Props) {
           `)
           .eq("vendor_id", vendorId)
           .is("deleted_at", null)
-          .order("created_at", { ascending: false }),
-        
-        // Fetch preview costs
-        supabase
-          .from("preview_costs")
-          .select("*")
-          .eq("vendor_id", vendorId)
-          .order("created_at", { ascending: false })
-      ]);
+          .order("created_at", { ascending: false });
 
-      // Handle real costs
-      const realCosts = realCostsResponse.data || [];
-      const formattedRealCosts = realCosts.map((cost: any) => {
-        const user = cost.users;
-        let authorLabel = "Neighbor";
-        
-        if (!cost.anonymous && user?.show_name_public && user?.name?.trim()) {
-          const name = user.name.trim();
-          if (name.includes(' ')) {
-            const parts = name.split(' ');
-            authorLabel = `${parts[0]} ${parts[parts.length - 1].charAt(0)}.`;
-          } else {
-            authorLabel = name;
-          }
-          
-          if (user.street_name?.trim()) {
-            authorLabel += ` on ${user.street_name.trim()}`;
-          }
+        if (!realCostsResponse.error) {
+          const realCosts = realCostsResponse.data || [];
+          formattedRealCosts = realCosts.map((cost: any) => {
+            const user = cost.users;
+            let authorLabel = "Neighbor";
+            
+            if (!cost.anonymous && user?.show_name_public && user?.name?.trim()) {
+              const name = user.name.trim();
+              if (name.includes(' ')) {
+                const parts = name.split(' ');
+                authorLabel = `${parts[0]} ${parts[parts.length - 1].charAt(0)}.`;
+              } else {
+                authorLabel = name;
+              }
+              
+              if (user.street_name?.trim()) {
+                authorLabel += ` on ${user.street_name.trim()}`;
+              }
+            }
+
+            return {
+              id: cost.id,
+              amount: cost.amount,
+              unit: cost.unit,
+              period: cost.period,
+              cost_kind: cost.cost_kind,
+              created_at: cost.created_at,
+              author_label: authorLabel,
+              type: 'real'
+            };
+          });
         }
+      } catch (error) {
+        // Silently handle RLS errors for logged-out users
+        console.log("Cannot fetch real costs (user not authenticated)");
+      }
 
-        return {
-          id: cost.id,
-          amount: cost.amount,
-          unit: cost.unit,
-          period: cost.period,
-          cost_kind: cost.cost_kind,
-          created_at: cost.created_at,
-          author_label: authorLabel,
-          type: 'real'
-        };
-      });
+      // Fetch preview costs (always accessible)
+      const previewCostsResponse = await supabase
+        .from("preview_costs")
+        .select("*")
+        .eq("vendor_id", vendorId)
+        .order("created_at", { ascending: false });
 
-      // Handle preview costs
       if (previewCostsResponse.error) {
         console.error("Failed to fetch preview costs:", previewCostsResponse.error);
         return formattedRealCosts;

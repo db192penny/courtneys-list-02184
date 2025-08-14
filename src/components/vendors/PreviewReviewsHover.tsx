@@ -32,10 +32,11 @@ export default function PreviewReviewsHover({
   const { data: reviews, isLoading } = useQuery({
     queryKey: ["preview-vendor-reviews", vendorId],
     queryFn: async () => {
-      // Fetch both real reviews and preview reviews
-      const [realReviewsResponse, previewReviewsResponse] = await Promise.all([
-        // Fetch real community reviews directly (without RPC which requires auth)
-        supabase
+      let formattedRealReviews: any[] = [];
+      
+      // Try to fetch real reviews, but handle RLS errors gracefully
+      try {
+        const realReviewsResponse = await supabase
           .from("reviews")
           .select(`
             id,
@@ -47,51 +48,54 @@ export default function PreviewReviewsHover({
             users!inner(name, street_name, show_name_public)
           `)
           .eq("vendor_id", vendorId)
-          .order("created_at", { ascending: false }),
-        // Fetch preview reviews
-        supabase
-          .from("preview_reviews")
-          .select("*")
-          .eq("vendor_id", vendorId)
-          .order("created_at", { ascending: false })
-      ]);
+          .order("created_at", { ascending: false });
 
-      // Handle real reviews
-      const realReviews = realReviewsResponse.data || [];
-      const formattedRealReviews = realReviews.map((review: any) => {
-        // Generate author label similar to the RPC function
-        const user = review.users;
-        let authorLabel = "Neighbor";
-        
-        if (!review.anonymous && user?.show_name_public && user?.name?.trim()) {
-          const name = user.name.trim();
-          if (name.includes(' ')) {
-            const parts = name.split(' ');
-            authorLabel = `${parts[0]} ${parts[parts.length - 1].charAt(0)}.`;
-          } else {
-            authorLabel = name;
-          }
-          
-          if (user.street_name?.trim()) {
-            authorLabel += ` on ${user.street_name.trim()}`;
-          }
+        if (!realReviewsResponse.error) {
+          const realReviews = realReviewsResponse.data || [];
+          formattedRealReviews = realReviews.map((review: any) => {
+            // Generate author label similar to the RPC function
+            const user = review.users;
+            let authorLabel = "Neighbor";
+            
+            if (!review.anonymous && user?.show_name_public && user?.name?.trim()) {
+              const name = user.name.trim();
+              if (name.includes(' ')) {
+                const parts = name.split(' ');
+                authorLabel = `${parts[0]} ${parts[parts.length - 1].charAt(0)}.`;
+              } else {
+                authorLabel = name;
+              }
+              
+              if (user.street_name?.trim()) {
+                authorLabel += ` on ${user.street_name.trim()}`;
+              }
+            }
+
+            return {
+              id: review.id,
+              rating: review.rating,
+              comments: review.comments,
+              created_at: review.created_at,
+              anonymous: review.anonymous,
+              author_label: authorLabel,
+              type: 'real'
+            };
+          });
         }
+      } catch (error) {
+        // Silently handle RLS errors for logged-out users
+        console.log("Cannot fetch real reviews (user not authenticated)");
+      }
 
-        return {
-          id: review.id,
-          rating: review.rating,
-          comments: review.comments,
-          created_at: review.created_at,
-          anonymous: review.anonymous,
-          author_label: authorLabel,
-          type: 'real'
-        };
-      });
+      // Fetch preview reviews (always accessible)
+      const previewReviewsResponse = await supabase
+        .from("preview_reviews")
+        .select("*")
+        .eq("vendor_id", vendorId)
+        .order("created_at", { ascending: false });
 
-      // Handle preview reviews
       if (previewReviewsResponse.error) {
         console.error("Failed to fetch preview reviews:", previewReviewsResponse.error);
-        // Return only real reviews if preview reviews fail
         return formattedRealReviews;
       }
 
