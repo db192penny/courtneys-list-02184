@@ -56,9 +56,28 @@ export default function VendorNameInput({
         inputRef.current = input;
 
         // Handle manual input changes
+        let inputTimeout: NodeJS.Timeout;
         input.addEventListener('input', (e) => {
           const value = (e.target as HTMLInputElement).value;
-          onManualInputRef.current?.(value);
+          
+          // Clear existing timeout to debounce the input
+          clearTimeout(inputTimeout);
+          
+          // Set a new timeout to handle manual input after a short delay
+          inputTimeout = setTimeout(() => {
+            onManualInputRef.current?.(value);
+          }, 100);
+        });
+
+        // Also handle keyboard events to ensure we capture all manual input
+        input.addEventListener('keyup', (e) => {
+          const value = (e.target as HTMLInputElement).value;
+          
+          // If user pressed Enter or Tab, immediately trigger manual input
+          if (e.key === 'Enter' || e.key === 'Tab') {
+            clearTimeout(inputTimeout);
+            onManualInputRef.current?.(value);
+          }
         });
       }
 

@@ -24,6 +24,7 @@ import HouseholdPreview from "./pages/HouseholdPreview";
 import Community from "./pages/Community";
 import AdminBadges from "./pages/AdminBadges";
 import AdminVendorSeed from "./pages/AdminVendorSeed";
+import AdminVendorManagement from "./pages/AdminVendorManagement";
 import Header from "./components/Header";
 
 const queryClient = new QueryClient();
@@ -115,6 +116,7 @@ const App = () => (
           <Route path="/admin" element={<Admin />} />
           <Route path="/admin/badges" element={<ProtectedRoute><AdminBadges /></ProtectedRoute>} />
           <Route path="/admin/vendors/seed" element={<ProtectedRoute><AdminVendorSeed /></ProtectedRoute>} />
+          <Route path="/admin/vendors/manage" element={<ProtectedRoute><AdminVendorManagement /></ProtectedRoute>} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/contact" element={<Contact />} />
