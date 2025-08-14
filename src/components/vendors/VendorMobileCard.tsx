@@ -49,7 +49,7 @@ export default function VendorMobileCard({
               {vendor.homes_serviced === 0 && (
                 <Badge 
                   variant="secondary" 
-                  className="text-xs px-2 py-0.5 bg-orange-100 text-orange-800"
+                  className="text-[10px] px-1 py-0 bg-orange-100 text-orange-800 hover:bg-orange-200 whitespace-nowrap"
                 >
                   New
                 </Badge>
@@ -57,7 +57,7 @@ export default function VendorMobileCard({
               {userHomeVendors?.has(vendor.id) && (
                 <Badge 
                   variant="secondary" 
-                  className="text-[10px] px-1 py-0 bg-green-100 text-green-800"
+                  className="text-[10px] px-1 py-0 bg-green-100 text-green-800 hover:bg-green-200 whitespace-nowrap"
                 >
                   Your Provider
                 </Badge>

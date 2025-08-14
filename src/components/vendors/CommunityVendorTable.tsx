@@ -169,10 +169,10 @@ export default function CommunityVendorTable({
                 <TableHead>Rank</TableHead>
                 <TableHead>Provider</TableHead>
                 <TableHead>Category</TableHead>
-                <TableHead># Homes</TableHead>
+                <TableHead className="whitespace-nowrap"># Homes</TableHead>
                 <TableHead>Ratings/Reviews</TableHead>
                 <TableHead>Cost</TableHead>
-                <TableHead>Contact</TableHead>
+                <TableHead className="whitespace-nowrap">Contact #s</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -210,7 +210,7 @@ export default function CommunityVendorTable({
                       {r.homes_serviced === 0 && (
                         <Badge 
                           variant="secondary" 
-                          className="text-xs px-2 py-0.5 bg-orange-100 text-orange-800 hover:bg-orange-200"
+                          className="text-[10px] px-1 py-0 bg-orange-100 text-orange-800 hover:bg-orange-200 whitespace-nowrap"
                         >
                           New
                         </Badge>
@@ -218,7 +218,7 @@ export default function CommunityVendorTable({
                       {userHomeVendors?.has(r.id) && (
                         <Badge 
                           variant="secondary" 
-                          className="text-[10px] px-1 py-0 bg-green-100 text-green-800 hover:bg-green-200"
+                          className="text-[10px] px-1 py-0 bg-green-100 text-green-800 hover:bg-green-200 whitespace-nowrap"
                         >
                           Your Provider
                         </Badge>
