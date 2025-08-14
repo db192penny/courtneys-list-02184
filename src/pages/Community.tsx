@@ -31,13 +31,13 @@ export default function Community() {
   const isPreview = !canViewFull;
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["community-vendors", communityName],
+    queryKey: ["community-vendor-stats", communityName],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("vendors")
-        .select("id, name, category, contact_info, typical_cost, community, created_at")
-        .eq("community", communityName)
-        .order("created_at", { ascending: false });
+        .rpc("list_vendor_stats", {
+          _hoa_name: communityName,
+          _limit: 100
+        });
       if (error) throw error;
       return data || [];
     },
