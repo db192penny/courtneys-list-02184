@@ -40,7 +40,7 @@ export default function RateVendorModal({ open, onOpenChange, vendor, onSuccess 
         setRating(0);
         setComments("");
         setShowNameInReview(true);
-        setUseForHome(true);
+        setUseForHome(false);
         return;
       }
 
@@ -54,7 +54,7 @@ export default function RateVendorModal({ open, onOpenChange, vendor, onSuccess 
           setRating(0);
           setComments("");
           setShowNameInReview(true);
-          setUseForHome(true);
+          setUseForHome(false);
           return;
         }
 
@@ -95,8 +95,7 @@ export default function RateVendorModal({ open, onOpenChange, vendor, onSuccess 
         // If there's an existing review, use its anonymous setting; otherwise use user's global preference
         setShowNameInReview(review ? !review.anonymous : (userProfile?.show_name_public ?? true));
 
-        // Default to true for new relationships, preserve existing choices
-        setUseForHome(homeVendor !== null ? !!homeVendor : true);
+        setUseForHome(!!homeVendor);
 
         let mergedCosts: CostEntry[] = baseCosts;
         if (costRows && costRows.length) {
