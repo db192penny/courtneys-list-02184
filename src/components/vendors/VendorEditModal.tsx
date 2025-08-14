@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { ExternalLink, RefreshCw } from "lucide-react";
+import VendorNameInput, { type VendorSelectedPayload } from "@/components/VendorNameInput";
 
 interface AdminVendor {
   id: string;
@@ -158,11 +159,34 @@ export function VendorEditModal({ vendor, open, onOpenChange, onSuccess }: Vendo
           <div className="grid gap-4">
             <div className="grid gap-2">
               <Label htmlFor="name">Vendor Name</Label>
-              <Input
+              <VendorNameInput
                 id="name"
-                value={formData.name}
-                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                required
+                defaultValue={formData.name}
+                placeholder="Start typing business name..."
+                onSelected={(payload: VendorSelectedPayload) => {
+                  setFormData(prev => ({
+                    ...prev,
+                    name: payload.name,
+                    contact_info: payload.phone || prev.contact_info,
+                    google_place_id: payload.place_id,
+                  }));
+                  
+                  // Auto-populate Google data if available
+                  if (payload.rating || payload.user_ratings_total) {
+                    setGoogleData({
+                      name: payload.name,
+                      formatted_phone_number: payload.phone,
+                      formatted_address: payload.formatted_address,
+                      rating: payload.rating,
+                      user_ratings_total: payload.user_ratings_total,
+                    });
+                  }
+                  
+                  toast.success("Business data populated from Google Places");
+                }}
+                onManualInput={(name: string) => {
+                  setFormData(prev => ({ ...prev, name }));
+                }}
               />
             </div>
 
