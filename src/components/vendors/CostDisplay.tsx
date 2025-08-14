@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { EditMarketPriceModal } from "./EditMarketPriceModal";
 import CostsHover from "./CostsHover";
+import PreviewCostsHover from "./PreviewCostsHover";
 
 type CostDisplayProps = {
   vendorId: string;
@@ -15,6 +16,7 @@ type CostDisplayProps = {
   marketAmount?: number;
   marketUnit?: string;
   showContact: boolean;
+  isPreviewMode?: boolean;
 };
 
 const formatUnit = (unit?: string) => {
@@ -43,7 +45,8 @@ export function CostDisplay({
   communitySampleSize,
   marketAmount,
   marketUnit,
-  showContact
+  showContact,
+  isPreviewMode
 }: CostDisplayProps) {
   const { data: isAdmin } = useIsAdmin();
   const [showEditMarket, setShowEditMarket] = useState(false);
@@ -60,9 +63,15 @@ export function CostDisplay({
           {communityPrice ? (
             <span className="text-xs font-medium">
               {communitySampleSize && communitySampleSize > 0 ? (
-                <CostsHover vendorId={vendorId}>
-                  {communityPrice}
-                </CostsHover>
+                isPreviewMode ? (
+                  <PreviewCostsHover vendorId={vendorId}>
+                    {communityPrice}
+                  </PreviewCostsHover>
+                ) : (
+                  <CostsHover vendorId={vendorId}>
+                    {communityPrice}
+                  </CostsHover>
+                )
               ) : (
                 communityPrice
               )}

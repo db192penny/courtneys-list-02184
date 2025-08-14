@@ -318,6 +318,7 @@ export default function CommunityVendorTable({
                       marketAmount={r.market_amount}
                       marketUnit={r.market_unit}
                       showContact={!!showContact}
+                      isPreviewMode={isPreviewMode}
                     />
                   </TableCell>
                   <TableCell>{showContact ? (r.contact_info ? formatUSPhoneDisplay(r.contact_info) : "—") : "Hidden"}</TableCell>
