@@ -167,7 +167,7 @@ export default function ActivityGuide() {
       <Dialog open={showInviteModal} onOpenChange={setShowInviteModal}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Share Invite Link</DialogTitle>
+            <DialogTitle>Share Courtney's List</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">
