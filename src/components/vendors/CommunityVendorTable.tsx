@@ -112,7 +112,7 @@ export default function CommunityVendorTable({
               <TableHead>Provider</TableHead>
               <TableHead>Category</TableHead>
               <TableHead># Homes</TableHead>
-              <TableHead>Ratings</TableHead>
+              <TableHead>Ratings/Reviews</TableHead>
               <TableHead>Avg Cost</TableHead>
               <TableHead>Contact</TableHead>
               <TableHead className="text-right">Actions</TableHead>
@@ -160,7 +160,7 @@ export default function CommunityVendorTable({
                   <div className="space-y-2">
                     <ReviewsHover vendorId={r.id}>
                       <div className="flex items-center gap-2 cursor-pointer group">
-                        <span className="text-xs text-muted-foreground">HOA:</span>
+                        <span className="text-xs text-muted-foreground">Community:</span>
                         {r.hoa_rating ? (
                           <div className="flex items-center gap-1 border-b border-blue-400 group-hover:border-blue-600 pb-0.5">
                             <RatingStars rating={r.hoa_rating} showValue />
