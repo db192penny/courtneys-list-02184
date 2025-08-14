@@ -82,6 +82,45 @@ export function AdminCostTable({ costs, isLoading, onUpdate }: AdminCostTablePro
     }
   };
 
+  const getAuthorLabel = (cost: any) => {
+    if (cost.anonymous) {
+      return "Anonymous Submission";
+    }
+    
+    const user = cost.users;
+    if (!user) {
+      return "Unknown User";
+    }
+    
+    if (user.name) {
+      return user.name;
+    }
+    
+    if (user.email) {
+      return user.email.substring(0, user.email.indexOf('@')) + '...';
+    }
+    
+    return "User";
+  };
+
+  const getAuthorDetails = (cost: any) => {
+    const user = cost.users;
+    if (!user || cost.anonymous) return null;
+    
+    return (
+      <div className="text-xs text-muted-foreground">
+        {user.email && <div>{user.email}</div>}
+        <div className="flex items-center gap-1 mt-1">
+          <span className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-xs ${
+            cost.anonymous ? 'bg-orange-100 text-orange-800' : 'bg-green-100 text-green-800'
+          }`}>
+            Anonymous: {cost.anonymous ? 'ON' : 'OFF'}
+          </span>
+        </div>
+      </div>
+    );
+  };
+
   const formatAmount = (amount: number, unit?: string) => {
     return `$${amount}${unit ? `/${unit}` : ''}`;
   };
@@ -136,12 +175,12 @@ export function AdminCostTable({ costs, isLoading, onUpdate }: AdminCostTablePro
                         {cost.cost_kind?.replace("_", " ") || "N/A"}
                       </Badge>
                     </TableCell>
-                  <TableCell>
-                    <div>
-                      <div className="text-sm">Anonymous User</div>
-                      <div className="text-xs text-muted-foreground">Identity protected</div>
-                    </div>
-                  </TableCell>
+                   <TableCell>
+                     <div className="space-y-1">
+                       <div className="font-medium">{getAuthorLabel(cost)}</div>
+                       {getAuthorDetails(cost)}
+                     </div>
+                   </TableCell>
                     <TableCell>
                       <div className="text-sm">{format(new Date(cost.created_at), "MMM d, yyyy")}</div>
                       <div className="text-xs text-muted-foreground">{format(new Date(cost.created_at), "h:mm a")}</div>
