@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
-import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 
 type Props = {
@@ -75,10 +74,7 @@ export default function CostsHover({ vendorId, children }: Props) {
                   )}
                 </div>
                 <div className="text-muted-foreground text-xs">
-                  <Badge variant="outline" className="text-xs px-2 py-0.5 bg-blue-50 text-blue-700 border-blue-200">
-                    by {cost.author_label}
-                  </Badge>
-                  <span className="ml-2">• {new Date(cost.created_at).toLocaleDateString()}</span>
+                  by {cost.author_label} • {new Date(cost.created_at).toLocaleDateString()}
                 </div>
               </div>
             ))}

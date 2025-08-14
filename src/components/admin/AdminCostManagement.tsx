@@ -35,7 +35,7 @@ export function AdminCostManagement() {
         <Alert>
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
-            You need to be logged in as an admin to access cost management. Please sign in with admin credentials.
+            You need admin permissions to access cost management. Contact a site administrator.
           </AlertDescription>
         </Alert>
       </div>
@@ -47,16 +47,11 @@ export function AdminCostManagement() {
     queryFn: async () => {
       console.log("Fetching admin costs...");
       
-      // First check current session
-      const { data: { session } } = await supabase.auth.getSession();
-      console.log("Current session:", session?.user?.id);
-      
       let query = supabase
         .from("costs")
         .select(`
           *,
-          vendors!inner(name, category),
-          users(name, email, show_name_public)
+          vendors!inner(name, category)
         `)
         .order("created_at", { ascending: false });
 
