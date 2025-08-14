@@ -106,16 +106,27 @@ All colors MUST be HSL.
 
 /* Google Places Autocomplete z-index fix for modals */
 .pac-container {
-  z-index: 99999 !important;
+  z-index: 999999 !important;
   position: fixed !important;
   pointer-events: auto !important;
+  transform: translateZ(0) !important;
+  background: white !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3) !important;
 }
 
 .pac-item {
   pointer-events: auto !important;
   cursor: pointer !important;
+  padding: 8px 12px !important;
+  background: white !important;
+  border-bottom: 1px solid #e0e0e0 !important;
 }
 
 .pac-item:hover {
-  background-color: #f0f0f0 !important;
+  background-color: #f5f5f5 !important;
+}
+
+.pac-item-selected {
+  background-color: #1976d2 !important;
+  color: white !important;
 }

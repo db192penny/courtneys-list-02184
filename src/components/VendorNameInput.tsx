@@ -72,9 +72,15 @@ export default function VendorNameInput({
         autocompleteRef.current = autocomplete;
 
         autocomplete.addListener("place_changed", () => {
+          console.log("[VendorNameInput] place_changed event fired");
           try {
             const place = autocomplete.getPlace();
-            if (!place.place_id || !place.name) return;
+            console.log("[VendorNameInput] Place data:", place);
+            
+            if (!place.place_id || !place.name) {
+              console.log("[VendorNameInput] Invalid place data - missing place_id or name");
+              return;
+            }
 
             const payload: VendorSelectedPayload = {
               name: place.name,
@@ -85,6 +91,7 @@ export default function VendorNameInput({
               user_ratings_total: place.user_ratings_total,
             };
 
+            console.log("[VendorNameInput] Calling onSelected with payload:", payload);
             setHelper(`Selected: ${place.name}`);
             onSelectedRef.current?.(payload);
 
@@ -100,6 +107,14 @@ export default function VendorNameInput({
               description: "Please try again or type a different business name.",
               variant: "destructive",
             });
+          }
+        });
+        
+        // Add click debugging for pac-container
+        document.addEventListener('click', (e) => {
+          const target = e.target as HTMLElement;
+          if (target.closest('.pac-container')) {
+            console.log("[VendorNameInput] Click detected on pac-container element:", target);
           }
         });
       }
