@@ -729,6 +729,8 @@ export type Database = {
           hoa_rating_count: number
           google_rating: number
           google_rating_count: number
+          google_reviews_json: Json
+          google_place_id: string
           avg_monthly_cost: number
           monthly_sample_size: number
           service_call_avg: number

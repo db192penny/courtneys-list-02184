@@ -59,14 +59,6 @@ export default function GoogleReviewsHover({
   // Use fresh reviews if available and successful refresh, otherwise use existing reviews
   const reviews: GoogleReview[] = (freshReviews && freshReviews.length > 0) ? freshReviews : existingReviews;
 
-  console.log('GoogleReviewsHover Debug:', {
-    vendorId,
-    googleReviewsJson,
-    existingReviews: existingReviews.length,
-    freshReviews: freshReviews?.length || 0,
-    finalReviews: reviews.length
-  });
-
   if (!googlePlaceId) {
     return <span>{children}</span>;
   }
