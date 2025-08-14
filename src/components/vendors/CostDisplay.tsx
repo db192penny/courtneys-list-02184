@@ -3,6 +3,7 @@ import { Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { EditMarketPriceModal } from "./EditMarketPriceModal";
+import CostsHover from "./CostsHover";
 
 type CostDisplayProps = {
   vendorId: string;
@@ -57,7 +58,13 @@ export function CostDisplay({
         <span className="text-muted-foreground">Community:</span>
         {communityPrice ? (
           <span className="font-medium">
-            {communityPrice}
+            {communitySampleSize && communitySampleSize > 0 ? (
+              <CostsHover vendorId={vendorId}>
+                {communityPrice}
+              </CostsHover>
+            ) : (
+              communityPrice
+            )}
             {communitySampleSize && (
               <span className="text-xs text-muted-foreground ml-1">
                 ({communitySampleSize})

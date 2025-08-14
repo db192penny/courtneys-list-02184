@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import CostInputs, { CostEntry, buildDefaultCosts } from "./CostInputs";
+import CostPreview from "./CostPreview";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -20,6 +22,8 @@ export default function CostManagementModal({ open, onOpenChange, vendor, onSucc
   const [costs, setCosts] = useState<CostEntry[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasExistingCosts, setHasExistingCosts] = useState(false);
+  const [showNameInCosts, setShowNameInCosts] = useState(true);
+  const [authorLabel, setAuthorLabel] = useState("Neighbor");
 
   useEffect(() => {
     let isActive = true;
@@ -42,10 +46,27 @@ export default function CostManagementModal({ open, onOpenChange, vendor, onSucc
           return;
         }
 
+        // Get user profile for author label
+        const { data: userProfile } = await supabase
+          .from("users")
+          .select("name, show_name_public, street_name")
+          .eq("id", user.id)
+          .maybeSingle();
+
+        if (userProfile && isActive) {
+          const displayName = userProfile.show_name_public && userProfile.name?.trim() 
+            ? (userProfile.name.includes(' ')
+                ? `${userProfile.name.split(' ')[0]} ${userProfile.name.split(' ').slice(-1)[0][0]}.`
+                : userProfile.name.trim())
+            : "Neighbor";
+          const streetSuffix = userProfile.street_name ? ` on ${userProfile.street_name}` : "";
+          setAuthorLabel(displayName + streetSuffix);
+        }
+
         // Prefill latest costs for this vendor limited to current user's household (RLS enforces it)
         const { data: costRows } = await supabase
           .from("costs")
-          .select("amount, period, unit, quantity, cost_kind, created_at")
+          .select("amount, period, unit, quantity, cost_kind, created_at, anonymous")
           .eq("vendor_id", vendor.id)
           .order("created_at", { ascending: false });
 
@@ -56,6 +77,9 @@ export default function CostManagementModal({ open, onOpenChange, vendor, onSucc
 
         if (costRows && costRows.length) {
           hasExisting = true;
+          // Set anonymity preference from most recent cost
+          setShowNameInCosts(!costRows[0].anonymous);
+          
           const byKind = new Map<string, typeof costRows[number]>();
           for (const row of costRows) {
             const k = String(row.cost_kind || "");
@@ -137,6 +161,7 @@ export default function CostManagementModal({ open, onOpenChange, vendor, onSucc
         cost_kind: c.cost_kind,
         household_address,
         created_by: userId,
+        anonymous: !showNameInCosts,
       }));
 
       if (payloads.length > 0) {
@@ -190,6 +215,24 @@ export default function CostManagementModal({ open, onOpenChange, vendor, onSucc
               <Label>Cost Information</Label>
               <CostInputs category={vendor.category} value={costs} onChange={setCosts} />
             </div>
+            
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="show-name-costs"
+                checked={showNameInCosts}
+                onCheckedChange={(checked) => setShowNameInCosts(checked as boolean)}
+              />
+              <Label htmlFor="show-name-costs" className="text-sm font-normal">
+                Show my name in costs
+              </Label>
+            </div>
+
+            <CostPreview 
+              costs={costs} 
+              showNameInCosts={showNameInCosts} 
+              authorLabel={authorLabel}
+            />
+            
             <div className="pt-2 flex justify-end gap-2">
               <Button variant="secondary" onClick={() => onOpenChange(false)} disabled={loading}>Cancel</Button>
               <Button onClick={onSubmit} disabled={loading}>{loading ? "Saving..." : "Save"}</Button>

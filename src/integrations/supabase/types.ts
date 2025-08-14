@@ -151,6 +151,7 @@ export type Database = {
       costs: {
         Row: {
           amount: number
+          anonymous: boolean
           cost_kind: string | null
           created_at: string
           created_by: string | null
@@ -167,6 +168,7 @@ export type Database = {
         }
         Insert: {
           amount: number
+          anonymous?: boolean
           cost_kind?: string | null
           created_at?: string
           created_by?: string | null
@@ -183,6 +185,7 @@ export type Database = {
         }
         Update: {
           amount?: number
+          anonymous?: boolean
           cost_kind?: string | null
           created_at?: string
           created_by?: string | null
@@ -731,6 +734,18 @@ export type Database = {
       is_verified: {
         Args: { _uid: string }
         Returns: boolean
+      }
+      list_vendor_costs: {
+        Args: { _vendor_id: string }
+        Returns: {
+          amount: number
+          author_label: string
+          cost_kind: string
+          created_at: string
+          id: string
+          period: string
+          unit: string
+        }[]
       }
       list_vendor_reviews: {
         Args: { _vendor_id: string }
