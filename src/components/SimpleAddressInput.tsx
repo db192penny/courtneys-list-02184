@@ -1,6 +1,4 @@
-
 import React, { useEffect, useRef, useState, useCallback } from "react";
-import { loadGoogleMaps } from "@/utils/mapsLoader";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 
@@ -53,7 +51,10 @@ function toOneLineFromFlexible(components: any[]) {
   return { oneLine, parts: { streetNumber, route, city, state, postalCode } };
 }
 
-export default function AddressInput({
+// Direct Google Maps API key - replace with your actual key
+const GOOGLE_MAPS_API_KEY = "AIzaSyBzF8v6i2SrE0QHQlBfJ_H7QrCtL7wU-Ns"; // This should be moved to environment variables
+
+export default function SimpleAddressInput({
   id,
   className,
   placeholder = "Start typing your address...",
@@ -63,23 +64,58 @@ export default function AddressInput({
 }: AddressInputProps) {
   const { toast } = useToast();
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const elementRef = useRef<any>(null);
-  const [helper, setHelper] = useState<string>("");
   const inputRef = useRef<HTMLInputElement | null>(null);
   const autocompleteRef = useRef<any>(null);
-  const onSelectedRef = useRef<AddressInputProps["onSelected"]>();
-  onSelectedRef.current = onSelected;
+  const [helper, setHelper] = useState<string>("");
+  const [scriptsLoaded, setScriptsLoaded] = useState(false);
 
-  const initAutocomplete = useCallback(async () => {
-    try {
-      console.log("[AddressInput] Starting initAutocomplete");
-      const google = await loadGoogleMaps(["places"]);
-      console.log("[AddressInput] Google Maps loaded successfully", google);
-      if (!containerRef.current) {
-        console.log("[AddressInput] Container ref not available");
+  // Load Google Maps JavaScript API
+  const loadGoogleMapsScript = useCallback(() => {
+    return new Promise<void>((resolve, reject) => {
+      // Check if already loaded
+      if (window.google && window.google.maps && window.google.maps.places) {
+        setScriptsLoaded(true);
+        resolve();
         return;
       }
 
+      // Check if script is already being loaded
+      if (document.querySelector('script[src*="maps.googleapis.com"]')) {
+        // Wait for it to load
+        const checkLoaded = setInterval(() => {
+          if (window.google && window.google.maps && window.google.maps.places) {
+            clearInterval(checkLoaded);
+            setScriptsLoaded(true);
+            resolve();
+          }
+        }, 100);
+        return;
+      }
+
+      // Create and load the script
+      const script = document.createElement('script');
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places&callback=initGoogleMaps`;
+      script.async = true;
+      script.defer = true;
+      
+      // Set up global callback
+      (window as any).initGoogleMaps = () => {
+        setScriptsLoaded(true);
+        resolve();
+      };
+      
+      script.onerror = () => {
+        reject(new Error('Failed to load Google Maps API'));
+      };
+      
+      document.head.appendChild(script);
+    });
+  }, []);
+
+  const initAutocomplete = useCallback(async () => {
+    if (!scriptsLoaded || !containerRef.current) return;
+
+    try {
       // Create input once
       if (!inputRef.current) {
         const input = document.createElement("input");
@@ -93,14 +129,14 @@ export default function AddressInput({
       }
 
       // Create autocomplete once
-      if (!autocompleteRef.current && inputRef.current) {
+      if (!autocompleteRef.current && inputRef.current && window.google && window.google.maps && window.google.maps.places) {
         const opts = {
           componentRestrictions: country && country.length ? { country } : undefined,
           types: ["address"],
         } as any;
-        const autocomplete = new google.maps.places.Autocomplete(inputRef.current, opts);
+        
+        const autocomplete = new window.google.maps.places.Autocomplete(inputRef.current, opts);
         autocompleteRef.current = autocomplete;
-        elementRef.current = autocomplete;
 
         autocomplete.addListener("place_changed", () => {
           try {
@@ -129,14 +165,14 @@ export default function AddressInput({
             };
 
             setHelper("");
-            onSelectedRef.current?.(payload);
+            onSelected?.(payload);
 
             // Keep the selected value visible in the field
             if (inputRef.current) {
               inputRef.current.value = payload.formatted_address || payload.household_address;
             }
           } catch (err) {
-            console.error("[AddressInput] place_changed handler failed:", err);
+            console.error("[SimpleAddressInput] place_changed handler failed:", err);
             setHelper("Address selection failed. Please try again.");
             toast({
               title: "Address selection failed",
@@ -147,22 +183,21 @@ export default function AddressInput({
         });
       }
     } catch (e) {
-      console.error("[AddressInput] Autocomplete init failed:", e);
-      setHelper("Address suggestions are unavailable right now. Please try refreshing the page.");
-    }
-  }, [placeholder, defaultValue, country]);
-
-  useEffect(() => {
-    initAutocomplete().catch((e) => {
-      console.error("[AddressInput] init failed:", e);
+      console.error("[SimpleAddressInput] Autocomplete init failed:", e);
       setHelper("Address suggestions are unavailable right now.");
-    });
-  }, []);
+    }
+  }, [scriptsLoaded, placeholder, defaultValue, country, onSelected, toast]);
 
-  // Keep latest onSelected in a ref to avoid re-initializing Autocomplete
   useEffect(() => {
-    onSelectedRef.current = onSelected;
-  }, [onSelected]);
+    loadGoogleMapsScript()
+      .then(() => {
+        initAutocomplete();
+      })
+      .catch((e) => {
+        console.error("[SimpleAddressInput] init failed:", e);
+        setHelper("Address suggestions are unavailable right now.");
+      });
+  }, [loadGoogleMapsScript, initAutocomplete]);
 
   // Update placeholder dynamically
   useEffect(() => {
@@ -178,18 +213,6 @@ export default function AddressInput({
     }
   }, [defaultValue]);
 
-  // Update country restriction without re-creating Autocomplete
-  useEffect(() => {
-    if (autocompleteRef.current) {
-      try {
-        autocompleteRef.current.setOptions({
-          componentRestrictions: country && country.length ? { country } : undefined,
-        });
-      } catch (e) {
-        console.warn("[AddressInput] failed to update country restrictions", e);
-      }
-    }
-  }, [country]);
   return (
     <div className="w-full">
       <div id={id} ref={containerRef} className={cn("w-full", className)} />

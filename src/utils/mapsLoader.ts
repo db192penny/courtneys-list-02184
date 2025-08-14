@@ -14,7 +14,9 @@ async function fetchGoogleKey(): Promise<string> {
   if (cachedKey) return cachedKey;
 
   const attempt = async () => {
+    console.log("[mapsLoader] Attempting to fetch Google Maps key...");
     const { data, error } = await supabase.functions.invoke("get-public-config");
+    console.log("[mapsLoader] Response:", { data, error });
     if (error) {
       throw new Error(error.message || "Failed to load Google Maps key");
     }
@@ -22,6 +24,7 @@ async function fetchGoogleKey(): Promise<string> {
     if (!key) {
       throw new Error("Google Maps API key is missing");
     }
+    console.log("[mapsLoader] Successfully fetched API key");
     return key;
   };
 
@@ -46,12 +49,16 @@ export async function loadGoogleMaps(libraries: ("places" | "geometry" | "marker
   if (loadPromise) return loadPromise;
 
   loadPromise = (async () => {
+    console.log("[mapsLoader] Loading Google Maps...");
     const apiKey = await fetchGoogleKey();
     if (!loader) {
+      console.log("[mapsLoader] Creating new Google Maps loader with key:", apiKey ? "present" : "missing");
       loader = new Loader({ apiKey, version: "weekly", libraries });
     }
     try {
+      console.log("[mapsLoader] Loading Google Maps API...");
       const g = await loader.load();
+      console.log("[mapsLoader] Google Maps API loaded successfully");
       return g;
     } catch (e) {
       console.error("[mapsLoader] Loader failed:", e);
