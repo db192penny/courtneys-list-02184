@@ -109,6 +109,7 @@ export default function VendorNameInput({
 
   // Get place details when a prediction is selected
   const selectPrediction = useCallback(async (prediction: PlacePrediction) => {
+    console.log("🎯 Selecting prediction:", prediction);
     if (!placesService.current) return;
     
     setLoading(true);
@@ -196,8 +197,11 @@ export default function VendorNameInput({
     if (!inputRef.current) return { top: 0, left: 0, width: 0 };
     
     const rect = inputRef.current.getBoundingClientRect();
+    console.log("🔍 Input position:", rect);
+    console.log("🔍 Window scroll:", { x: window.scrollX, y: window.scrollY });
+    
     return {
-      top: rect.bottom + window.scrollY,
+      top: rect.bottom + window.scrollY + 4, // Add small gap
       left: rect.left + window.scrollX,
       width: rect.width,
     };
@@ -239,9 +243,17 @@ export default function VendorNameInput({
             top: dropdownPosition.top,
             left: dropdownPosition.left,
             width: dropdownPosition.width,
-            zIndex: 999999,
+            zIndex: 9999999,
           }}
           className="bg-background border border-border rounded-md shadow-lg max-h-60 overflow-y-auto"
+          onMouseDown={(e) => {
+            console.log("🖱️ Dropdown mousedown");
+            e.stopPropagation();
+          }}
+          onClick={(e) => {
+            console.log("🖱️ Dropdown click");
+            e.stopPropagation();
+          }}
         >
           {predictions.map((prediction, index) => (
             <div
@@ -251,7 +263,17 @@ export default function VendorNameInput({
                 "hover:bg-accent hover:text-accent-foreground",
                 selectedIndex === index && "bg-accent text-accent-foreground"
               )}
-              onClick={() => selectPrediction(prediction)}
+              onClick={(e) => {
+                console.log("🖱️ Prediction clicked:", prediction);
+                e.stopPropagation();
+                e.preventDefault();
+                selectPrediction(prediction);
+              }}
+              onMouseDown={(e) => {
+                console.log("🖱️ Prediction mousedown:", prediction);
+                e.stopPropagation();
+                e.preventDefault();
+              }}
               onMouseEnter={() => setSelectedIndex(index)}
             >
               <div className="font-medium">
