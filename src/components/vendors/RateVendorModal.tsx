@@ -247,6 +247,7 @@ export default function RateVendorModal({ open, onOpenChange, vendor, onSuccess 
       queryClient.invalidateQueries({ queryKey: ["community-stats"] });
       queryClient.invalidateQueries({ queryKey: ["community-vendors"] });
       queryClient.invalidateQueries({ queryKey: ["vendor-costs"] });
+      queryClient.invalidateQueries({ queryKey: ["user-home-vendors"] });
       // Use wildcard to invalidate all community-specific queries
       queryClient.invalidateQueries({ 
         predicate: (query) => query.queryKey[0] === "community-stats" 
