@@ -157,7 +157,7 @@ export default function CommunityVendorTable({
                   </div>
                 </TableCell>
                 <TableCell>
-                  <div className="space-y-1">
+                  <div className="space-y-2">
                     <ReviewsHover vendorId={r.id}>
                       <div className="flex items-center gap-2 cursor-pointer group">
                         <span className="text-xs text-muted-foreground">HOA:</span>
@@ -172,15 +172,13 @@ export default function CommunityVendorTable({
                       </div>
                     </ReviewsHover>
                     {r.google_rating != null && (
-                      <ReviewsHover vendorId={r.id}>
-                        <div className="flex items-center gap-2 cursor-pointer group">
-                          <span className="text-xs text-muted-foreground">Google:</span>
-                          <div className="flex items-center gap-1 border-b border-blue-400 group-hover:border-blue-600 pb-0.5">
-                            <RatingStars rating={r.google_rating} showValue />
-                            {r.google_rating_count ? <span className="text-xs text-muted-foreground">({r.google_rating_count})</span> : null}
-                          </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-muted-foreground">Google:</span>
+                        <div className="flex items-center gap-1">
+                          <RatingStars rating={r.google_rating} showValue />
+                          {r.google_rating_count ? <span className="text-xs text-muted-foreground">({r.google_rating_count})</span> : null}
                         </div>
-                      </ReviewsHover>
+                      </div>
                     )}
                   </div>
                 </TableCell>
