@@ -1,6 +1,8 @@
 import { ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/hover-card";
+import { Badge } from "@/components/ui/badge";
+import { Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserProfile } from "@/hooks/useUserProfile";
 
@@ -43,9 +45,14 @@ export default function ReviewsHover({ vendorId, children }: { vendorId: string;
           <div className="max-h-64 overflow-y-auto space-y-3">
             {data.map((r) => (
               <div key={r.id} className="border rounded-md p-2">
-                <div className="text-xs text-foreground">
-                  <span className="font-medium">{r.rating}/5</span>
-                  <span className="ml-2 text-muted-foreground">by {r.author_label}</span>
+                <div className="text-xs text-foreground flex items-center gap-2">
+                  <div className="flex items-center gap-1">
+                    <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
+                    <span className="font-medium">{r.rating}/5</span>
+                  </div>
+                  <Badge variant="outline" className="text-xs px-2 py-0.5 bg-blue-50 text-blue-700 border-blue-200">
+                    by {r.author_label}
+                  </Badge>
                 </div>
                 {r.comments && (
                   <p className="text-sm text-muted-foreground mt-1">{r.comments}</p>
