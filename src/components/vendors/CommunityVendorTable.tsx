@@ -10,9 +10,11 @@ import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { CATEGORIES } from "@/data/categories";
 import { useUserHomeVendors } from "@/hooks/useUserHomeVendors";
+import useIsAdmin from "@/hooks/useIsAdmin";
 
 import ReviewsHover from "@/components/vendors/ReviewsHover";
 import RateVendorModal from "@/components/vendors/RateVendorModal";
+import AdminEditVendorModal from "@/components/vendors/AdminEditVendorModal";
 import { formatUSPhoneDisplay } from "@/utils/phone";
 export type CommunityVendorRow = {
   id: string;
@@ -65,12 +67,24 @@ export default function CommunityVendorTable({
   });
 
   const { data: userHomeVendors } = useUserHomeVendors();
+  const { data: isAdmin } = useIsAdmin();
+  
+  // Rate modal state
   const [modalOpen, setModalOpen] = useState(false);
   const [selected, setSelected] = useState<{ id: string; name: string; category: string } | null>(null);
+  
+  // Edit modal state
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editVendorId, setEditVendorId] = useState<string | null>(null);
 
   const openRate = (row: CommunityVendorRow) => {
     setSelected({ id: row.id, name: row.name, category: row.category });
     setModalOpen(true);
+  };
+
+  const openEdit = (vendorId: string) => {
+    setEditVendorId(vendorId);
+    setEditModalOpen(true);
   };
 
   const formatted = useMemo(() => data || [], [data]);
@@ -221,7 +235,9 @@ export default function CommunityVendorTable({
                 <TableCell>{showContact ? (r.contact_info ? formatUSPhoneDisplay(r.contact_info) : "—") : "Hidden"}</TableCell>
                 <TableCell className="text-right space-x-2">
                   <Button size="sm" variant="outline" className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700" onClick={() => openRate(r)}>Rate</Button>
-                  
+                  {isAdmin && (
+                    <Button size="sm" variant="outline" onClick={() => openEdit(r.id)}>Edit</Button>
+                  )}
                 </TableCell>
               </TableRow>
             ))}
@@ -229,6 +245,16 @@ export default function CommunityVendorTable({
         </Table>
       </div>
       <RateVendorModal open={modalOpen} onOpenChange={setModalOpen} vendor={selected} onSuccess={() => { setModalOpen(false); refetch(); }} />
+      <AdminEditVendorModal 
+        open={editModalOpen} 
+        onOpenChange={setEditModalOpen} 
+        vendorId={editVendorId} 
+        onSuccess={() => { 
+          setEditModalOpen(false); 
+          setEditVendorId(null);
+          refetch(); 
+        }} 
+      />
     </div>
     </TooltipProvider>
   );
