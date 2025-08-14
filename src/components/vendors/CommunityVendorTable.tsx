@@ -162,7 +162,9 @@ export default function CommunityVendorTable({
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center gap-2">
-                    <span className="font-medium text-foreground">{r.homes_serviced}</span>
+                    <span className="font-medium text-foreground">
+                      {r.homes_serviced === 0 ? "–" : r.homes_serviced}
+                    </span>
                     <span className="text-xs text-muted-foreground">{r.homes_pct ? `${r.homes_pct}%` : ""}</span>
                     {/* Heat map hidden for now */}
                   </div>
@@ -178,7 +180,12 @@ export default function CommunityVendorTable({
                             {r.hoa_rating_count ? <span className="text-xs text-muted-foreground">({r.hoa_rating_count})</span> : null}
                           </div>
                         ) : (
-                          <span className="text-xs text-muted-foreground border-b border-blue-400 group-hover:border-blue-600 pb-0.5">—</span>
+                          <span 
+                            className="text-xs text-muted-foreground border-b border-blue-400 group-hover:border-blue-600 pb-0.5"
+                            title="Be the first to rate this provider"
+                          >
+                            No Ratings Yet
+                          </span>
                         )}
                       </div>
                     </ReviewsHover>
@@ -198,6 +205,13 @@ export default function CommunityVendorTable({
                     <span className="text-xs text-muted-foreground">See in Reviews</span>
                   ) : r.avg_cost_amount != null ? (
                     <span>${Number(r.avg_cost_amount).toFixed(2)} {r.avg_cost_display}</span>
+                  ) : r.homes_serviced === 0 ? (
+                    <span 
+                      className="text-xs text-muted-foreground"
+                      title="Submit cost info to help your neighbors"
+                    >
+                      TBD
+                    </span>
                   ) : (
                     "—"
                   )}
