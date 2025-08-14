@@ -201,17 +201,17 @@ export default function CommunityVendorTable({
                   </div>
                 </TableCell>
                 <TableCell>
-                  {r.avg_cost_display === "See in Reviews" ? (
-                    <span className="text-xs text-muted-foreground">See in Reviews</span>
-                  ) : r.avg_cost_amount != null ? (
-                    <span>${Number(r.avg_cost_amount).toFixed(2)} {r.avg_cost_display}</span>
-                  ) : r.homes_serviced === 0 ? (
+                  {r.homes_serviced === 0 ? (
                     <span 
                       className="text-xs text-muted-foreground cursor-help"
                       title="Submit cost info to help your neighbors"
                     >
                       TBD
                     </span>
+                  ) : r.avg_cost_amount != null ? (
+                    <span>${Number(r.avg_cost_amount).toFixed(2)} {r.avg_cost_display}</span>
+                  ) : r.avg_cost_display === "See in Reviews" ? (
+                    <span className="text-xs text-muted-foreground">See in Reviews</span>
                   ) : (
                     <span 
                       className="text-xs text-muted-foreground cursor-help"
