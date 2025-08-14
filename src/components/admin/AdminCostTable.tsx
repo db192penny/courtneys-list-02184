@@ -122,8 +122,7 @@ export function AdminCostTable({ costs, isLoading, onUpdate }: AdminCostTablePro
                   <TableHead>Vendor</TableHead>
                   <TableHead>Amount</TableHead>
                   <TableHead>Cost Type</TableHead>
-                  <TableHead>User</TableHead>
-                  <TableHead>Anonymous</TableHead>
+                  <TableHead>Author</TableHead>
                   <TableHead>Created</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Actions</TableHead>
@@ -151,18 +150,9 @@ export function AdminCostTable({ costs, isLoading, onUpdate }: AdminCostTablePro
                     </TableCell>
                   <TableCell>
                     <div>
-                      <div className="text-sm font-medium">
-                        {cost.users?.name || cost.users?.email || "Unknown User"}
-                      </div>
-                      {cost.users?.email && cost.users?.name && (
-                        <div className="text-xs text-muted-foreground">{cost.users.email}</div>
-                      )}
+                      <div className="text-sm">Anonymous User</div>
+                      <div className="text-xs text-muted-foreground">Identity protected</div>
                     </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={cost.anonymous ? "destructive" : "default"}>
-                      {cost.anonymous ? "Yes" : "No"}
-                    </Badge>
                   </TableCell>
                     <TableCell>
                       <div className="text-sm">{format(new Date(cost.created_at), "MMM d, yyyy")}</div>
