@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { RatingStars } from "@/components/ui/rating-stars";
 import { Badge } from "@/components/ui/badge";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { CATEGORIES } from "@/data/categories";
 import { useUserHomeVendors } from "@/hooks/useUserHomeVendors";
 
@@ -75,6 +76,7 @@ export default function CommunityVendorTable({
   const formatted = useMemo(() => data || [], [data]);
 
   return (
+    <TooltipProvider>
     <div className="space-y-4">
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div className="flex items-center gap-3">
@@ -204,12 +206,16 @@ export default function CommunityVendorTable({
                   {r.avg_cost_amount != null ? (
                     <span>${Number(r.avg_cost_amount).toFixed(2)} {r.avg_cost_display}</span>
                   ) : (
-                    <span 
-                      className="text-xs text-muted-foreground cursor-help"
-                      title="Submit cost info to help your neighbors"
-                    >
-                      TBD
-                    </span>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span className="text-xs text-muted-foreground cursor-help">
+                          TBD
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Submit cost info to help your neighbors</p>
+                      </TooltipContent>
+                    </Tooltip>
                   )}
                 </TableCell>
                 <TableCell>{showContact ? (r.contact_info ? formatUSPhoneDisplay(r.contact_info) : "—") : "Hidden"}</TableCell>
@@ -224,6 +230,7 @@ export default function CommunityVendorTable({
       </div>
       <RateVendorModal open={modalOpen} onOpenChange={setModalOpen} vendor={selected} onSuccess={() => { setModalOpen(false); refetch(); }} />
     </div>
+    </TooltipProvider>
   );
 }
 
