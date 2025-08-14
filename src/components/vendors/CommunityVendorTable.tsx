@@ -197,9 +197,16 @@ export default function CommunityVendorTable({
                   <TableCell>{idx + 1}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      <span className="font-medium text-foreground">
-                        {r.name}
-                      </span>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="font-medium text-foreground max-w-[140px] truncate">
+                            {r.name}
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>{r.name}</p>
+                        </TooltipContent>
+                      </Tooltip>
                       {r.homes_serviced === 0 && (
                         <Badge 
                           variant="secondary" 
@@ -283,9 +290,11 @@ export default function CommunityVendorTable({
                     />
                   </TableCell>
                   <TableCell>{showContact ? (r.contact_info ? formatUSPhoneDisplay(r.contact_info) : "—") : "Hidden"}</TableCell>
-                  <TableCell className="text-right space-x-2">
-                    <Button size="sm" variant="outline" className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700" onClick={() => openRate(r)}>Rate</Button>
-                    <Button size="sm" variant="outline" onClick={() => openCosts(r)}>+ Costs</Button>
+                   <TableCell className="text-right">
+                    <div className="flex gap-1 justify-end">
+                      <Button size="sm" variant="outline" onClick={() => openRate(r)}>Rate</Button>
+                      <Button size="sm" variant="outline" onClick={() => openCosts(r)}>+ Costs</Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

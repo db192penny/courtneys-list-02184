@@ -36,7 +36,14 @@ export default function VendorMobileCard({
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
               <span className="text-lg font-semibold text-muted-foreground">#{rank}</span>
-              <h3 className="font-medium text-foreground truncate">{vendor.name}</h3>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <h3 className="font-medium text-foreground max-w-[140px] truncate">{vendor.name}</h3>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{vendor.name}</p>
+                </TooltipContent>
+              </Tooltip>
             </div>
             <div className="flex flex-wrap gap-1">
               {vendor.homes_serviced === 0 && (
@@ -57,11 +64,10 @@ export default function VendorMobileCard({
               )}
             </div>
           </div>
-          <div className="flex gap-2 shrink-0">
+          <div className="flex gap-1 shrink-0">
             <Button 
               size="sm" 
-              variant="outline" 
-              className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700" 
+              variant="outline"
               onClick={() => onRate(vendor)}
             >
               Rate
