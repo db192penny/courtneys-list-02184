@@ -76,6 +76,13 @@ const CommunityPreview = () => {
     enabled: !!communityName,
   });
 
+  const photoUrl = useMemo(() => {
+    if (community?.photo_path) {
+      return supabase.storage.from("community-photos").getPublicUrl(community.photo_path).data.publicUrl;
+    }
+    return "/lovable-uploads/fa4d554f-323c-4bd2-b5aa-7cd1f2289c3c.png";
+  }, [community?.photo_path]);
+
   if (!slug) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -115,9 +122,12 @@ const CommunityPreview = () => {
       <div className="container py-8 space-y-8">
         {/* Logo and Header */}
         <header className="text-center space-y-4">
-          <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
-            <span className="text-2xl font-bold text-primary">CL</span>
-          </div>
+          <img
+            src={photoUrl}
+            alt={`${communityName} community photo`}
+            className="h-24 w-24 rounded-lg object-cover border mx-auto"
+            loading="lazy"
+          />
           <div>
             <h1 className="text-3xl font-bold tracking-tight">{communityName}</h1>
             <p className="text-muted-foreground mt-2">
