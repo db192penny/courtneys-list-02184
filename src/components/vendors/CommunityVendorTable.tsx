@@ -6,7 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { RatingStars } from "@/components/ui/rating-stars";
+import { Badge } from "@/components/ui/badge";
 import { CATEGORIES } from "@/data/categories";
+import { useUserHomeVendors } from "@/hooks/useUserHomeVendors";
 
 import ReviewsHover from "@/components/vendors/ReviewsHover";
 import RateVendorModal from "@/components/vendors/RateVendorModal";
@@ -61,6 +63,7 @@ export default function CommunityVendorTable({
     enabled: !!communityName,
   });
 
+  const { data: userHomeVendors } = useUserHomeVendors();
   const [modalOpen, setModalOpen] = useState(false);
   const [selected, setSelected] = useState<{ id: string; name: string; category: string } | null>(null);
 
@@ -142,6 +145,14 @@ export default function CommunityVendorTable({
                     <span className="font-medium text-foreground">
                       {r.name}
                     </span>
+                    {userHomeVendors?.has(r.id) && (
+                      <Badge 
+                        variant="secondary" 
+                        className="text-xs px-2 py-0.5 bg-green-100 text-green-800 hover:bg-green-200"
+                      >
+                        Your Provider
+                      </Badge>
+                    )}
                   </div>
                 </TableCell>
                 <TableCell>
