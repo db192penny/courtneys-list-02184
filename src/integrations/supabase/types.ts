@@ -150,12 +150,17 @@ export type Database = {
       }
       costs: {
         Row: {
+          admin_modified: boolean | null
+          admin_modified_at: string | null
+          admin_modified_by: string | null
           amount: number
           anonymous: boolean
           cost_kind: string | null
           created_at: string
           created_by: string | null
           currency: string
+          deleted_at: string | null
+          deleted_by: string | null
           household_address: string
           id: string
           normalized_address: string
@@ -167,12 +172,17 @@ export type Database = {
           vendor_id: string
         }
         Insert: {
+          admin_modified?: boolean | null
+          admin_modified_at?: string | null
+          admin_modified_by?: string | null
           amount: number
           anonymous?: boolean
           cost_kind?: string | null
           created_at?: string
           created_by?: string | null
           currency?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
           household_address: string
           id?: string
           normalized_address: string
@@ -184,12 +194,17 @@ export type Database = {
           vendor_id: string
         }
         Update: {
+          admin_modified?: boolean | null
+          admin_modified_at?: string | null
+          admin_modified_by?: string | null
           amount?: number
           anonymous?: boolean
           cost_kind?: string | null
           created_at?: string
           created_by?: string | null
           currency?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
           household_address?: string
           id?: string
           normalized_address?: string

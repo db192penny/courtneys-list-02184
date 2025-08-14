@@ -26,6 +26,7 @@ import AdminBadges from "./pages/AdminBadges";
 import AdminVendorSeed from "./pages/AdminVendorSeed";
 import AdminVendorManagement from "./pages/AdminVendorManagement";
 import AdminEditVendor from "./pages/AdminEditVendor";
+import AdminCostManagement from "./pages/AdminCostManagement";
 import Header from "./components/Header";
 
 const queryClient = new QueryClient();
@@ -119,6 +120,7 @@ const App = () => (
           <Route path="/admin/vendors/seed" element={<ProtectedRoute><AdminVendorSeed /></ProtectedRoute>} />
           <Route path="/admin/vendors/manage" element={<ProtectedRoute><AdminVendorManagement /></ProtectedRoute>} />
           <Route path="/admin/vendors/edit" element={<ProtectedRoute><AdminEditVendor /></ProtectedRoute>} />
+          <Route path="/admin/costs" element={<ProtectedRoute><AdminCostManagement /></ProtectedRoute>} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/contact" element={<Contact />} />
