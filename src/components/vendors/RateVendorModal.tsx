@@ -205,17 +205,19 @@ export default function RateVendorModal({ open, onOpenChange, vendor, onSuccess 
           created_by: userId,
         }));
         if (payloads.length) {
-          console.log("[RateVendorModal] Inserting costs:", payloads);
-          const { error: costErr } = await supabase.from("costs").insert(payloads as any);
+          console.log("[RateVendorModal] Upserting costs:", payloads);
+          const { error: costErr } = await supabase.from("costs").upsert(payloads as any, {
+            onConflict: 'created_by,vendor_id,cost_kind'
+          });
           if (costErr) {
-            console.error("[RateVendorModal] cost insert error", costErr);
+            console.error("[RateVendorModal] cost upsert error", costErr);
             toast({
               title: "Error saving cost information",
               description: "Your rating was saved but cost information couldn't be saved.",
               variant: "destructive",
             });
           } else {
-            console.log("[RateVendorModal] Costs inserted successfully");
+            console.log("[RateVendorModal] Costs upserted successfully");
           }
         }
       }

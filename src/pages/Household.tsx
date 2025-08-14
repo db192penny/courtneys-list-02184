@@ -176,10 +176,13 @@ export default function Household() {
       household_address: address,
       amount: value,
       currency: curr,
+      cost_kind: 'one_time', // Add default cost_kind for unique constraint
       created_by: userId,
     } as const;
 
-    const { error } = await supabase.from("costs").insert(payload as any);
+    const { error } = await supabase.from("costs").upsert(payload as any, {
+      onConflict: 'created_by,vendor_id,cost_kind'
+    });
     if (error) {
       console.error("[Household] insert cost error:", error);
       toast({ title: "Could not add cost", description: error.message, variant: "destructive" });
