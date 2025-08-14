@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -97,6 +96,13 @@ function AuthWatcher() {
   return null;
 }
 
+function ConditionalHeader() {
+  const location = useLocation();
+  const isPreviewRoute = location.pathname.startsWith('/community-preview/');
+  
+  return isPreviewRoute ? null : <Header />;
+}
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -104,7 +110,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
           <AuthWatcher />
-          <Header />
+          <ConditionalHeader />
           <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/signin" element={<SignIn />} />

@@ -94,7 +94,7 @@ const CommunityPreview = () => {
   const title = previewLink?.title || `${communityName} — Vendor Preview`;
   const description = previewLink?.description || `Preview vendor listings and community reviews for ${communityName}. Early access to neighbor recommendations.`;
 
-  console.log("CommunityPreview rendering with changes:", { communityName, slug });
+  
   return (
     <main className="min-h-screen bg-background">
       <SEO
@@ -107,7 +107,7 @@ const CommunityPreview = () => {
       <div className="bg-primary text-primary-foreground py-3">
         <div className="container text-center">
           <p className="text-sm font-medium">
-            Hi - thanks for helping with this list. Please rate at least three vendors (more if we have them :)
+            Hi - thanks so much for helping with this list. Please rate at least three vendors (more if you see them :)
           </p>
         </div>
       </div>

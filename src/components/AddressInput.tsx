@@ -71,10 +71,10 @@ export default function AddressInput({
   onSelectedRef.current = onSelected;
 
   const initAutocomplete = useCallback(async () => {
-    const google = await loadGoogleMaps(["places"]);
-    if (!containerRef.current) return;
-
     try {
+      const google = await loadGoogleMaps(["places"]);
+      if (!containerRef.current) return;
+
       // Create input once
       if (!inputRef.current) {
         const input = document.createElement("input");
@@ -145,7 +145,7 @@ export default function AddressInput({
       console.error("[AddressInput] Autocomplete init failed:", e);
       setHelper("Address suggestions are unavailable right now.");
     }
-  }, []);
+  }, [placeholder, defaultValue, country]);
 
   useEffect(() => {
     initAutocomplete().catch((e) => {
