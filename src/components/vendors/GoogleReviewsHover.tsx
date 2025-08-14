@@ -66,7 +66,7 @@ export default function GoogleReviewsHover({
   return (
     <HoverCard>
       <HoverCardTrigger asChild>
-        <span className="cursor-help underline-offset-2 hover:underline">{children}</span>
+        <span className="cursor-help">{children}</span>
       </HoverCardTrigger>
       <HoverCardContent className="w-80">
         <div className="flex items-center justify-between mb-3">

@@ -24,7 +24,7 @@ export default function ReviewsHover({ vendorId, children }: { vendorId: string;
   return (
     <HoverCard>
       <HoverCardTrigger asChild>
-        <span className="cursor-help underline-offset-2 hover:underline">{children}</span>
+        <span className="cursor-help">{children}</span>
       </HoverCardTrigger>
       <HoverCardContent className="w-80">
         {!isVerified && (
