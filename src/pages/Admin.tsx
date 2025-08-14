@@ -7,6 +7,7 @@ import { toast } from "@/components/ui/sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Link } from "react-router-dom";
+import { AdminQuickAccess } from "@/components/admin/AdminQuickAccess";
 interface PendingRow {
   household_address: string;
   hoa_name: string;
@@ -282,6 +283,8 @@ const [householdLoading, setHouseholdLoading] = useState<Record<string, boolean>
 
         {authed && isSiteAdmin && (
           <div className="grid gap-6">
+            <AdminQuickAccess />
+            
             <div className="rounded-md border border-border p-4">
               <div className="flex items-center justify-between mb-3">
                 <h2 className="font-medium">Admin Tools</h2>
@@ -294,9 +297,6 @@ const [householdLoading, setHouseholdLoading] = useState<Record<string, boolean>
                   </Button>
                   <Button asChild variant="outline" size="sm">
                     <Link to="/admin/badges">Manage Badges</Link>
-                  </Button>
-                  <Button asChild variant="outline" size="sm">
-                    <Link to="/admin/costs">Manage Costs</Link>
                   </Button>
                   <Button asChild variant="outline" size="sm">
                     <Link to="/admin/costs">Manage Costs</Link>
