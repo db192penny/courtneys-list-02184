@@ -95,7 +95,8 @@ export default function RateVendorModal({ open, onOpenChange, vendor, onSuccess 
         // If there's an existing review, use its anonymous setting; otherwise use user's global preference
         setShowNameInReview(review ? !review.anonymous : (userProfile?.show_name_public ?? true));
 
-        setUseForHome(!!homeVendor);
+        // Default to true for "use for home" when rating from community tab
+        setUseForHome(true);
 
         let mergedCosts: CostEntry[] = baseCosts;
         if (costRows && costRows.length) {
