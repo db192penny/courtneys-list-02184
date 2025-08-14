@@ -40,7 +40,7 @@ export default function RateVendorModal({ open, onOpenChange, vendor, onSuccess 
         setRating(0);
         setComments("");
         setShowNameInReview(true);
-        setUseForHome(false);
+        setUseForHome(true);
         return;
       }
 
@@ -54,7 +54,7 @@ export default function RateVendorModal({ open, onOpenChange, vendor, onSuccess 
           setRating(0);
           setComments("");
           setShowNameInReview(true);
-          setUseForHome(false);
+          setUseForHome(true);
           return;
         }
 
