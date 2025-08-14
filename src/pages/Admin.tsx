@@ -6,6 +6,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { toast } from "@/components/ui/sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { AdminVendorTable } from "@/components/vendors/AdminVendorTable";
 interface PendingRow {
   household_address: string;
   hoa_name: string;
@@ -280,47 +282,64 @@ const [householdLoading, setHouseholdLoading] = useState<Record<string, boolean>
         )}
 
         {authed && isSiteAdmin && (
-          <div className="grid gap-6">
-            <div className="rounded-md border border-border p-4">
-              <h2 className="font-medium mb-3">Pending Users ({pendingUsers.length})</h2>
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Email</TableHead>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Address</TableHead>
-                      <TableHead>Joined</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {pendingUsers.length === 0 && (
+          <Tabs defaultValue="users" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="users">User Management</TabsTrigger>
+              <TabsTrigger value="vendors">Vendor Management</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="users" className="space-y-6">
+              <div className="rounded-md border border-border p-4">
+                <h2 className="font-medium mb-3">Pending Users ({pendingUsers.length})</h2>
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
                       <TableRow>
-                        <TableCell colSpan={5} className="text-sm text-muted-foreground">No users pending approval.</TableCell>
+                        <TableHead>Email</TableHead>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Address</TableHead>
+                        <TableHead>Joined</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
                       </TableRow>
-                    )}
-                    {pendingUsers.map((u) => (
-                        <TableRow key={u.id}>
-                          <TableCell>{u.email}</TableCell>
-                          <TableCell>{u.name || "—"}</TableCell>
-                          <TableCell>{u.formatted_address || u.address || "—"}</TableCell>
-                          <TableCell>{u.created_at ? new Date(u.created_at).toLocaleDateString() : "—"}</TableCell>
-                          <TableCell className="text-right space-x-2">
-                            <Button size="sm" variant="secondary" disabled={!!userLoading?.[u.id]} onClick={() => setUserVerification(u.id, false, u.email)}>
-                              {userLoading?.[u.id] === "reject" ? "Rejecting…" : "Reject"}
-                            </Button>
-                            <Button size="sm" disabled={!!userLoading?.[u.id]} onClick={() => setUserVerification(u.id, true, u.email)}>
-                              {userLoading?.[u.id] === "approve" ? "Approving…" : "Approve"}
-                            </Button>
-                          </TableCell>
+                    </TableHeader>
+                    <TableBody>
+                      {pendingUsers.length === 0 && (
+                        <TableRow>
+                          <TableCell colSpan={5} className="text-sm text-muted-foreground">No users pending approval.</TableCell>
                         </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                      )}
+                      {pendingUsers.map((u) => (
+                          <TableRow key={u.id}>
+                            <TableCell>{u.email}</TableCell>
+                            <TableCell>{u.name || "—"}</TableCell>
+                            <TableCell>{u.formatted_address || u.address || "—"}</TableCell>
+                            <TableCell>{u.created_at ? new Date(u.created_at).toLocaleDateString() : "—"}</TableCell>
+                            <TableCell className="text-right space-x-2">
+                              <Button size="sm" variant="secondary" disabled={!!userLoading?.[u.id]} onClick={() => setUserVerification(u.id, false, u.email)}>
+                                {userLoading?.[u.id] === "reject" ? "Rejecting…" : "Reject"}
+                              </Button>
+                              <Button size="sm" disabled={!!userLoading?.[u.id]} onClick={() => setUserVerification(u.id, true, u.email)}>
+                                {userLoading?.[u.id] === "approve" ? "Approving…" : "Approve"}
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
               </div>
-            </div>
-          </div>
+            </TabsContent>
+
+            <TabsContent value="vendors" className="space-y-6">
+              <div className="rounded-md border border-border p-4">
+                <h2 className="font-medium mb-3">Vendor Management</h2>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Manage all vendors in the system. Edit vendor details, sync with Google Places API, or delete vendors and their associated data.
+                </p>
+                <AdminVendorTable />
+              </div>
+            </TabsContent>
+          </Tabs>
         )}
 
         {authed && isHoaAdmin && (
