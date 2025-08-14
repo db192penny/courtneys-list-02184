@@ -35,7 +35,7 @@ export function AdminCostManagement() {
         <Alert>
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
-            You need admin permissions to access cost management. Contact a site administrator.
+            You need to be logged in as an admin to access cost management. Please sign in with admin credentials.
           </AlertDescription>
         </Alert>
       </div>
