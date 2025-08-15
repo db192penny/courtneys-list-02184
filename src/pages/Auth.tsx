@@ -219,7 +219,7 @@ const Auth = () => {
           <CardHeader className="space-y-1">
             <CardTitle>{communityName ? `${communityName} Fam` : "Request Access"}</CardTitle>
             <CardDescription>
-              Since you are part of the invite only test family (thank you!), you will be automatically verified. In the future, neighbors will need to be accepted by an admin (umm, me unless one of you want to be <strong>sold bold:)</strong>.
+              Since you are part of the invite only test family (thank you!), you will be automatically verified. In the future, neighbors will need to be accepted by an admin (umm, that will be me unless one of you cares to be <strong>so bold:)</strong>.
             </CardDescription>
           </CardHeader>
 
