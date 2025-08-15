@@ -318,7 +318,7 @@ const Auth = () => {
                 )}
               </div>
 
-              <Button type="submit" className="w-full" disabled={resident === "no"}>Request Access</Button>
+              <Button type="submit" className="w-full" disabled={resident === "no"}>I'm VIP - let me in the Door!</Button>
             </form>
           </CardContent>
 
