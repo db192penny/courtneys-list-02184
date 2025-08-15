@@ -76,12 +76,9 @@ function AuthWatcher() {
     const redirectIfNeeded = (hasSession: boolean) => {
       if (!mounted) return;
       console.log('AuthWatcher: checking redirect', { hasSession, pathname: location.pathname });
-      if (
-        hasSession &&
-        (location.pathname === "/signin" ||
-          location.pathname.startsWith("/auth"))
-      ) {
-        console.log('AuthWatcher: redirecting authenticated user to community');
+      // Only redirect from /signin - let /auth page handle its own community detection
+      if (hasSession && location.pathname === "/signin") {
+        console.log('AuthWatcher: redirecting authenticated user from signin');
         navigate("/communities/boca-bridges", { replace: true });
       }
     };

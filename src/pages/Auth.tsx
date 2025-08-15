@@ -109,7 +109,9 @@ const Auth = () => {
         console.warn("[Auth] community detection failed (non-fatal):", e);
       }
 
-      navigate(destination);
+      // Clean up any hash fragments and navigate
+      const cleanDestination = destination.split('#')[0];
+      navigate(cleanDestination, { replace: true });
     } catch (e) {
       console.warn("[Auth] finalizeOnboarding failed:", e);
       navigate("/profile?onboarding=1");
