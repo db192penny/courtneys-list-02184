@@ -209,17 +209,17 @@ const Auth = () => {
   return (
     <main className="min-h-screen bg-background">
       <SEO
-        title="Join Courtney’s List"
-        description="Request access by entering your details below. After HOA approval, you’ll get a magic link to unlock exclusive vendor info."
+        title="Join Courtney's List"
+        description="Join the invite only test family - automatically verified access to exclusive vendor info."
         canonical={canonical}
       />
       <section className="container max-w-xl py-10">
-        <h1 className="text-3xl font-semibold mb-6">Join Courtney’s List</h1>
+        <h1 className="text-3xl font-semibold mb-6">Join Courtney's List</h1>
         <Card>
           <CardHeader className="space-y-1">
             <CardTitle>{communityName ? `Join ${communityName}` : "Request Access"}</CardTitle>
             <CardDescription>
-              Request access by entering your details below. After approval by a community admin, you’ll receive a magic link to unlock exclusive vendor info.
+              Since you are part of the invite only test family (thank you!), you will be automatically verified. In the future, neighbors will need to be accepted by an admin (umm, me unless one of you want to be <strong>sold bold:)</strong>.
             </CardDescription>
           </CardHeader>
 
@@ -313,7 +313,7 @@ const Auth = () => {
         </Card>
 
         <div className="mt-4 text-center text-sm text-muted-foreground">
-          Enter your details, and once approved by your community admin, you’ll get full access to your neighborhood’s trusted providers.
+          Enter your details, and once approved by your community admin, you'll get full access to your neighborhood's trusted providers.
         </div>
       </section>
     </main>
