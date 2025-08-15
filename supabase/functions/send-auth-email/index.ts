@@ -39,7 +39,14 @@ Deno.serve(async (req) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')
     const token = webhookData.email_data?.token_hash || webhookData.email_data?.token || 'missing-token'
     const emailActionType = webhookData.email_data?.email_action_type || 'recovery'
-    const redirectTo = webhookData.email_data?.redirect_to || `${supabaseUrl}`
+    const redirectTo = webhookData.email_data?.redirect_to || 'https://courtneys-list.com/auth'
+    
+    console.log('🔗 Magic link details:', {
+      token: token.substring(0, 10) + '...',
+      emailActionType,
+      providedRedirectTo: webhookData.email_data?.redirect_to,
+      finalRedirectTo: redirectTo
+    })
     
     const magicLinkUrl = `${supabaseUrl}/auth/v1/verify?token=${token}&type=${emailActionType}&redirect_to=${redirectTo}`
     
