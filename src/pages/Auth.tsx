@@ -322,9 +322,11 @@ const Auth = () => {
             </form>
           </CardContent>
 
-          <CardFooter className="flex items-center justify-between">
-            <Button variant="link" onClick={() => navigate("/")}>Back to Homepage</Button>
-          </CardFooter>
+          {!communityName && (
+            <CardFooter className="flex items-center justify-between">
+              <Button variant="link" onClick={() => navigate("/")}>Back to Homepage</Button>
+            </CardFooter>
+          )}
         </Card>
 
         <div className="mt-4 text-center text-sm text-muted-foreground">
