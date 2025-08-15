@@ -217,7 +217,7 @@ const Auth = () => {
         <h1 className="text-3xl font-semibold mb-6">Join Courtney's List</h1>
         <Card>
           <CardHeader className="space-y-1">
-            <CardTitle>{communityName ? `Join ${communityName}` : "Request Access"}</CardTitle>
+            <CardTitle>{communityName ? `${communityName} Fam` : "Request Access"}</CardTitle>
             <CardDescription>
               Since you are part of the invite only test family (thank you!), you will be automatically verified. In the future, neighbors will need to be accepted by an admin (umm, me unless one of you want to be <strong>sold bold:)</strong>.
             </CardDescription>
