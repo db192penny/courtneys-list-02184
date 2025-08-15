@@ -21,8 +21,10 @@ const Index = () => {
 
   const onAddressSelected = async (payload: AddressSelectedPayload) => {
     try {
+      console.log("Index: Address selected:", payload);
       setSelectedAddress(payload);
       localStorage.setItem("prefill_address", payload.formatted_address);
+      console.log("Index: Address stored in localStorage:", payload.formatted_address);
     } catch (e) {
       console.error("[Index] address select error:", e);
       toast({ title: "Something went wrong", description: "Please try again.", variant: "destructive" });
@@ -31,11 +33,14 @@ const Index = () => {
 
   const onSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault();
+    console.log("Index: Submit clicked", { selectedAddress, hoa });
     if (!selectedAddress) {
+      console.log("Index: No address selected, showing error");
       toast({ title: "Pick from suggestions", description: "Please pick an address from the list.", variant: "destructive" });
       return;
     }
     try {
+      console.log("Index: Navigating to community:", toSlug(hoa));
       navigate(`/communities/${toSlug(hoa)}`);
     } catch (e) {
       console.error("[Index] submit error:", e);

@@ -74,12 +74,13 @@ function AuthWatcher() {
     let mounted = true;
     const redirectIfNeeded = (hasSession: boolean) => {
       if (!mounted) return;
+      console.log('AuthWatcher: checking redirect', { hasSession, pathname: location.pathname });
       if (
         hasSession &&
-        (location.pathname === "/" ||
-          location.pathname === "/signin" ||
+        (location.pathname === "/signin" ||
           location.pathname.startsWith("/auth"))
       ) {
+        console.log('AuthWatcher: redirecting authenticated user to community');
         navigate("/communities/boca-bridges", { replace: true });
       }
     };
