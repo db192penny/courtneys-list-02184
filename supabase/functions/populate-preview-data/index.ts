@@ -17,43 +17,34 @@ Deno.serve(async (req) => {
     
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
-    console.log('Starting to populate preview data...')
+    console.log('Starting to populate preview data with real user data...')
 
-    // First, create some dummy preview sessions
-    const dummySessions = [
+    // Create preview sessions using real user data from David and Courtney Birnbaum
+    const realSessions = [
       {
-        session_token: 'preview-session-1',
-        name: 'Sarah M.',
-        address: '123 Oak Street',
-        street_name: 'Oak Street',
+        session_token: 'preview-session-david',
+        name: 'David B.',
+        address: '123 Rosella Rd',
+        street_name: 'Rosella Rd',
         community: 'Boca Bridges',
-        normalized_address: 'oak street',
-        source: 'sample_data'
+        normalized_address: 'rosella rd',
+        source: 'real_data'
       },
       {
-        session_token: 'preview-session-2', 
-        name: 'Mike R.',
-        address: '456 Pine Avenue',
-        street_name: 'Pine Avenue',
+        session_token: 'preview-session-courtney',
+        name: 'Courtney B.',
+        address: '456 Rosella Rd',
+        street_name: 'Rosella Rd',
         community: 'Boca Bridges',
-        normalized_address: 'pine avenue',
-        source: 'sample_data'
-      },
-      {
-        session_token: 'preview-session-3',
-        name: 'Lisa K.',
-        address: '789 Maple Drive',
-        street_name: 'Maple Drive', 
-        community: 'Boca Bridges',
-        normalized_address: 'maple drive',
-        source: 'sample_data'
+        normalized_address: 'rosella rd',
+        source: 'real_data'
       }
     ]
 
-    // Insert dummy sessions
+    // Insert preview sessions
     const { data: sessions, error: sessionError } = await supabase
       .from('preview_sessions')
-      .upsert(dummySessions, { onConflict: 'session_token' })
+      .upsert(realSessions, { onConflict: 'session_token' })
       .select()
 
     if (sessionError) {
@@ -63,26 +54,39 @@ Deno.serve(async (req) => {
 
     console.log(`Created ${sessions?.length} preview sessions`)
 
-    // Get existing reviews and copy them to preview_reviews
-    const { data: existingReviews, error: reviewsError } = await supabase
+    // Get real reviews from David and Courtney Birnbaum
+    const { data: realReviews, error: reviewsError } = await supabase
       .from('reviews')
-      .select('vendor_id, rating, comments, recommended')
-      .limit(50) // Limit to avoid too much data
+      .select(`
+        vendor_id, 
+        rating, 
+        comments, 
+        recommended,
+        user_id
+      `)
+      .in('user_id', ['4a6da6d8-7a14-4f65-a7e0-0f4a9bb68a25', '59e15d3e-e3da-4e80-9c15-c8f9b8b3c1ba'])
 
     if (reviewsError) {
-      console.error('Error fetching reviews:', reviewsError)
+      console.error('Error fetching real reviews:', reviewsError)
       throw reviewsError
     }
 
-    if (existingReviews && existingReviews.length > 0) {
-      const previewReviews = existingReviews.map((review, index) => ({
-        vendor_id: review.vendor_id,
-        session_id: sessions[index % sessions.length].id,
-        rating: review.rating,
-        comments: review.comments,
-        recommended: review.recommended,
-        anonymous: Math.random() > 0.7 // 30% chance of being anonymous
-      }))
+    if (realReviews && realReviews.length > 0 && sessions && sessions.length > 0) {
+      const previewReviews = realReviews.map((review) => {
+        // Assign David's reviews to David's session, Courtney's to Courtney's
+        const sessionId = review.user_id === '4a6da6d8-7a14-4f65-a7e0-0f4a9bb68a25' 
+          ? sessions.find(s => s.session_token === 'preview-session-david')?.id
+          : sessions.find(s => s.session_token === 'preview-session-courtney')?.id
+
+        return {
+          vendor_id: review.vendor_id,
+          session_id: sessionId,
+          rating: review.rating,
+          comments: review.comments,
+          recommended: review.recommended,
+          anonymous: false // Use real names for authenticity
+        }
+      }).filter(review => review.session_id) // Filter out any that couldn't find a session
 
       const { error: insertReviewError } = await supabase
         .from('preview_reviews')
@@ -91,35 +95,52 @@ Deno.serve(async (req) => {
       if (insertReviewError) {
         console.error('Error inserting preview reviews:', insertReviewError)
       } else {
-        console.log(`Inserted ${previewReviews.length} preview reviews`)
+        console.log(`Inserted ${previewReviews.length} real preview reviews`)
       }
     }
 
-    // Get existing costs and copy them to preview_costs  
-    const { data: existingCosts, error: costsError } = await supabase
+    // Get real costs from David and Courtney Birnbaum
+    const { data: realCosts, error: costsError } = await supabase
       .from('costs')
-      .select('vendor_id, amount, unit, period, cost_kind, notes, currency, quantity')
+      .select(`
+        vendor_id, 
+        amount, 
+        unit, 
+        period, 
+        cost_kind, 
+        notes, 
+        currency, 
+        quantity,
+        created_by
+      `)
+      .in('created_by', ['4a6da6d8-7a14-4f65-a7e0-0f4a9bb68a25', '59e15d3e-e3da-4e80-9c15-c8f9b8b3c1ba'])
       .is('deleted_at', null)
-      .limit(50) // Limit to avoid too much data
 
     if (costsError) {
-      console.error('Error fetching costs:', costsError)
+      console.error('Error fetching real costs:', costsError)
       throw costsError
     }
 
-    if (existingCosts && existingCosts.length > 0) {
-      const previewCosts = existingCosts.map((cost, index) => ({
-        vendor_id: cost.vendor_id,
-        session_id: sessions[index % sessions.length].id,
-        amount: cost.amount,
-        unit: cost.unit,
-        period: cost.period,
-        cost_kind: cost.cost_kind,
-        notes: cost.notes,
-        currency: cost.currency,
-        quantity: cost.quantity,
-        anonymous: Math.random() > 0.6 // 40% chance of being anonymous
-      }))
+    if (realCosts && realCosts.length > 0 && sessions && sessions.length > 0) {
+      const previewCosts = realCosts.map((cost) => {
+        // Assign David's costs to David's session, Courtney's to Courtney's
+        const sessionId = cost.created_by === '4a6da6d8-7a14-4f65-a7e0-0f4a9bb68a25' 
+          ? sessions.find(s => s.session_token === 'preview-session-david')?.id
+          : sessions.find(s => s.session_token === 'preview-session-courtney')?.id
+
+        return {
+          vendor_id: cost.vendor_id,
+          session_id: sessionId,
+          amount: cost.amount,
+          unit: cost.unit,
+          period: cost.period,
+          cost_kind: cost.cost_kind,
+          notes: cost.notes,
+          currency: cost.currency,
+          quantity: cost.quantity,
+          anonymous: false // Use real names for authenticity
+        }
+      }).filter(cost => cost.session_id) // Filter out any that couldn't find a session
 
       const { error: insertCostError } = await supabase
         .from('preview_costs')
@@ -128,17 +149,17 @@ Deno.serve(async (req) => {
       if (insertCostError) {
         console.error('Error inserting preview costs:', insertCostError)
       } else {
-        console.log(`Inserted ${previewCosts.length} preview costs`)
+        console.log(`Inserted ${previewCosts.length} real preview costs`)
       }
     }
 
     return new Response(
       JSON.stringify({
         success: true,
-        message: 'Preview data populated successfully',
+        message: 'Preview data populated with real user data successfully',
         sessions: sessions?.length || 0,
-        reviews: existingReviews?.length || 0,
-        costs: existingCosts?.length || 0
+        reviews: realReviews?.length || 0,
+        costs: realCosts?.length || 0
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
