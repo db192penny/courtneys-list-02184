@@ -15,16 +15,26 @@ const supabaseAdmin = createClient(
 
 Deno.serve(async (req) => {
   console.log('Auth email webhook triggered')
+  console.log('Hook secret configured:', !!hookSecret)
+  console.log('Resend API key configured:', !!Deno.env.get('RESEND_API_KEY'))
   
   if (req.method !== 'POST') {
     return new Response('Method not allowed', { status: 405 })
   }
 
-  const payload = await req.text()
-  const headers = Object.fromEntries(req.headers)
-  const wh = new Webhook(hookSecret)
-  
   try {
+    const payload = await req.text()
+    console.log('Received payload length:', payload.length)
+    
+    const headers = Object.fromEntries(req.headers)
+    console.log('Headers received:', Object.keys(headers))
+    
+    if (!hookSecret) {
+      throw new Error('SEND_AUTH_EMAIL_HOOK_SECRET not configured')
+    }
+    
+    const wh = new Webhook(hookSecret)
+    
     const {
       user,
       email_data: { token, token_hash, redirect_to, email_action_type },
