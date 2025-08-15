@@ -129,7 +129,7 @@ export default function Community() {
               }}
               className="w-full sm:w-auto"
             >
-              Join Your Neighbors
+              Sign Up As A Verified Neighbor
             </Button>
             <p className="text-sm text-muted-foreground">
               Join your community to rate vendors, share costs, and access detailed reviews. We keep this space for verified neighbors only, so everyone can share openly and safely.
@@ -159,11 +159,6 @@ export default function Community() {
         {/* Show real data when it exists */}
         {!!data && data.length > 0 && (
           <div className="space-y-3">
-            {!isAuthenticated && (
-              <p className="text-sm text-muted-foreground">
-                Join your community to rate vendors, share costs, and access detailed reviews. We keep this space for verified neighbors only, so everyone can share openly and safely.
-              </p>
-            )}
             <CommunityVendorTable 
               communityName={communityName} 
               showContact={true} 
