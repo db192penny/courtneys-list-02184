@@ -117,6 +117,12 @@ serve(async (req) => {
         <p>If the button doesn't work, copy and paste this link into your browser:</p>
         <p style="word-break: break-all; color:#555">${actionLink}</p>
         <p style="margin-top:24px;color:#666">If you didn't expect this email, you can safely ignore it.</p>
+        <div style="margin-top: 32px; padding-top: 16px; border-top: 1px solid #eee;">
+          <p style="color: #999; font-size: 12px; text-align: center; margin: 0;">
+            <a href="https://courtneys-list.com/unsubscribe?email=${encodeURIComponent(email)}" style="color: #999; text-decoration: underline;">Unsubscribe</a> | 
+            <a href="https://courtneys-list.com/contact" style="color: #999; text-decoration: underline;">Contact Us</a>
+          </p>
+        </div>
       </div>
     `;
 

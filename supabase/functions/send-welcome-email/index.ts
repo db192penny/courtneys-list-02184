@@ -84,6 +84,12 @@ const handler = async (req: Request): Promise<Response> => {
               Best regards,<br>
               The Courtney's List Team
             </p>
+            <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #e2e8f0;">
+              <p style="color: #94a3b8; font-size: 12px; text-align: center; margin: 0;">
+                <a href="https://courtneys-list.com/unsubscribe?email=${encodeURIComponent(email)}" style="color: #94a3b8; text-decoration: underline;">Unsubscribe</a> | 
+                <a href="https://courtneys-list.com/contact" style="color: #94a3b8; text-decoration: underline;">Contact Us</a>
+              </p>
+            </div>
           </div>
         </div>
       `,

@@ -59,6 +59,12 @@ Deno.serve(async (req) => {
           <a href="${magicLinkUrl}" style="display: inline-block; background: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px;">Access Your Account ✨</a>
           <p style="margin-top: 20px;">Or copy this code: <code style="background: #f4f4f4; padding: 4px 8px;">${webhookData.email_data?.token || 'N/A'}</code></p>
           <p style="color: #666; margin-top: 30px;">Happy exploring!<br/>Courtney's List</p>
+          <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee;">
+            <p style="color: #999; font-size: 12px; text-align: center;">
+              <a href="https://courtneys-list.com/unsubscribe?email=${encodeURIComponent(webhookData.user.email)}" style="color: #999; text-decoration: underline;">Unsubscribe</a> | 
+              <a href="https://courtneys-list.com/contact" style="color: #999; text-decoration: underline;">Contact Us</a>
+            </p>
+          </div>
         </body>
       </html>
     `

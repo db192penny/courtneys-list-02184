@@ -107,6 +107,24 @@ export const MagicLinkEmail = ({
           </Link>
           - Your neighborhood vendor directory
         </Text>
+        
+        <Text style={unsubscribe}>
+          <Link
+            href={`https://courtneys-list.com/unsubscribe?email=${encodeURIComponent(name)}`}
+            target="_blank"
+            style={{ color: '#ccc', textDecoration: 'underline' }}
+          >
+            Unsubscribe
+          </Link>
+          {' | '}
+          <Link
+            href="https://courtneys-list.com/contact"
+            target="_blank"
+            style={{ color: '#ccc', textDecoration: 'underline' }}
+          >
+            Contact Us
+          </Link>
+        </Text>
       </Container>
     </Body>
   </Html>
@@ -166,4 +184,15 @@ const code = {
   border: '1px solid #eee',
   color: '#333',
   fontFamily: 'monospace',
+}
+
+const unsubscribe = {
+  color: '#ccc',
+  fontSize: '12px',
+  lineHeight: '18px',
+  marginTop: '24px',
+  marginBottom: '12px',
+  textAlign: 'center' as const,
+  borderTop: '1px solid #eee',
+  paddingTop: '16px',
 }
