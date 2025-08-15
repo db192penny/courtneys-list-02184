@@ -12,6 +12,8 @@ const ALLOWLIST = [
   /^https:\/\/.*\.lovableproject\.com$/i,
   /^https:\/\/.*\.lovable\.app$/i,
   /^https:\/\/id-preview--.*\.lovable\.app$/i,
+  /^https:\/\/courtneys-list\.com$/i,
+  /^https:\/\/www\.courtneys-list\.com$/i,
 ];
 
 function cors(req: Request) {
