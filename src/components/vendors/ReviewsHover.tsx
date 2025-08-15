@@ -29,7 +29,7 @@ export default function ReviewsHover({ vendorId, children }: { vendorId: string;
       <HoverCardContent className="w-80">
         {!isVerified && (
           <div className="text-sm text-muted-foreground">
-            Reviews are available after verification.
+            Reviews are shared just within our neighborhood circle. Sign up to view them.
           </div>
         )}
         {isVerified && isLoading && (

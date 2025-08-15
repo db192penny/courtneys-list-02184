@@ -129,10 +129,10 @@ export default function Community() {
               }}
               className="w-full sm:w-auto"
             >
-              Sign Up to Access Full Features
+              Join Your Neighbors
             </Button>
             <p className="text-sm text-muted-foreground">
-              Join your community to rate vendors, share costs, and access detailed reviews.
+              Join your community to rate vendors, share costs, and access detailed reviews. We keep this space for verified neighbors only, so everyone can share openly and safely.
             </p>
           </div>
         )}
@@ -161,7 +161,7 @@ export default function Community() {
           <div className="space-y-3">
             {!isAuthenticated && (
               <p className="text-sm text-muted-foreground">
-                Sign up to rate vendors, share costs, and see detailed reviews.
+                Join your community to rate vendors, share costs, and access detailed reviews. We keep this space for verified neighbors only, so everyone can share openly and safely.
               </p>
             )}
             <CommunityVendorTable 

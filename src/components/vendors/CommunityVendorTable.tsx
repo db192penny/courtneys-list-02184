@@ -321,7 +321,7 @@ export default function CommunityVendorTable({
                            onClick={() => window.location.href = `/auth?community=${encodeURIComponent(communityName)}`}
                            className="text-xs"
                          >
-                           Sign Up to Rate
+                           Join to Rate
                          </Button>
                        )}
                      </div>
