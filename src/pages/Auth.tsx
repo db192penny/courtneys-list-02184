@@ -76,15 +76,15 @@ const Auth = () => {
         localStorage.removeItem("pending_profile");
       }
 
-      // Determine community from household mapping; fallback to profile onboarding
+      // Determine community from signup source first, then household mapping; fallback to profile onboarding
       let destination = "/profile?onboarding=1";
       console.log("[Auth] 🔍 Starting community detection for user:", userId);
       
       try {
-        // Get the user's address first to filter household_hoa properly
+        // PRIORITY 1: Check signup_source for community affiliation
         const { data: userData, error: userErr } = await supabase
           .from("users")
-          .select("address")
+          .select("address, signup_source")
           .eq("id", userId)
           .maybeSingle();
 
@@ -92,9 +92,17 @@ const Auth = () => {
           console.warn("[Auth] user lookup error:", userErr);
         }
 
-        console.log("[Auth] 📍 User address:", userData?.address);
+        console.log("[Auth] 📍 User data:", { address: userData?.address, signup_source: userData?.signup_source });
 
-        if (userData?.address) {
+        // Check if user signed up from a community page
+        if (userData?.signup_source && userData.signup_source.startsWith("community:")) {
+          const communityFromSignup = userData.signup_source.replace("community:", "");
+          destination = `/communities/${toSlug(communityFromSignup)}`;
+          console.log("[Auth] ✅ Community detected from signup_source, redirecting to:", destination);
+        } else if (userData?.address) {
+          // PRIORITY 2: Fall back to address-based detection
+          console.log("[Auth] 🔍 No community signup_source, checking address-based detection");
+          
           // Use the RPC function to get the normalized address first
           const { data: normalizedAddr } = await supabase.rpc("normalize_address", { _addr: userData.address });
           console.log("[Auth] 🔍 Normalized address:", normalizedAddr);
@@ -116,7 +124,7 @@ const Auth = () => {
           const hoaName = mapping?.hoa_name || "";
           if (hoaName) {
             destination = `/communities/${toSlug(hoaName)}`;
-            console.log("[Auth] ✅ Community detected, redirecting to:", destination);
+            console.log("[Auth] ✅ Community detected via address, redirecting to:", destination);
           } else {
             console.log("[Auth] ⚠️ No HOA mapping found, trying RPC fallback");
             // try RPC as additional fallback if available
