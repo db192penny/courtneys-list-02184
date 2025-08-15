@@ -23,6 +23,7 @@ interface User {
   created_at: string;
   points: number | null;
   submissions_count: number | null;
+  hoa_name: string | null;
 }
 
 interface UserActivity {
@@ -48,7 +49,10 @@ const AdminUsers = () => {
     queryFn: async () => {
       let query = supabase
         .from("users")
-        .select("id, email, name, address, formatted_address, is_verified, signup_source, created_at, points, submissions_count")
+        .select(`
+          id, email, name, address, formatted_address, is_verified, signup_source, created_at, points, submissions_count,
+          household_hoa!left(hoa_name)
+        `)
         .order("created_at", { ascending: false });
 
       if (statusFilter === "verified") {
@@ -59,7 +63,10 @@ const AdminUsers = () => {
 
       const { data, error } = await query;
       if (error) throw error;
-      return data || [];
+      return (data || []).map((user: any) => ({
+        ...user,
+        hoa_name: user.household_hoa?.[0]?.hoa_name || null
+      }));
     },
   });
 
@@ -68,7 +75,8 @@ const AdminUsers = () => {
     const matchesSearch = !searchTerm || 
       user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.address?.toLowerCase().includes(searchTerm.toLowerCase());
+      user.address?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.hoa_name?.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesSource = sourceFilter === "all" || 
       (sourceFilter === "community" && user.signup_source?.startsWith("community:")) ||
@@ -204,7 +212,7 @@ const AdminUsers = () => {
               <div className="flex-1 relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search by email, name, or address..."
+                  placeholder="Search by email, name, address, or community..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
@@ -250,6 +258,7 @@ const AdminUsers = () => {
                     <TableHead>Email</TableHead>
                     <TableHead>Name</TableHead>
                     <TableHead>Status</TableHead>
+                    <TableHead>Community</TableHead>
                     <TableHead>Signup Source</TableHead>
                     <TableHead>Points</TableHead>
                     <TableHead>Joined</TableHead>
@@ -259,13 +268,13 @@ const AdminUsers = () => {
                 <TableBody>
                   {isLoading ? (
                     <TableRow>
-                      <TableCell colSpan={7} className="text-center py-8">
+                      <TableCell colSpan={8} className="text-center py-8">
                         Loading users...
                       </TableCell>
                     </TableRow>
                   ) : filteredUsers.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={7} className="text-center py-8">
+                      <TableCell colSpan={8} className="text-center py-8">
                         No users found matching the current filters.
                       </TableCell>
                     </TableRow>
@@ -275,6 +284,7 @@ const AdminUsers = () => {
                         <TableCell>{user.email}</TableCell>
                         <TableCell>{user.name || "—"}</TableCell>
                         <TableCell>{getStatusBadge(user)}</TableCell>
+                        <TableCell>{user.hoa_name || "—"}</TableCell>
                         <TableCell>{getSignupSourceDisplay(user.signup_source)}</TableCell>
                         <TableCell>{user.points || 0}</TableCell>
                         <TableCell>
@@ -358,10 +368,16 @@ const AdminUsers = () => {
                     <label className="text-sm font-medium">Points</label>
                     <p className="text-sm text-muted-foreground">{selectedUser.points || 0}</p>
                   </div>
-                  <div className="col-span-2">
+                  <div>
                     <label className="text-sm font-medium">Address</label>
                     <p className="text-sm text-muted-foreground">
                       {selectedUser.formatted_address || selectedUser.address || "—"}
+                    </p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">Community</label>
+                    <p className="text-sm text-muted-foreground">
+                      {selectedUser.hoa_name || "—"}
                     </p>
                   </div>
                   <div className="col-span-2">
