@@ -1,4 +1,6 @@
-// Auth email function with basic webhook verification
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.54.0";
+
+// Auth email function with basic webhook verification and community detection
 Deno.serve(async (req) => {
   console.log('🚀 Auth email webhook triggered')
   
@@ -35,11 +37,58 @@ Deno.serve(async (req) => {
       })
     }
 
+    // Detect community for better redirect
+    let communityRedirect = 'https://courtneys-list.com'
+    
+    try {
+      const supabaseUrl = Deno.env.get('SUPABASE_URL')
+      const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+      
+      if (supabaseUrl && serviceKey) {
+        const supabase = createClient(supabaseUrl, serviceKey)
+        
+        // Try to find user and their community
+        const { data: user } = await supabase
+          .from('users')
+          .select('signup_source, address')
+          .eq('email', webhookData.user.email)
+          .single()
+        
+        if (user) {
+          console.log('📍 User found:', { signup_source: user.signup_source, has_address: !!user.address })
+          
+          // Check signup_source first
+          if (user.signup_source?.startsWith('community:')) {
+            const communityName = user.signup_source.split('community:')[1]
+            if (communityName) {
+              communityRedirect = `https://courtneys-list.com/communities/${encodeURIComponent(communityName.toLowerCase().replace(/\s+/g, '-'))}`
+              console.log('🏘️ Community from signup_source:', communityName)
+            }
+          } else if (user.address) {
+            // Query household_hoa to find their community
+            const { data: hoa } = await supabase
+              .from('household_hoa')
+              .select('hoa_name')
+              .eq('normalized_address', supabase.rpc('normalize_address', { _addr: user.address }))
+              .single()
+            
+            if (hoa?.hoa_name) {
+              communityRedirect = `https://courtneys-list.com/communities/${encodeURIComponent(hoa.hoa_name.toLowerCase().replace(/\s+/g, '-'))}`
+              console.log('🏘️ Community from address:', hoa.hoa_name)
+            }
+          }
+        }
+      }
+    } catch (communityError) {
+      console.log('⚠️ Community detection failed:', communityError.message)
+      // Continue with default redirect
+    }
+
     // Create magic link
     const supabaseUrl = Deno.env.get('SUPABASE_URL')
     const token = webhookData.email_data?.token_hash || webhookData.email_data?.token || 'missing-token'
     const emailActionType = webhookData.email_data?.email_action_type || 'recovery'
-    const redirectTo = webhookData.email_data?.redirect_to || 'https://courtneys-list.com/auth'
+    const redirectTo = webhookData.email_data?.redirect_to || communityRedirect
     
     console.log('🔗 Magic link details:', {
       token: token.substring(0, 10) + '...',

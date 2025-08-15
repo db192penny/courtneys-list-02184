@@ -30,9 +30,9 @@ const handler = async (req: Request): Promise<Response> => {
     const isHomepageSignup = signupSource?.startsWith('homepage:');
     const isCommunitySignup = signupSource?.startsWith('community:');
     
-    // Create community-specific content
+    // Create community-specific content with proper domain
     const communityLink = communityName 
-      ? `https://iuxacgyocpwblpmmbwwc.supabase.co/community/${encodeURIComponent(communityName.toLowerCase())}`
+      ? `https://courtneys-list.com/communities/${encodeURIComponent(communityName.toLowerCase().replace(/\s+/g, '-'))}`
       : 'https://courtneys-list.com';
 
     const welcomeMessage = communityName

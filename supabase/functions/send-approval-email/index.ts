@@ -72,7 +72,47 @@ serve(async (req) => {
     // Admin client to generate magic link
     const supabaseAdmin = createClient(supabaseUrl, serviceKey);
 
-    const targetRedirect = redirectUrl || `${new URL(req.url).origin}/`;
+    // Detect community for better redirect
+    let communityRedirect = 'https://courtneys-list.com'
+    
+    try {
+      // Try to find user and their community
+      const { data: user } = await supabaseAdmin
+        .from('users')
+        .select('signup_source, address')
+        .eq('email', email)
+        .single()
+      
+      if (user) {
+        console.log('📍 User found for approval:', { signup_source: user.signup_source, has_address: !!user.address })
+        
+        // Check signup_source first
+        if (user.signup_source?.startsWith('community:')) {
+          const communityName = user.signup_source.split('community:')[1]
+          if (communityName) {
+            communityRedirect = `https://courtneys-list.com/communities/${encodeURIComponent(communityName.toLowerCase().replace(/\s+/g, '-'))}`
+            console.log('🏘️ Community from signup_source:', communityName)
+          }
+        } else if (user.address) {
+          // Query household_hoa to find their community
+          const { data: hoa } = await supabaseAdmin
+            .from('household_hoa')
+            .select('hoa_name')
+            .eq('normalized_address', supabaseAdmin.rpc('normalize_address', { _addr: user.address }))
+            .single()
+          
+          if (hoa?.hoa_name) {
+            communityRedirect = `https://courtneys-list.com/communities/${encodeURIComponent(hoa.hoa_name.toLowerCase().replace(/\s+/g, '-'))}`
+            console.log('🏘️ Community from address:', hoa.hoa_name)
+          }
+        }
+      }
+    } catch (communityError) {
+      console.log('⚠️ Community detection failed for approval email:', communityError.message)
+      // Continue with default redirect
+    }
+
+    const targetRedirect = redirectUrl || communityRedirect;
 
     const { data: linkData, error: linkErr } = await supabaseAdmin.auth.admin.generateLink({
       type: "magiclink",
