@@ -29,6 +29,7 @@ import AdminEditVendor from "./pages/AdminEditVendor";
 import AdminCostManagement from "./pages/AdminCostManagement";
 import AdminPreviewLinks from "./pages/AdminPreviewLinks";
 import AdminPreviewUsers from "./pages/AdminPreviewUsers";
+import AdminUsers from "./pages/AdminUsers";
 import Header from "./components/Header";
 
 const queryClient = new QueryClient();
@@ -130,9 +131,10 @@ const App = () => (
           <Route path="/admin/vendors/seed" element={<ProtectedRoute><AdminVendorSeed /></ProtectedRoute>} />
           <Route path="/admin/vendors/manage" element={<ProtectedRoute><AdminVendorManagement /></ProtectedRoute>} />
           <Route path="/admin/vendors/edit" element={<ProtectedRoute><AdminEditVendor /></ProtectedRoute>} />
-          <Route path="/admin/costs" element={<ProtectedRoute><AdminCostManagement /></ProtectedRoute>} />
-           <Route path="/admin/preview-links" element={<ProtectedRoute><AdminPreviewLinks /></ProtectedRoute>} />
-           <Route path="/admin/preview-users" element={<ProtectedRoute><AdminPreviewUsers /></ProtectedRoute>} />
+           <Route path="/admin/costs" element={<ProtectedRoute><AdminCostManagement /></ProtectedRoute>} />
+            <Route path="/admin/preview-links" element={<ProtectedRoute><AdminPreviewLinks /></ProtectedRoute>} />
+            <Route path="/admin/preview-users" element={<ProtectedRoute><AdminPreviewUsers /></ProtectedRoute>} />
+            <Route path="/admin/users" element={<ProtectedRoute><AdminUsers /></ProtectedRoute>} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/contact" element={<Contact />} />

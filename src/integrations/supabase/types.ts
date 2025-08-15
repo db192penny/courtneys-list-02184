@@ -715,6 +715,7 @@ export type Database = {
           name: string | null
           points: number | null
           show_name_public: boolean | null
+          signup_source: string | null
           street_name: string
           submissions_count: number | null
           updated_at: string
@@ -733,6 +734,7 @@ export type Database = {
           name?: string | null
           points?: number | null
           show_name_public?: boolean | null
+          signup_source?: string | null
           street_name: string
           submissions_count?: number | null
           updated_at?: string
@@ -751,6 +753,7 @@ export type Database = {
           name?: string | null
           points?: number | null
           show_name_public?: boolean | null
+          signup_source?: string | null
           street_name?: string
           submissions_count?: number | null
           updated_at?: string

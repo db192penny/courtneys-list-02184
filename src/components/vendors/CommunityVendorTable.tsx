@@ -54,12 +54,14 @@ const SORTS = [
 
 export default function CommunityVendorTable({
   communityName,
-  showContact,
-  isPreviewMode,
+  showContact = true,
+  isAuthenticated = false,
+  isVerified = false,
 }: {
   communityName: string;
   showContact?: boolean;
-  isPreviewMode?: boolean;
+  isAuthenticated?: boolean;
+  isVerified?: boolean;
 }) {
   const [category, setCategory] = useState<string>("all");
   const [sortBy, setSortBy] = useState<typeof SORTS[number]["key"]>("homes");
@@ -249,47 +251,26 @@ export default function CommunityVendorTable({
                       {/* Heat map hidden for now */}
                     </div>
                   </TableCell>
-                  <TableCell>
-                    <div className="space-y-4">
-                      {isPreviewMode ? (
-                        <PreviewReviewsHover vendorId={r.id}>
-                          <div className="flex items-center gap-2 cursor-pointer group">
-                            <span className="text-xs text-muted-foreground min-w-[70px]">{communityName}:</span>
-                            {r.hoa_rating ? (
-                              <div className="flex items-center gap-1 px-2 py-1.5 rounded-md bg-blue-50 hover:bg-blue-100 transition-colors border border-blue-200 hover:border-blue-300 min-h-[28px]">
-                                <RatingStars rating={r.hoa_rating} showValue />
-                                {r.hoa_rating_count ? <span className="text-xs text-muted-foreground">({r.hoa_rating_count})</span> : null}
-                              </div>
-                            ) : (
-                              <span 
-                                className="text-xs text-muted-foreground px-2 py-1.5 rounded-md bg-blue-50 hover:bg-blue-100 transition-colors border border-blue-200 hover:border-blue-300 min-h-[28px] flex items-center"
-                                title="Be the first to rate this provider"
-                              >
-                                No Ratings Yet
-                              </span>
-                            )}
-                          </div>
-                        </PreviewReviewsHover>
-                      ) : (
-                        <ReviewsHover vendorId={r.id}>
-                          <div className="flex items-center gap-2 cursor-pointer group">
-                            <span className="text-xs text-muted-foreground min-w-[70px]">{communityName}:</span>
-                            {r.hoa_rating ? (
-                              <div className="flex items-center gap-1 px-2 py-1.5 rounded-md bg-blue-50 hover:bg-blue-100 transition-colors border border-blue-200 hover:border-blue-300 min-h-[28px]">
-                                <RatingStars rating={r.hoa_rating} showValue />
-                                {r.hoa_rating_count ? <span className="text-xs text-muted-foreground">({r.hoa_rating_count})</span> : null}
-                              </div>
-                            ) : (
-                              <span 
-                                className="text-xs text-muted-foreground px-2 py-1.5 rounded-md bg-blue-50 hover:bg-blue-100 transition-colors border border-blue-200 hover:border-blue-300 min-h-[28px] flex items-center"
-                                title="Be the first to rate this provider"
-                              >
-                                No Ratings Yet
-                              </span>
-                            )}
-                          </div>
-                        </ReviewsHover>
-                      )}
+                   <TableCell>
+                     <div className="space-y-4">
+                       <ReviewsHover vendorId={r.id}>
+                         <div className="flex items-center gap-2 cursor-pointer group">
+                           <span className="text-xs text-muted-foreground min-w-[70px]">{communityName}:</span>
+                           {r.hoa_rating ? (
+                             <div className="flex items-center gap-1 px-2 py-1.5 rounded-md bg-blue-50 hover:bg-blue-100 transition-colors border border-blue-200 hover:border-blue-300 min-h-[28px]">
+                               <RatingStars rating={r.hoa_rating} showValue />
+                               {r.hoa_rating_count ? <span className="text-xs text-muted-foreground">({r.hoa_rating_count})</span> : null}
+                             </div>
+                           ) : (
+                             <span 
+                               className="text-xs text-muted-foreground px-2 py-1.5 rounded-md bg-blue-50 hover:bg-blue-100 transition-colors border border-blue-200 hover:border-blue-300 min-h-[28px] flex items-center"
+                               title="Be the first to rate this provider"
+                             >
+                               No Ratings Yet
+                             </span>
+                           )}
+                         </div>
+                       </ReviewsHover>
                       {r.google_rating != null && (
                         <GoogleReviewsHover 
                           vendorId={r.id} 
@@ -315,45 +296,60 @@ export default function CommunityVendorTable({
                       communityAmount={r.community_amount}
                       communityUnit={r.community_unit}
                       communitySampleSize={r.community_sample_size}
-                      marketAmount={r.market_amount}
-                      marketUnit={r.market_unit}
-                      showContact={!!showContact}
-                      isPreviewMode={isPreviewMode}
-                      communityName={communityName}
+                       marketAmount={r.market_amount}
+                       marketUnit={r.market_unit}
+                       showContact={!!showContact}
+                       isAuthenticated={isAuthenticated}
+                       communityName={communityName}
                     />
                   </TableCell>
                   <TableCell>{showContact ? (r.contact_info ? formatUSPhoneDisplay(r.contact_info) : "—") : "Hidden"}</TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex gap-1 justify-end">
-                      <Button size="sm" variant="outline" className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700 flex items-center gap-1" onClick={() => openRate(r)}>
-                        <Star className="h-3 w-3" />
-                        Rate
-                      </Button>
-                      <Button size="sm" variant="outline" className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700" onClick={() => openCosts(r)}>+ Costs</Button>
-                    </div>
-                  </TableCell>
+                   <TableCell className="text-right">
+                     <div className="flex gap-1 justify-end">
+                       {isAuthenticated ? (
+                         <>
+                           <Button size="sm" variant="outline" className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700 flex items-center gap-1" onClick={() => openRate(r)}>
+                             <Star className="h-3 w-3" />
+                             Rate
+                           </Button>
+                           <Button size="sm" variant="outline" className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700" onClick={() => openCosts(r)}>+ Costs</Button>
+                         </>
+                       ) : (
+                         <Button 
+                           size="sm" 
+                           variant="outline" 
+                           onClick={() => window.location.href = `/auth?community=${encodeURIComponent(communityName)}`}
+                           className="text-xs"
+                         >
+                           Sign Up to Rate
+                         </Button>
+                       )}
+                     </div>
+                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </div>
       )}
-      <RateVendorModalWrapper 
-        open={rateModalOpen} 
-        onOpenChange={setRateModalOpen} 
-        vendor={selectedVendor} 
-        onSuccess={() => { setRateModalOpen(false); refetch(); }}
-        isPreviewMode={isPreviewMode}
-        communityName={communityName}
-      />
-      <CostManagementModalWrapper 
-        open={costModalOpen} 
-        onOpenChange={setCostModalOpen} 
-        vendor={selectedVendor} 
-        onSuccess={() => { setCostModalOpen(false); refetch(); }}
-        isPreviewMode={isPreviewMode}
-        communityName={communityName}
-      />
+      {isAuthenticated && (
+        <>
+          <RateVendorModalWrapper 
+            open={rateModalOpen} 
+            onOpenChange={setRateModalOpen} 
+            vendor={selectedVendor} 
+            onSuccess={() => { setRateModalOpen(false); refetch(); }}
+            communityName={communityName}
+          />
+          <CostManagementModalWrapper 
+            open={costModalOpen} 
+            onOpenChange={setCostModalOpen} 
+            vendor={selectedVendor} 
+            onSuccess={() => { setCostModalOpen(false); refetch(); }}
+            communityName={communityName}
+          />
+        </>
+      )}
     </div>
     </TooltipProvider>
   );

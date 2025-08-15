@@ -302,7 +302,7 @@ const [householdLoading, setHouseholdLoading] = useState<Record<string, boolean>
                     <Link to="/admin/costs">Manage Costs</Link>
                   </Button>
                   <Button asChild variant="outline" size="sm">
-                    <Link to="/admin/preview-users">Preview Users</Link>
+                    <Link to="/admin/users">Manage Users</Link>
                   </Button>
                 </div>
               </div>

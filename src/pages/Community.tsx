@@ -27,8 +27,9 @@ export default function Community() {
   const communityName = useMemo(() => slugToName(slug), [slug]);
   const pageTitle = useMemo(() => (communityName === "Boca Bridges" ? "Boca Bridges Overview" : `${communityName} Overview`), [communityName]);
   const canonical = typeof window !== "undefined" ? window.location.href : undefined;
-  const canViewFull = !!profile?.isAuthenticated && !!profile?.isVerified;
-  const isPreview = !canViewFull;
+  const isAuthenticated = !!profile?.isAuthenticated;
+  const isVerified = !!profile?.isVerified;
+  const showSignUpPrompt = !isAuthenticated;
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["community-vendor-stats", communityName],
@@ -76,8 +77,8 @@ export default function Community() {
   return (
     <main className="min-h-screen bg-background">
       <SEO
-        title={isPreview ? `${pageTitle} — Preview` : pageTitle}
-        description={isPreview ? "You're viewing a limited preview. Sign up to request exclusive access to your community's full vendor details, pricing, and HOA-approved membership." : `Trusted vendors recommended by ${communityName} residents.`}
+        title={pageTitle}
+        description={`Trusted vendors recommended by ${communityName} residents. View ratings, costs, and contact information.`}
         canonical={canonical}
       />
 
@@ -119,23 +120,19 @@ export default function Community() {
           </Button>
         </div>
 
-        {isPreview && !profile?.isAuthenticated && (
+        {showSignUpPrompt && (
           <div className="flex flex-col gap-3">
             <Button 
               onClick={() => {
-                let addr = "";
-                try {
-                  addr = localStorage.getItem("prefill_address") || "";
-                } catch {}
-                const url = `/auth/signup?community=${encodeURIComponent(communityName)}${addr ? `&address=${encodeURIComponent(addr)}` : ""}`;
+                const url = `/auth?community=${encodeURIComponent(communityName)}`;
                 navigate(url);
               }}
               className="w-full sm:w-auto"
             >
-              Sign Up to Request Access
+              Sign Up to Access Full Features
             </Button>
             <p className="text-sm text-muted-foreground">
-              Membership is by community admin approval only — join your trusted community and gain exclusive vendor insights.
+              Join your community to rate vendors, share costs, and access detailed reviews.
             </p>
           </div>
         )}
@@ -147,31 +144,32 @@ export default function Community() {
         {!!data && data.length === 0 && !isLoading && (
           <>
             <CommunityDemoTable communityName={communityName} />
-            {!isPreview && (
-              <div className="pt-4">
-                <Button 
-                  variant="secondary" 
-                  onClick={() => navigate(`/submit?community=${encodeURIComponent(communityName)}`)}
-                  className="w-full sm:w-auto"
-                >
-                  + Add a Service Provider
-                </Button>
-              </div>
-            )}
+            <div className="pt-4">
+              <Button 
+                variant="secondary" 
+                onClick={() => navigate(`/submit?community=${encodeURIComponent(communityName)}`)}
+                className="w-full sm:w-auto"
+              >
+                + Add a Service Provider
+              </Button>
+            </div>
           </>
         )}
 
         {/* Show real data when it exists */}
         {!!data && data.length > 0 && (
           <div className="space-y-3">
-            {isPreview && (
+            {!isAuthenticated && (
               <p className="text-sm text-muted-foreground">
-                {profile?.isAuthenticated
-                  ? "Contact info and HOA averages are hidden until you're approved."
-                  : "Contact info and HOA averages are hidden until you sign up."}
+                Sign up to rate vendors, share costs, and see detailed reviews.
               </p>
             )}
-            <CommunityVendorTable communityName={communityName} showContact={canViewFull} />
+            <CommunityVendorTable 
+              communityName={communityName} 
+              showContact={true} 
+              isAuthenticated={isAuthenticated}
+              isVerified={isVerified}
+            />
           </div>
         )}
 

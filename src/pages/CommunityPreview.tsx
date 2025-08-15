@@ -162,7 +162,8 @@ const CommunityPreview = () => {
           <CommunityVendorTable 
             communityName={communityName} 
             showContact={true}
-            isPreviewMode={true}
+            isAuthenticated={false}
+            isVerified={false}
           />
         </div>
 

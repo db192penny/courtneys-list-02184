@@ -29,6 +29,10 @@ const Auth = () => {
     return (q || stored).trim();
   }, [params]);
 
+  const communityName = useMemo(() => {
+    return params.get("community") || "";
+  }, [params]);
+
   useEffect(() => {
     const hint = localStorage.getItem("invite_email");
     if (hint && !email) setEmail(hint);
@@ -53,6 +57,7 @@ const Auth = () => {
           name: pending.name,
           address: pending.address,
           street_name: pending.street_name || extractStreetName(pending.address),
+          signup_source: (pending as any).signup_source || null,
         };
         const { error: upsertError } = await supabase.from("users").upsert(payload);
         if (upsertError) {
@@ -169,6 +174,7 @@ const Auth = () => {
       email: email.trim(),
       address: address.trim(),
       street_name: extractStreetName(address.trim()),
+      signup_source: communityName ? `community:${communityName}` : undefined,
     };
     localStorage.setItem("pending_profile", JSON.stringify(pending));
     if (inviteToken) localStorage.setItem("invite_token", inviteToken);
@@ -205,7 +211,7 @@ const Auth = () => {
         <h1 className="text-3xl font-semibold mb-6">Join Courtney’s List</h1>
         <Card>
           <CardHeader className="space-y-1">
-            <CardTitle>Request Access</CardTitle>
+            <CardTitle>{communityName ? `Join ${communityName}` : "Request Access"}</CardTitle>
             <CardDescription>
               Request access by entering your details below. After approval by a community admin, you’ll receive a magic link to unlock exclusive vendor info.
             </CardDescription>

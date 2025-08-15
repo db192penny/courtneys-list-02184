@@ -16,7 +16,7 @@ type CostDisplayProps = {
   marketAmount?: number;
   marketUnit?: string;
   showContact: boolean;
-  isPreviewMode?: boolean;
+  isAuthenticated?: boolean;
   communityName?: string;
 };
 
@@ -47,7 +47,7 @@ export function CostDisplay({
   marketAmount,
   marketUnit,
   showContact,
-  isPreviewMode,
+  isAuthenticated,
   communityName
 }: CostDisplayProps) {
   const { data: isAdmin } = useIsAdmin();
@@ -65,15 +65,9 @@ export function CostDisplay({
           {communityPrice ? (
             <span className="text-xs font-medium">
               {communitySampleSize && communitySampleSize > 0 ? (
-                isPreviewMode ? (
-                  <PreviewCostsHover vendorId={vendorId}>
-                    {communityPrice}
-                  </PreviewCostsHover>
-                ) : (
-                  <CostsHover vendorId={vendorId}>
-                    {communityPrice}
-                  </CostsHover>
-                )
+                <CostsHover vendorId={vendorId}>
+                  {communityPrice}
+                </CostsHover>
               ) : (
                 communityPrice
               )}
