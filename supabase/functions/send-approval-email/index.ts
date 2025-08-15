@@ -167,7 +167,7 @@ serve(async (req) => {
     `;
 
     const { data: emailRes, error: emailErr } = await resend.emails.send({
-      from: "Courtney’s List <onboarding@resend.dev>",
+      from: "Courtney’s List <courtney@courtneys-list.com>",
       to: [email],
       subject: "You're approved — sign in to Courtney’s List",
       html,

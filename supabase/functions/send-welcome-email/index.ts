@@ -46,7 +46,7 @@ const handler = async (req: Request): Promise<Response> => {
       : `<p>Thanks for joining Courtney's List! We're excited to help you discover trusted vendors in your community.</p>`;
 
     const emailResponse = await resend.emails.send({
-      from: "Courtney's List <onboarding@resend.dev>",
+      from: "Courtney's List <courtney@courtneys-list.com>",
       to: [email],
       subject: `${welcomeMessage} Your trusted vendor directory awaits`,
       html: `
