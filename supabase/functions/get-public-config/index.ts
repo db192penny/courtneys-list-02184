@@ -57,7 +57,14 @@ serve(async (req) => {
 
   try {
     const googleMapsKey = Deno.env.get('GOOGLE_MAPS_KEY') || '';
+    console.log('Environment check:', {
+      hasKey: !!googleMapsKey,
+      keyLength: googleMapsKey.length,
+      keyPrefix: googleMapsKey.substring(0, 10)
+    });
+    
     if (!googleMapsKey) {
+      console.error('GOOGLE_MAPS_KEY not found in environment');
       return new Response(JSON.stringify({ error: 'Google Maps key not configured' }), {
         status: 500,
         headers: { 'Content-Type': 'application/json', ...pre.headers, 'Vary': 'Origin' },
