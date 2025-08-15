@@ -136,7 +136,7 @@ Deno.serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: "Courtney's List <courtney@courtneys-list.com>",
+        from: "Courtney's List <noreply@courtneys-list.com>",
         to: [webhookData.user.email],
         subject: "🎉 VIP Access Granted - Your magic link inside!",
         html: html,
