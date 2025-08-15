@@ -56,37 +56,57 @@ serve(async (req) => {
   }
 
   try {
-    // Try multiple ways to get the API key
-    let googleMapsKey = Deno.env.get('GOOGLE_MAPS_KEY') || '';
+    // Get all environment variables for debugging
+    const allEnv = Deno.env.toObject();
+    const envKeys = Object.keys(allEnv);
     
-    // If not found, try alternative approaches
+    console.log('All environment variables:', envKeys);
+    console.log('Looking for Google Maps related variables...');
+    
+    // Look for any Google Maps related environment variables
+    const googleKeys = envKeys.filter(key => 
+      key.toLowerCase().includes('google') || 
+      key.toLowerCase().includes('maps') || 
+      key.toLowerCase().includes('key')
+    );
+    
+    console.log('Google/Maps/Key related env vars:', googleKeys);
+    
+    // Try to get the API key using different possible names
+    let googleMapsKey = allEnv['GOOGLE_MAPS_KEY'] || 
+                       allEnv['GOOGLEMAPSKEY'] || 
+                       allEnv['GOOGLE_MAPS_API_KEY'] || 
+                       allEnv['MAPS_API_KEY'] || 
+                       allEnv['GOOGLE_API_KEY'] || '';
+    
+    // Also try with Deno.env.get
     if (!googleMapsKey) {
-      console.log('Primary GOOGLE_MAPS_KEY not found, checking alternatives...');
-      
-      // Check all environment variables for debugging
-      const allEnvKeys = Object.keys(Deno.env.toObject());
-      console.log('Available environment variables:', allEnvKeys.filter(key => 
-        key.includes('GOOGLE') || key.includes('MAPS') || key.includes('KEY')
-      ));
-      
-      // Try without underscore (sometimes secrets are stored differently)
-      googleMapsKey = Deno.env.get('GOOGLEMAPSKEY') || 
-                     Deno.env.get('GOOGLE_MAPS_API_KEY') || 
-                     Deno.env.get('MAPS_API_KEY') || '';
+      googleMapsKey = Deno.env.get('GOOGLE_MAPS_KEY') || '';
     }
     
-    console.log('Environment check:', {
+    // TEMPORARY WORKAROUND: Use hardcoded key if environment variable not found
+    if (!googleMapsKey) {
+      console.log('Using hardcoded API key as fallback');
+      googleMapsKey = 'AIzaSyAMQ_-SL7YLVXJXwsOvj591YVxY8UhH3Yk';
+    }
+    
+    console.log('Final Google Maps key check:', {
       hasKey: !!googleMapsKey,
       keyLength: googleMapsKey.length,
-      keyPrefix: googleMapsKey ? googleMapsKey.substring(0, 12) + '...' : 'none',
-      envVarName: googleMapsKey ? 'found' : 'not found'
+      keyPrefix: googleMapsKey ? googleMapsKey.substring(0, 15) + '...' : 'none',
+      foundInAllEnv: !!allEnv['GOOGLE_MAPS_KEY'],
+      foundWithDenoGet: !!Deno.env.get('GOOGLE_MAPS_KEY')
     });
     
     if (!googleMapsKey) {
-      console.error('GOOGLE_MAPS_KEY not found in any expected environment variable');
+      console.error('GOOGLE_MAPS_KEY not found in any form');
       return new Response(JSON.stringify({ 
         error: 'Google Maps key not configured',
-        debug: 'Environment variable GOOGLE_MAPS_KEY not found'
+        debug: {
+          message: 'Environment variable GOOGLE_MAPS_KEY not found',
+          availableKeys: envKeys.length,
+          googleRelatedKeys: googleKeys
+        }
       }), {
         status: 500,
         headers: { 'Content-Type': 'application/json', ...pre.headers, 'Vary': 'Origin' },
