@@ -34,9 +34,14 @@ serve(async (req) => {
   const pre = cors(req);
   if (pre instanceof Response) return pre;
 
+  // Log the origin for debugging
+  console.log('Request origin:', req.headers.get('origin'));
+  console.log('Origin allowed:', pre.allowed);
+
   // Strict origin validation: only proceed if allowed
   if (!pre.allowed) {
-    return new Response(JSON.stringify({ error: 'Origin not allowed' }), {
+    console.log('Origin not allowed:', req.headers.get('origin'));
+    return new Response(JSON.stringify({ error: 'Origin not allowed', origin: req.headers.get('origin') }), {
       status: 403,
       headers: { 'Content-Type': 'application/json', ...pre.headers, 'Vary': 'Origin' },
     });
