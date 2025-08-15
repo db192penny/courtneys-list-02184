@@ -14,31 +14,32 @@ const supabaseAdmin = createClient(
 )
 
 Deno.serve(async (req) => {
-  console.log('Auth email webhook triggered')
-  console.log('Hook secret configured:', !!hookSecret)
-  console.log('Resend API key configured:', !!Deno.env.get('RESEND_API_KEY'))
+  console.log('🚀 Auth email webhook triggered')
+  console.log('🔑 Hook secret configured:', !!hookSecret)
+  console.log('📧 Resend API key configured:', !!Deno.env.get('RESEND_API_KEY'))
   
   if (req.method !== 'POST') {
+    console.log('❌ Method not allowed:', req.method)
     return new Response('Method not allowed', { status: 405 })
   }
 
   try {
     const payload = await req.text()
-    console.log('Received payload length:', payload.length)
+    console.log('📦 Received payload length:', payload.length)
     
     const headers = Object.fromEntries(req.headers)
-    console.log('Headers received:', Object.keys(headers))
+    console.log('📋 Headers received:', Object.keys(headers))
     
     if (!hookSecret) {
+      console.error('❌ SEND_AUTH_EMAIL_HOOK_SECRET not configured')
       throw new Error('SEND_AUTH_EMAIL_HOOK_SECRET not configured')
     }
     
+    console.log('🔐 Creating webhook verifier...')
     const wh = new Webhook(hookSecret)
     
-    const {
-      user,
-      email_data: { token, token_hash, redirect_to, email_action_type },
-    } = wh.verify(payload, headers) as {
+    console.log('✅ Verifying webhook payload...')
+    const webhookData = wh.verify(payload, headers) as {
       user: {
         id: string
         email: string
@@ -51,7 +52,11 @@ Deno.serve(async (req) => {
       }
     }
 
-    console.log('Processing auth email for user:', user.email)
+    const { user, email_data } = webhookData
+    const { token, token_hash, redirect_to, email_action_type } = email_data
+
+    console.log('👤 Processing auth email for user:', user.email)
+    console.log('📝 Email action type:', email_action_type)
 
     // Get pending profile data from the redirect URL or stored data
     let name = 'Neighbor'
@@ -59,14 +64,20 @@ Deno.serve(async (req) => {
     let signupSource = ''
 
     try {
+      console.log('🔍 Fetching user profile data...')
       // Try to get user profile data from the users table
-      const { data: userData } = await supabaseAdmin
+      const { data: userData, error: userError } = await supabaseAdmin
         .from('users')
         .select('name, signup_source')
         .eq('email', user.email)
-        .single()
+        .maybeSingle()
+
+      if (userError) {
+        console.log('⚠️ Error fetching user data:', userError.message)
+      }
 
       if (userData) {
+        console.log('✅ Found user data:', userData)
         name = userData.name || 'Neighbor'
         signupSource = userData.signup_source || ''
         
@@ -76,12 +87,14 @@ Deno.serve(async (req) => {
         } else if (signupSource.startsWith('homepage:')) {
           communityName = signupSource.replace('homepage:', '')
         }
+      } else {
+        console.log('ℹ️ No user data found, using defaults')
       }
     } catch (error) {
-      console.log('Could not fetch user data, using defaults:', error)
+      console.log('⚠️ Could not fetch user data, using defaults:', error.message)
     }
 
-    console.log('Rendering email for:', { name, communityName, signupSource })
+    console.log('🎨 Rendering email template for:', { name, communityName, signupSource })
 
     const html = await renderAsync(
       React.createElement(MagicLinkEmail, {
@@ -96,6 +109,7 @@ Deno.serve(async (req) => {
       })
     )
 
+    console.log('📤 Sending email via Resend...')
     const emailResponse = await resend.emails.send({
       from: "Courtney's List <onboarding@resend.dev>",
       to: [user.email],
@@ -104,17 +118,19 @@ Deno.serve(async (req) => {
     })
 
     if (emailResponse.error) {
+      console.error('❌ Resend error:', emailResponse.error)
       throw emailResponse.error
     }
 
-    console.log('Custom magic link email sent successfully:', emailResponse.data?.id)
+    console.log('✅ Custom magic link email sent successfully:', emailResponse.data?.id)
 
     return new Response(JSON.stringify({ success: true, emailId: emailResponse.data?.id }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     })
   } catch (error) {
-    console.error('Error in send-auth-email function:', error)
+    console.error('💥 Error in send-auth-email function:', error.message)
+    console.error('🔍 Error stack:', error.stack)
     return new Response(
       JSON.stringify({
         error: {
