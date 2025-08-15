@@ -46,7 +46,7 @@ const Auth = () => {
 
   const finalizeOnboarding = useCallback(async (userId: string, userEmail: string | null) => {
     const pendingRaw = localStorage.getItem("pending_profile");
-    const pending: null | { name: string; email: string; address: string; street_name?: string } = pendingRaw ? JSON.parse(pendingRaw) : null;
+    const pending: null | { name: string; email: string; address: string; street_name?: string; signup_source?: string } = pendingRaw ? JSON.parse(pendingRaw) : null;
 
 
     try {
@@ -74,6 +74,23 @@ const Auth = () => {
         }
 
         localStorage.removeItem("pending_profile");
+
+        // Send welcome email for homepage and community signups
+        if (pending?.signup_source?.startsWith('homepage:') || pending?.signup_source?.startsWith('community:')) {
+          try {
+            await supabase.functions.invoke('send-welcome-email', {
+              body: {
+                email: userEmail || pending.email,
+                name: pending.name,
+                communityName: communityName,
+                signupSource: pending.signup_source
+              }
+            });
+            console.log("Welcome email sent successfully");
+          } catch (emailError) {
+            console.warn("Welcome email failed (non-fatal):", emailError);
+          }
+        }
       }
 
       // Determine community from household mapping; fallback to profile onboarding
