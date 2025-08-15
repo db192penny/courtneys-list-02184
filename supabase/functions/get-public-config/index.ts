@@ -56,26 +56,49 @@ serve(async (req) => {
   }
 
   try {
-    const googleMapsKey = Deno.env.get('GOOGLE_MAPS_KEY') || '';
+    // Try multiple ways to get the API key
+    let googleMapsKey = Deno.env.get('GOOGLE_MAPS_KEY') || '';
+    
+    // If not found, try alternative approaches
+    if (!googleMapsKey) {
+      console.log('Primary GOOGLE_MAPS_KEY not found, checking alternatives...');
+      
+      // Check all environment variables for debugging
+      const allEnvKeys = Object.keys(Deno.env.toObject());
+      console.log('Available environment variables:', allEnvKeys.filter(key => 
+        key.includes('GOOGLE') || key.includes('MAPS') || key.includes('KEY')
+      ));
+      
+      // Try without underscore (sometimes secrets are stored differently)
+      googleMapsKey = Deno.env.get('GOOGLEMAPSKEY') || 
+                     Deno.env.get('GOOGLE_MAPS_API_KEY') || 
+                     Deno.env.get('MAPS_API_KEY') || '';
+    }
+    
     console.log('Environment check:', {
       hasKey: !!googleMapsKey,
       keyLength: googleMapsKey.length,
-      keyPrefix: googleMapsKey.substring(0, 10)
+      keyPrefix: googleMapsKey ? googleMapsKey.substring(0, 12) + '...' : 'none',
+      envVarName: googleMapsKey ? 'found' : 'not found'
     });
     
     if (!googleMapsKey) {
-      console.error('GOOGLE_MAPS_KEY not found in environment');
-      return new Response(JSON.stringify({ error: 'Google Maps key not configured' }), {
+      console.error('GOOGLE_MAPS_KEY not found in any expected environment variable');
+      return new Response(JSON.stringify({ 
+        error: 'Google Maps key not configured',
+        debug: 'Environment variable GOOGLE_MAPS_KEY not found'
+      }), {
         status: 500,
         headers: { 'Content-Type': 'application/json', ...pre.headers, 'Vary': 'Origin' },
       });
     }
 
+    console.log('Successfully returning Google Maps key');
     return new Response(JSON.stringify({ googleMapsKey }), {
       status: 200,
       headers: {
         'Content-Type': 'application/json',
-        'Cache-Control': 'public, max-age=86400, s-maxage=86400',
+        'Cache-Control': 'public, max-age=300, s-maxage=300', // Reduced cache time for testing
         'Vary': 'Origin',
         ...pre.headers,
       },
