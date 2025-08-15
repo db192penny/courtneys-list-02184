@@ -169,12 +169,18 @@ const Auth = () => {
       setErrors({});
     }
 
+    // Check if user came from homepage (address prefilled from localStorage)
+    const prefillAddress = localStorage.getItem("prefill_address");
+    const cameFromHomepage = prefillAddress && address.trim() === prefillAddress.trim();
+    
     const pending = {
       name: name.trim(),
       email: email.trim(),
       address: address.trim(),
       street_name: extractStreetName(address.trim()),
-      signup_source: communityName ? `community:${communityName}` : undefined,
+      signup_source: cameFromHomepage 
+        ? `homepage:${communityName || "unknown"}` 
+        : communityName ? `community:${communityName}` : undefined,
     };
     localStorage.setItem("pending_profile", JSON.stringify(pending));
     if (inviteToken) localStorage.setItem("invite_token", inviteToken);
