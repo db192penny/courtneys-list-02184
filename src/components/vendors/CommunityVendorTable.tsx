@@ -306,23 +306,17 @@ export default function CommunityVendorTable({
                   <TableCell>{showContact ? (r.contact_info ? formatUSPhoneDisplay(r.contact_info) : "—") : "Hidden"}</TableCell>
                    <TableCell className="text-right">
                      <div className="flex gap-1 justify-end">
-                       {isAuthenticated ? (
-                         <>
-                           <Button size="sm" variant="outline" className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700 flex items-center gap-1" onClick={() => openRate(r)}>
-                             <Star className="h-3 w-3" />
-                             Rate
-                           </Button>
-                           <Button size="sm" variant="outline" className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700" onClick={() => openCosts(r)}>+ Costs</Button>
-                         </>
-                       ) : (
-                         <Button 
-                           size="sm" 
-                           variant="outline" 
-                           onClick={() => window.location.href = `/auth?community=${encodeURIComponent(communityName)}`}
-                           className="text-xs"
-                         >
-                           Join to Rate
-                         </Button>
+                       <Button 
+                         size="sm" 
+                         variant="outline" 
+                         className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700 flex items-center gap-1" 
+                         onClick={() => isAuthenticated ? openRate(r) : window.location.href = `/auth?community=${encodeURIComponent(communityName)}`}
+                       >
+                         <Star className="h-3 w-3" />
+                         Rate
+                       </Button>
+                       {isAuthenticated && (
+                         <Button size="sm" variant="outline" className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700" onClick={() => openCosts(r)}>+ Costs</Button>
                        )}
                      </div>
                    </TableCell>
