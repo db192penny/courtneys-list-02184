@@ -78,31 +78,59 @@ const Auth = () => {
 
       // Determine community from household mapping; fallback to profile onboarding
       let destination = "/profile?onboarding=1";
+      console.log("[Auth] 🔍 Starting community detection for user:", userId);
+      
       try {
-        const { data: mapping, error: mapErr } = await supabase
-          .from("household_hoa")
-          .select("hoa_name, created_at")
-          .order("created_at", { ascending: false })
-          .limit(1)
+        // Get the user's address first to filter household_hoa properly
+        const { data: userData, error: userErr } = await supabase
+          .from("users")
+          .select("address")
+          .eq("id", userId)
           .maybeSingle();
 
-        if (mapErr) {
-          console.warn("[Auth] household_hoa lookup error (non-fatal):", mapErr);
+        if (userErr) {
+          console.warn("[Auth] user lookup error:", userErr);
         }
 
-        const hoaName = mapping?.hoa_name || "";
-        if (hoaName) {
-          destination = `/communities/${toSlug(hoaName)}`;
-        } else {
-          // try RPC as additional fallback if available
-          try {
-            const { data: hoaRes } = await supabase.rpc("get_my_hoa");
-            const rpcHoa = (hoaRes?.[0]?.hoa_name as string | undefined) || "";
-            if (rpcHoa) {
-              destination = `/communities/${toSlug(rpcHoa)}`;
+        console.log("[Auth] 📍 User address:", userData?.address);
+
+        if (userData?.address) {
+          // Use the RPC function to get the normalized address first
+          const { data: normalizedAddr } = await supabase.rpc("normalize_address", { _addr: userData.address });
+          console.log("[Auth] 🔍 Normalized address:", normalizedAddr);
+          
+          const { data: mapping, error: mapErr } = await supabase
+            .from("household_hoa")
+            .select("hoa_name, created_at, household_address")
+            .eq("household_address", normalizedAddr)
+            .order("created_at", { ascending: false })
+            .limit(1)
+            .maybeSingle();
+
+          if (mapErr) {
+            console.warn("[Auth] household_hoa lookup error (non-fatal):", mapErr);
+          }
+
+          console.log("[Auth] 🏘️ HOA mapping found:", mapping);
+
+          const hoaName = mapping?.hoa_name || "";
+          if (hoaName) {
+            destination = `/communities/${toSlug(hoaName)}`;
+            console.log("[Auth] ✅ Community detected, redirecting to:", destination);
+          } else {
+            console.log("[Auth] ⚠️ No HOA mapping found, trying RPC fallback");
+            // try RPC as additional fallback if available
+            try {
+              const { data: hoaRes } = await supabase.rpc("get_my_hoa");
+              const rpcHoa = (hoaRes?.[0]?.hoa_name as string | undefined) || "";
+              console.log("[Auth] 🔧 RPC result:", rpcHoa);
+              if (rpcHoa) {
+                destination = `/communities/${toSlug(rpcHoa)}`;
+                console.log("[Auth] ✅ Community detected via RPC, redirecting to:", destination);
+              }
+            } catch (e) {
+              console.warn("[Auth] get_my_hoa failed (non-fatal):", e);
             }
-          } catch (e) {
-            console.warn("[Auth] get_my_hoa failed (non-fatal):", e);
           }
         }
       } catch (e) {
