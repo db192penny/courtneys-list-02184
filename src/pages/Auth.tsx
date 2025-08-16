@@ -393,10 +393,10 @@ const Auth = () => {
         canonical={canonical}
       />
       <section className="container max-w-xl py-10">
-        <h1 className="text-3xl font-semibold mb-6">Join Courtney's List</h1>
+        <h1 className="text-3xl font-semibold mb-6">{communityName ? `Join ${communityName}` : "Join Courtney's List"}</h1>
         <Card>
           <CardHeader className="space-y-1">
-            <CardTitle>{communityName ? `${communityName} Fam` : "Request Access"}</CardTitle>
+            <CardTitle>Request Access</CardTitle>
             <CardDescription>
               Since you are part of the invite only test family (thank you!), you will be automatically verified. In the future, neighbors will need to be accepted by an admin (umm, that will be me unless one of you cares to be <strong>so bold:)</strong>.
             </CardDescription>
