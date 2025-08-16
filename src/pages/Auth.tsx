@@ -378,15 +378,25 @@ const Auth = () => {
 
   const canonical = typeof window !== "undefined" ? window.location.href : undefined;
 
+  // Helper function to convert slug to display name
+  const slugToName = (slug: string): string => {
+    return slug
+      .split('-')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  };
+
+  const displayTitle = communityName ? `Join the ${slugToName(communityName)} Crew` : "Join Courtney's List";
+
   return (
     <main className="min-h-screen bg-background">
       <SEO
-        title="Join Courtney's List"
+        title={displayTitle}
         description="Join the invite only test family - automatically verified access to exclusive vendor info."
         canonical={canonical}
       />
       <section className="container max-w-xl py-10">
-        <h1 className="text-3xl font-semibold mb-6">Join Courtney's List</h1>
+        <h1 className="text-3xl font-semibold mb-6">{displayTitle}</h1>
         <Card>
           <CardHeader className="space-y-1">
             <CardTitle>{communityName ? `${communityName} Fam` : "Request Access"}</CardTitle>
