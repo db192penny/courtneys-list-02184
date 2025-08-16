@@ -78,20 +78,31 @@ Deno.serve(async (req) => {
             // Query household_hoa to find their community
             console.log('🔍 Looking up community by address:', user.address)
             try {
-              const { data: hoa, error: hoaError } = await supabase
-                .from('household_hoa')
-                .select('hoa_name')
-                .eq('normalized_address', supabase.rpc('normalize_address', { _addr: user.address }))
-                .single()
+              // First normalize the address
+              const { data: normalizedAddr, error: normalizeError } = await supabase
+                .rpc('normalize_address', { _addr: user.address })
               
-              if (hoaError) {
-                console.log('⚠️ HOA lookup error:', hoaError.message)
-              } else if (hoa?.hoa_name) {
-                communityName = hoa.hoa_name
-                communityRedirect = `https://courtneys-list.com/auth?community=${encodeURIComponent(hoa.hoa_name)}&verified=true`
-                console.log('🏘️ Community from address:', hoa.hoa_name)
-              } else {
-                console.log('⚠️ No HOA found for address')
+              if (normalizeError) {
+                console.log('⚠️ Address normalization error:', normalizeError.message)
+              } else if (normalizedAddr) {
+                console.log('🔧 Normalized address:', normalizedAddr)
+                
+                // Then query with the normalized address
+                const { data: hoa, error: hoaError } = await supabase
+                  .from('household_hoa')
+                  .select('hoa_name')
+                  .eq('normalized_address', normalizedAddr)
+                  .single()
+                
+                if (hoaError) {
+                  console.log('⚠️ HOA lookup error:', hoaError.message)
+                } else if (hoa?.hoa_name) {
+                  communityName = hoa.hoa_name
+                  communityRedirect = `https://courtneys-list.com/auth?community=${encodeURIComponent(hoa.hoa_name)}&verified=true`
+                  console.log('🏘️ Community from address:', hoa.hoa_name)
+                } else {
+                  console.log('⚠️ No HOA found for normalized address:', normalizedAddr)
+                }
               }
             } catch (addressError) {
               console.log('⚠️ Address-based lookup failed:', addressError.message)
