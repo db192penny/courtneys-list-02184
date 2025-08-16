@@ -358,22 +358,32 @@ const Auth = () => {
       signup_source: pending.signup_source 
     });
 
-    const redirectUrl = `${window.location.origin}/auth?post_signup=1`;
-
-    const { error } = await supabase.auth.signInWithOtp({
+    // For VIP users, skip email verification and create account directly
+    const { data, error } = await supabase.auth.signUp({
       email: email.trim(),
+      password: crypto.randomUUID(), // Generate random password since we're auto-verifying
       options: {
-        emailRedirectTo: redirectUrl,
+        data: {
+          name: pending.name,
+          address: pending.address,
+          street_name: pending.street_name,
+          signup_source: pending.signup_source,
+        },
+        emailRedirectTo: `${window.location.origin}/auth?post_signup=1`
       },
     });
 
     if (error) {
-      console.error("[Auth] magic link error:", error);
-      toast({ title: "Could not send magic link", description: error.message, variant: "destructive" });
+      console.error("[Auth] signup error:", error);
+      toast({ title: "Could not create account", description: error.message, variant: "destructive" });
       return;
     }
 
-    toast({ title: "Check your email", description: "We sent you a secure sign-in link." });
+    // If user was created successfully, immediately finalize onboarding
+    if (data.user) {
+      console.log("[Auth] 🎉 VIP user created, finalizing onboarding...");
+      await finalizeOnboarding(data.user.id, data.user.email);
+    }
   };
 
   const canonical = typeof window !== "undefined" ? window.location.href : undefined;
