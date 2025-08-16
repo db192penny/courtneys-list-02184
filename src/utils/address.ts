@@ -10,6 +10,19 @@ export const extractStreetName = (fullAddress: string) => {
   return cleaned || firstSegment.trim();
 };
 
+export const capitalizeStreetName = (streetName: string) => {
+  if (!streetName || !streetName.trim()) return '';
+  
+  return streetName
+    .toLowerCase()
+    .split(' ')
+    .map(word => {
+      // Capitalize first letter of each word
+      return word.charAt(0).toUpperCase() + word.slice(1);
+    })
+    .join(' ');
+};
+
 export const isInBocaBridges = (fullAddress: string) => {
   if (!fullAddress) return false;
   const hay = fullAddress.toLowerCase();

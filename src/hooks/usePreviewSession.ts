@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { capitalizeStreetName } from "@/utils/address";
 
 export interface PreviewSession {
   id: string;
@@ -115,7 +116,7 @@ export const usePreviewSession = () => {
     if (!session) return "Neighbor";
     
     const firstName = session.name.split(" ")[0];
-    const streetName = session.street_name ? ` on ${session.street_name}` : "";
+    const streetName = session.street_name ? ` on ${capitalizeStreetName(session.street_name)}` : "";
     return `${firstName}${streetName}`;
   };
 

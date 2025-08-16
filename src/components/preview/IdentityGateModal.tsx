@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
 import { loadGoogleMaps } from "@/utils/mapsLoader";
+import { capitalizeStreetName } from "@/utils/address";
 
 interface Props {
   open: boolean;
@@ -112,7 +113,7 @@ export default function IdentityGateModal({ open, onOpenChange, community, onSuc
     setLoading(true);
     
     try {
-      const streetName = extractStreetName(selectedPlace);
+      const streetName = capitalizeStreetName(extractStreetName(selectedPlace));
       const urlParams = new URLSearchParams(window.location.search);
       const source = urlParams.get("src") || "direct";
       
