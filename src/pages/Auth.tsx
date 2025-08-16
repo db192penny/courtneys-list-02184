@@ -399,7 +399,7 @@ const Auth = () => {
         <h1 className="text-3xl font-semibold mb-6">{displayTitle}</h1>
         <Card>
           <CardHeader className="space-y-1">
-            <CardTitle>{communityName ? `${communityName} Fam` : "Request Access"}</CardTitle>
+            <CardTitle>Request Access</CardTitle>
             <CardDescription>
               Since you are part of the invite only test family (thank you!), you will be automatically verified. In the future, neighbors will need to be accepted by an admin (umm, that will be me unless one of you cares to be <strong>so bold:)</strong>.
             </CardDescription>
