@@ -100,7 +100,7 @@ const Index = () => {
                 </Button>
               </div>
             </form>
-            <div className="mt-3 flex flex-col items-center gap-1">
+            {/* <div className="mt-3 flex flex-col items-center gap-1">
               <Button
                 type="button"
                 variant="outline"
@@ -114,7 +114,7 @@ const Index = () => {
               <p className="text-xs text-muted-foreground text-center">
                 Members-only access to detailed ratings, reviews, and pricing.
               </p>
-            </div>
+            </div> */}
             <p className="mt-3 text-xs text-muted-foreground">*We’ll only show street-level info publicly to protect your privacy.*</p>
             <div className="mt-3 flex justify-center">
               <Button
