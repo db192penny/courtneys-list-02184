@@ -30,7 +30,6 @@ import AdminCostManagement from "./pages/AdminCostManagement";
 import AdminPreviewLinks from "./pages/AdminPreviewLinks";
 import AdminPreviewUsers from "./pages/AdminPreviewUsers";
 import AdminUsers from "./pages/AdminUsers";
-import AdminAddressRequests from "./pages/AdminAddressRequests";
 import Header from "./components/Header";
 import { AdminProtectedRoute } from "./components/AdminProtectedRoute";
 
@@ -197,8 +196,7 @@ const App = () => (
            <Route path="/admin/costs" element={<AdminProtectedRoute><AdminCostManagement /></AdminProtectedRoute>} />
             <Route path="/admin/preview-links" element={<AdminProtectedRoute><AdminPreviewLinks /></AdminProtectedRoute>} />
             <Route path="/admin/preview-users" element={<AdminProtectedRoute><AdminPreviewUsers /></AdminProtectedRoute>} />
-             <Route path="/admin/users" element={<AdminProtectedRoute><AdminUsers /></AdminProtectedRoute>} />
-             <Route path="/admin/address-requests" element={<AdminProtectedRoute><AdminAddressRequests /></AdminProtectedRoute>} />
+            <Route path="/admin/users" element={<AdminProtectedRoute><AdminUsers /></AdminProtectedRoute>} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/contact" element={<Contact />} />

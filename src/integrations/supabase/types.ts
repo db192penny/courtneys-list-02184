@@ -58,66 +58,6 @@ export type Database = {
           },
         ]
       }
-      address_change_requests: {
-        Row: {
-          admin_notes: string | null
-          approved_at: string | null
-          approved_by: string | null
-          created_at: string
-          current_address: string
-          current_normalized_address: string
-          id: string
-          metadata: Json | null
-          reason: string | null
-          rejection_reason: string | null
-          requested_address: string
-          requested_formatted_address: string | null
-          requested_normalized_address: string
-          requested_place_id: string | null
-          status: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          admin_notes?: string | null
-          approved_at?: string | null
-          approved_by?: string | null
-          created_at?: string
-          current_address: string
-          current_normalized_address: string
-          id?: string
-          metadata?: Json | null
-          reason?: string | null
-          rejection_reason?: string | null
-          requested_address: string
-          requested_formatted_address?: string | null
-          requested_normalized_address: string
-          requested_place_id?: string | null
-          status?: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          admin_notes?: string | null
-          approved_at?: string | null
-          approved_by?: string | null
-          created_at?: string
-          current_address?: string
-          current_normalized_address?: string
-          id?: string
-          metadata?: Json | null
-          reason?: string | null
-          rejection_reason?: string | null
-          requested_address?: string
-          requested_formatted_address?: string | null
-          requested_normalized_address?: string
-          requested_place_id?: string | null
-          status?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       address_mismatch_log: {
         Row: {
           created_at: string
@@ -1077,13 +1017,6 @@ export type Database = {
         Args: { _reason?: string; _user_id: string }
         Returns: boolean
       }
-      approve_address_change_request: {
-        Args: { _admin_notes?: string; _request_id: string }
-        Returns: {
-          message: string
-          success: boolean
-        }[]
-      }
       audit_and_fix_user_points: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -1279,17 +1212,6 @@ export type Database = {
       normalize_address: {
         Args: { _addr: string }
         Returns: string
-      }
-      reject_address_change_request: {
-        Args: {
-          _admin_notes?: string
-          _rejection_reason: string
-          _request_id: string
-        }
-        Returns: {
-          message: string
-          success: boolean
-        }[]
       }
       validate_invite: {
         Args: { _token: string }

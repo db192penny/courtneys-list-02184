@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { extractStreetName } from "@/utils/address";
 import { Link, useSearchParams } from "react-router-dom";
-
+import AddressInput, { AddressSelectedPayload } from "@/components/AddressInput";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { useBadgeLevels, getUserCurrentBadge, getUserNextBadge } from "@/hooks/useBadgeLevels";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
@@ -18,7 +18,6 @@ import BadgeProgress from "@/components/badges/BadgeProgress";
 import PointHistoryTable from "@/components/badges/PointHistoryTable";
 import ActivityGuide from "@/components/badges/ActivityGuide";
 import BadgeLevelChart from "@/components/badges/BadgeLevelChart";
-import AddressChangeRequestForm from "@/components/AddressChangeRequestForm";
 
 
 const Profile = () => {
@@ -90,6 +89,86 @@ useEffect(() => {
 
   const canonical = typeof window !== "undefined" ? window.location.href : undefined;
 
+  const handleAddressSelected = async (payload: AddressSelectedPayload) => {
+    // Validate the address before sending to backend
+    const incomingAddress = payload.household_address || payload.formatted_address || '';
+    
+    if (!incomingAddress || incomingAddress.trim().length === 0) {
+      console.warn("[Profile] Empty address provided to handleAddressSelected");
+      toast({
+        title: "Invalid address",
+        description: "Please select a valid address from the suggestions.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Check for obviously invalid addresses
+    const normalized = incomingAddress.toLowerCase().trim();
+    const invalidPatterns = [
+      'address not provided',
+      'no address',
+      'unknown',
+      'pending',
+      'not specified',
+      'n/a'
+    ];
+    
+    if (invalidPatterns.some(pattern => normalized.includes(pattern))) {
+      console.warn("[Profile] Invalid address pattern detected:", incomingAddress);
+      toast({
+        title: "Invalid address",
+        description: "Please enter a valid street address.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Require place_id for proper geocoding
+    if (!payload.place_id) {
+      console.warn("[Profile] No place_id provided");
+      toast({
+        title: "Invalid address",
+        description: "Please select an address from the dropdown suggestions.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Don't overwrite a good address with a potentially bad one
+    if (address && 
+        address !== 'Address Not Provided' && 
+        address.trim().length > 10 && // Has some substance
+        (!incomingAddress || incomingAddress.length < address.length / 2)) {
+      console.warn("[Profile] Refusing to overwrite good address with potentially bad one:", {
+        current: address,
+        incoming: incomingAddress
+      });
+      toast({
+        title: "Address not updated",
+        description: "The selected address appears incomplete. Please try again.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // POST to backend (Supabase Edge Function)
+    const { error } = await supabase.functions.invoke("household-address", {
+      body: payload,
+    });
+    if (error) {
+      console.error("[Profile] address save error:", error);
+      toast({
+        title: "Could not save address",
+        description: error.message || "Unknown error",
+        variant: "destructive",
+      });
+      return;
+    }
+    // Optimistic/local refresh
+    setAddress(payload.household_address);
+    toast({ title: "Address saved", description: "Your household address was updated." });
+  };
 
   return (
     <main className="min-h-screen bg-background">
@@ -143,25 +222,22 @@ useEffect(() => {
                 <Label htmlFor="name">Name</Label>
                 <Input id="name" value={name} onChange={(e) => setName(e.currentTarget.value)} />
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="address">Full Address</Label>
+                <AddressInput
+                  id="address"
+                  defaultValue={address}
+                  onSelected={handleAddressSelected}
+                  country={["us"]}
+                  placeholder="Start typing your address..."
+                />
+              </div>
             </CardContent>
             <CardFooter className="flex justify-end">
               <Button type="submit" disabled={loading}>Save</Button>
             </CardFooter>
           </form>
         </Card>
-
-        {/* Address Change Request Section */}
-        <div className="mt-6">
-          <AddressChangeRequestForm 
-            currentAddress={address} 
-            onRequestSubmitted={() => {
-              toast({
-                title: "Request Submitted",
-                description: "Your address change request has been submitted for admin approval.",
-              });
-            }}
-          />
-        </div>
         
         {/* Activity Insights Section */}
         <div className="mt-8 space-y-6">
