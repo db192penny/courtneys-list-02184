@@ -5,7 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { useUserAddressChangeRequests } from "@/hooks/useAddressChangeRequests";
+import { useAddressChangeRequests } from "@/hooks/useAddressChangeRequests";
 import { Clock, CheckCircle, XCircle, AlertCircle } from "lucide-react";
 import SimpleAddressInput, { AddressSelectedPayload } from "./SimpleAddressInput";
 

@@ -1,29 +1,18 @@
 import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { AdminProtectedRoute } from "@/components/AdminProtectedRoute";
+import SEO from "@/components/SEO";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "@/components/ui/table";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogDescription, 
-  DialogFooter, 
-  DialogHeader, 
-  DialogTitle 
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { format } from "date-fns";
 import { CheckCircle, XCircle, Clock, User, MapPin } from "lucide-react";
-import SEO from "@/components/SEO";
 
 interface AddressChangeRequest {
   id: string;
@@ -32,13 +21,8 @@ interface AddressChangeRequest {
   requested_address: string;
   requested_formatted_address?: string;
   reason?: string;
-  status: string;
+  status: 'pending' | 'approved' | 'rejected' | 'cancelled';
   created_at: string;
-  updated_at: string;
-  approved_by?: string;
-  approved_at?: string;
-  rejection_reason?: string;
-  admin_notes?: string;
   user_email?: string;
   user_name?: string;
 }
@@ -47,135 +31,125 @@ export default function AdminAddressRequests() {
   const [requests, setRequests] = useState<AddressChangeRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedRequest, setSelectedRequest] = useState<AddressChangeRequest | null>(null);
-  const [showApprovalDialog, setShowApprovalDialog] = useState(false);
-  const [showRejectionDialog, setShowRejectionDialog] = useState(false);
-  const [adminNotes, setAdminNotes] = useState("");
   const [rejectionReason, setRejectionReason] = useState("");
-  const [processing, setProcessing] = useState(false);
+  const [adminNotes, setAdminNotes] = useState("");
+  const [actionLoading, setActionLoading] = useState(false);
   const { toast } = useToast();
 
-  useEffect(() => {
-    fetchRequests();
-  }, []);
-
   const fetchRequests = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      
-      // First get the requests
-      const { data: requestsData, error } = await supabase
-        .from('address_change_requests')
-        .select('*')
-        .order('created_at', { ascending: false });
+      const { data, error } = await supabase
+        .from("address_change_requests")
+        .select("*")
+        .order("created_at", { ascending: false });
 
       if (error) throw error;
 
-      // Then get user data for each request
-      const userIds = requestsData?.map(req => req.user_id) || [];
-      const { data: usersData } = await supabase
-        .from('users')
-        .select('id, email, name')
-        .in('id', userIds);
+      // Get user emails for each request
+      const userIds = data?.map(req => req.user_id) || [];
+      const { data: users } = await supabase
+        .from("users")
+        .select("id, email, name")
+        .in("id", userIds);
 
-      const formattedRequests = requestsData?.map(req => {
-        const user = usersData?.find(u => u.id === req.user_id);
+      const formatted = data?.map(req => {
+        const user = users?.find(u => u.id === req.user_id);
         return {
           ...req,
+          status: req.status as 'pending' | 'approved' | 'rejected' | 'cancelled',
           user_email: user?.email,
           user_name: user?.name
         };
       }) || [];
 
-      setRequests(formattedRequests);
+      setRequests(formatted);
     } catch (error) {
-      console.error('Error fetching requests:', error);
+      console.error("Error fetching requests:", error);
       toast({
         title: "Error",
         description: "Failed to load address change requests",
-        variant: "destructive"
+        variant: "destructive",
       });
     } finally {
       setLoading(false);
     }
   };
 
-  const handleApprove = async () => {
-    if (!selectedRequest) return;
-    
+  const handleApprove = async (requestId: string) => {
+    setActionLoading(true);
     try {
-      setProcessing(true);
-      
       const { data, error } = await supabase.rpc('approve_address_change_request', {
-        _request_id: selectedRequest.id,
+        _request_id: requestId,
         _admin_notes: adminNotes || null
       });
 
       if (error) throw error;
 
-      const result = data?.[0];
-      if (!result?.success) {
-        throw new Error(result?.message || 'Failed to approve request');
+      if (data?.[0]?.success) {
+        toast({
+          title: "Success",
+          description: "Address change request approved",
+        });
+        fetchRequests();
+        setSelectedRequest(null);
+        setAdminNotes("");
+      } else {
+        throw new Error(data?.[0]?.message || "Failed to approve request");
       }
-
-      toast({
-        title: "Success",
-        description: "Address change request approved successfully",
-      });
-
-      setShowApprovalDialog(false);
-      setSelectedRequest(null);
-      setAdminNotes("");
-      fetchRequests();
     } catch (error) {
-      console.error('Error approving request:', error);
+      console.error("Error approving request:", error);
       toast({
-        title: "Error", 
-        description: error instanceof Error ? error.message : "Failed to approve request",
-        variant: "destructive"
+        title: "Error",
+        description: "Failed to approve address change request",
+        variant: "destructive",
       });
     } finally {
-      setProcessing(false);
+      setActionLoading(false);
     }
   };
 
-  const handleReject = async () => {
-    if (!selectedRequest || !rejectionReason.trim()) return;
-    
+  const handleReject = async (requestId: string) => {
+    if (!rejectionReason.trim()) {
+      toast({
+        title: "Error",
+        description: "Please provide a rejection reason",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setActionLoading(true);
     try {
-      setProcessing(true);
-      
       const { data, error } = await supabase.rpc('reject_address_change_request', {
-        _request_id: selectedRequest.id,
+        _request_id: requestId,
         _rejection_reason: rejectionReason,
         _admin_notes: adminNotes || null
       });
 
       if (error) throw error;
 
-      const result = data?.[0];
-      if (!result?.success) {
-        throw new Error(result?.message || 'Failed to reject request');
+      if (data?.[0]?.success) {
+        toast({
+          title: "Success",
+          description: "Address change request rejected",
+        });
+        fetchRequests();
+        setSelectedRequest(null);
+        setRejectionReason("");
+        setAdminNotes("");
+      } else {
+        throw new Error(data?.[0]?.message || "Failed to reject request");
       }
-
-      toast({
-        title: "Success",
-        description: "Address change request rejected",
-      });
-
-      setShowRejectionDialog(false);
-      setSelectedRequest(null);
-      setAdminNotes("");
-      setRejectionReason("");
-      fetchRequests();
     } catch (error) {
-      console.error('Error rejecting request:', error);
+      console.error("Error rejecting request:", error);
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to reject request",
-        variant: "destructive"
+        description: "Failed to reject address change request",
+        variant: "destructive",
       });
     } finally {
-      setProcessing(false);
+      setActionLoading(false);
     }
   };
 
@@ -187,57 +161,47 @@ export default function AdminAddressRequests() {
         return <Badge variant="secondary" className="bg-green-100 text-green-800"><CheckCircle className="w-3 h-3 mr-1" />Approved</Badge>;
       case 'rejected':
         return <Badge variant="secondary" className="bg-red-100 text-red-800"><XCircle className="w-3 h-3 mr-1" />Rejected</Badge>;
-      case 'cancelled':
-        return <Badge variant="secondary" className="bg-gray-100 text-gray-800">Cancelled</Badge>;
       default:
-        return <Badge variant="secondary">{status}</Badge>;
+        return <Badge variant="outline">{status}</Badge>;
     }
   };
 
-  const pendingCount = requests.filter(r => r.status === 'pending').length;
+  useEffect(() => {
+    fetchRequests();
+  }, []);
 
-  if (loading) {
-    return (
-      <div className="container mx-auto py-6">
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-muted rounded w-1/3"></div>
-          <div className="h-32 bg-muted rounded"></div>
-        </div>
-      </div>
-    );
-  }
+  const pendingRequests = requests.filter(req => req.status === 'pending');
+  const processedRequests = requests.filter(req => req.status !== 'pending');
 
   return (
-    <>
-      <SEO 
-        title="Admin - Address Change Requests"
-        description="Manage address change requests"
+    <AdminProtectedRoute>
+      <SEO
+        title="Address Change Requests - Admin"
+        description="Manage address change requests from users"
       />
       
-      <div className="container mx-auto py-6 space-y-6">
+      <div className="container mx-auto py-8 space-y-6">
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">Address Change Requests</h1>
-            <p className="text-muted-foreground">Review and approve address change requests from users</p>
-          </div>
-          {pendingCount > 0 && (
-            <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
-              {pendingCount} pending
-            </Badge>
-          )}
+          <h1 className="text-3xl font-bold">Address Change Requests</h1>
+          <Button onClick={fetchRequests} variant="outline">
+            Refresh
+          </Button>
         </div>
 
+        {/* Pending Requests */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <MapPin className="w-5 h-5" />
-              All Requests
+              <Clock className="w-5 h-5" />
+              Pending Requests ({pendingRequests.length})
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {requests.length === 0 ? (
+            {loading ? (
+              <div className="text-center py-8">Loading...</div>
+            ) : pendingRequests.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
-                No address change requests found
+                No pending address change requests
               </div>
             ) : (
               <Table>
@@ -247,19 +211,18 @@ export default function AdminAddressRequests() {
                     <TableHead>Current Address</TableHead>
                     <TableHead>Requested Address</TableHead>
                     <TableHead>Reason</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Created</TableHead>
+                    <TableHead>Date</TableHead>
                     <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {requests.map((request) => (
+                  {pendingRequests.map((request) => (
                     <TableRow key={request.id}>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <User className="w-4 h-4" />
                           <div>
-                            <div className="font-medium">{request.user_name}</div>
+                            <div className="font-medium">{request.user_name || 'Unknown'}</div>
                             <div className="text-sm text-muted-foreground">{request.user_email}</div>
                           </div>
                         </div>
@@ -267,37 +230,115 @@ export default function AdminAddressRequests() {
                       <TableCell className="max-w-xs truncate">{request.current_address}</TableCell>
                       <TableCell className="max-w-xs truncate">{request.requested_formatted_address || request.requested_address}</TableCell>
                       <TableCell className="max-w-xs truncate">{request.reason || '-'}</TableCell>
-                      <TableCell>{getStatusBadge(request.status)}</TableCell>
-                      <TableCell>{new Date(request.created_at).toLocaleDateString()}</TableCell>
+                      <TableCell>{format(new Date(request.created_at), 'MMM d, yyyy')}</TableCell>
                       <TableCell>
-                        {request.status === 'pending' && (
-                          <div className="flex gap-2">
-                            <Button 
-                              size="sm" 
-                              onClick={() => {
-                                setSelectedRequest(request);
-                                setShowApprovalDialog(true);
-                              }}
-                            >
-                              Approve
-                            </Button>
-                            <Button 
-                              size="sm" 
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button
                               variant="outline"
-                              onClick={() => {
-                                setSelectedRequest(request);
-                                setShowRejectionDialog(true);
-                              }}
+                              size="sm"
+                              onClick={() => setSelectedRequest(request)}
                             >
-                              Reject
+                              Review
                             </Button>
-                          </div>
-                        )}
-                        {request.status === 'rejected' && request.rejection_reason && (
-                          <div className="text-sm text-red-600 max-w-xs truncate">
-                            {request.rejection_reason}
-                          </div>
-                        )}
+                          </DialogTrigger>
+                          <DialogContent className="max-w-2xl">
+                            <DialogHeader>
+                              <DialogTitle>Review Address Change Request</DialogTitle>
+                            </DialogHeader>
+                            
+                            {selectedRequest && (
+                              <div className="space-y-6">
+                                <div className="grid grid-cols-2 gap-4">
+                                  <div>
+                                    <Label>User</Label>
+                                    <div className="mt-1">
+                                      <div className="font-medium">{selectedRequest.user_name}</div>
+                                      <div className="text-sm text-muted-foreground">{selectedRequest.user_email}</div>
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <Label>Request Date</Label>
+                                    <div className="mt-1">{format(new Date(selectedRequest.created_at), 'PPp')}</div>
+                                  </div>
+                                </div>
+
+                                <div className="space-y-4">
+                                  <div>
+                                    <Label className="flex items-center gap-2">
+                                      <MapPin className="w-4 h-4" />
+                                      Current Address
+                                    </Label>
+                                    <div className="mt-1 p-3 bg-muted rounded-md">
+                                      {selectedRequest.current_address}
+                                    </div>
+                                  </div>
+                                  
+                                  <div>
+                                    <Label className="flex items-center gap-2">
+                                      <MapPin className="w-4 h-4" />
+                                      Requested Address
+                                    </Label>
+                                    <div className="mt-1 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                                      {selectedRequest.requested_formatted_address || selectedRequest.requested_address}
+                                    </div>
+                                  </div>
+
+                                  {selectedRequest.reason && (
+                                    <div>
+                                      <Label>User's Reason</Label>
+                                      <div className="mt-1 p-3 bg-muted rounded-md">
+                                        {selectedRequest.reason}
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+
+                                <div className="space-y-4">
+                                  <div>
+                                    <Label htmlFor="adminNotes">Admin Notes (Optional)</Label>
+                                    <Textarea
+                                      id="adminNotes"
+                                      value={adminNotes}
+                                      onChange={(e) => setAdminNotes(e.target.value)}
+                                      placeholder="Add any notes about this approval/rejection..."
+                                      className="mt-1"
+                                    />
+                                  </div>
+
+                                  <div>
+                                    <Label htmlFor="rejectionReason">Rejection Reason (Required for rejection)</Label>
+                                    <Input
+                                      id="rejectionReason"
+                                      value={rejectionReason}
+                                      onChange={(e) => setRejectionReason(e.target.value)}
+                                      placeholder="Reason for rejecting this request..."
+                                      className="mt-1"
+                                    />
+                                  </div>
+                                </div>
+
+                                <div className="flex gap-2 justify-end">
+                                  <Button
+                                    variant="destructive"
+                                    onClick={() => handleReject(selectedRequest.id)}
+                                    disabled={actionLoading}
+                                  >
+                                    <XCircle className="w-4 h-4 mr-2" />
+                                    Reject
+                                  </Button>
+                                  <Button
+                                    onClick={() => handleApprove(selectedRequest.id)}
+                                    disabled={actionLoading}
+                                  >
+                                    <CheckCircle className="w-4 h-4 mr-2" />
+                                    Approve
+                                  </Button>
+                                </div>
+                              </div>
+                            )}
+                          </DialogContent>
+                        </Dialog>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -307,132 +348,51 @@ export default function AdminAddressRequests() {
           </CardContent>
         </Card>
 
-        {/* Approval Dialog */}
-        <Dialog open={showApprovalDialog} onOpenChange={setShowApprovalDialog}>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Approve Address Change Request</DialogTitle>
-              <DialogDescription>
-                Review the address change details and approve if everything looks correct.
-              </DialogDescription>
-            </DialogHeader>
-            
-            {selectedRequest && (
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label className="font-medium">User</Label>
-                    <p className="text-sm">{selectedRequest.user_name} ({selectedRequest.user_email})</p>
-                  </div>
-                  <div>
-                    <Label className="font-medium">Request Date</Label>
-                    <p className="text-sm">{new Date(selectedRequest.created_at).toLocaleDateString()}</p>
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label className="font-medium">Current Address</Label>
-                  <p className="text-sm p-2 bg-muted rounded">{selectedRequest.current_address}</p>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label className="font-medium">Requested Address</Label>
-                  <p className="text-sm p-2 bg-muted rounded">{selectedRequest.requested_formatted_address || selectedRequest.requested_address}</p>
-                </div>
-                
-                {selectedRequest.reason && (
-                  <div className="space-y-2">
-                    <Label className="font-medium">User's Reason</Label>
-                    <p className="text-sm p-2 bg-muted rounded">{selectedRequest.reason}</p>
-                  </div>
-                )}
-                
-                <div className="space-y-2">
-                  <Label htmlFor="admin-notes">Admin Notes (Optional)</Label>
-                  <Textarea
-                    id="admin-notes"
-                    placeholder="Add any notes about this approval..."
-                    value={adminNotes}
-                    onChange={(e) => setAdminNotes(e.target.value)}
-                  />
-                </div>
+        {/* Processed Requests */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Processed Requests ({processedRequests.length})</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {processedRequests.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                No processed requests yet
               </div>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>User</TableHead>
+                    <TableHead>Addresses</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Date</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {processedRequests.map((request) => (
+                    <TableRow key={request.id}>
+                      <TableCell>
+                        <div>
+                          <div className="font-medium">{request.user_name || 'Unknown'}</div>
+                          <div className="text-sm text-muted-foreground">{request.user_email}</div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="space-y-1">
+                          <div className="text-sm text-muted-foreground">From: {request.current_address}</div>
+                          <div className="text-sm">To: {request.requested_formatted_address || request.requested_address}</div>
+                        </div>
+                      </TableCell>
+                      <TableCell>{getStatusBadge(request.status)}</TableCell>
+                      <TableCell>{format(new Date(request.created_at), 'MMM d, yyyy')}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             )}
-            
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setShowApprovalDialog(false)}>
-                Cancel
-              </Button>
-              <Button onClick={handleApprove} disabled={processing}>
-                {processing ? "Approving..." : "Approve Change"}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
-        {/* Rejection Dialog */}
-        <Dialog open={showRejectionDialog} onOpenChange={setShowRejectionDialog}>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Reject Address Change Request</DialogTitle>
-              <DialogDescription>
-                Please provide a reason for rejecting this address change request.
-              </DialogDescription>
-            </DialogHeader>
-            
-            {selectedRequest && (
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label className="font-medium">User</Label>
-                  <p className="text-sm">{selectedRequest.user_name} ({selectedRequest.user_email})</p>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label className="font-medium">Requested Change</Label>
-                  <div className="text-sm space-y-1">
-                    <p><span className="font-medium">From:</span> {selectedRequest.current_address}</p>
-                    <p><span className="font-medium">To:</span> {selectedRequest.requested_formatted_address || selectedRequest.requested_address}</p>
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="rejection-reason">Rejection Reason *</Label>
-                  <Textarea
-                    id="rejection-reason"
-                    placeholder="Explain why this request is being rejected..."
-                    value={rejectionReason}
-                    onChange={(e) => setRejectionReason(e.target.value)}
-                    required
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="admin-notes-reject">Admin Notes (Optional)</Label>
-                  <Textarea
-                    id="admin-notes-reject"
-                    placeholder="Additional notes..."
-                    value={adminNotes}
-                    onChange={(e) => setAdminNotes(e.target.value)}
-                  />
-                </div>
-              </div>
-            )}
-            
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setShowRejectionDialog(false)}>
-                Cancel
-              </Button>
-              <Button 
-                variant="destructive" 
-                onClick={handleReject} 
-                disabled={processing || !rejectionReason.trim()}
-              >
-                {processing ? "Rejecting..." : "Reject Request"}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+          </CardContent>
+        </Card>
       </div>
-    </>
+    </AdminProtectedRoute>
   );
 }

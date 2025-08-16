@@ -304,6 +304,9 @@ const [householdLoading, setHouseholdLoading] = useState<Record<string, boolean>
                   <Button asChild variant="outline" size="sm">
                     <Link to="/admin/users">Manage Users</Link>
                   </Button>
+                  <Button asChild variant="outline" size="sm">
+                    <Link to="/admin/address-requests">Address Requests</Link>
+                  </Button>
                 </div>
               </div>
               <p className="text-sm text-muted-foreground mb-4">
