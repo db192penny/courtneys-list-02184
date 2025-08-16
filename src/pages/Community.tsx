@@ -127,7 +127,9 @@ export default function Community() {
                 const url = `/auth?community=${encodeURIComponent(communityName)}`;
                 navigate(url);
               }}
-              className="w-full sm:w-auto"
+              size="sm"
+              variant="outline"
+              className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700 w-auto"
             >
               Sign Up As A Verified Neighbor
             </Button>
