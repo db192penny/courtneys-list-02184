@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,11 +11,15 @@ import { toast } from "@/hooks/use-toast";
 import { Mail, AlertTriangle } from "lucide-react";
 
 const SignIn = () => {
+  const [searchParams] = useSearchParams();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<"idle" | "approved" | "pending" | "not_found" | "error">("idle");
   const [message, setMessage] = useState("");
   const [showMagicLinkModal, setShowMagicLinkModal] = useState(false);
+
+  const community = searchParams.get("community");
+  const communityName = community ? community.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,14 +77,14 @@ const SignIn = () => {
   return (
     <main>
       <SEO
-        title="Sign In to Courtney’s List | Private Community Access"
-        description="Sign in with your email to access your community’s trusted vendor list."
+        title="Sign In to Courtney's List | Private Community Access"
+        description="Sign in with your email to access your community's trusted vendor list."
         canonical={`${window.location.origin}/signin`}
       />
       <section className="container max-w-lg py-12">
         <Card>
           <CardHeader>
-            <CardTitle>Sign In to Courtney’s List</CardTitle>
+            <CardTitle>Sign In to Courtney's List</CardTitle>
             <CardDescription>Enter your email to receive a magic link.</CardDescription>
           </CardHeader>
           <CardContent>
@@ -107,8 +111,11 @@ const SignIn = () => {
               </div>
 
               <div className="pt-2 text-center">
-                <Link to="/auth" className="underline underline-offset-4">
-                  New to Courtney’s List? Sign Up
+                <Link 
+                  to={community ? `/auth?community=${community}` : "/auth"} 
+                  className="underline underline-offset-4"
+                >
+                  New to {communityName || "Courtney's List"}? Sign Up
                 </Link>
               </div>
             </form>
