@@ -137,13 +137,13 @@ const SignIn = () => {
           </DialogHeader>
           
           <div className="space-y-4 py-4">
-            <div className="flex items-start gap-3 p-4 bg-orange-50 dark:bg-orange-950/20 rounded-lg border border-orange-200 dark:border-orange-800">
-              <AlertTriangle className="h-5 w-5 text-orange-600 mt-0.5 flex-shrink-0" />
+            <div className="flex items-start gap-3 p-4 bg-yellow-50 dark:bg-yellow-950/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+              <AlertTriangle className="h-5 w-5 text-yellow-600 mt-0.5 flex-shrink-0" />
               <div>
-                <p className="font-semibold text-orange-800 dark:text-orange-200">
+                <p className="font-semibold text-yellow-800 dark:text-yellow-200">
                   Don't forget to check your spam folder!
                 </p>
-                <p className="text-sm text-orange-700 dark:text-orange-300 mt-1">
+                <p className="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
                   Magic links sometimes end up in spam or junk mail folders.
                 </p>
               </div>
