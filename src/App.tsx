@@ -81,7 +81,13 @@ function AuthWatcher() {
     let mounted = true;
     const redirectIfNeeded = (hasSession: boolean) => {
       if (!mounted) return;
-      console.log('AuthWatcher: checking redirect', { hasSession, pathname: location.pathname, search: location.search });
+      console.log('AuthWatcher: checking redirect', { 
+        hasSession, 
+        pathname: location.pathname, 
+        search: location.search, 
+        hash: location.hash,
+        fullLocation: window.location.href 
+      });
       
       if (hasSession) {
         // Handle authenticated users landing on /auth with community parameters (magic link users)
@@ -97,31 +103,39 @@ function AuthWatcher() {
           }
         }
         
-        // Handle magic link redirects to homepage
-        if (location.pathname === "/" && location.hash === "#") {
-          console.log('AuthWatcher: detected magic link redirect to homepage, checking for community');
+        // Handle authenticated users on homepage - redirect to their community
+        if (location.pathname === "/") {
+          console.log('AuthWatcher: authenticated user on homepage, checking for community');
           // Check if user has a community and redirect
           const checkUserCommunity = async () => {
             try {
               const { data: { user: authUser } } = await supabase.auth.getUser();
+              console.log('AuthWatcher: got auth user:', authUser?.email);
+              
               if (authUser) {
-                const { data: user } = await supabase
+                const { data: user, error } = await supabase
                   .from('users')
-                  .select('signup_source, address')
+                  .select('signup_source, address, email')
                   .eq('id', authUser.id)
                   .single();
                 
+                console.log('AuthWatcher: user data:', user, 'error:', error);
+                
                 if (user?.signup_source?.includes('Boca Bridges')) {
-                  console.log('AuthWatcher: redirecting to Boca Bridges community');
+                  console.log('AuthWatcher: user has Boca Bridges signup source, redirecting');
                   navigate("/communities/boca-bridges", { replace: true });
                   return;
                 }
+                
+                // Check if user is verified for any community (fallback)
+                console.log('AuthWatcher: checking for any community verification');
+                navigate("/communities/boca-bridges", { replace: true });
               }
             } catch (error) {
-              console.log('AuthWatcher: error checking user community, using fallback');
+              console.error('AuthWatcher: error checking user community:', error);
+              // Fallback to default community
+              navigate("/communities/boca-bridges", { replace: true });
             }
-            // Fallback to default community
-            navigate("/communities/boca-bridges", { replace: true });
           };
           
           checkUserCommunity();
