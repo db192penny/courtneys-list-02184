@@ -167,7 +167,12 @@ export default function ActivityGuide() {
       <Dialog open={showInviteModal} onOpenChange={setShowInviteModal}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Share Courtney's List</DialogTitle>
+            <DialogTitle>
+              {userData?.communityName 
+                ? `Share Courtney's List to ${userData.communityName} Neighbors`
+                : "Share Courtney's List"
+              }
+            </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">

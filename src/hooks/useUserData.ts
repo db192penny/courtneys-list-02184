@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 export type UserData = {
   name?: string;
   streetName?: string;
+  communityName?: string;
   isAuthenticated: boolean;
 };
 
@@ -25,9 +26,20 @@ export function useUserData() {
       if (error) {
         console.warn("[useUserData] user data load error:", error);
       }
+
+      // Fetch community name
+      let communityName: string | undefined;
+      try {
+        const { data: hoaData } = await supabase.rpc("get_my_hoa");
+        communityName = hoaData?.[0]?.hoa_name || undefined;
+      } catch (hoaError) {
+        console.warn("[useUserData] HOA data load error:", hoaError);
+      }
+
       return {
         name: data?.name || undefined,
         streetName: data?.street_name || undefined,
+        communityName,
         isAuthenticated: true,
       };
     },
