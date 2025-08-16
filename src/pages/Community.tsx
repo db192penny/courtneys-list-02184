@@ -8,6 +8,7 @@ import CommunityVendorTable from "@/components/vendors/CommunityVendorTable";
 import CommunityDemoTable from "@/components/vendors/CommunityDemoTable";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserProfile } from "@/hooks/useUserProfile";
+import { WelcomeToolbar } from "@/components/WelcomeToolbar";
 
 function slugToName(slug: string) {
   const cleaned = (slug || "")
@@ -108,6 +109,9 @@ export default function Community() {
             </div>
           </div>
         </header>
+
+        {/* Welcome toolbar for new users */}
+        {profile?.isAuthenticated && <WelcomeToolbar communitySlug={slug} />}
 
         {/* Submit Vendor available to all users; unauthenticated users will be redirected to Auth */}
         <div className="pt-2">

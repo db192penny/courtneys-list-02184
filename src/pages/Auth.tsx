@@ -210,13 +210,13 @@ const Auth = () => {
       try {
         // PRIORITY 0: Check URL params for community context first (magic link users)
         if (communityName && isVerifiedMagicLink) {
-          destination = `/communities/${toSlug(communityName)}`;
+          destination = `/communities/${toSlug(communityName)}?welcome=true`;
           console.log("[Auth] ✅ Verified magic link user with community, redirecting to:", destination);
           // Skip database detection for verified magic link users
           setTimeout(() => navigate(destination, { replace: true }), 100);
           return;
         } else if (communityName) {
-          destination = `/communities/${toSlug(communityName)}`;
+          destination = `/communities/${toSlug(communityName)}?welcome=true`;
           console.log("[Auth] ✅ Community detected from URL params, redirecting to:", destination);
         } else {
           // PRIORITY 1: Check signup_source for community affiliation
@@ -239,7 +239,7 @@ const Auth = () => {
           // Check if user signed up from a community page
           if (userData?.signup_source && userData.signup_source.startsWith("community:")) {
             const communityFromSignup = userData.signup_source.replace("community:", "");
-            destination = `/communities/${toSlug(communityFromSignup)}`;
+            destination = `/communities/${toSlug(communityFromSignup)}?welcome=true`;
             console.log("[Auth] ✅ Community detected from signup_source, redirecting to:", destination);
           } else if (userData?.address && userData.address !== "Address Not Provided") {
             // PRIORITY 2: Fall back to address-based detection
@@ -265,7 +265,7 @@ const Auth = () => {
 
             const hoaName = mapping?.hoa_name || "";
             if (hoaName) {
-              destination = `/communities/${toSlug(hoaName)}`;
+              destination = `/communities/${toSlug(hoaName)}?welcome=true`;
               console.log("[Auth] ✅ Community detected via address, redirecting to:", destination);
             } else {
               console.log("[Auth] ⚠️ No HOA mapping found, trying RPC fallback");
@@ -275,7 +275,7 @@ const Auth = () => {
                 const rpcHoa = (hoaRes?.[0]?.hoa_name as string | undefined) || "";
                 console.log("[Auth] 🔧 RPC result:", rpcHoa);
                 if (rpcHoa) {
-                  destination = `/communities/${toSlug(rpcHoa)}`;
+                  destination = `/communities/${toSlug(rpcHoa)}?welcome=true`;
                   console.log("[Auth] ✅ Community detected via RPC, redirecting to:", destination);
                 }
               } catch (e) {
