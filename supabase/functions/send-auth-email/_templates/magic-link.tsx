@@ -30,83 +30,55 @@ export const MagicLinkEmail = ({
   email_action_type,
   redirect_to,
   token_hash,
-}: MagicLinkEmailProps) => (
-  <Html>
-    <Head />
-    <Preview>🎉 VIP Access Granted - Your magic link inside!</Preview>
-    <Body style={main}>
-      <Container style={container}>
-        <Heading style={h1}>🎉 VIP Access Granted!</Heading>
-        
-        <Text style={text}>
-          Hi {name}!
-        </Text>
-        
-        {communityName && (
+}: MagicLinkEmailProps) => {
+  const firstName = name ? name.split(' ')[0] : 'there'
+  const neighborhoodName = communityName || 'Your Neighborhood'
+  
+  return (
+    <Html>
+      <Head />
+      <Preview>{neighborhoodName} Access is Ready - Unlock it Now</Preview>
+      <Body style={main}>
+        <Container style={container}>
           <Text style={text}>
-            Welcome to the <strong>{communityName}</strong> community on Courtney's List!
+            Hi {firstName},
           </Text>
-        )}
-        
-        <Text style={text}>
-          Click the magic link below to access your account:
-        </Text>
-        
-        <Link
-          href={`${supabase_url}/auth/v1/verify?token=${token_hash}&type=${email_action_type}&redirect_to=${redirect_to}`}
-          target="_blank"
-          style={{
-            ...link,
-            display: 'block',
-            marginBottom: '16px',
-            backgroundColor: '#007bff',
-            color: 'white',
-            padding: '12px 24px',
-            borderRadius: '6px',
-            textDecoration: 'none',
-            textAlign: 'center' as const,
-          }}
-        >
-          Access Your Account ✨
-        </Link>
-        
-        <Text style={{ ...text, marginBottom: '14px' }}>
-          Or, copy and paste this temporary login code:
-        </Text>
-        <code style={code}>{token}</code>
-        
-        <Text style={text}>
-          Once you're in, you'll be able to:
-        </Text>
-        <Text style={text}>
-          • Discover trusted local vendors in your community<br/>
-          • Share your own vendor recommendations<br/>
-          • Access exclusive pricing from neighbors<br/>
-          • Connect with fellow community members
-        </Text>
-        
-        <Text
-          style={{
-            ...text,
-            color: '#ababab',
-            marginTop: '14px',
-            marginBottom: '16px',
-          }}
-        >
-          If you didn't request this, you can safely ignore this email.
-        </Text>
-        
-        <Text style={footer}>
-          Happy exploring!<br/>
+          
+          <Text style={text}>
+            Excited to have you back! Please click here to return to the {neighborhoodName} list:
+          </Text>
+          
           <Link
-            href="https://courtneys-list.com"
+            href={`${supabase_url}/auth/v1/verify?token=${token_hash}&type=${email_action_type}&redirect_to=${redirect_to}`}
             target="_blank"
-            style={{ ...link, color: '#898989' }}
+            style={{
+              ...link,
+              display: 'block',
+              marginBottom: '24px',
+              backgroundColor: '#007bff',
+              color: 'white',
+              padding: '12px 24px',
+              borderRadius: '6px',
+              textDecoration: 'none',
+              textAlign: 'center' as const,
+            }}
           >
-            Courtney's List
+            See List of Providers
           </Link>
-          - Your neighborhood vendor directory
-        </Text>
+          
+          <Text style={text}>
+            I hope this list makes your life a little easier. And thanks for all your contributions.
+          </Text>
+          
+          <Text style={signature}>
+            Cheers,<br/>
+            Courtney
+          </Text>
+        </Container>
+      </Body>
+    </Html>
+  )
+}
         
         <Text style={unsubscribe}>
           <Link
@@ -184,6 +156,13 @@ const code = {
   border: '1px solid #eee',
   color: '#333',
   fontFamily: 'monospace',
+}
+
+const signature = {
+  color: '#333',
+  fontSize: '14px',
+  margin: '24px 0',
+  lineHeight: '1.5',
 }
 
 const unsubscribe = {

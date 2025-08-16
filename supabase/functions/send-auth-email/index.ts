@@ -37,8 +37,10 @@ Deno.serve(async (req) => {
       })
     }
 
-    // Detect community for better redirect
+    // Detect community for better redirect and email personalization
     let communityRedirect = 'https://courtneys-list.com'
+    let communityName = null
+    let userName = null
     
     try {
       const supabaseUrl = Deno.env.get('SUPABASE_URL')
@@ -50,15 +52,17 @@ Deno.serve(async (req) => {
         // Try to find user and their community
         const { data: user } = await supabase
           .from('users')
-          .select('signup_source, address')
+          .select('name, signup_source, address')
           .eq('email', webhookData.user.email)
           .single()
         
         if (user) {
           console.log('📍 User found:', { signup_source: user.signup_source, has_address: !!user.address })
           
+          // Store user name for personalization
+          userName = user.name
+          
           // Check signup_source first - handle both community: and homepage: patterns
-          let communityName = null
           if (user.signup_source?.startsWith('community:')) {
             communityName = user.signup_source.split('community:')[1]
             console.log('🏘️ Community from signup_source (community:):', communityName)
@@ -83,6 +87,7 @@ Deno.serve(async (req) => {
               if (hoaError) {
                 console.log('⚠️ HOA lookup error:', hoaError.message)
               } else if (hoa?.hoa_name) {
+                communityName = hoa.hoa_name
                 communityRedirect = `https://courtneys-list.com/auth?community=${encodeURIComponent(hoa.hoa_name)}&verified=true`
                 console.log('🏘️ Community from address:', hoa.hoa_name)
               } else {
@@ -114,19 +119,27 @@ Deno.serve(async (req) => {
     
     const magicLinkUrl = `${supabaseUrl}/auth/v1/verify?token=${token}&type=${emailActionType}&redirect_to=${redirectTo}`
     
+    // Extract first name for personalization
+    const firstName = userName ? userName.split(' ')[0] : 'there'
+    const neighborhoodName = communityName || 'Your Neighborhood'
+    
     const html = `
       <html>
-        <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <h1 style="color: #333;">🎉 VIP Access Granted!</h1>
-          <p>Hi there!</p>
-          <p>Click the link below to access your account:</p>
-          <a href="${magicLinkUrl}" style="display: inline-block; background: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px;">Access Your Account ✨</a>
-          <p style="margin-top: 20px;">Or copy this code: <code style="background: #f4f4f4; padding: 4px 8px;">${webhookData.email_data?.token || 'N/A'}</code></p>
-          <p style="color: #666; margin-top: 30px;">Happy exploring!<br/>Courtney's List</p>
+        <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <p style="color: #333; font-size: 14px; margin: 24px 0; line-height: 1.5;">Hi ${firstName},</p>
+          
+          <p style="color: #333; font-size: 14px; margin: 24px 0; line-height: 1.5;">Excited to have you back! Please click here to return to the ${neighborhoodName} list:</p>
+          
+          <a href="${magicLinkUrl}" style="display: block; background: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; text-align: center; margin-bottom: 24px;">See List of Providers</a>
+          
+          <p style="color: #333; font-size: 14px; margin: 24px 0; line-height: 1.5;">I hope this list makes your life a little easier. And thanks for all your contributions.</p>
+          
+          <p style="color: #333; font-size: 14px; margin: 24px 0; line-height: 1.5;">Cheers,<br/>Courtney</p>
+          
           <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee;">
-            <p style="color: #999; font-size: 12px; text-align: center;">
-              <a href="https://courtneys-list.com/unsubscribe?email=${encodeURIComponent(webhookData.user.email)}" style="color: #999; text-decoration: underline;">Unsubscribe</a> | 
-              <a href="https://courtneys-list.com/contact" style="color: #999; text-decoration: underline;">Contact Us</a>
+            <p style="color: #ccc; font-size: 12px; text-align: center; line-height: 18px;">
+              <a href="https://courtneys-list.com/unsubscribe?email=${encodeURIComponent(webhookData.user.email)}" style="color: #ccc; text-decoration: underline;">Unsubscribe</a> | 
+              <a href="https://courtneys-list.com/contact" style="color: #ccc; text-decoration: underline;">Contact Us</a>
             </p>
           </div>
         </body>
@@ -153,7 +166,7 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         from: "Courtney's List <courtney@courtneys-list.com>",
         to: [webhookData.user.email],
-        subject: "🎉 VIP Access Granted - Your magic link inside!",
+        subject: `${communityName || 'Your Neighborhood'} Access is Ready - Unlock it Now`,
         html: html,
       }),
     })
