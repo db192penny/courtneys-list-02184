@@ -46,9 +46,9 @@ export type CommunityVendorRow = {
   market_unit: string | null;
 };
 
-const SORTS = [
+const getSorts = (communityName: string) => [
   { key: "homes", label: "# of Homes Serviced" },
-  { key: "hoa_rating", label: "Community Rating" },
+  { key: "hoa_rating", label: `${communityName} Rating` },
   { key: "google_rating", label: "Google Rating" },
 ] as const;
 
@@ -64,6 +64,7 @@ export default function CommunityVendorTable({
   isVerified?: boolean;
 }) {
   const [category, setCategory] = useState<string>("all");
+  const SORTS = getSorts(communityName);
   const [sortBy, setSortBy] = useState<typeof SORTS[number]["key"]>("homes");
   const isMobile = useIsMobile();
 
