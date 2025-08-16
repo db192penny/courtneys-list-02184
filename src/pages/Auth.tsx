@@ -12,7 +12,8 @@ import { toSlug } from "@/utils/slug";
 import AddressInput, { AddressSelectedPayload } from "@/components/AddressInput";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Info, Crown } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Info, Crown, PartyPopper } from "lucide-react";
 
 const Auth = () => {
   const [name, setName] = useState("");
@@ -20,6 +21,8 @@ const Auth = () => {
   const [address, setAddress] = useState("");
   const [resident, setResident] = useState<"yes" | "no">("yes");
   const [errors, setErrors] = useState<{ name?: boolean; email?: boolean; address?: boolean; resident?: boolean }>({});
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [detectedCommunity, setDetectedCommunity] = useState<string>("");
   const { toast } = useToast();
   const navigate = useNavigate();
   const [params] = useSearchParams();
@@ -287,12 +290,22 @@ const Auth = () => {
       const cleanDestination = destination.split('#')[0];
       console.log("[Auth] 🎯 Navigating to final destination:", cleanDestination);
       
-      // Show success toast for successful onboarding
+      // Show success modal for successful onboarding
       if (destination !== "/profile?onboarding=1") {
-        toast({ 
-          title: "Welcome!", 
-          description: "You've been successfully onboarded to your community." 
-        });
+        // Extract community name from destination for personalized message
+        const communityMatch = destination.match(/\/communities\/(.+)/);
+        const communityForDisplay = communityMatch 
+          ? communityMatch[1].replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+          : communityName || "your community";
+        
+        setDetectedCommunity(communityForDisplay);
+        setShowSuccessModal(true);
+        
+        // Delay navigation to show the modal
+        setTimeout(() => {
+          navigate(cleanDestination, { replace: true });
+        }, 100);
+        return;
       }
       
       navigate(cleanDestination, { replace: true });
@@ -534,6 +547,36 @@ const Auth = () => {
           Enter your details, and once approved by your community admin, you'll get full access to your neighborhood's trusted providers.
         </div>
       </section>
+
+      {/* Success Modal */}
+      <AlertDialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
+        <AlertDialogContent className="max-w-md">
+          <AlertDialogHeader className="text-center space-y-4">
+            <div className="mx-auto w-16 h-16 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center">
+              <PartyPopper className="w-8 h-8 text-green-600 dark:text-green-400" />
+            </div>
+            <AlertDialogTitle className="text-2xl font-bold text-green-700 dark:text-green-400">
+              Welcome to Your Community! 🎉
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-base space-y-2">
+              <p className="font-semibold">You've been successfully onboarded{detectedCommunity && ` to ${detectedCommunity}`}!</p>
+              <p className="text-muted-foreground">
+                Explore local vendors recommended by your neighbors and start discovering trusted services in your area.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogAction 
+            onClick={() => {
+              setShowSuccessModal(false);
+              const cleanDestination = `/communities/${toSlug(detectedCommunity)}`.split('#')[0];
+              navigate(cleanDestination, { replace: true });
+            }}
+            className="w-full bg-green-600 hover:bg-green-700 text-white"
+          >
+            Start Exploring
+          </AlertDialogAction>
+        </AlertDialogContent>
+      </AlertDialog>
     </main>
   );
 };
