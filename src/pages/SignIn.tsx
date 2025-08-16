@@ -5,14 +5,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import SEO from "@/components/SEO";
 import { toast } from "@/hooks/use-toast";
+import { Mail, AlertTriangle } from "lucide-react";
 
 const SignIn = () => {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<"idle" | "approved" | "pending" | "not_found" | "error">("idle");
   const [message, setMessage] = useState("");
+  const [showMagicLinkModal, setShowMagicLinkModal] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,7 +54,7 @@ const SignIn = () => {
         }
         setStatus("approved");
         setMessage("If that email is registered, a magic link has been sent. Please check your inbox.");
-        toast({ title: "Magic link sent", description: `Check ${targetEmail} to continue.` });
+        setShowMagicLinkModal(true);
       } else if (statusResult === "not_found") {
         setStatus("not_found");
         setMessage("We couldn't find an account with that email. Please sign up to request access.");
@@ -112,6 +115,60 @@ const SignIn = () => {
           </CardContent>
         </Card>
       </section>
+
+      {/* Magic Link Sent Modal */}
+      <Dialog open={showMagicLinkModal} onOpenChange={setShowMagicLinkModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-lg">
+              <Mail className="h-5 w-5 text-green-600" />
+              Magic Link Sent!
+            </DialogTitle>
+            <DialogDescription className="text-center pt-2">
+              We've sent a magic link to <strong>{email}</strong>
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="flex items-start gap-3 p-4 bg-orange-50 dark:bg-orange-950/20 rounded-lg border border-orange-200 dark:border-orange-800">
+              <AlertTriangle className="h-5 w-5 text-orange-600 mt-0.5 flex-shrink-0" />
+              <div>
+                <p className="font-semibold text-orange-800 dark:text-orange-200">
+                  Don't forget to check your spam folder!
+                </p>
+                <p className="text-sm text-orange-700 dark:text-orange-300 mt-1">
+                  Magic links sometimes end up in spam or junk mail folders.
+                </p>
+              </div>
+            </div>
+            
+            <div className="space-y-3 text-sm text-muted-foreground">
+              <p className="font-medium text-foreground">What to do next:</p>
+              <ol className="space-y-2 list-decimal list-inside">
+                <li>Check your inbox for an email from Courtney's List</li>
+                <li>If you don't see it, check your spam/junk folder</li>
+                <li>Click the magic link in the email to sign in</li>
+              </ol>
+            </div>
+            
+            <div className="flex flex-col gap-2 pt-2">
+              <Button onClick={() => setShowMagicLinkModal(false)} className="w-full">
+                Got It!
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setShowMagicLinkModal(false);
+                  handleSubmit(new Event('submit') as any);
+                }}
+                className="w-full"
+              >
+                Resend Magic Link
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </main>
   );
 };
