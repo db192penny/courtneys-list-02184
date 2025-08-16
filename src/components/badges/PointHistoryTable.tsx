@@ -53,8 +53,13 @@ export default function PointHistoryTable() {
     );
   }
 
-  const displayHistory = isOpen ? history : history.slice(0, 5);
-  const hasMore = history.length > 5;
+  // Filter out internal system messages that users shouldn't see
+  const userFacingHistory = history.filter(entry => 
+    !['validation_warning', 'system_correction'].includes(entry.activity_type)
+  );
+  
+  const displayHistory = isOpen ? userFacingHistory : userFacingHistory.slice(0, 5);
+  const hasMore = userFacingHistory.length > 5;
 
   return (
     <Card>
@@ -65,7 +70,7 @@ export default function PointHistoryTable() {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
-        {history.length === 0 ? (
+        {userFacingHistory.length === 0 ? (
           <div className="text-center py-6 text-muted-foreground">
             <p>No point history yet</p>
             <p className="text-sm mt-1">Start participating to earn points!</p>
@@ -107,14 +112,14 @@ export default function PointHistoryTable() {
                       </>
                     ) : (
                       <>
-                        Show All ({history.length - 5} more) <ChevronDown className="ml-2 h-4 w-4" />
+                        Show All ({userFacingHistory.length - 5} more) <ChevronDown className="ml-2 h-4 w-4" />
                       </>
                     )}
                   </Button>
                 </CollapsibleTrigger>
                 <CollapsibleContent>
                   <div className="space-y-2 mt-2">
-                    {history.slice(5).map((entry) => (
+                    {userFacingHistory.slice(5).map((entry) => (
                       <div key={entry.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
                         <div className="flex items-center gap-3">
                           <span className="text-lg">

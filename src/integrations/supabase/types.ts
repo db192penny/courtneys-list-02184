@@ -959,6 +959,15 @@ export type Database = {
           old_points: number
         }[]
       }
+      fix_duplicate_join_points: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          new_points: number
+          old_points: number
+          removed_duplicates: number
+          user_id: string
+        }[]
+      }
       fix_orphaned_users: {
         Args: Record<PropertyKey, never>
         Returns: {
