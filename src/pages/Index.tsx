@@ -92,7 +92,7 @@ const Index = () => {
                 </div>
                 <Button 
                   type="submit" 
-                  className="w-full md:w-auto md:min-w-[160px]" 
+                  className="w-full md:w-auto md:min-w-[160px] bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700" 
                   disabled={!selectedAddress} 
                   aria-disabled={!selectedAddress}
                 >
