@@ -147,7 +147,7 @@ serve(async (req) => {
       <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji'; line-height: 1.6; color: #111">
         <h2 style="margin: 0 0 12px;">You're approved! 🎉</h2>
         <p>Hi ${displayName},</p>
-        <p>Your access to Courtney’s List has been approved. Use the secure link below to sign in:</p>
+        <p>Your access to Courtney's List has been approved. Use the secure link below to sign in:</p>
         <p style="margin: 20px 0">
           <a href="${actionLink}"
              style="display:inline-block;background:#111;color:#fff;padding:10px 16px;border-radius:8px;text-decoration:none">
@@ -167,9 +167,9 @@ serve(async (req) => {
     `;
 
     const { data: emailRes, error: emailErr } = await resend.emails.send({
-      from: "Courtney’s List <onboarding@resend.dev>",
+      from: "Courtney's List <courtney@courtneys-list.com>",
       to: [email],
-      subject: "You're approved — sign in to Courtney’s List",
+      subject: "You're approved — sign in to Courtney's List",
       html,
     });
 
