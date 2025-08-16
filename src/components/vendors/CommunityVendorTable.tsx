@@ -306,7 +306,7 @@ export default function CommunityVendorTable({
                        communityName={communityName}
                     />
                   </TableCell>
-                  <TableCell>{showContact ? (r.contact_info ? formatUSPhoneDisplay(r.contact_info) : "—") : "Hidden"}</TableCell>
+                  <TableCell className="whitespace-nowrap">{showContact ? (r.contact_info ? formatUSPhoneDisplay(r.contact_info) : "—") : "Hidden"}</TableCell>
                    <TableCell className="text-right">
                      <div className="flex gap-1 justify-end">
                        <Button 
