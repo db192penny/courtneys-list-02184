@@ -872,6 +872,10 @@ export type Database = {
           hoa_name: string
         }[]
       }
+      admin_cleanup_orphaned_user: {
+        Args: { _user_id: string }
+        Returns: boolean
+      }
       admin_list_all_users: {
         Args: Record<PropertyKey, never>
         Returns: {

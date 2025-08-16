@@ -23,6 +23,8 @@ interface User {
   created_at: string;
   points: number | null;
   submissions_count: number | null;
+  is_orphaned?: boolean;
+  email_confirmed_at?: string | null;
 }
 
 interface UserActivity {
@@ -42,29 +44,31 @@ const AdminUsers = () => {
   const [userActivity, setUserActivity] = useState<UserActivity[]>([]);
   const [loadingAction, setLoadingAction] = useState<Record<string, string>>({});
 
-  // Fetch all users
-  const { data: users = [], isLoading, refetch } = useQuery<User[]>({
-    queryKey: ["admin-users", statusFilter, sourceFilter],
+  // Fetch all users including orphaned ones
+  const { data: users = [], isLoading, refetch } = useQuery({
+    queryKey: ["admin-all-users", statusFilter, sourceFilter],
     queryFn: async () => {
-      let query = supabase
-        .from("users")
-        .select("id, email, name, address, formatted_address, is_verified, signup_source, created_at, points, submissions_count")
-        .order("created_at", { ascending: false });
-
+      const { data, error } = await supabase.rpc("admin_list_all_users");
+      if (error) throw error;
+      
+      let filteredData = data || [];
+      
       if (statusFilter === "verified") {
-        query = query.eq("is_verified", true);
+        filteredData = filteredData.filter((user: any) => user.is_verified === true);
       } else if (statusFilter === "pending") {
-        query = query.eq("is_verified", false);
+        filteredData = filteredData.filter((user: any) => user.is_verified === false || user.is_orphaned === true);
       }
 
-      const { data, error } = await query;
-      if (error) throw error;
-      return data || [];
+      return filteredData.map((user: any) => ({
+        ...user,
+        formatted_address: null,
+        submissions_count: null
+      })) as User[];
     },
   });
 
   // Filter users based on search term and source
-  const filteredUsers = users.filter(user => {
+  const filteredUsers = (users as User[]).filter(user => {
     const matchesSearch = !searchTerm || 
       user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -116,7 +120,7 @@ const AdminUsers = () => {
     fetchUserActivity();
   }, [selectedUser]);
 
-  const handleUserAction = async (userId: string, action: "verify" | "unverify" | "delete") => {
+  const handleUserAction = async (userId: string, action: "verify" | "unverify" | "delete" | "cleanup") => {
     setLoadingAction(prev => ({ ...prev, [userId]: action }));
 
     try {
@@ -130,7 +134,17 @@ const AdminUsers = () => {
         });
 
         if (error) throw error;
-        toast({ title: "User deleted", description: "User and their data have been removed." });
+        toast({ title: "User deleted", description: "User and their data have been completely removed." });
+      } else if (action === "cleanup") {
+        const confirmed = confirm("This will permanently remove this orphaned user from the system. Continue?");
+        if (!confirmed) return;
+
+        const { error } = await supabase.rpc("admin_cleanup_orphaned_user", {
+          _user_id: userId
+        });
+
+        if (error) throw error;
+        toast({ title: "Orphaned user cleaned up", description: "The orphaned user has been removed from the system." });
       } else {
         const isVerified = action === "verify";
         const { error } = await supabase
@@ -171,6 +185,9 @@ const AdminUsers = () => {
   };
 
   const getStatusBadge = (user: User) => {
+    if (user.is_orphaned) {
+      return <Badge variant="destructive">Orphaned</Badge>;
+    }
     if (user.is_verified) {
       return <Badge className="bg-green-100 text-green-800">Verified</Badge>;
     }
@@ -289,34 +306,48 @@ const AdminUsers = () => {
                             >
                               <Eye className="h-4 w-4" />
                             </Button>
-                            {user.is_verified ? (
+                            {user.is_orphaned ? (
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => handleUserAction(user.id, "unverify")}
+                                onClick={() => handleUserAction(user.id, "cleanup")}
                                 disabled={!!loadingAction[user.id]}
+                                className="text-destructive hover:text-destructive"
                               >
-                                <UserX className="h-4 w-4" />
+                                <Trash2 className="h-4 w-4" />
                               </Button>
                             ) : (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleUserAction(user.id, "verify")}
-                                disabled={!!loadingAction[user.id]}
-                              >
-                                <UserCheck className="h-4 w-4" />
-                              </Button>
+                              <>
+                                {user.is_verified ? (
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleUserAction(user.id, "unverify")}
+                                    disabled={!!loadingAction[user.id]}
+                                  >
+                                    <UserX className="h-4 w-4" />
+                                  </Button>
+                                ) : (
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleUserAction(user.id, "verify")}
+                                    disabled={!!loadingAction[user.id]}
+                                  >
+                                    <UserCheck className="h-4 w-4" />
+                                  </Button>
+                                )}
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleUserAction(user.id, "delete")}
+                                  disabled={!!loadingAction[user.id]}
+                                  className="text-destructive hover:text-destructive"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </>
                             )}
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleUserAction(user.id, "delete")}
-                              disabled={!!loadingAction[user.id]}
-                              className="text-destructive hover:text-destructive"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
                           </div>
                         </TableCell>
                       </TableRow>
