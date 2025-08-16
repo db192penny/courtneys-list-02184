@@ -34,6 +34,10 @@ const Auth = () => {
     return params.get("community") || "";
   }, [params]);
 
+  const isVerifiedMagicLink = useMemo(() => {
+    return params.get("verified") === "true";
+  }, [params]);
+
   useEffect(() => {
     // Only pre-fill email if there's a valid invite token context
     const hint = localStorage.getItem("invite_email");
@@ -201,8 +205,11 @@ const Auth = () => {
       console.log("[Auth] 🔍 Starting community detection for user:", userId);
       
       try {
-        // PRIORITY 0: Check URL params for community context first
-        if (communityName) {
+        // PRIORITY 0: Check URL params for community context first (magic link users)
+        if (communityName && isVerifiedMagicLink) {
+          destination = `/communities/${toSlug(communityName)}`;
+          console.log("[Auth] ✅ Verified magic link user with community, redirecting to:", destination);
+        } else if (communityName) {
           destination = `/communities/${toSlug(communityName)}`;
           console.log("[Auth] ✅ Community detected from URL params, redirecting to:", destination);
         } else {

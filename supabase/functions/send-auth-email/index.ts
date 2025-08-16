@@ -61,7 +61,7 @@ Deno.serve(async (req) => {
           if (user.signup_source?.startsWith('community:')) {
             const communityName = user.signup_source.split('community:')[1]
             if (communityName) {
-              communityRedirect = `https://courtneys-list.com/communities/${encodeURIComponent(communityName.toLowerCase().replace(/\s+/g, '-'))}`
+              communityRedirect = `https://courtneys-list.com/auth?community=${encodeURIComponent(communityName)}&verified=true`
               console.log('🏘️ Community from signup_source:', communityName)
             }
           } else if (user.address) {
@@ -73,7 +73,7 @@ Deno.serve(async (req) => {
               .single()
             
             if (hoa?.hoa_name) {
-              communityRedirect = `https://courtneys-list.com/communities/${encodeURIComponent(hoa.hoa_name.toLowerCase().replace(/\s+/g, '-'))}`
+              communityRedirect = `https://courtneys-list.com/auth?community=${encodeURIComponent(hoa.hoa_name)}&verified=true`
               console.log('🏘️ Community from address:', hoa.hoa_name)
             }
           }
