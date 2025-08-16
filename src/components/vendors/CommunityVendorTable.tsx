@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { RatingStars } from "@/components/ui/rating-stars";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Star } from "lucide-react";
+import { Star, Filter, ChevronUp, ChevronDown, ArrowUpDown } from "lucide-react";
 import { CATEGORIES } from "@/data/categories";
 import { useUserHomeVendors } from "@/hooks/useUserHomeVendors";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -101,45 +101,81 @@ export default function CommunityVendorTable({
     setCostModalOpen(true);
   };
 
+  const handleHeaderClick = (sortKey: typeof SORTS[number]["key"]) => {
+    setSortBy(sortKey);
+  };
+
+  const getSortIcon = (sortKey: typeof SORTS[number]["key"]) => {
+    if (sortBy === sortKey) {
+      return <ChevronUp className="h-4 w-4 text-primary" />;
+    }
+    return <ArrowUpDown className="h-4 w-4 text-muted-foreground opacity-50" />;
+  };
+
   const formatted = useMemo(() => data || [], [data]);
 
   return (
     <TooltipProvider>
     <div className="space-y-4">
-      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-          <div className="w-full sm:w-52">
-            <Select value={category} onValueChange={setCategory}>
-              <SelectTrigger aria-label="Filter by category">
-                <SelectValue placeholder="All Categories" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Categories</SelectItem>
-                {CATEGORIES.map((c) => (
-                  <SelectItem key={c} value={c}>{c}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:gap-6">
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground flex items-center gap-2">
+              <Filter className="h-4 w-4" />
+              Filter by Category
+            </label>
+            <div className="w-full sm:w-52">
+              <Select value={category} onValueChange={setCategory}>
+                <SelectTrigger className="bg-background border-2 border-muted hover:border-primary/20 focus:border-primary transition-colors">
+                  <SelectValue placeholder="All Categories" />
+                </SelectTrigger>
+                <SelectContent className="bg-background border-2">
+                  <SelectItem value="all">All Categories</SelectItem>
+                  {CATEGORIES.map((c) => (
+                    <SelectItem key={c} value={c}>{c}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {category !== "all" && (
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => setCategory("all")}
+                  className="mt-1 h-6 px-2 text-xs text-muted-foreground hover:text-foreground"
+                >
+                  Clear filter
+                </Button>
+              )}
+            </div>
           </div>
-          <div className="w-full sm:w-56">
-            <Select value={sortBy} onValueChange={(v) => setSortBy(v as any)}>
-              <SelectTrigger aria-label="Sort by">
-                <SelectValue placeholder="# of Homes Serviced" />
-              </SelectTrigger>
-              <SelectContent>
-                {SORTS.map((s) => (
-                  <SelectItem key={s.key} value={s.key}>{s.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground flex items-center gap-2">
+              <ArrowUpDown className="h-4 w-4" />
+              Sort by
+            </label>
+            <div className="w-full sm:w-56">
+              <Select value={sortBy} onValueChange={(v) => setSortBy(v as any)}>
+                <SelectTrigger className="bg-background border-2 border-muted hover:border-primary/20 focus:border-primary transition-colors">
+                  <SelectValue placeholder="# of Homes Serviced" />
+                </SelectTrigger>
+                <SelectContent className="bg-background border-2">
+                  {SORTS.map((s) => (
+                    <SelectItem key={s.key} value={s.key}>{s.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
+        </div>
+        <div className="flex items-end">
           <Button 
             variant="secondary" 
             onClick={() => refetch()} 
             disabled={isFetching}
-            className="w-full sm:w-auto"
+            className="w-full sm:w-auto flex items-center gap-2"
           >
-            Refresh
+            <Filter className="h-4 w-4" />
+            {isFetching ? "Loading..." : "Refresh"}
           </Button>
         </div>
       </div>
@@ -178,8 +214,24 @@ export default function CommunityVendorTable({
                 <TableHead>Rank</TableHead>
                 <TableHead>Provider</TableHead>
                 <TableHead>Category</TableHead>
-                <TableHead className="whitespace-nowrap"># Homes</TableHead>
-                <TableHead>Ratings/Reviews</TableHead>
+                <TableHead 
+                  className="whitespace-nowrap cursor-pointer hover:bg-muted/50 transition-colors select-none"
+                  onClick={() => handleHeaderClick("homes")}
+                >
+                  <div className="flex items-center gap-2">
+                    # Homes
+                    {getSortIcon("homes")}
+                  </div>
+                </TableHead>
+                <TableHead 
+                  className="cursor-pointer hover:bg-muted/50 transition-colors select-none"
+                  onClick={() => handleHeaderClick("hoa_rating")}
+                >
+                  <div className="flex items-center gap-2">
+                    Ratings/Reviews
+                    {getSortIcon("hoa_rating")}
+                  </div>
+                </TableHead>
                 <TableHead>Cost</TableHead>
                 <TableHead className="whitespace-nowrap">Contact #s</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
