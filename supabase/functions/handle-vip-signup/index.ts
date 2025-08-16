@@ -48,29 +48,23 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("[VIP Signup] Processing VIP signup for:", email);
 
-    // First, check if user already exists in auth.users
-    const { data: existingAuthUser, error: authCheckError } = await supabaseAdmin.auth.admin.getUserByEmail(email);
+    // First, check if user already exists by trying to list users with this email
+    const { data: userList, error: listError } = await supabaseAdmin.auth.admin.listUsers({
+      page: 1,
+      perPage: 1000 // Get all users to search through
+    });
+    
+    let existingUser = null;
+    if (userList?.users) {
+      existingUser = userList.users.find(user => user.email?.toLowerCase() === email.toLowerCase());
+    }
     
     let userId: string;
-    let session: any = null;
 
-    if (existingAuthUser?.user) {
+    if (existingUser) {
       // User exists in auth, use their ID
-      userId = existingAuthUser.user.id;
+      userId = existingUser.id;
       console.log("[VIP Signup] Found existing auth user:", userId);
-      
-      // Create a session for the existing user
-      const { data: sessionData, error: sessionError } = await supabaseAdmin.auth.admin.generateLink({
-        type: 'magiclink',
-        email: email,
-        options: {
-          redirectTo: `${Deno.env.get('SUPABASE_URL')}/auth/v1/callback`
-        }
-      });
-      
-      if (!sessionError && sessionData) {
-        console.log("[VIP Signup] Generated session for existing user");
-      }
     } else {
       // Create new user without email confirmation
       const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
