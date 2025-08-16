@@ -913,6 +913,19 @@ export type Database = {
           vendor_submissions: number
         }[]
       }
+      audit_user_points: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          calculated_points: number
+          cost_count: number
+          current_points: number
+          discrepancy: boolean
+          history_points: number
+          review_count: number
+          user_email: string
+          vendor_count: number
+        }[]
+      }
       check_vendor_duplicate: {
         Args: { _community: string; _name: string }
         Returns: {
@@ -928,6 +941,14 @@ export type Database = {
       current_user_normalized_address: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      fix_all_point_discrepancies: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          fixed_user_email: string
+          new_points: number
+          old_points: number
+        }[]
       }
       get_email_status: {
         Args: { _email: string }
