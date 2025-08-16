@@ -456,7 +456,7 @@ const Auth = () => {
               <Crown className="h-5 w-5 text-yellow-600 dark:text-yellow-400 mt-0.5 flex-shrink-0" />
               <div className="space-y-1">
                 <p className="text-sm text-yellow-800 dark:text-yellow-200">
-                  Since you're part of the <strong>invite-only test group</strong> (thanks!), you're <strong>automatically verified</strong>. In the future, neighbors will need admin approval (that'll be me—unless one of you volunteers :)).
+                  Since you're part of the <strong>invite-only test group</strong> (thanks!), you'll be <strong>automatically verified</strong>. In the future, neighbors will need admin approval (that'll be me—unless one of you volunteers :)).
                 </p>
               </div>
             </div>
