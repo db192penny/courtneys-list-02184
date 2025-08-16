@@ -149,14 +149,6 @@ const SignIn = () => {
               </div>
             </div>
             
-            <div className="space-y-3 text-sm text-muted-foreground">
-              <p className="font-medium text-foreground">What to do next:</p>
-              <ol className="space-y-2 list-decimal list-inside">
-                <li>Check your inbox for an email from Courtney's List</li>
-                <li>If you don't see it, check your spam/junk folder</li>
-                <li>Click the magic link in the email to sign in</li>
-              </ol>
-            </div>
             
             <div className="flex flex-col gap-2 pt-2">
               <Button onClick={() => setShowMagicLinkModal(false)} className="w-full">
