@@ -105,12 +105,43 @@ export default function AddressInput({
         autocomplete.addListener("place_changed", () => {
           try {
             const place = autocomplete.getPlace();
-            if (!place.place_id) return;
+            console.log("[AddressInput] place selected:", place);
+            
+            if (!place || !place.geometry || !place.place_id) {
+              console.warn("[AddressInput] Invalid place selection - missing required data");
+              setHelper("Please select a valid address from the suggestions.");
+              return;
+            }
+
+            // Validate the formatted address
+            const formattedAddress = place.formatted_address || '';
+            if (!formattedAddress || formattedAddress.trim().length === 0) {
+              console.warn("[AddressInput] Empty formatted address");
+              setHelper("Please select a valid address from the suggestions.");
+              return;
+            }
+
+            // Check for obviously invalid addresses
+            const normalized = formattedAddress.toLowerCase().trim();
+            const invalidPatterns = [
+              'address not provided',
+              'no address',
+              'unknown',
+              'pending',
+              'not specified',
+              'n/a'
+            ];
+            
+            if (invalidPatterns.some(pattern => normalized.includes(pattern))) {
+              console.warn("[AddressInput] Invalid address pattern detected:", formattedAddress);
+              setHelper("Please select a valid street address from the suggestions.");
+              return;
+            }
 
             const comps = place.address_components || [];
             const formatted = place.formatted_address || "";
             const { oneLine, parts } = toOneLineFromFlexible(comps);
-            const normalized = normalizeLowerTrim(oneLine || formatted);
+            const normalizedAddress = normalizeLowerTrim(oneLine || formatted);
 
             const loc = place.geometry?.location;
             let lat: number | null = null;
@@ -121,7 +152,7 @@ export default function AddressInput({
             }
 
             const payload: AddressSelectedPayload = {
-              household_address: normalized,
+              household_address: normalizedAddress,
               formatted_address: formatted || oneLine,
               place_id: place.place_id,
               components: { parts, raw: comps },

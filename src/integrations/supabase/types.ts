@@ -14,6 +14,50 @@ export type Database = {
   }
   public: {
     Tables: {
+      address_change_log: {
+        Row: {
+          created_at: string | null
+          id: string
+          metadata: Json | null
+          new_address: string | null
+          new_street_name: string | null
+          old_address: string | null
+          old_street_name: string | null
+          source: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          new_address?: string | null
+          new_street_name?: string | null
+          old_address?: string | null
+          old_street_name?: string | null
+          source?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          new_address?: string | null
+          new_street_name?: string | null
+          old_address?: string | null
+          old_street_name?: string | null
+          source?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "address_change_log_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       admin_audit_log: {
         Row: {
           action: string

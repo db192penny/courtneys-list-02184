@@ -90,6 +90,68 @@ useEffect(() => {
   const canonical = typeof window !== "undefined" ? window.location.href : undefined;
 
   const handleAddressSelected = async (payload: AddressSelectedPayload) => {
+    // Validate the address before sending to backend
+    const incomingAddress = payload.household_address || payload.formatted_address || '';
+    
+    if (!incomingAddress || incomingAddress.trim().length === 0) {
+      console.warn("[Profile] Empty address provided to handleAddressSelected");
+      toast({
+        title: "Invalid address",
+        description: "Please select a valid address from the suggestions.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Check for obviously invalid addresses
+    const normalized = incomingAddress.toLowerCase().trim();
+    const invalidPatterns = [
+      'address not provided',
+      'no address',
+      'unknown',
+      'pending',
+      'not specified',
+      'n/a'
+    ];
+    
+    if (invalidPatterns.some(pattern => normalized.includes(pattern))) {
+      console.warn("[Profile] Invalid address pattern detected:", incomingAddress);
+      toast({
+        title: "Invalid address",
+        description: "Please enter a valid street address.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Require place_id for proper geocoding
+    if (!payload.place_id) {
+      console.warn("[Profile] No place_id provided");
+      toast({
+        title: "Invalid address",
+        description: "Please select an address from the dropdown suggestions.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Don't overwrite a good address with a potentially bad one
+    if (address && 
+        address !== 'Address Not Provided' && 
+        address.trim().length > 10 && // Has some substance
+        (!incomingAddress || incomingAddress.length < address.length / 2)) {
+      console.warn("[Profile] Refusing to overwrite good address with potentially bad one:", {
+        current: address,
+        incoming: incomingAddress
+      });
+      toast({
+        title: "Address not updated",
+        description: "The selected address appears incomplete. Please try again.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     // POST to backend (Supabase Edge Function)
     const { error } = await supabase.functions.invoke("household-address", {
       body: payload,
