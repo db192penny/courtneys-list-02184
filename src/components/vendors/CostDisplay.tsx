@@ -87,13 +87,13 @@ export function CostDisplay({
 
         {/* Area Average Price Line */}
         <div className="flex items-center gap-1">
-          <span className="text-sm font-semibold text-muted-foreground min-w-[70px]">Area Average:</span>
+          <span className="text-xs text-muted-foreground min-w-[70px]">Area Average:</span>
           <Tooltip>
             <TooltipTrigger asChild>
               <div className="px-2 py-1.5 rounded-md bg-orange-50 hover:bg-orange-100 transition-colors border border-orange-200 hover:border-orange-300 min-h-[28px] flex items-center cursor-help">
                 {marketPrice ? (
                   <div className="flex items-center gap-1">
-                    <span className="text-sm font-bold">{marketPrice}</span>
+                    <span className="text-xs font-medium">{marketPrice}</span>
                     {isAdmin && (
                       <Button
                         variant="ghost"
@@ -107,7 +107,7 @@ export function CostDisplay({
                   </div>
                 ) : (
                   <div className="flex items-center gap-1">
-                    <span className="text-sm font-bold text-muted-foreground">—</span>
+                    <span className="text-xs font-medium text-muted-foreground">—</span>
                     {isAdmin && (
                       <Button
                         variant="ghost"
@@ -123,9 +123,12 @@ export function CostDisplay({
               </div>
             </TooltipTrigger>
             <TooltipContent>
-              <p className="text-xs max-w-xs">
-                Average cost for similar services in your area, based on industry pricing data, home prices, and data from HomeAdvisor
-              </p>
+              <div className="space-y-2">
+                <p className="text-sm font-semibold">Area Average Calculation</p>
+                <p className="text-xs max-w-xs">
+                  Average cost for similar services in your area, based on industry pricing data, home prices, and data from HomeAdvisor
+                </p>
+              </div>
             </TooltipContent>
           </Tooltip>
         </div>
