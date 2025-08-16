@@ -82,10 +82,42 @@ function AuthWatcher() {
     const redirectIfNeeded = (hasSession: boolean) => {
       if (!mounted) return;
       console.log('AuthWatcher: checking redirect', { hasSession, pathname: location.pathname });
-      // Only redirect from /signin - let /auth page handle its own community detection
-      if (hasSession && location.pathname === "/signin") {
-        console.log('AuthWatcher: redirecting authenticated user from signin');
-        navigate("/communities/boca-bridges", { replace: true });
+      
+      if (hasSession) {
+        // Handle magic link redirects to homepage
+        if (location.pathname === "/" && location.hash === "#") {
+          console.log('AuthWatcher: detected magic link redirect to homepage, checking for community');
+          // Check if user has a community and redirect
+          const checkUserCommunity = async () => {
+            try {
+              const { data: { user: authUser } } = await supabase.auth.getUser();
+              if (authUser) {
+                const { data: user } = await supabase
+                  .from('users')
+                  .select('signup_source, address')
+                  .eq('id', authUser.id)
+                  .single();
+                
+                if (user?.signup_source?.includes('Boca Bridges')) {
+                  console.log('AuthWatcher: redirecting to Boca Bridges community');
+                  navigate("/communities/boca-bridges", { replace: true });
+                  return;
+                }
+              }
+            } catch (error) {
+              console.log('AuthWatcher: error checking user community, using fallback');
+            }
+            // Fallback to default community
+            navigate("/communities/boca-bridges", { replace: true });
+          };
+          
+          checkUserCommunity();
+        }
+        // Only redirect from /signin - let /auth page handle its own community detection
+        else if (location.pathname === "/signin") {
+          console.log('AuthWatcher: redirecting authenticated user from signin');
+          navigate("/communities/boca-bridges", { replace: true });
+        }
       }
     };
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -98,7 +130,7 @@ function AuthWatcher() {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, [navigate, location.pathname]);
+  }, [navigate, location.pathname, location.hash]);
   return null;
 }
 

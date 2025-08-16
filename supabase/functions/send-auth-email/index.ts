@@ -57,24 +57,39 @@ Deno.serve(async (req) => {
         if (user) {
           console.log('📍 User found:', { signup_source: user.signup_source, has_address: !!user.address })
           
-          // Check signup_source first
+          // Check signup_source first - handle both community: and homepage: patterns
+          let communityName = null
           if (user.signup_source?.startsWith('community:')) {
-            const communityName = user.signup_source.split('community:')[1]
-            if (communityName) {
-              communityRedirect = `https://courtneys-list.com/auth?community=${encodeURIComponent(communityName)}&verified=true`
-              console.log('🏘️ Community from signup_source:', communityName)
-            }
+            communityName = user.signup_source.split('community:')[1]
+            console.log('🏘️ Community from signup_source (community:):', communityName)
+          } else if (user.signup_source?.startsWith('homepage:')) {
+            communityName = user.signup_source.split('homepage:')[1]
+            console.log('🏘️ Community from signup_source (homepage:):', communityName)
+          }
+          
+          if (communityName) {
+            communityRedirect = `https://courtneys-list.com/auth?community=${encodeURIComponent(communityName)}&verified=true`
+            console.log('🏘️ Setting community redirect to:', communityRedirect)
           } else if (user.address) {
             // Query household_hoa to find their community
-            const { data: hoa } = await supabase
-              .from('household_hoa')
-              .select('hoa_name')
-              .eq('normalized_address', supabase.rpc('normalize_address', { _addr: user.address }))
-              .single()
-            
-            if (hoa?.hoa_name) {
-              communityRedirect = `https://courtneys-list.com/auth?community=${encodeURIComponent(hoa.hoa_name)}&verified=true`
-              console.log('🏘️ Community from address:', hoa.hoa_name)
+            console.log('🔍 Looking up community by address:', user.address)
+            try {
+              const { data: hoa, error: hoaError } = await supabase
+                .from('household_hoa')
+                .select('hoa_name')
+                .eq('normalized_address', supabase.rpc('normalize_address', { _addr: user.address }))
+                .single()
+              
+              if (hoaError) {
+                console.log('⚠️ HOA lookup error:', hoaError.message)
+              } else if (hoa?.hoa_name) {
+                communityRedirect = `https://courtneys-list.com/auth?community=${encodeURIComponent(hoa.hoa_name)}&verified=true`
+                console.log('🏘️ Community from address:', hoa.hoa_name)
+              } else {
+                console.log('⚠️ No HOA found for address')
+              }
+            } catch (addressError) {
+              console.log('⚠️ Address-based lookup failed:', addressError.message)
             }
           }
         }
