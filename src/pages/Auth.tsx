@@ -358,22 +358,22 @@ const Auth = () => {
       signup_source: pending.signup_source 
     });
 
-    const redirectUrl = `${window.location.origin}/auth?post_signup=1`;
+    // Generate a temporary password the user never sees
+    const tempPassword = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 
-    const { error } = await supabase.auth.signInWithOtp({
+    const { error } = await supabase.auth.signUp({
       email: email.trim(),
-      options: {
-        emailRedirectTo: redirectUrl,
-      },
+      password: tempPassword,
     });
 
     if (error) {
-      console.error("[Auth] magic link error:", error);
-      toast({ title: "Could not send magic link", description: error.message, variant: "destructive" });
+      console.error("[Auth] signup error:", error);
+      toast({ title: "Could not create account", description: error.message, variant: "destructive" });
       return;
     }
 
-    toast({ title: "Check your email", description: "We sent you a secure sign-in link." });
+    // Since email confirmation is disabled, user is immediately authenticated
+    // The onAuthStateChange listener will handle the rest
   };
 
   const canonical = typeof window !== "undefined" ? window.location.href : undefined;
