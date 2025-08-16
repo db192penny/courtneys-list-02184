@@ -212,6 +212,9 @@ const Auth = () => {
         if (communityName && isVerifiedMagicLink) {
           destination = `/communities/${toSlug(communityName)}`;
           console.log("[Auth] ✅ Verified magic link user with community, redirecting to:", destination);
+          // Skip database detection for verified magic link users
+          setTimeout(() => navigate(destination, { replace: true }), 100);
+          return;
         } else if (communityName) {
           destination = `/communities/${toSlug(communityName)}`;
           console.log("[Auth] ✅ Community detected from URL params, redirecting to:", destination);

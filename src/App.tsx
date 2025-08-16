@@ -81,9 +81,22 @@ function AuthWatcher() {
     let mounted = true;
     const redirectIfNeeded = (hasSession: boolean) => {
       if (!mounted) return;
-      console.log('AuthWatcher: checking redirect', { hasSession, pathname: location.pathname });
+      console.log('AuthWatcher: checking redirect', { hasSession, pathname: location.pathname, search: location.search });
       
       if (hasSession) {
+        // Handle authenticated users landing on /auth with community parameters (magic link users)
+        if (location.pathname === "/auth") {
+          const urlParams = new URLSearchParams(location.search);
+          const communityParam = urlParams.get('community');
+          const isVerified = urlParams.get('verified') === 'true';
+          
+          if (communityParam && isVerified) {
+            console.log('AuthWatcher: detected authenticated magic link user, redirecting to community:', communityParam);
+            navigate(`/communities/${communityParam}`, { replace: true });
+            return;
+          }
+        }
+        
         // Handle magic link redirects to homepage
         if (location.pathname === "/" && location.hash === "#") {
           console.log('AuthWatcher: detected magic link redirect to homepage, checking for community');
@@ -130,7 +143,7 @@ function AuthWatcher() {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, [navigate, location.pathname, location.hash]);
+  }, [navigate, location.pathname, location.hash, location.search]);
   return null;
 }
 
