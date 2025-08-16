@@ -31,6 +31,7 @@ import AdminPreviewLinks from "./pages/AdminPreviewLinks";
 import AdminPreviewUsers from "./pages/AdminPreviewUsers";
 import AdminUsers from "./pages/AdminUsers";
 import Header from "./components/Header";
+import { AdminProtectedRoute } from "./components/AdminProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -124,14 +125,14 @@ const App = () => (
           <Route path="/household/preview" element={<HouseholdPreview />} />
           <Route path="/household" element={<ProtectedRoute><Household /></ProtectedRoute>} />
           <Route path="/admin" element={<Admin />} />
-          <Route path="/admin/badges" element={<ProtectedRoute><AdminBadges /></ProtectedRoute>} />
-          <Route path="/admin/vendors/seed" element={<ProtectedRoute><AdminVendorSeed /></ProtectedRoute>} />
-          <Route path="/admin/vendors/manage" element={<ProtectedRoute><AdminVendorManagement /></ProtectedRoute>} />
-          <Route path="/admin/vendors/edit" element={<ProtectedRoute><AdminEditVendor /></ProtectedRoute>} />
-           <Route path="/admin/costs" element={<ProtectedRoute><AdminCostManagement /></ProtectedRoute>} />
-            <Route path="/admin/preview-links" element={<ProtectedRoute><AdminPreviewLinks /></ProtectedRoute>} />
-            <Route path="/admin/preview-users" element={<ProtectedRoute><AdminPreviewUsers /></ProtectedRoute>} />
-            <Route path="/admin/users" element={<ProtectedRoute><AdminUsers /></ProtectedRoute>} />
+          <Route path="/admin/badges" element={<AdminProtectedRoute><AdminBadges /></AdminProtectedRoute>} />
+          <Route path="/admin/vendors/seed" element={<AdminProtectedRoute><AdminVendorSeed /></AdminProtectedRoute>} />
+          <Route path="/admin/vendors/manage" element={<AdminProtectedRoute><AdminVendorManagement /></AdminProtectedRoute>} />
+          <Route path="/admin/vendors/edit" element={<AdminProtectedRoute><AdminEditVendor /></AdminProtectedRoute>} />
+           <Route path="/admin/costs" element={<AdminProtectedRoute><AdminCostManagement /></AdminProtectedRoute>} />
+            <Route path="/admin/preview-links" element={<AdminProtectedRoute><AdminPreviewLinks /></AdminProtectedRoute>} />
+            <Route path="/admin/preview-users" element={<AdminProtectedRoute><AdminPreviewUsers /></AdminProtectedRoute>} />
+            <Route path="/admin/users" element={<AdminProtectedRoute><AdminUsers /></AdminProtectedRoute>} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/contact" element={<Contact />} />
