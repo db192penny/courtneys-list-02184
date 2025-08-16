@@ -358,63 +358,38 @@ const Auth = () => {
       signup_source: pending.signup_source 
     });
 
-    console.log("[Auth] 🚀 Processing VIP signup...");
-    
-    // Call the VIP signup edge function
-    const { data: vipResponse, error: vipError } = await supabase.functions.invoke('handle-vip-signup', {
-      body: {
-        email: email.trim(),
-        name: pending.name,
-        address: pending.address,
-        streetName: pending.street_name,
-        residentStatus: resident,
-        signupSource: pending.signup_source,
-        formattedAddress: pending.address,
-        googlePlaceId: null // Can be enhanced later with Google Places integration
-      }
+    const redirectUrl = `${window.location.origin}/auth?post_signup=1`;
+
+    const { error } = await supabase.auth.signInWithOtp({
+      email: email.trim(),
+      options: {
+        emailRedirectTo: redirectUrl,
+      },
     });
 
-    if (vipError) {
-      console.error("[Auth] VIP signup error:", vipError);
-      toast({ title: "Could not create account", description: vipError.message, variant: "destructive" });
+    if (error) {
+      console.error("[Auth] magic link error:", error);
+      toast({ title: "Could not send magic link", description: error.message, variant: "destructive" });
       return;
     }
 
-    if (vipResponse?.success) {
-      console.log("[Auth] ✅ VIP signup successful, redirecting...");
-      toast({ title: "Welcome!", description: "Your account has been created successfully." });
-      
-      // Redirect directly to community page
-      navigate('/community/boca-bridges');
-    } else {
-      toast({ title: "Signup failed", description: "Please try again", variant: "destructive" });
-    }
+    toast({ title: "Check your email", description: "We sent you a secure sign-in link." });
   };
 
   const canonical = typeof window !== "undefined" ? window.location.href : undefined;
 
-  // Helper function to convert slug to display name
-  const slugToName = (slug: string): string => {
-    return slug
-      .split('-')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
-  };
-
-  const displayTitle = communityName ? `Join the ${slugToName(communityName)} Crew` : "Join Courtney's List";
-
   return (
     <main className="min-h-screen bg-background">
       <SEO
-        title={displayTitle}
+        title="Join Courtney's List"
         description="Join the invite only test family - automatically verified access to exclusive vendor info."
         canonical={canonical}
       />
       <section className="container max-w-xl py-10">
-        <h1 className="text-3xl font-semibold mb-6">{displayTitle}</h1>
+        <h1 className="text-3xl font-semibold mb-6">Join Courtney's List</h1>
         <Card>
           <CardHeader className="space-y-1">
-            <CardTitle>Request Access</CardTitle>
+            <CardTitle>{communityName ? `${communityName} Fam` : "Request Access"}</CardTitle>
             <CardDescription>
               Since you are part of the invite only test family (thank you!), you will be automatically verified. In the future, neighbors will need to be accepted by an admin (umm, that will be me unless one of you cares to be <strong>so bold:)</strong>.
             </CardDescription>

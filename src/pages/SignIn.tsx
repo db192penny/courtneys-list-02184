@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,7 +13,6 @@ const SignIn = () => {
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<"idle" | "approved" | "pending" | "not_found" | "error">("idle");
   const [message, setMessage] = useState("");
-  const location = useLocation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,14 +70,14 @@ const SignIn = () => {
   return (
     <main>
       <SEO
-        title="Sign In to Courtney's List | Private Community Access"
-        description="Sign in with your email to access your community's trusted vendor list."
+        title="Sign In to Courtney’s List | Private Community Access"
+        description="Sign in with your email to access your community’s trusted vendor list."
         canonical={`${window.location.origin}/signin`}
       />
       <section className="container max-w-lg py-12">
         <Card>
           <CardHeader>
-            <CardTitle>Sign In to Courtney's List</CardTitle>
+            <CardTitle>Sign In to Courtney’s List</CardTitle>
             <CardDescription>Enter your email to receive a magic link.</CardDescription>
           </CardHeader>
           <CardContent>
@@ -105,11 +104,8 @@ const SignIn = () => {
               </div>
 
               <div className="pt-2 text-center">
-                <Link 
-                  to={`/auth${location.search}`} 
-                  className="underline underline-offset-4"
-                >
-                  New to Courtney's List? Sign Up
+                <Link to="/auth" className="underline underline-offset-4">
+                  New to Courtney’s List? Sign Up
                 </Link>
               </div>
             </form>

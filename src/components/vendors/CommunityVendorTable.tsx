@@ -21,7 +21,6 @@ import VendorMobileCard from "@/components/vendors/VendorMobileCard";
 import CostManagementModalWrapper from "@/components/vendors/CostManagementModalWrapper";
 import { CostDisplay } from "@/components/vendors/CostDisplay";
 import { formatUSPhoneDisplay } from "@/utils/phone";
-import { toSlug } from "@/utils/slug";
 export type CommunityVendorRow = {
   id: string;
   name: string;
@@ -311,7 +310,7 @@ export default function CommunityVendorTable({
                          size="sm" 
                          variant="outline" 
                          className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700 flex items-center gap-1" 
-                         onClick={() => isAuthenticated ? openRate(r) : window.location.href = `/auth?community=${encodeURIComponent(toSlug(communityName))}`}
+                         onClick={() => isAuthenticated ? openRate(r) : window.location.href = `/auth?community=${encodeURIComponent(communityName)}`}
                        >
                          <Star className="h-3 w-3" />
                          Rate
