@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import SEO from "@/components/SEO";
@@ -51,7 +50,7 @@ const Index = () => {
   return (
     <main className="min-h-screen bg-background">
       <SEO
-        title="Courtney's List — Your Private Community’s Trusted Guide to Local Services"
+        title="Courtney's List — Your Private Community's Trusted Guide to Local Services"
         description="Invite-only community vendor recommendations for your neighborhood. Enter your address to view trusted providers."
         canonical={canonical}
       />
@@ -63,7 +62,8 @@ const Index = () => {
         />
         <div className="relative z-10 max-w-3xl w-full text-center space-y-6 mx-auto">
           <h1 className="text-5xl md:text-7xl font-normal tracking-tight">Courtney's List</h1>
-          <p className="text-xl text-muted-foreground">Your Private Community’s Trusted Guide to Local Services</p>
+          <p className="text-xl text-muted-foreground">Your Private Community's Trusted Guide to Local Services</p>
+          <p className="text-lg text-muted-foreground/80 italic">And a pretty good home for your provider info</p>
           
           <div className="mx-auto mt-6 w-full max-w-2xl rounded-xl bg-background/70 supports-[backdrop-filter]:bg-background/60 backdrop-blur shadow-lg p-4 md:p-6">
             <form onSubmit={onSubmit} className="w-full">
@@ -115,7 +115,7 @@ const Index = () => {
                 Members-only access to detailed ratings, reviews, and pricing.
               </p>
             </div> */}
-            <p className="mt-3 text-xs text-muted-foreground">*We’ll only show street-level info publicly to protect your privacy.*</p>
+            <p className="mt-3 text-xs text-muted-foreground">*We'll only show street-level info publicly to protect your privacy.*</p>
             <div className="mt-3 flex justify-center">
               <Button
                 type="button"
@@ -140,7 +140,7 @@ const Index = () => {
               <ShieldCheck className="text-foreground" aria-hidden="true" />
             </div>
             <h3 className="text-lg font-medium">Verify Your Address</h3>
-            <p className="text-sm text-muted-foreground">Join your neighborhood’s private community by confirming your home address and HOA. Approval comes from an HOA admin — and yes, you can be that admin if you’d like.</p>
+            <p className="text-sm text-muted-foreground">Join your neighborhood's private community by confirming your home address and HOA. Approval comes from an HOA admin — and yes, you can be that admin if you'd like.</p>
           </article>
           <article className="text-center motion-safe:animate-fade-in">
             <div className="flex items-center justify-center mb-4">
@@ -154,14 +154,14 @@ const Index = () => {
               <Send className="text-foreground" aria-hidden="true" />
             </div>
             <h3 className="text-lg font-medium">Share Your Vendors</h3>
-            <p className="text-sm text-muted-foreground">Add the service providers you’ve used (good or bad) so neighbors get an honest, growing resource they can trust.</p>
+            <p className="text-sm text-muted-foreground">Add the service providers you've used (good or bad) so neighbors get an honest, growing resource they can trust.</p>
           </article>
         </div>
       </section>
 
 
       <section className="container mt-12 md:mt-16 lg:mt-20 pb-16 md:pb-24">
-        <h2 className="text-2xl md:text-3xl font-semibold text-center mb-6">Why Courtney’s List</h2>
+        <h2 className="text-2xl md:text-3xl font-semibold text-center mb-6">Why Courtney's List</h2>
         <ul className="max-w-3xl mx-auto space-y-3">
           <li className="flex items-start gap-3"><CheckCircle className="mt-0.5 text-foreground" aria-hidden="true" /><span>See who your neighbors trust — with clear ratings and costs.</span></li>
           <li className="flex items-start gap-3"><CheckCircle className="mt-0.5 text-foreground" aria-hidden="true" /><span>Compare prices and find the best local providers easily.</span></li>
@@ -176,7 +176,7 @@ const Index = () => {
             <a href="/terms" className="hover:underline">Terms of Service</a>
             <a href="/contact" className="hover:underline">Contact Us</a>
           </nav>
-          <p className="text-xs">© {new Date().getFullYear()} Courtney’s List. All rights reserved.</p>
+          <p className="text-xs">© {new Date().getFullYear()} Courtney's List. All rights reserved.</p>
         </div>
       </footer>
     </main>
