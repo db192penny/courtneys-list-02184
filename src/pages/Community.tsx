@@ -107,6 +107,16 @@ export default function Community() {
                   <Button variant="secondary" asChild size="sm">
                     <a href={`sms:${e164Phone}`} aria-label="Text HOA contact">Text HOA</a>
                   </Button>
+                  <Button variant="outline" asChild size="sm">
+                    <a href={`/community-preview/${slug}`} aria-label="View community preview">Preview Mode</a>
+                  </Button>
+                </div>
+              )}
+              {!e164Phone && (
+                <div className="mt-2">
+                  <Button variant="outline" asChild size="sm">
+                    <a href={`/community-preview/${slug}`} aria-label="View community preview">Preview Mode</a>
+                  </Button>
                 </div>
               )}
             </div>
