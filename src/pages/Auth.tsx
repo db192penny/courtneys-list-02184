@@ -438,12 +438,12 @@ const Auth = () => {
   return (
     <main className="min-h-screen bg-background">
       <SEO
-        title="Join Courtney's List"
+        title={communityName ? `Join ${communityName.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}` : "Join Courtney's List"}
         description="Join the invite only test family - automatically verified access to exclusive vendor info."
         canonical={canonical}
       />
       <section className="container max-w-xl py-10">
-        <h1 className="text-3xl font-semibold mb-6">{communityName ? `Join ${communityName}` : "Join Courtney's List"}</h1>
+        <h1 className="text-3xl font-semibold mb-6">{communityName ? `Join ${communityName.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}` : "Join Courtney's List"}</h1>
         <Card>
           <CardHeader className="space-y-4">
             <CardTitle>Request Access</CardTitle>

@@ -77,14 +77,14 @@ const SignIn = () => {
   return (
     <main>
       <SEO
-        title="Sign In to Courtney's List | Private Community Access"
+        title={`Sign In to ${communityName || "Courtney's List"} | Private Community Access`}
         description="Sign in with your email to access your community's trusted vendor list."
         canonical={`${window.location.origin}/signin`}
       />
       <section className="container max-w-lg py-12">
         <Card>
           <CardHeader>
-            <CardTitle>Sign In to Courtney's List</CardTitle>
+            <CardTitle>Sign In to {communityName || "Courtney's List"}</CardTitle>
             <CardDescription>Enter your email to receive a magic link.</CardDescription>
           </CardHeader>
           <CardContent>

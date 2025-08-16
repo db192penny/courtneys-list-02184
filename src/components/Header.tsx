@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -12,7 +12,12 @@ const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { data: isAdmin } = useIsAdmin();
   const navigate = useNavigate();
+  const location = useLocation();
   const isMobile = useIsMobile();
+
+  // Determine if we're on homepage to set default community context
+  const isHomepage = location.pathname === "/";
+  const signInLink = isHomepage ? "/signin?community=boca-bridges" : "/signin";
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -78,7 +83,7 @@ const Header = () => {
               </Sheet>
             ) : (
               <Button asChild size="sm">
-                <Link to="/signin">Sign in</Link>
+                <Link to={signInLink}>Sign in</Link>
               </Button>
             )}
           </div>
@@ -97,7 +102,7 @@ const Header = () => {
               </div>
             ) : (
               <Button asChild>
-                <Link to="/signin">Sign in</Link>
+                <Link to={signInLink}>Sign in</Link>
               </Button>
             )}
           </div>
