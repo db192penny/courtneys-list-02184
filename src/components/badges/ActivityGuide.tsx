@@ -112,20 +112,20 @@ export default function ActivityGuide() {
       buttonText: "Rate Vendors"
     },
     {
-      type: "invite_neighbor",
-      title: "Invite a Neighbor", 
-      description: "Invite someone from your community to join",
-      points: rewards.find(r => r.activity === "invite_neighbor")?.points || 10,
-      action: generateInvite,
-      buttonText: isInviting ? "Generating..." : "Send Invite"
-    },
-    {
       type: "vendor_submission",
       title: "Submit a New Vendor",
       description: "Add a new service provider to help your community",
       points: rewards.find(r => r.activity === "vendor_submission")?.points || 5,
       action: () => navigate("/submit?community=Boca%20Bridges"),
       buttonText: "Add Vendor"
+    },
+    {
+      type: "invite_neighbor",
+      title: "Invite a Neighbor", 
+      description: "Invite someone from your community to join",
+      points: rewards.find(r => r.activity === "invite_neighbor")?.points || 10,
+      action: generateInvite,
+      buttonText: isInviting ? "Generating..." : "Send Invite"
     }
   ];
 
