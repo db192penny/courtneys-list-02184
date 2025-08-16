@@ -2,6 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
+import { capitalizeStreetName, extractStreetName } from "@/utils/address";
+import { formatNameWithLastInitial } from "@/utils/nameFormatting";
 
 type Props = {
   vendorId: string;
@@ -43,18 +45,15 @@ const getAuthorLabel = (cost: PreviewCost, session: PreviewSession | undefined) 
     return "Neighbor";
   }
   
-  const name = session.name.trim();
+  const formattedName = formatNameWithLastInitial(session.name.trim());
   const street = session.street_name;
   
-  let displayName;
-  if (name.includes(' ')) {
-    const parts = name.split(' ');
-    displayName = `${parts[0]} ${parts[parts.length - 1].charAt(0)}.`;
-  } else {
-    displayName = name;
+  if (street?.trim()) {
+    const cleanStreet = capitalizeStreetName(extractStreetName(street.trim()));
+    return `${formattedName} on ${cleanStreet}`;
   }
   
-  return street ? `${displayName} on ${street}` : displayName;
+  return formattedName;
 };
 
 export default function PreviewCostsHover({ vendorId, children }: Props) {
@@ -88,16 +87,12 @@ export default function PreviewCostsHover({ vendorId, children }: Props) {
             let authorLabel = "Neighbor";
             
             if (!cost.anonymous && user?.show_name_public && user?.name?.trim()) {
-              const name = user.name.trim();
-              if (name.includes(' ')) {
-                const parts = name.split(' ');
-                authorLabel = `${parts[0]} ${parts[parts.length - 1].charAt(0)}.`;
-              } else {
-                authorLabel = name;
-              }
+              const formattedName = formatNameWithLastInitial(user.name.trim());
+              authorLabel = formattedName;
               
               if (user.street_name?.trim()) {
-                authorLabel += ` on ${user.street_name.trim()}`;
+                const cleanStreet = capitalizeStreetName(extractStreetName(user.street_name.trim()));
+                authorLabel += ` on ${cleanStreet}`;
               }
             }
 

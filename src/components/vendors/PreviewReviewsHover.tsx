@@ -5,6 +5,8 @@ import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/h
 import { RatingStars } from "@/components/ui/rating-stars";
 import { formatDistanceToNow } from "date-fns";
 import { usePreviewSession } from "@/hooks/usePreviewSession";
+import { capitalizeStreetName, extractStreetName } from "@/utils/address";
+import { formatNameWithLastInitial } from "@/utils/nameFormatting";
 
 interface PreviewReview {
   id: string;
@@ -58,16 +60,12 @@ export default function PreviewReviewsHover({
             let authorLabel = "Neighbor";
             
             if (!review.anonymous && user?.show_name_public && user?.name?.trim()) {
-              const name = user.name.trim();
-              if (name.includes(' ')) {
-                const parts = name.split(' ');
-                authorLabel = `${parts[0]} ${parts[parts.length - 1].charAt(0)}.`;
-              } else {
-                authorLabel = name;
-              }
+              const formattedName = formatNameWithLastInitial(user.name.trim());
+              authorLabel = formattedName;
               
               if (user.street_name?.trim()) {
-                authorLabel += ` on ${user.street_name.trim()}`;
+                const cleanStreet = capitalizeStreetName(extractStreetName(user.street_name.trim()));
+                authorLabel += ` on ${cleanStreet}`;
               }
             }
 
@@ -141,18 +139,15 @@ export default function PreviewReviewsHover({
       return "Neighbor";
     }
     
-    const name = review.session.name.trim();
+    const formattedName = formatNameWithLastInitial(review.session.name.trim());
     const street = review.session.street_name;
     
-    let displayName;
-    if (name.includes(' ')) {
-      const parts = name.split(' ');
-      displayName = `${parts[0]} ${parts[parts.length - 1].charAt(0)}.`;
-    } else {
-      displayName = name;
+    if (street?.trim()) {
+      const cleanStreet = capitalizeStreetName(extractStreetName(street.trim()));
+      return `${formattedName} on ${cleanStreet}`;
     }
     
-    return street ? `${displayName} on ${street}` : displayName;
+    return formattedName;
   };
 
   return (

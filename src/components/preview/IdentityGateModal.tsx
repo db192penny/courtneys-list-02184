@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
 import { loadGoogleMaps } from "@/utils/mapsLoader";
-import { capitalizeStreetName } from "@/utils/address";
+import { capitalizeStreetName, extractStreetName as utilExtractStreetName } from "@/utils/address";
 
 interface Props {
   open: boolean;
@@ -84,18 +84,14 @@ export default function IdentityGateModal({ open, onOpenChange, community, onSuc
     };
   }, [open]);
 
-  const extractStreetName = (place: google.maps.places.PlaceResult | null) => {
+  const extractStreetFromPlace = (place: google.maps.places.PlaceResult | null) => {
     if (!place?.address_components) return "";
-    
-    const streetNumber = place.address_components.find(
-      component => component.types.includes("street_number")
-    )?.long_name || "";
     
     const streetName = place.address_components.find(
       component => component.types.includes("route")
     )?.long_name || "";
     
-    return streetName ? `${streetNumber} ${streetName}`.trim() : "";
+    return streetName || "";
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -113,7 +109,7 @@ export default function IdentityGateModal({ open, onOpenChange, community, onSuc
     setLoading(true);
     
     try {
-      const streetName = capitalizeStreetName(extractStreetName(selectedPlace));
+      const streetName = capitalizeStreetName(extractStreetFromPlace(selectedPlace));
       const urlParams = new URLSearchParams(window.location.search);
       const source = urlParams.get("src") || "direct";
       
