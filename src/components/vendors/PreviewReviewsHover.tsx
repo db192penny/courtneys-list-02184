@@ -156,7 +156,7 @@ export default function PreviewReviewsHover({
   };
 
   return (
-    <HoverCard>
+    <HoverCard openDelay={200} closeDelay={100}>
       <HoverCardTrigger asChild>
         {children}
       </HoverCardTrigger>

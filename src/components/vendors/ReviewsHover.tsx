@@ -22,7 +22,7 @@ export default function ReviewsHover({ vendorId, children }: { vendorId: string;
   });
 
   return (
-    <HoverCard>
+    <HoverCard openDelay={200} closeDelay={100}>
       <HoverCardTrigger asChild>
         <span className="cursor-help">{children}</span>
       </HoverCardTrigger>

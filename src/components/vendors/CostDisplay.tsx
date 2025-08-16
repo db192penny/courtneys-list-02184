@@ -87,19 +87,16 @@ export function CostDisplay({
 
         {/* Area Average Price Line */}
         <div className="flex items-center gap-1">
-          <div className="flex items-center gap-1 min-w-[70px]">
-            <span className="text-xs text-muted-foreground">Area Average:</span>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Info className="h-3 w-3 text-muted-foreground hover:text-foreground cursor-help" />
-              </TooltipTrigger>
-              <TooltipContent>
-                <p className="text-xs max-w-xs">
-                  Average cost for similar services in your area, based on industry pricing data
-                </p>
-              </TooltipContent>
-            </Tooltip>
-          </div>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="text-xs text-muted-foreground min-w-[70px] cursor-help">Area Average:</span>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p className="text-xs max-w-xs">
+                Average cost for similar services in your area, based on industry pricing data, home prices, and data from HomeAdvisor
+              </p>
+            </TooltipContent>
+          </Tooltip>
           <div className="px-2 py-1.5 rounded-md bg-orange-50 hover:bg-orange-100 transition-colors border border-orange-200 hover:border-orange-300 min-h-[28px] flex items-center">
             {marketPrice ? (
               <div className="flex items-center gap-1">

@@ -54,7 +54,7 @@ export default function CostsHover({ vendorId, children }: Props) {
   }
 
   return (
-    <HoverCard>
+    <HoverCard openDelay={200} closeDelay={100}>
       <HoverCardTrigger asChild>
         <span className="cursor-pointer underline decoration-dotted underline-offset-4">
           {children}
