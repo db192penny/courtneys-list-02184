@@ -70,7 +70,7 @@ const Index = () => {
               <div className="flex flex-col gap-3 md:flex-row md:items-stretch md:gap-4">
                 <div className="flex-1">
                   <AddressInput
-                    placeholder="Enter Your Address"
+                    placeholder="Enter Your Street Address"
                     onSelected={onAddressSelected}
                   />
                 </div>
