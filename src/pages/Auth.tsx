@@ -358,87 +358,36 @@ const Auth = () => {
       signup_source: pending.signup_source 
     });
 
-    // Check if user already exists first
-    const { data: existingUser } = await supabase.auth.getUser();
+    console.log("[Auth] 🚀 Processing VIP signup...");
     
-    if (existingUser?.user) {
-      console.log("[Auth] User already logged in, finalizing onboarding...");
-      await finalizeOnboarding(existingUser.user.id, existingUser.user.email!);
-      return;
-    }
-
-    // Try to sign in existing user first (handles orphaned users)
-    const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-      email: email.trim(),
-      password: 'dummy-password' // This will fail but helps identify existing users
-    });
-
-    // If user exists but password is wrong, try magic link
-    if (signInError?.message?.includes('Invalid login credentials')) {
-      console.log("[Auth] User exists, sending magic link...");
-      const { error: otpError } = await supabase.auth.signInWithOtp({
+    // Call the VIP signup edge function
+    const { data: vipResponse, error: vipError } = await supabase.functions.invoke('handle-vip-signup', {
+      body: {
         email: email.trim(),
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth?post_signup=1`
-        }
-      });
-      
-      if (otpError) {
-        console.error("[Auth] OTP error:", otpError);
-        toast({ title: "Could not send magic link", description: otpError.message, variant: "destructive" });
-        return;
+        name: pending.name,
+        address: pending.address,
+        streetName: pending.street_name,
+        residentStatus: resident,
+        signupSource: pending.signup_source,
+        formattedAddress: pending.address,
+        googlePlaceId: null // Can be enhanced later with Google Places integration
       }
-      
-      toast({ title: "Check your email", description: "We sent you a secure sign-in link." });
-      return;
-    }
-
-    // For new users, create account with signup
-    const { data, error } = await supabase.auth.signUp({
-      email: email.trim(),
-      password: crypto.randomUUID(), // Generate random password since we're auto-verifying
-      options: {
-        data: {
-          name: pending.name,
-          address: pending.address,
-          street_name: pending.street_name,
-          signup_source: pending.signup_source,
-        },
-        emailRedirectTo: `${window.location.origin}/auth?post_signup=1`
-      },
     });
 
-    if (error) {
-      console.error("[Auth] signup error:", error);
-      
-      // Handle repeated signup attempts
-      if (error.message?.includes('repeated_signup') || error.message?.includes('already registered')) {
-        console.log("[Auth] User already exists, sending magic link...");
-        const { error: otpError } = await supabase.auth.signInWithOtp({
-          email: email.trim(),
-          options: {
-            emailRedirectTo: `${window.location.origin}/auth?post_signup=1`
-          }
-        });
-        
-        if (otpError) {
-          console.error("[Auth] OTP error:", otpError);
-          toast({ title: "Could not send magic link", description: otpError.message, variant: "destructive" });
-          return;
-        }
-        
-        toast({ title: "Check your email", description: "We sent you a secure sign-in link." });
-        return;
-      }
-      
-      toast({ title: "Could not create account", description: error.message, variant: "destructive" });
+    if (vipError) {
+      console.error("[Auth] VIP signup error:", vipError);
+      toast({ title: "Could not create account", description: vipError.message, variant: "destructive" });
       return;
     }
 
-    // If user was created successfully, immediately finalize onboarding
-    if (data.user) {
-      console.log("[Auth] 🎉 VIP user created, finalizing onboarding...");
-      await finalizeOnboarding(data.user.id, data.user.email!);
+    if (vipResponse?.success) {
+      console.log("[Auth] ✅ VIP signup successful, redirecting...");
+      toast({ title: "Welcome!", description: "Your account has been created successfully." });
+      
+      // Redirect directly to community page
+      navigate('/community/boca-bridges');
+    } else {
+      toast({ title: "Signup failed", description: "Please try again", variant: "destructive" });
     }
   };
 
