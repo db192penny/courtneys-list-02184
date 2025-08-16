@@ -131,6 +131,7 @@ const Auth = () => {
             street_name: pending.street_name || extractStreetName(pending.address),
             signup_source: (pending as any).signup_source || null,
             is_verified: true, // Auto-verify since they completed auth flow
+            show_name_public: true, // Default to showing name in reviews/costs
           };
           
           console.log("[Auth] 📝 Upserting user data:", { 
