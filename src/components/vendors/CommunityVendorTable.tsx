@@ -110,10 +110,10 @@ export default function CommunityVendorTable({
           <div className="w-full sm:w-52">
             <Select value={category} onValueChange={setCategory}>
               <SelectTrigger aria-label="Filter by category">
-                <SelectValue placeholder="All" />
+                <SelectValue placeholder="All Categories" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All</SelectItem>
+                <SelectItem value="all">All Categories</SelectItem>
                 {CATEGORIES.map((c) => (
                   <SelectItem key={c} value={c}>{c}</SelectItem>
                 ))}
