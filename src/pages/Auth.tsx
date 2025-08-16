@@ -12,7 +12,7 @@ import { toSlug } from "@/utils/slug";
 import AddressInput, { AddressSelectedPayload } from "@/components/AddressInput";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Info } from "lucide-react";
+import { Info, Crown } from "lucide-react";
 
 const Auth = () => {
   const [name, setName] = useState("");
@@ -432,11 +432,18 @@ const Auth = () => {
       <section className="container max-w-xl py-10">
         <h1 className="text-3xl font-semibold mb-6">{communityName ? `Join ${communityName}` : "Join Courtney's List"}</h1>
         <Card>
-          <CardHeader className="space-y-1">
+          <CardHeader className="space-y-4">
             <CardTitle>Request Access</CardTitle>
-            <CardDescription>
-              Since you are part of the invite only test family (thank you!), you will be automatically verified. In the future, neighbors will need to be accepted by an admin (umm, that will be me unless one of you cares to be <strong>so bold:)</strong>.
-            </CardDescription>
+            
+            {/* Highlighted Invite-Only Test Family Message */}
+            <div className="flex items-start gap-3 p-4 bg-yellow-50 dark:bg-yellow-950/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+              <Crown className="h-5 w-5 text-yellow-600 dark:text-yellow-400 mt-0.5 flex-shrink-0" />
+              <div className="space-y-1">
+                <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                  Since you are part of the <strong>invite only test family</strong> (thank you!), you will be <strong>automatically verified</strong>. In the future, neighbors will need to be accepted by an admin (umm, that will be me unless one of you cares to be <strong>so bold:)</strong>.
+                </p>
+              </div>
+            </div>
           </CardHeader>
 
           <CardContent className="space-y-4">
