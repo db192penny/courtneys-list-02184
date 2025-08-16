@@ -13,6 +13,7 @@ import AddressInput, { AddressSelectedPayload } from "@/components/AddressInput"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Info } from "lucide-react";
+
 const Auth = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -176,67 +177,73 @@ const Auth = () => {
       console.log("[Auth] 🔍 Starting community detection for user:", userId);
       
       try {
-        // PRIORITY 1: Check signup_source for community affiliation
-        const { data: userData, error: userErr } = await supabase
-          .from("users")
-          .select("address, signup_source")
-          .eq("id", userId)
-          .maybeSingle();
-
-        if (userErr) {
-          console.warn("[Auth] ⚠️ User lookup error:", userErr);
-          throw userErr;
-        }
-
-        console.log("[Auth] 📍 User data retrieved:", { 
-          address: userData?.address, 
-          signup_source: userData?.signup_source 
-        });
-
-        // Check if user signed up from a community page
-        if (userData?.signup_source && userData.signup_source.startsWith("community:")) {
-          const communityFromSignup = userData.signup_source.replace("community:", "");
-          destination = `/communities/${toSlug(communityFromSignup)}`;
-          console.log("[Auth] ✅ Community detected from signup_source, redirecting to:", destination);
-        } else if (userData?.address && userData.address !== "Address Not Provided") {
-          // PRIORITY 2: Fall back to address-based detection
-          console.log("[Auth] 🔍 No community signup_source, checking address-based detection");
-          
-          // Use the RPC function to get the normalized address first
-          const { data: normalizedAddr } = await supabase.rpc("normalize_address", { _addr: userData.address });
-          console.log("[Auth] 🔍 Normalized address:", normalizedAddr);
-          
-          const { data: mapping, error: mapErr } = await supabase
-            .from("household_hoa")
-            .select("hoa_name, created_at, household_address")
-            .eq("household_address", normalizedAddr)
-            .order("created_at", { ascending: false })
-            .limit(1)
+        // PRIORITY 0: Check URL params for community context first
+        if (communityName) {
+          destination = `/communities/${toSlug(communityName)}`;
+          console.log("[Auth] ✅ Community detected from URL params, redirecting to:", destination);
+        } else {
+          // PRIORITY 1: Check signup_source for community affiliation
+          const { data: userData, error: userErr } = await supabase
+            .from("users")
+            .select("address, signup_source")
+            .eq("id", userId)
             .maybeSingle();
 
-          if (mapErr) {
-            console.warn("[Auth] ⚠️ household_hoa lookup error (non-fatal):", mapErr);
+          if (userErr) {
+            console.warn("[Auth] ⚠️ User lookup error:", userErr);
+            throw userErr;
           }
 
-          console.log("[Auth] 🏘️ HOA mapping found:", mapping);
+          console.log("[Auth] 📍 User data retrieved:", { 
+            address: userData?.address, 
+            signup_source: userData?.signup_source 
+          });
 
-          const hoaName = mapping?.hoa_name || "";
-          if (hoaName) {
-            destination = `/communities/${toSlug(hoaName)}`;
-            console.log("[Auth] ✅ Community detected via address, redirecting to:", destination);
-          } else {
-            console.log("[Auth] ⚠️ No HOA mapping found, trying RPC fallback");
-            // try RPC as additional fallback if available
-            try {
-              const { data: hoaRes } = await supabase.rpc("get_my_hoa");
-              const rpcHoa = (hoaRes?.[0]?.hoa_name as string | undefined) || "";
-              console.log("[Auth] 🔧 RPC result:", rpcHoa);
-              if (rpcHoa) {
-                destination = `/communities/${toSlug(rpcHoa)}`;
-                console.log("[Auth] ✅ Community detected via RPC, redirecting to:", destination);
+          // Check if user signed up from a community page
+          if (userData?.signup_source && userData.signup_source.startsWith("community:")) {
+            const communityFromSignup = userData.signup_source.replace("community:", "");
+            destination = `/communities/${toSlug(communityFromSignup)}`;
+            console.log("[Auth] ✅ Community detected from signup_source, redirecting to:", destination);
+          } else if (userData?.address && userData.address !== "Address Not Provided") {
+            // PRIORITY 2: Fall back to address-based detection
+            console.log("[Auth] 🔍 No community signup_source, checking address-based detection");
+            
+            // Use the RPC function to get the normalized address first
+            const { data: normalizedAddr } = await supabase.rpc("normalize_address", { _addr: userData.address });
+            console.log("[Auth] 🔍 Normalized address:", normalizedAddr);
+            
+            const { data: mapping, error: mapErr } = await supabase
+              .from("household_hoa")
+              .select("hoa_name, created_at, household_address")
+              .eq("household_address", normalizedAddr)
+              .order("created_at", { ascending: false })
+              .limit(1)
+              .maybeSingle();
+
+            if (mapErr) {
+              console.warn("[Auth] ⚠️ household_hoa lookup error (non-fatal):", mapErr);
+            }
+
+            console.log("[Auth] 🏘️ HOA mapping found:", mapping);
+
+            const hoaName = mapping?.hoa_name || "";
+            if (hoaName) {
+              destination = `/communities/${toSlug(hoaName)}`;
+              console.log("[Auth] ✅ Community detected via address, redirecting to:", destination);
+            } else {
+              console.log("[Auth] ⚠️ No HOA mapping found, trying RPC fallback");
+              // try RPC as additional fallback if available
+              try {
+                const { data: hoaRes } = await supabase.rpc("get_my_hoa");
+                const rpcHoa = (hoaRes?.[0]?.hoa_name as string | undefined) || "";
+                console.log("[Auth] 🔧 RPC result:", rpcHoa);
+                if (rpcHoa) {
+                  destination = `/communities/${toSlug(rpcHoa)}`;
+                  console.log("[Auth] ✅ Community detected via RPC, redirecting to:", destination);
+                }
+              } catch (e) {
+                console.warn("[Auth] ⚠️ get_my_hoa failed (non-fatal):", e);
               }
-            } catch (e) {
-              console.warn("[Auth] ⚠️ get_my_hoa failed (non-fatal):", e);
             }
           }
         }
@@ -273,7 +280,7 @@ const Auth = () => {
       // Always ensure the user can access the app, even with partial failures
       navigate("/profile?onboarding=1&error=signup_incomplete", { replace: true });
     }
-  }, [inviteToken, navigate, toast]);
+  }, [inviteToken, navigate, toast, communityName]);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -434,52 +441,47 @@ const Auth = () => {
                         </button>
                       </TooltipTrigger>
                       <TooltipContent>
-                        <p>We use your address to verify residency for community-only access.</p>
+                        <p>Your address helps us link you with your community's exclusive vendor info</p>
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
                 </div>
-                <div className={errors.address ? "ring-2 ring-destructive rounded-md" : ""}>
-                  <AddressInput
-                    id="address"
-                    defaultValue={address}
-                    onSelected={(p: AddressSelectedPayload) => setAddress(p.household_address)}
-                    placeholder="123 Boca Bridges Way, Boca Raton, FL"
-                  />
-                </div>
-                {!!address && (
-                  <p className="text-xs text-muted-foreground">
-                    Street inferred as: <span className="font-medium">{extractStreetName(address)}</span>
-                  </p>
-                )}
-                {inviteToken && (
-                  <p className="text-xs text-muted-foreground">Invite detected — you'll be granted access after sign-in.</p>
-                )}
+                <AddressInput
+                  id="address"
+                  defaultValue={address}
+                  placeholder="Full home address"
+                  className={errors.address ? "border-destructive focus-visible:ring-destructive" : undefined}
+                  onSelected={(addr: AddressSelectedPayload) => {
+                    setAddress(addr.formatted_address);
+                  }}
+                />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="resident">Are you a current resident? <span className="text-foreground" aria-hidden>*</span></Label>
-                <Select value={resident} onValueChange={(v) => setResident(v as "yes" | "no")}>
-                  <SelectTrigger id="resident" className={errors.resident ? "border-destructive focus-visible:ring-destructive" : undefined}>
-                    <SelectValue placeholder="Select an option" />
+                <Label htmlFor="resident">Are you a resident? <span className="text-foreground" aria-hidden>*</span></Label>
+                <Select required value={resident} onValueChange={(v) => setResident(v as "yes" | "no")}>
+                  <SelectTrigger id="resident" className={errors.resident ? "border-destructive" : undefined}>
+                    <SelectValue placeholder="Select yes or no" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="yes">Yes</SelectItem>
-                    <SelectItem value="no">No</SelectItem>
+                    <SelectItem value="yes">Yes, I live here</SelectItem>
+                    <SelectItem value="no">No, I'm not a resident</SelectItem>
                   </SelectContent>
                 </Select>
-                {resident === "no" && (
-                  <p className="text-xs text-destructive">Currently, access is restricted to residents only.</p>
-                )}
               </div>
 
-              <Button type="submit" className="w-full" disabled={resident === "no"}>I'm VIP - let me in the Door!</Button>
+              <Button type="submit" size="lg" className="w-full">
+                Request Access
+              </Button>
             </form>
           </CardContent>
 
-          {!communityName && (
-            <CardFooter className="flex items-center justify-between">
-              <Button variant="link" onClick={() => navigate("/")}>Back to Homepage</Button>
+          {/* TEMPORARY FALLBACK UI */}
+          {resident === "no" && (
+            <CardFooter className="pt-0">
+              <p className="text-sm text-muted-foreground">
+                Currently, access is restricted to residents only. We may expand to other users in the future.
+              </p>
             </CardFooter>
           )}
         </Card>
