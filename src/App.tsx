@@ -55,6 +55,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
   if (loading) return null;
   if (authed) return <>{children}</>;
+  
   // Unauthenticated: special handling for /household
   if (location.pathname === "/household") {
     let addr = "";
@@ -66,7 +67,11 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     const dest = addr ? `/household/preview?addr=${encodeURIComponent(addr)}` : "/";
     return <Navigate to={dest} replace />;
   }
-  return <Navigate to="/auth" replace />;
+  
+  // Preserve community context when redirecting to auth
+  const currentSearch = location.search;
+  const authUrl = currentSearch ? `/auth${currentSearch}` : "/auth";
+  return <Navigate to={authUrl} replace />;
 };
 
 function AuthWatcher() {
