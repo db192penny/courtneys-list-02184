@@ -358,7 +358,42 @@ const Auth = () => {
       signup_source: pending.signup_source 
     });
 
-    // For VIP users, skip email verification and create account directly
+    // Check if user already exists first
+    const { data: existingUser } = await supabase.auth.getUser();
+    
+    if (existingUser?.user) {
+      console.log("[Auth] User already logged in, finalizing onboarding...");
+      await finalizeOnboarding(existingUser.user.id, existingUser.user.email!);
+      return;
+    }
+
+    // Try to sign in existing user first (handles orphaned users)
+    const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+      email: email.trim(),
+      password: 'dummy-password' // This will fail but helps identify existing users
+    });
+
+    // If user exists but password is wrong, try magic link
+    if (signInError?.message?.includes('Invalid login credentials')) {
+      console.log("[Auth] User exists, sending magic link...");
+      const { error: otpError } = await supabase.auth.signInWithOtp({
+        email: email.trim(),
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth?post_signup=1`
+        }
+      });
+      
+      if (otpError) {
+        console.error("[Auth] OTP error:", otpError);
+        toast({ title: "Could not send magic link", description: otpError.message, variant: "destructive" });
+        return;
+      }
+      
+      toast({ title: "Check your email", description: "We sent you a secure sign-in link." });
+      return;
+    }
+
+    // For new users, create account with signup
     const { data, error } = await supabase.auth.signUp({
       email: email.trim(),
       password: crypto.randomUUID(), // Generate random password since we're auto-verifying
@@ -375,6 +410,27 @@ const Auth = () => {
 
     if (error) {
       console.error("[Auth] signup error:", error);
+      
+      // Handle repeated signup attempts
+      if (error.message?.includes('repeated_signup') || error.message?.includes('already registered')) {
+        console.log("[Auth] User already exists, sending magic link...");
+        const { error: otpError } = await supabase.auth.signInWithOtp({
+          email: email.trim(),
+          options: {
+            emailRedirectTo: `${window.location.origin}/auth?post_signup=1`
+          }
+        });
+        
+        if (otpError) {
+          console.error("[Auth] OTP error:", otpError);
+          toast({ title: "Could not send magic link", description: otpError.message, variant: "destructive" });
+          return;
+        }
+        
+        toast({ title: "Check your email", description: "We sent you a secure sign-in link." });
+        return;
+      }
+      
       toast({ title: "Could not create account", description: error.message, variant: "destructive" });
       return;
     }
@@ -382,7 +438,7 @@ const Auth = () => {
     // If user was created successfully, immediately finalize onboarding
     if (data.user) {
       console.log("[Auth] 🎉 VIP user created, finalizing onboarding...");
-      await finalizeOnboarding(data.user.id, data.user.email);
+      await finalizeOnboarding(data.user.id, data.user.email!);
     }
   };
 
