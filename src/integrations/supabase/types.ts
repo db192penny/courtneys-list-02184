@@ -58,6 +58,42 @@ export type Database = {
           },
         ]
       }
+      address_mismatch_log: {
+        Row: {
+          created_at: string
+          id: string
+          normalized_address: string
+          original_address: string
+          resolved_at: string | null
+          resolved_by: string | null
+          status: string | null
+          suggested_hoa: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          normalized_address: string
+          original_address: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string | null
+          suggested_hoa?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          normalized_address?: string
+          original_address?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string | null
+          suggested_hoa?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       admin_audit_log: {
         Row: {
           action: string
@@ -920,6 +956,23 @@ export type Database = {
         Args: { _user_id: string }
         Returns: boolean
       }
+      admin_fix_address_mismatch: {
+        Args: { _new_address: string; _new_hoa: string; _user_id: string }
+        Returns: boolean
+      }
+      admin_list_address_mismatches: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          address: string
+          created_at: string
+          email: string
+          mismatch_status: string
+          name: string
+          normalized_address: string
+          suggested_hoa: string
+          user_id: string
+        }[]
+      }
       admin_list_all_users: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -1012,6 +1065,10 @@ export type Database = {
       }
       current_user_normalized_address: {
         Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      detect_address_mismatch: {
+        Args: { _address: string; _user_id: string }
         Returns: string
       }
       fix_all_point_discrepancies: {
