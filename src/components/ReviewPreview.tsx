@@ -1,4 +1,5 @@
 import { capitalizeStreetName } from "@/utils/address";
+import { formatNameWithLastInitial } from "@/utils/nameFormatting";
 
 type ReviewPreviewProps = {
   rating: number;
@@ -11,14 +12,9 @@ export default function ReviewPreview({ rating, showName, userName, streetName }
   // Generate star symbols
   const stars = "⭐".repeat(Math.max(0, Math.min(5, rating)));
   
-  // Format user name
+  // Format user name using utility function
   const formatName = (name?: string) => {
-    if (!name || !name.trim()) return "Neighbor";
-    const parts = name.trim().split(" ");
-    if (parts.length === 0) return "Neighbor";
-    const firstName = parts[0];
-    const lastInitial = parts.length > 1 ? parts[parts.length - 1][0] : "";
-    return lastInitial ? `${firstName} ${lastInitial}.` : firstName;
+    return formatNameWithLastInitial(name || "");
   };
 
   const displayName = showName ? formatName(userName) : "Neighbor";

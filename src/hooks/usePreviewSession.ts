@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { capitalizeStreetName } from "@/utils/address";
+import { formatNameWithLastInitial } from "@/utils/nameFormatting";
 
 export interface PreviewSession {
   id: string;
@@ -115,9 +116,9 @@ export const usePreviewSession = () => {
   const getAuthorLabel = () => {
     if (!session) return "Neighbor";
     
-    const firstName = session.name.split(" ")[0];
+    const formattedName = formatNameWithLastInitial(session.name);
     const streetName = session.street_name ? ` on ${capitalizeStreetName(session.street_name)}` : "";
-    return `${firstName}${streetName}`;
+    return `${formattedName}${streetName}`;
   };
 
   return {
