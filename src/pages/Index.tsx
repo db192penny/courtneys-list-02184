@@ -104,7 +104,7 @@ const Index = () => {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => navigate("/auth/signup")}
+                onClick={() => navigate(`/auth?community=${toSlug(hoa)}`)}
                 className="w-full md:w-auto md:min-w-[260px]"
                 aria-label="Sign up to unlock exclusive access"
               >
