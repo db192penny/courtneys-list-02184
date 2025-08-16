@@ -872,6 +872,21 @@ export type Database = {
           hoa_name: string
         }[]
       }
+      admin_list_all_users: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          address: string
+          created_at: string
+          email: string
+          email_confirmed_at: string
+          id: string
+          is_orphaned: boolean
+          is_verified: boolean
+          name: string
+          points: number
+          signup_source: string
+        }[]
+      }
       admin_list_pending_households: {
         Args: Record<PropertyKey, never>
         Returns: {
