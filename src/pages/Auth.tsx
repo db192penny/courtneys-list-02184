@@ -45,39 +45,134 @@ const Auth = () => {
   }, [email, address, params]);
 
   const finalizeOnboarding = useCallback(async (userId: string, userEmail: string | null) => {
-    const pendingRaw = localStorage.getItem("pending_profile");
-    const pending: null | { name: string; email: string; address: string; street_name?: string; signup_source?: string } = pendingRaw ? JSON.parse(pendingRaw) : null;
+    console.log("[Auth] 🚀 Starting finalizeOnboarding for user:", userId);
+    
+    let retryCount = 0;
+    const maxRetries = 3;
+    let destination = "/profile?onboarding=1";
+    
+    // Enhanced error tracking
+    const errorTracker = {
+      pending_profile_missing: false,
+      upsert_failed: false,
+      community_detection_failed: false,
+      navigation_failed: false
+    };
 
+    const executeWithRetry = async (operation: () => Promise<void>, operationName: string) => {
+      for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+          await operation();
+          return;
+        } catch (error) {
+          console.warn(`[Auth] ${operationName} attempt ${attempt} failed:`, error);
+          if (attempt === maxRetries) {
+            throw error;
+          }
+          // Progressive delay: 500ms, 1s, 1.5s
+          await new Promise(resolve => setTimeout(resolve, attempt * 500));
+        }
+      }
+    };
 
     try {
-      if (pending) {
-        const payload = {
-          id: userId,
-          email: userEmail || pending.email,
-          name: pending.name,
-          address: pending.address,
-          street_name: pending.street_name || extractStreetName(pending.address),
-          signup_source: (pending as any).signup_source || null,
-        };
-        const { error: upsertError } = await supabase.from("users").upsert(payload);
-        if (upsertError) {
-          console.error("[Auth] users upsert error:", upsertError);
-        }
-
-        const token = localStorage.getItem("invite_token") || inviteToken;
-        if (token) {
-          const { error: markErr } = await supabase.rpc("mark_invite_accepted", {
-            _token: token,
-            _user_id: userId,
+      // STEP 1: Handle pending profile data with fallback mechanisms
+      const pendingRaw = localStorage.getItem("pending_profile");
+      let pending: null | { name: string; email: string; address: string; street_name?: string; signup_source?: string } = null;
+      
+      if (pendingRaw) {
+        try {
+          pending = JSON.parse(pendingRaw);
+          console.log("[Auth] ✅ Found pending profile data:", { 
+            name: pending?.name, 
+            email: pending?.email, 
+            hasAddress: !!pending?.address 
           });
-          if (markErr) console.warn("[Auth] mark_invite_accepted error (non-fatal):", markErr);
+        } catch (parseError) {
+          console.error("[Auth] ❌ Failed to parse pending_profile:", parseError);
+          errorTracker.pending_profile_missing = true;
         }
-
-        localStorage.removeItem("pending_profile");
+      } else {
+        console.warn("[Auth] ⚠️ No pending_profile found in localStorage");
+        errorTracker.pending_profile_missing = true;
       }
 
-      // Determine community from signup source first, then household mapping; fallback to profile onboarding
-      let destination = "/profile?onboarding=1";
+      // STEP 2: Fallback data collection from sessionStorage and URL params
+      if (!pending) {
+        console.log("[Auth] 🔧 Attempting fallback data collection...");
+        const fallbackName = sessionStorage.getItem("signup_name") || "Unknown User";
+        const fallbackEmail = userEmail || sessionStorage.getItem("signup_email") || "unknown@example.com";
+        const fallbackAddress = sessionStorage.getItem("signup_address") || "Address Not Provided";
+        
+        pending = {
+          name: fallbackName,
+          email: fallbackEmail,
+          address: fallbackAddress,
+          street_name: extractStreetName(fallbackAddress),
+          signup_source: "fallback_recovery"
+        };
+        
+        console.log("[Auth] 🔧 Using fallback data:", { 
+          name: pending.name, 
+          email: pending.email, 
+          hasAddress: !!pending.address 
+        });
+      }
+
+      // STEP 3: Upsert user data with retry logic
+      if (pending) {
+        await executeWithRetry(async () => {
+          const payload = {
+            id: userId,
+            email: userEmail || pending.email,
+            name: pending.name,
+            address: pending.address,
+            street_name: pending.street_name || extractStreetName(pending.address),
+            signup_source: (pending as any).signup_source || null,
+            is_verified: true, // Auto-verify since they completed auth flow
+          };
+          
+          console.log("[Auth] 📝 Upserting user data:", { 
+            id: payload.id, 
+            email: payload.email, 
+            name: payload.name, 
+            signup_source: payload.signup_source 
+          });
+          
+          const { error: upsertError } = await supabase.from("users").upsert(payload);
+          if (upsertError) {
+            console.error("[Auth] ❌ Users upsert error:", upsertError);
+            errorTracker.upsert_failed = true;
+            throw upsertError;
+          }
+          
+          console.log("[Auth] ✅ User data upserted successfully");
+        }, "user upsert");
+
+        // STEP 4: Handle invite token acceptance
+        const token = localStorage.getItem("invite_token") || inviteToken;
+        if (token) {
+          try {
+            const { error: markErr } = await supabase.rpc("mark_invite_accepted", {
+              _token: token,
+              _user_id: userId,
+            });
+            if (markErr) {
+              console.warn("[Auth] ⚠️ mark_invite_accepted error (non-fatal):", markErr);
+            } else {
+              console.log("[Auth] ✅ Invite token marked as accepted");
+            }
+          } catch (inviteError) {
+            console.warn("[Auth] ⚠️ Invite processing failed (non-fatal):", inviteError);
+          }
+        }
+
+        // Clean up localStorage
+        localStorage.removeItem("pending_profile");
+        console.log("[Auth] 🧹 Cleaned up pending_profile from localStorage");
+      }
+
+      // STEP 5: Community detection with enhanced error handling
       console.log("[Auth] 🔍 Starting community detection for user:", userId);
       
       try {
@@ -89,17 +184,21 @@ const Auth = () => {
           .maybeSingle();
 
         if (userErr) {
-          console.warn("[Auth] user lookup error:", userErr);
+          console.warn("[Auth] ⚠️ User lookup error:", userErr);
+          throw userErr;
         }
 
-        console.log("[Auth] 📍 User data:", { address: userData?.address, signup_source: userData?.signup_source });
+        console.log("[Auth] 📍 User data retrieved:", { 
+          address: userData?.address, 
+          signup_source: userData?.signup_source 
+        });
 
         // Check if user signed up from a community page
         if (userData?.signup_source && userData.signup_source.startsWith("community:")) {
           const communityFromSignup = userData.signup_source.replace("community:", "");
           destination = `/communities/${toSlug(communityFromSignup)}`;
           console.log("[Auth] ✅ Community detected from signup_source, redirecting to:", destination);
-        } else if (userData?.address) {
+        } else if (userData?.address && userData.address !== "Address Not Provided") {
           // PRIORITY 2: Fall back to address-based detection
           console.log("[Auth] 🔍 No community signup_source, checking address-based detection");
           
@@ -116,7 +215,7 @@ const Auth = () => {
             .maybeSingle();
 
           if (mapErr) {
-            console.warn("[Auth] household_hoa lookup error (non-fatal):", mapErr);
+            console.warn("[Auth] ⚠️ household_hoa lookup error (non-fatal):", mapErr);
           }
 
           console.log("[Auth] 🏘️ HOA mapping found:", mapping);
@@ -137,22 +236,44 @@ const Auth = () => {
                 console.log("[Auth] ✅ Community detected via RPC, redirecting to:", destination);
               }
             } catch (e) {
-              console.warn("[Auth] get_my_hoa failed (non-fatal):", e);
+              console.warn("[Auth] ⚠️ get_my_hoa failed (non-fatal):", e);
             }
           }
         }
       } catch (e) {
-        console.warn("[Auth] community detection failed (non-fatal):", e);
+        console.warn("[Auth] ⚠️ Community detection failed (non-fatal):", e);
+        errorTracker.community_detection_failed = true;
       }
 
-      // Clean up any hash fragments and navigate
+      // STEP 6: Navigate with success notification
       const cleanDestination = destination.split('#')[0];
+      console.log("[Auth] 🎯 Navigating to final destination:", cleanDestination);
+      
+      // Show success toast for successful onboarding
+      if (destination !== "/profile?onboarding=1") {
+        toast({ 
+          title: "Welcome!", 
+          description: "You've been successfully onboarded to your community." 
+        });
+      }
+      
       navigate(cleanDestination, { replace: true });
+      
     } catch (e) {
-      console.warn("[Auth] finalizeOnboarding failed:", e);
-      navigate("/profile?onboarding=1");
+      console.error("[Auth] ❌ finalizeOnboarding failed with error:", e);
+      console.error("[Auth] 📊 Error tracking:", errorTracker);
+      
+      // Show user-friendly error message
+      toast({ 
+        title: "Onboarding Issue", 
+        description: "We're completing your signup. If this persists, please contact support.", 
+        variant: "destructive" 
+      });
+      
+      // Always ensure the user can access the app, even with partial failures
+      navigate("/profile?onboarding=1&error=signup_incomplete", { replace: true });
     }
-  }, [inviteToken, navigate]);
+  }, [inviteToken, navigate, toast]);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -220,9 +341,22 @@ const Auth = () => {
         ? `homepage:${communityName || "unknown"}` 
         : communityName ? `community:${communityName}` : undefined,
     };
+    
+    // Store in multiple locations for redundancy
     localStorage.setItem("pending_profile", JSON.stringify(pending));
+    sessionStorage.setItem("signup_name", pending.name);
+    sessionStorage.setItem("signup_email", pending.email);
+    sessionStorage.setItem("signup_address", pending.address);
+    
     if (inviteToken) localStorage.setItem("invite_token", inviteToken);
     localStorage.setItem("invite_email", email.trim());
+    
+    console.log("[Auth] 💾 Stored signup data with redundancy:", { 
+      name: pending.name, 
+      email: pending.email, 
+      hasAddress: !!pending.address,
+      signup_source: pending.signup_source 
+    });
 
     const redirectUrl = `${window.location.origin}/auth?post_signup=1`;
 

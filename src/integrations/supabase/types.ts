@@ -926,6 +926,15 @@ export type Database = {
           vendor_count: number
         }[]
       }
+      check_orphaned_users: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          auth_created_at: string
+          auth_email: string
+          auth_user_id: string
+          public_user_exists: boolean
+        }[]
+      }
       check_vendor_duplicate: {
         Args: { _community: string; _name: string }
         Returns: {
@@ -948,6 +957,24 @@ export type Database = {
           fixed_user_email: string
           new_points: number
           old_points: number
+        }[]
+      }
+      fix_orphaned_users: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          created_record: boolean
+          email: string
+          error_message: string
+          user_id: string
+        }[]
+      }
+      fix_specific_orphaned_user: {
+        Args: { _address?: string; _email: string; _name?: string }
+        Returns: {
+          created_record: boolean
+          email: string
+          error_message: string
+          user_id: string
         }[]
       }
       get_email_status: {
