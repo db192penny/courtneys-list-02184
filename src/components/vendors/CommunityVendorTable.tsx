@@ -124,7 +124,7 @@ export default function CommunityVendorTable({
               <Filter className="h-4 w-4" />
               Filter by Category
             </label>
-            <div className="w-full sm:w-52">
+            <div className="w-full sm:w-52 relative">
               <Select value={category} onValueChange={setCategory}>
                 <SelectTrigger className="bg-background border-2 border-muted hover:border-primary/20 focus:border-primary transition-colors">
                   <SelectValue placeholder="All Categories" />
@@ -141,7 +141,7 @@ export default function CommunityVendorTable({
                   variant="ghost" 
                   size="sm" 
                   onClick={() => setCategory("all")}
-                  className="mt-1 h-6 px-2 text-xs text-muted-foreground hover:text-foreground"
+                  className="absolute -top-6 right-0 h-5 px-2 text-xs text-muted-foreground hover:text-foreground"
                 >
                   Clear filter
                 </Button>
