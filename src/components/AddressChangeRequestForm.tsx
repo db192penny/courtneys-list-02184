@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAddressChangeRequests } from "@/hooks/useAddressChangeRequests";
 import { Clock, CheckCircle, XCircle, AlertCircle } from "lucide-react";
 import SimpleAddressInput, { AddressSelectedPayload } from "./SimpleAddressInput";
+import { supabase } from "@/integrations/supabase/client";
 
 interface AddressChangeRequestFormProps {
   currentAddress: string;
@@ -21,10 +22,10 @@ export default function AddressChangeRequestForm({
   const [selectedAddress, setSelectedAddress] = useState<AddressSelectedPayload | null>(null);
   const [reason, setReason] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const { userRequests, loading, createRequest, cancelRequest, refetch } = useUserAddressChangeRequests();
+  const { data: userRequests, refetch, isLoading } = useAddressChangeRequests();
   const { toast } = useToast();
 
-  const pendingRequest = userRequests.find(req => req.status === 'pending');
+  const pendingRequest = userRequests?.find(req => req.status === 'pending');
 
   const handleAddressSelected = (payload: AddressSelectedPayload) => {
     setSelectedAddress(payload);
@@ -36,15 +37,25 @@ export default function AddressChangeRequestForm({
     try {
       setSubmitting(true);
 
-      await createRequest({
-        current_address: currentAddress,
-        current_normalized_address: currentAddress.toLowerCase().trim(),
-        requested_address: selectedAddress.formatted_address,
-        requested_normalized_address: selectedAddress.household_address,
-        requested_formatted_address: selectedAddress.formatted_address,
-        requested_place_id: selectedAddress.place_id,
-        reason: reason.trim() || undefined
-      });
+      // Get current user ID
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      const { error } = await supabase
+        .from('address_change_requests')
+        .insert({
+          user_id: user.id,
+          current_address: currentAddress,
+          current_normalized_address: currentAddress.toLowerCase().trim(),
+          requested_address: selectedAddress.formatted_address,
+          requested_normalized_address: selectedAddress.household_address,
+          requested_formatted_address: selectedAddress.formatted_address,
+          requested_place_id: selectedAddress.place_id,
+          reason: reason.trim() || undefined,
+          status: 'pending'
+        });
+
+      if (error) throw error;
 
       toast({
         title: "Request Submitted",
@@ -54,6 +65,7 @@ export default function AddressChangeRequestForm({
       // Reset form
       setSelectedAddress(null);
       setReason("");
+      refetch();
       onRequestSubmitted?.();
     } catch (error) {
       console.error('Error submitting address change request:', error);
@@ -69,11 +81,18 @@ export default function AddressChangeRequestForm({
 
   const handleCancelRequest = async (requestId: string) => {
     try {
-      await cancelRequest(requestId);
+      const { error } = await supabase
+        .from('address_change_requests')
+        .update({ status: 'cancelled' })
+        .eq('id', requestId);
+
+      if (error) throw error;
+
       toast({
         title: "Request Cancelled",
         description: "Your address change request has been cancelled.",
       });
+      refetch();
     } catch (error) {
       console.error('Error cancelling request:', error);
       toast({
@@ -99,7 +118,7 @@ export default function AddressChangeRequestForm({
     }
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <Card>
         <CardHeader>
@@ -118,7 +137,7 @@ export default function AddressChangeRequestForm({
   return (
     <div className="space-y-4">
       {/* Existing Requests */}
-      {userRequests.length > 0 && (
+      {userRequests && userRequests.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle>Address Change Requests</CardTitle>
