@@ -35,15 +35,38 @@ const Auth = () => {
   }, [params]);
 
   useEffect(() => {
+    // Only pre-fill email if there's a valid invite token context
     const hint = localStorage.getItem("invite_email");
-    if (hint && !email) setEmail(hint);
+    if (hint && !email && inviteToken) {
+      // Validate that the stored email is for a current valid invite
+      const validateAndSetEmail = async () => {
+        try {
+          const { data } = await supabase.rpc("validate_invite", { _token: inviteToken });
+          // Handle the response structure - data is an array from the RPC
+          const inviteData = Array.isArray(data) && data.length > 0 ? data[0] : null;
+          if (inviteData && inviteData.invited_email === hint) {
+            setEmail(hint);
+          } else {
+            // Clear outdated email hint
+            localStorage.removeItem("invite_email");
+          }
+        } catch (error) {
+          console.warn("Could not validate invite token, clearing stored email");
+          localStorage.removeItem("invite_email");
+        }
+      };
+      validateAndSetEmail();
+    } else if (hint && !inviteToken) {
+      // Clear stored email if there's no invite context
+      localStorage.removeItem("invite_email");
+    }
 
     const addrParam = (params.get("address") || "").trim();
     const storedAddr = localStorage.getItem("prefill_address") || "";
     if (!address && (addrParam || storedAddr)) {
       setAddress(addrParam || storedAddr);
     }
-  }, [email, address, params]);
+  }, [email, address, params, inviteToken]);
 
   const finalizeOnboarding = useCallback(async (userId: string, userEmail: string | null) => {
     console.log("[Auth] 🚀 Starting finalizeOnboarding for user:", userId);
@@ -356,8 +379,14 @@ const Auth = () => {
     sessionStorage.setItem("signup_email", pending.email);
     sessionStorage.setItem("signup_address", pending.address);
     
-    if (inviteToken) localStorage.setItem("invite_token", inviteToken);
-    localStorage.setItem("invite_email", email.trim());
+    if (inviteToken) {
+      localStorage.setItem("invite_token", inviteToken);
+      // Only store email if it's associated with a valid invite
+      localStorage.setItem("invite_email", email.trim());
+    } else {
+      // Clear any stored invite email if there's no invite context
+      localStorage.removeItem("invite_email");
+    }
     
     console.log("[Auth] 💾 Stored signup data with redundancy:", { 
       name: pending.name, 
