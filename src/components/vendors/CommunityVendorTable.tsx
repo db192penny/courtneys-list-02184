@@ -164,6 +164,8 @@ export default function CommunityVendorTable({
               onRate={openRate}
               onCosts={openCosts}
               userHomeVendors={userHomeVendors}
+              isAuthenticated={isAuthenticated}
+              communityName={communityName}
             />
           ))}
         </div>

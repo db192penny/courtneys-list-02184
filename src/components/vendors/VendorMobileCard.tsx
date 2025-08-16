@@ -18,6 +18,8 @@ interface VendorMobileCardProps {
   onRate: (vendor: CommunityVendorRow) => void;
   onCosts: (vendor: CommunityVendorRow) => void;
   userHomeVendors?: Set<string>;
+  isAuthenticated?: boolean;
+  communityName?: string;
 }
 
 export default function VendorMobileCard({
@@ -28,6 +30,8 @@ export default function VendorMobileCard({
   onRate,
   onCosts,
   userHomeVendors,
+  isAuthenticated = false,
+  communityName,
 }: VendorMobileCardProps) {
   return (
     <Card className="w-full">
@@ -72,19 +76,21 @@ export default function VendorMobileCard({
               size="sm" 
               variant="outline"
               className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700 flex items-center gap-1"
-              onClick={() => onRate(vendor)}
+              onClick={() => isAuthenticated ? onRate(vendor) : window.location.href = `/auth?community=${encodeURIComponent(communityName || '')}`}
             >
               <Star className="h-3 w-3" />
               Rate
             </Button>
-            <Button 
-              size="sm" 
-              variant="outline"
-              className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700"
-              onClick={() => onCosts(vendor)}
-            >
-              + Costs
-            </Button>
+            {isAuthenticated && (
+              <Button 
+                size="sm" 
+                variant="outline"
+                className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700"
+                onClick={() => onCosts(vendor)}
+              >
+                + Costs
+              </Button>
+            )}
           </div>
         </div>
 
