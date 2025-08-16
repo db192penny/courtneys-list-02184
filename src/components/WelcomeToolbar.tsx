@@ -38,19 +38,19 @@ export function WelcomeToolbar({ communitySlug }: WelcomeToolbarProps) {
 
   return (
     <div className="animate-fade-in mb-6">
-      <Alert className="border-primary bg-primary/5 relative">
-        <PartyPopper className="h-5 w-5 text-primary" />
+      <Alert className="border-yellow-300 bg-yellow-50 relative shadow-md">
+        <PartyPopper className="h-5 w-5 text-yellow-600" />
         <div className="pr-8">
-          <AlertDescription className="text-sm leading-relaxed">
-            <strong>Welcome aboard!</strong> Please try to rate at least 3 vendors you use and more if you see them and having fun :) 
-            Please also click on filter for Other categories (Pool, Pest Control, etc) and have fun exploring!
+          <AlertDescription className="text-sm leading-relaxed text-yellow-800">
+            <strong>Welcome aboard!</strong> Please try to rate at least 3 vendors and more if you are having fun :) 
+            Please also click on filter for Other Categories (Pool, Pest Control, etc) and have fun exploring!
           </AlertDescription>
         </div>
         <Button
           variant="ghost"
           size="sm"
           onClick={handleDismiss}
-          className="absolute right-2 top-2 h-8 w-8 p-0 hover:bg-primary/10"
+          className="absolute right-2 top-2 h-8 w-8 p-0 hover:bg-yellow-100 text-yellow-700"
           aria-label="Dismiss welcome message"
         >
           <X className="h-4 w-4" />

@@ -84,6 +84,9 @@ export default function Community() {
       />
 
       <section className="container py-10 space-y-6">
+        {/* Welcome toolbar for new users */}
+        {profile?.isAuthenticated && <WelcomeToolbar communitySlug={slug} />}
+        
         <header className="space-y-0">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
             <img
@@ -109,9 +112,6 @@ export default function Community() {
             </div>
           </div>
         </header>
-
-        {/* Welcome toolbar for new users */}
-        {profile?.isAuthenticated && <WelcomeToolbar communitySlug={slug} />}
 
         {/* Submit Vendor available to all users; unauthenticated users will be redirected to Auth */}
         <div className="pt-2">
