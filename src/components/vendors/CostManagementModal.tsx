@@ -209,7 +209,7 @@ export default function CostManagementModal({ open, onOpenChange, vendor, onSucc
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            {hasExistingCosts ? "Edit Costs" : "Add Costs"} — {vendor?.name}
+            {hasExistingCosts ? "Edit Costs" : "Share Costs"} — {vendor?.name}
           </DialogTitle>
         </DialogHeader>
         {vendor && (

@@ -210,7 +210,7 @@ export default function MobileCostManagementModal({ open, onOpenChange, vendor, 
       <DrawerContent className="max-h-[85vh]">
         <DrawerHeader className="text-left pb-4">
           <DrawerTitle>
-            {hasExistingCosts ? "Edit Costs" : "Add Costs"} — {vendor?.name}
+            {hasExistingCosts ? "Edit Costs" : "Share Costs"} — {vendor?.name}
           </DrawerTitle>
         </DrawerHeader>
         
