@@ -1291,6 +1291,14 @@ export type Database = {
           success: boolean
         }[]
       }
+      short_name: {
+        Args: { full_name: string }
+        Returns: string
+      }
+      street_only: {
+        Args: { addr: string }
+        Returns: string
+      }
       validate_invite: {
         Args: { _token: string }
         Returns: {
