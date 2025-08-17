@@ -1218,6 +1218,7 @@ export type Database = {
           cost_kind: string
           created_at: string
           id: string
+          notes: string
           period: string
           unit: string
         }[]
@@ -1226,11 +1227,10 @@ export type Database = {
         Args: { _vendor_id: string }
         Returns: {
           author_label: string
-          comment: string
+          comments: string
           created_at: string
           id: string
           rating: number
-          user_id: string
         }[]
       }
       list_vendor_stats: {
