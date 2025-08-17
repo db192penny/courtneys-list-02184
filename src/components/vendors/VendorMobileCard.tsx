@@ -122,11 +122,11 @@ export default function VendorMobileCard({
           <Dialog>
             <DialogTrigger asChild>
               <div className="flex items-center justify-between p-2 rounded-md bg-blue-50 hover:bg-blue-100 transition-colors border border-blue-200 cursor-pointer group">
-                <span className="text-sm font-medium text-muted-foreground group-hover:underline">{communityName}</span>
+                <span className="text-sm font-medium text-muted-foreground underline">{communityName}</span>
                 <div className="flex items-center gap-1">
                   {vendor.hoa_rating ? (
                     <>
-                      <div className="group-hover:underline">
+                      <div className="underline">
                         <RatingStars rating={vendor.hoa_rating} showValue />
                       </div>
                       {vendor.hoa_rating_count && (
@@ -134,7 +134,7 @@ export default function VendorMobileCard({
                       )}
                     </>
                   ) : (
-                    <span className="text-xs text-muted-foreground group-hover:underline">No ratings yet</span>
+                    <span className="text-xs text-muted-foreground underline">No ratings yet</span>
                   )}
                   <ChevronRight className="h-3 w-3 text-muted-foreground" />
                 </div>
@@ -154,9 +154,9 @@ export default function VendorMobileCard({
             <Dialog>
               <DialogTrigger asChild>
                 <div className="flex items-center justify-between p-2 rounded-md bg-green-50 hover:bg-green-100 transition-colors border border-green-200 cursor-pointer group">
-                  <span className="text-sm font-medium text-muted-foreground group-hover:underline">Google</span>
+                  <span className="text-sm font-medium text-muted-foreground underline">Google</span>
                   <div className="flex items-center gap-1">
-                    <div className="group-hover:underline">
+                    <div className="underline">
                       <RatingStars rating={vendor.google_rating} showValue />
                     </div>
                     {vendor.google_rating_count && (

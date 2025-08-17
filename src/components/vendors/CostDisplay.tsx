@@ -68,7 +68,7 @@ export function CostDisplay({
             <Dialog>
               <DialogTrigger asChild>
                 <div className="px-2 py-1.5 rounded-md bg-blue-50 hover:bg-blue-100 transition-colors border border-blue-200 hover:border-blue-300 min-h-[28px] flex items-center group cursor-pointer">
-                  <span className="text-xs font-medium group-hover:underline">
+                  <span className="text-xs font-medium underline">
                     {communityPrice}
                     {communitySampleSize && (
                       <span className="text-xs text-muted-foreground ml-1">
@@ -90,9 +90,9 @@ export function CostDisplay({
           ) : (
             <div className="px-2 py-1.5 rounded-md bg-blue-50 hover:bg-blue-100 transition-colors border border-blue-200 hover:border-blue-300 min-h-[28px] flex items-center group cursor-pointer">
               {communityPrice ? (
-                <span className="text-xs font-medium group-hover:underline">{communityPrice}</span>
+                <span className="text-xs font-medium underline">{communityPrice}</span>
               ) : (
-                <span className="text-xs text-muted-foreground group-hover:underline">TBD</span>
+                <span className="text-xs text-muted-foreground underline">TBD</span>
               )}
             </div>
           )}
@@ -106,7 +106,7 @@ export function CostDisplay({
               <div className="px-2 py-1.5 rounded-md bg-orange-50 hover:bg-orange-100 transition-colors border border-orange-200 hover:border-orange-300 min-h-[28px] flex items-center group cursor-pointer">
                 {marketPrice ? (
                   <div className="flex items-center gap-1">
-                    <span className="text-xs font-medium group-hover:underline">{marketPrice}</span>
+                    <span className="text-xs font-medium underline">{marketPrice}</span>
                     <Info className="h-3 w-3 text-muted-foreground" />
                     {isAdmin && (
                       <Button
@@ -124,7 +124,7 @@ export function CostDisplay({
                   </div>
                 ) : (
                   <div className="flex items-center gap-1">
-                    <span className="text-xs font-medium text-muted-foreground group-hover:underline">—</span>
+                    <span className="text-xs font-medium text-muted-foreground underline">—</span>
                     <Info className="h-3 w-3 text-muted-foreground" />
                     {isAdmin && (
                       <Button
