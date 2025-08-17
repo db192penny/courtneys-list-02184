@@ -106,7 +106,7 @@ export default function VendorMobileCard({
           </Button>
           <div className="flex items-center gap-2 text-sm">
             <span className="font-medium">
-              {vendor.homes_serviced === 0 ? "–" : vendor.homes_serviced} homes
+              {vendor.homes_serviced === 0 ? "–" : vendor.homes_serviced} neighbors
             </span>
             {vendor.homes_pct && (
               <span className="text-xs text-muted-foreground">({vendor.homes_pct}%)</span>

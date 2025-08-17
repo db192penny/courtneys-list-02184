@@ -47,7 +47,7 @@ export type CommunityVendorRow = {
 };
 
 const getSorts = (communityName: string) => [
-  { key: "homes", label: "# of Homes Serviced" },
+  { key: "homes", label: "Neighbors Using" },
   { key: "hoa_rating", label: `${communityName} Rating` },
   { key: "google_rating", label: "Google Rating" },
 ] as const;
@@ -156,7 +156,7 @@ export default function CommunityVendorTable({
             <div className="w-full sm:w-56">
               <Select value={sortBy} onValueChange={(v) => setSortBy(v as any)}>
                 <SelectTrigger className="bg-background border-2 border-muted hover:border-primary/20 focus:border-primary transition-colors">
-                  <SelectValue placeholder="# of Homes Serviced" />
+                  <SelectValue placeholder="Neighbors Using" />
                 </SelectTrigger>
                 <SelectContent className="bg-background border-2">
                   {SORTS.map((s) => (
@@ -219,7 +219,7 @@ export default function CommunityVendorTable({
                   onClick={() => handleHeaderClick("homes")}
                 >
                   <div className="flex items-center gap-2">
-                    # Homes
+                    # of Neighbors Using
                     {getSortIcon("homes")}
                   </div>
                 </TableHead>
