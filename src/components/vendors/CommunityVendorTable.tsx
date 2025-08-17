@@ -219,7 +219,7 @@ export default function CommunityVendorTable({
                   onClick={() => handleHeaderClick("homes")}
                 >
                   <div className="flex items-center gap-2">
-                    # of Neighbors Using
+                    Neighbors Using
                     {getSortIcon("homes")}
                   </div>
                 </TableHead>
