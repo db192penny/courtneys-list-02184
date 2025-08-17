@@ -312,13 +312,13 @@ export default function CommunityVendorTable({
                          <div className="flex items-center gap-2 cursor-pointer group">
                            <span className="text-xs text-muted-foreground min-w-[70px]">{communityName}:</span>
                            {r.hoa_rating ? (
-                             <div className="flex items-center gap-1 px-2 py-1.5 rounded-md bg-blue-50 hover:bg-blue-100 transition-colors border border-blue-200 hover:border-blue-300 min-h-[28px]">
+                             <div className="flex items-center gap-1 px-2 py-1.5 rounded-md bg-blue-50 hover:bg-blue-100 transition-colors border border-blue-200 hover:border-blue-300 min-h-[28px] underline decoration-dotted underline-offset-4">
                                <RatingStars rating={r.hoa_rating} showValue />
                                {r.hoa_rating_count ? <span className="text-xs text-muted-foreground">({r.hoa_rating_count})</span> : null}
                              </div>
                            ) : (
                              <span 
-                               className="text-xs text-muted-foreground px-2 py-1.5 rounded-md bg-blue-50 hover:bg-blue-100 transition-colors border border-blue-200 hover:border-blue-300 min-h-[28px] flex items-center"
+                               className="text-xs text-muted-foreground px-2 py-1.5 rounded-md bg-blue-50 hover:bg-blue-100 transition-colors border border-blue-200 hover:border-blue-300 min-h-[28px] flex items-center underline decoration-dotted underline-offset-4"
                                title="Be the first to rate this provider"
                              >
                                No Ratings Yet
@@ -334,7 +334,7 @@ export default function CommunityVendorTable({
                         >
                           <div className="flex items-center gap-2 cursor-pointer group">
                             <span className="text-xs text-muted-foreground min-w-[70px]">Google:</span>
-                            <div className="flex items-center gap-1 px-2 py-1.5 rounded-md bg-green-50 hover:bg-green-100 transition-colors border border-green-200 hover:border-green-300 min-h-[28px]">
+                            <div className="flex items-center gap-1 px-2 py-1.5 rounded-md bg-green-50 hover:bg-green-100 transition-colors border border-green-200 hover:border-green-300 min-h-[28px] underline decoration-dotted underline-offset-4">
                               <RatingStars rating={r.google_rating} showValue />
                               {r.google_rating_count ? <span className="text-xs text-muted-foreground">({r.google_rating_count})</span> : null}
                             </div>
