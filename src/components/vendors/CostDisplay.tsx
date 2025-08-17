@@ -88,49 +88,63 @@ export function CostDisplay({
         {/* Area Average Price Line */}
         <div className="flex items-center gap-1">
           <span className="text-xs text-muted-foreground min-w-[70px]">Area Average:</span>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div className="px-2 py-1.5 rounded-md bg-orange-50 hover:bg-orange-100 transition-colors border border-orange-200 hover:border-orange-300 min-h-[28px] flex items-center cursor-help">
-                {marketPrice ? (
-                  <div className="flex items-center gap-1">
-                    <span className="text-xs font-medium">{marketPrice}</span>
-                    {isAdmin && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-auto p-0 text-muted-foreground hover:text-foreground"
-                        onClick={() => setShowEditMarket(true)}
-                      >
-                        <Pencil className="h-3 w-3" />
-                      </Button>
-                    )}
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-1">
-                    <span className="text-xs font-medium text-muted-foreground">—</span>
-                    {isAdmin && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-auto p-0 text-muted-foreground hover:text-foreground"
-                        onClick={() => setShowEditMarket(true)}
-                      >
-                        <Pencil className="h-3 w-3" />
-                      </Button>
-                    )}
-                  </div>
+          <div className="px-2 py-1.5 rounded-md bg-orange-50 hover:bg-orange-100 transition-colors border border-orange-200 hover:border-orange-300 min-h-[28px] flex items-center">
+            {marketPrice ? (
+              <div className="flex items-center gap-1">
+                <span className="text-xs font-medium">{marketPrice}</span>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Info className="h-3 w-3 text-muted-foreground cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <div className="space-y-2">
+                      <p className="text-sm font-semibold">Area Average Calculation</p>
+                      <p className="text-xs max-w-xs">
+                        Average cost for similar services in your area, based on industry pricing data, home prices, and data from HomeAdvisor
+                      </p>
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+                {isAdmin && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-auto p-0 text-muted-foreground hover:text-foreground"
+                    onClick={() => setShowEditMarket(true)}
+                  >
+                    <Pencil className="h-3 w-3" />
+                  </Button>
                 )}
               </div>
-            </TooltipTrigger>
-            <TooltipContent>
-              <div className="space-y-2">
-                <p className="text-sm font-semibold">Area Average Calculation</p>
-                <p className="text-xs max-w-xs">
-                  Average cost for similar services in your area, based on industry pricing data, home prices, and data from HomeAdvisor
-                </p>
+            ) : (
+              <div className="flex items-center gap-1">
+                <span className="text-xs font-medium text-muted-foreground">—</span>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Info className="h-3 w-3 text-muted-foreground cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <div className="space-y-2">
+                      <p className="text-sm font-semibold">Area Average Calculation</p>
+                      <p className="text-xs max-w-xs">
+                        Average cost for similar services in your area, based on industry pricing data, home prices, and data from HomeAdvisor
+                      </p>
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+                {isAdmin && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-auto p-0 text-muted-foreground hover:text-foreground"
+                    onClick={() => setShowEditMarket(true)}
+                  >
+                    <Pencil className="h-3 w-3" />
+                  </Button>
+                )}
               </div>
-            </TooltipContent>
-          </Tooltip>
+            )}
+          </div>
         </div>
 
         {/* Modals */}

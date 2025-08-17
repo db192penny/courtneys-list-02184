@@ -1,9 +1,10 @@
-import { Star } from "lucide-react";
+import { Star, Info, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { RatingStars } from "@/components/ui/rating-stars";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { formatUSPhoneDisplay } from "@/utils/phone";
 import ReviewsHover from "@/components/vendors/ReviewsHover";
 import GoogleReviewsHover from "@/components/vendors/GoogleReviewsHover";
@@ -116,38 +117,62 @@ export default function VendorMobileCard({
 
         {/* Ratings */}
         <div className="space-y-2">
-          <ReviewsHover vendorId={vendor.id}>
-            <div className="flex items-center justify-between p-2 rounded-md bg-blue-50 hover:bg-blue-100 transition-colors border border-blue-200 cursor-pointer">
-              <span className="text-sm font-medium text-muted-foreground">{communityName}</span>
-              {vendor.hoa_rating ? (
+          <Dialog>
+            <DialogTrigger asChild>
+              <div className="flex items-center justify-between p-2 rounded-md bg-blue-50 hover:bg-blue-100 transition-colors border border-blue-200 cursor-pointer">
+                <span className="text-sm font-medium text-muted-foreground">{communityName}</span>
                 <div className="flex items-center gap-1">
-                  <RatingStars rating={vendor.hoa_rating} showValue />
-                  {vendor.hoa_rating_count && (
-                    <span className="text-xs text-muted-foreground">({vendor.hoa_rating_count})</span>
+                  {vendor.hoa_rating ? (
+                    <>
+                      <RatingStars rating={vendor.hoa_rating} showValue />
+                      {vendor.hoa_rating_count && (
+                        <span className="text-xs text-muted-foreground">({vendor.hoa_rating_count})</span>
+                      )}
+                    </>
+                  ) : (
+                    <span className="text-xs text-muted-foreground">No ratings yet</span>
                   )}
-                </div>
-              ) : (
-                <span className="text-xs text-muted-foreground">No ratings yet</span>
-              )}
-            </div>
-          </ReviewsHover>
-
-          {vendor.google_rating != null && (
-            <GoogleReviewsHover 
-              vendorId={vendor.id} 
-              googleReviewsJson={vendor.google_reviews_json}
-              googlePlaceId={vendor.google_place_id}
-            >
-              <div className="flex items-center justify-between p-2 rounded-md bg-green-50 hover:bg-green-100 transition-colors border border-green-200 cursor-pointer">
-                <span className="text-sm font-medium text-muted-foreground">Google</span>
-                <div className="flex items-center gap-1">
-                  <RatingStars rating={vendor.google_rating} showValue />
-                  {vendor.google_rating_count && (
-                    <span className="text-xs text-muted-foreground">({vendor.google_rating_count})</span>
-                  )}
+                  <ChevronRight className="h-3 w-3 text-muted-foreground" />
                 </div>
               </div>
-            </GoogleReviewsHover>
+            </DialogTrigger>
+            <DialogContent className="max-w-sm max-h-[80vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>{communityName} Reviews</DialogTitle>
+              </DialogHeader>
+              <ReviewsHover vendorId={vendor.id}>
+                <div className="w-full"></div>
+              </ReviewsHover>
+            </DialogContent>
+          </Dialog>
+
+          {vendor.google_rating != null && (
+            <Dialog>
+              <DialogTrigger asChild>
+                <div className="flex items-center justify-between p-2 rounded-md bg-green-50 hover:bg-green-100 transition-colors border border-green-200 cursor-pointer">
+                  <span className="text-sm font-medium text-muted-foreground">Google</span>
+                  <div className="flex items-center gap-1">
+                    <RatingStars rating={vendor.google_rating} showValue />
+                    {vendor.google_rating_count && (
+                      <span className="text-xs text-muted-foreground">({vendor.google_rating_count})</span>
+                    )}
+                    <ChevronRight className="h-3 w-3 text-muted-foreground" />
+                  </div>
+                </div>
+              </DialogTrigger>
+              <DialogContent className="max-w-sm max-h-[80vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Google Reviews</DialogTitle>
+                </DialogHeader>
+                <GoogleReviewsHover 
+                  vendorId={vendor.id} 
+                  googleReviewsJson={vendor.google_reviews_json}
+                  googlePlaceId={vendor.google_place_id}
+                >
+                  <div className="w-full"></div>
+                </GoogleReviewsHover>
+              </DialogContent>
+            </Dialog>
           )}
         </div>
 
