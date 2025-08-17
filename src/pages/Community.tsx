@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { Plus } from "lucide-react";
 import SEO from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import VendorCard from "@/components/vendors/VendorCard";
@@ -113,16 +114,6 @@ export default function Community() {
           </div>
         </header>
 
-        {/* Submit Vendor available to all users; unauthenticated users will be redirected to Auth */}
-        <div className="pt-2">
-          <Button 
-            variant="secondary" 
-            onClick={() => navigate(`/submit?community=${encodeURIComponent(communityName)}`)}
-            className="w-full sm:w-auto"
-          >
-            + Add a Service Provider
-          </Button>
-        </div>
 
         {showSignUpPrompt && (
           <div className="flex flex-col gap-3">
@@ -148,18 +139,7 @@ export default function Community() {
 
         {/* Show demo data only when no real data exists */}
         {!!data && data.length === 0 && !isLoading && (
-          <>
-            <CommunityDemoTable communityName={communityName} />
-            <div className="pt-4">
-              <Button 
-                variant="secondary" 
-                onClick={() => navigate(`/submit?community=${encodeURIComponent(communityName)}`)}
-                className="w-full sm:w-auto"
-              >
-                + Add a Service Provider
-              </Button>
-            </div>
-          </>
+          <CommunityDemoTable communityName={communityName} />
         )}
 
         {/* Show real data when it exists */}
@@ -175,6 +155,16 @@ export default function Community() {
         )}
 
       </section>
+
+      {/* Floating Action Button */}
+      <Button
+        onClick={() => navigate(`/submit?community=${encodeURIComponent(communityName)}`)}
+        className="fixed bottom-20 right-4 h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-shadow z-50 md:bottom-6"
+        size="icon"
+        aria-label="Add a Service Provider"
+      >
+        <Plus className="h-6 w-6" />
+      </Button>
     </main>
   );
 }
