@@ -63,7 +63,7 @@ export default function CommunityVendorTable({
   isAuthenticated?: boolean;
   isVerified?: boolean;
 }) {
-  const [category, setCategory] = useState<string>("all");
+  const [category, setCategory] = useState<string>("pool");
   const SORTS = getSorts(communityName);
   const [sortBy, setSortBy] = useState<typeof SORTS[number]["key"]>("homes");
   const isMobile = useIsMobile();
@@ -214,8 +214,16 @@ export default function CommunityVendorTable({
           ))}
         </div>
       ) : (
-        <div className="overflow-x-auto">
-          <Table>
+        <div className="space-y-4">
+          {category !== "all" && (
+            <div className="text-center">
+              <h3 className="text-xl font-semibold text-foreground">
+                {category} Providers
+              </h3>
+            </div>
+          )}
+          <div className="overflow-x-auto">
+            <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Rank</TableHead>
@@ -386,6 +394,7 @@ export default function CommunityVendorTable({
               ))}
             </TableBody>
           </Table>
+          </div>
         </div>
       )}
       {isAuthenticated && (
