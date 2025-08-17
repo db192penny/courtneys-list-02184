@@ -118,7 +118,7 @@ export default function VendorMobileCard({
         <div className="space-y-2">
           <ReviewsHover vendorId={vendor.id}>
             <div className="flex items-center justify-between p-2 rounded-md bg-blue-50 hover:bg-blue-100 transition-colors border border-blue-200 cursor-pointer">
-              <span className="text-sm font-medium text-muted-foreground">Community</span>
+              <span className="text-sm font-medium text-muted-foreground">{communityName}</span>
               {vendor.hoa_rating ? (
                 <div className="flex items-center gap-1">
                   <RatingStars rating={vendor.hoa_rating} showValue />
