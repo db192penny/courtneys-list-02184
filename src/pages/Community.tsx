@@ -9,6 +9,8 @@ import CommunityDemoTable from "@/components/vendors/CommunityDemoTable";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { WelcomeToolbar } from "@/components/WelcomeToolbar";
+import { MobileBottomNav } from "@/components/MobileBottomNav";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 function slugToName(slug: string) {
   const cleaned = (slug || "")
@@ -24,6 +26,7 @@ export default function Community() {
   const { slug = "" } = useParams();
   const navigate = useNavigate();
   const { data: profile } = useUserProfile();
+  const isMobile = useIsMobile();
 
   const communityName = useMemo(() => slugToName(slug), [slug]);
   const pageTitle = useMemo(() => (communityName === "Boca Bridges" ? "Boca Bridges Overview" : `${communityName} Overview`), [communityName]);
@@ -113,16 +116,18 @@ export default function Community() {
           </div>
         </header>
 
-        {/* Submit Vendor available to all users; unauthenticated users will be redirected to Auth */}
-        <div className="pt-2">
-          <Button 
-            variant="secondary" 
-            onClick={() => navigate(`/submit?community=${encodeURIComponent(communityName)}`)}
-            className="w-full sm:w-auto"
-          >
-            + Add a Service Provider
-          </Button>
-        </div>
+        {/* Submit Vendor - hidden on mobile since it's in bottom nav */}
+        {!isMobile && (
+          <div className="pt-2">
+            <Button 
+              variant="secondary" 
+              onClick={() => navigate(`/submit?community=${encodeURIComponent(communityName)}`)}
+              className="w-full sm:w-auto"
+            >
+              + Add a Service Provider
+            </Button>
+          </div>
+        )}
 
         {showSignUpPrompt && (
           <div className="flex flex-col gap-3">
@@ -150,21 +155,24 @@ export default function Community() {
         {!!data && data.length === 0 && !isLoading && (
           <>
             <CommunityDemoTable communityName={communityName} />
-            <div className="pt-4">
-              <Button 
-                variant="secondary" 
-                onClick={() => navigate(`/submit?community=${encodeURIComponent(communityName)}`)}
-                className="w-full sm:w-auto"
-              >
-                + Add a Service Provider
-              </Button>
-            </div>
+            {/* Add Provider button - hidden on mobile since it's in bottom nav */}
+            {!isMobile && (
+              <div className="pt-4">
+                <Button 
+                  variant="secondary" 
+                  onClick={() => navigate(`/submit?community=${encodeURIComponent(communityName)}`)}
+                  className="w-full sm:w-auto"
+                >
+                  + Add a Service Provider
+                </Button>
+              </div>
+            )}
           </>
         )}
 
         {/* Show real data when it exists */}
         {!!data && data.length > 0 && (
-          <div className="space-y-3">
+          <div className="space-y-3 mb-20">
             <CommunityVendorTable 
               communityName={communityName} 
               showContact={true} 
@@ -175,6 +183,9 @@ export default function Community() {
         )}
 
       </section>
+      
+      {/* Mobile Bottom Navigation */}
+      <MobileBottomNav communityName={communityName} />
     </main>
   );
 }
