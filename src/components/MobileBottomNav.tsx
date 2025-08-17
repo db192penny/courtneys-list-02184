@@ -17,7 +17,7 @@ export function MobileBottomNav({ communityName = "Boca Bridges" }: MobileBottom
   const isAuthenticated = !!profile?.isAuthenticated;
 
   // Don't show on certain pages where it might interfere
-  const hiddenRoutes = ['/auth', '/signin', '/submit'];
+  const hiddenRoutes = ['/auth', '/signin'];
   const shouldHide = hiddenRoutes.some(route => location.pathname.startsWith(route));
 
   if (!isMobile || shouldHide) {
