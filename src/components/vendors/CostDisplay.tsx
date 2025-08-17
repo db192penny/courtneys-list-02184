@@ -63,15 +63,15 @@ export function CostDisplay({
         {/* Community Price Line */}
         <div className="flex items-center gap-1">
           <span className="text-xs text-muted-foreground min-w-[70px]">{communityName || "Community"}:</span>
-          <div className="px-2 py-1.5 rounded-md bg-blue-50 hover:bg-blue-100 transition-colors border border-blue-200 hover:border-blue-300 min-h-[28px] flex items-center">
+          <div className="px-2 py-1.5 rounded-md bg-blue-50 hover:bg-blue-100 transition-colors border border-blue-200 hover:border-blue-300 min-h-[28px] flex items-center group cursor-pointer">
             {communityPrice ? (
               <span className="text-xs font-medium">
                 {communitySampleSize && communitySampleSize > 0 ? (
                   <CostsHover vendorId={vendorId}>
-                    {communityPrice}
+                    <span className="group-hover:underline">{communityPrice}</span>
                   </CostsHover>
                 ) : (
-                  communityPrice
+                  <span className="group-hover:underline">{communityPrice}</span>
                 )}
                 {communitySampleSize && (
                   <span className="text-xs text-muted-foreground ml-1">
@@ -80,7 +80,7 @@ export function CostDisplay({
                 )}
               </span>
             ) : (
-              <span className="text-xs text-muted-foreground">TBD</span>
+              <span className="text-xs text-muted-foreground group-hover:underline">TBD</span>
             )}
           </div>
         </div>
@@ -88,10 +88,10 @@ export function CostDisplay({
         {/* Area Average Price Line */}
         <div className="flex items-center gap-1">
           <span className="text-xs text-muted-foreground min-w-[70px]">Area Average:</span>
-          <div className="px-2 py-1.5 rounded-md bg-orange-50 hover:bg-orange-100 transition-colors border border-orange-200 hover:border-orange-300 min-h-[28px] flex items-center">
+          <div className="px-2 py-1.5 rounded-md bg-orange-50 hover:bg-orange-100 transition-colors border border-orange-200 hover:border-orange-300 min-h-[28px] flex items-center group cursor-pointer">
             {marketPrice ? (
               <div className="flex items-center gap-1">
-                <span className="text-xs font-medium">{marketPrice}</span>
+                <span className="text-xs font-medium group-hover:underline">{marketPrice}</span>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Info className="h-3 w-3 text-muted-foreground cursor-help" />
@@ -118,7 +118,7 @@ export function CostDisplay({
               </div>
             ) : (
               <div className="flex items-center gap-1">
-                <span className="text-xs font-medium text-muted-foreground">—</span>
+                <span className="text-xs font-medium text-muted-foreground group-hover:underline">—</span>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Info className="h-3 w-3 text-muted-foreground cursor-help" />

@@ -9,6 +9,8 @@ import { formatUSPhoneDisplay } from "@/utils/phone";
 import ReviewsHover from "@/components/vendors/ReviewsHover";
 import GoogleReviewsHover from "@/components/vendors/GoogleReviewsHover";
 import { CostDisplay } from "@/components/vendors/CostDisplay";
+import { MobileReviewsModal } from "@/components/vendors/MobileReviewsModal";
+import { MobileGoogleReviewsModal } from "@/components/vendors/MobileGoogleReviewsModal";
 import type { CommunityVendorRow } from "@/components/vendors/CommunityVendorTable";
 
 interface VendorMobileCardProps {
@@ -119,18 +121,20 @@ export default function VendorMobileCard({
         <div className="space-y-2">
           <Dialog>
             <DialogTrigger asChild>
-              <div className="flex items-center justify-between p-2 rounded-md bg-blue-50 hover:bg-blue-100 transition-colors border border-blue-200 cursor-pointer">
-                <span className="text-sm font-medium text-muted-foreground">{communityName}</span>
+              <div className="flex items-center justify-between p-2 rounded-md bg-blue-50 hover:bg-blue-100 transition-colors border border-blue-200 cursor-pointer group">
+                <span className="text-sm font-medium text-muted-foreground group-hover:underline">{communityName}</span>
                 <div className="flex items-center gap-1">
                   {vendor.hoa_rating ? (
                     <>
-                      <RatingStars rating={vendor.hoa_rating} showValue />
+                      <div className="group-hover:underline">
+                        <RatingStars rating={vendor.hoa_rating} showValue />
+                      </div>
                       {vendor.hoa_rating_count && (
                         <span className="text-xs text-muted-foreground">({vendor.hoa_rating_count})</span>
                       )}
                     </>
                   ) : (
-                    <span className="text-xs text-muted-foreground">No ratings yet</span>
+                    <span className="text-xs text-muted-foreground group-hover:underline">No ratings yet</span>
                   )}
                   <ChevronRight className="h-3 w-3 text-muted-foreground" />
                 </div>
@@ -140,19 +144,21 @@ export default function VendorMobileCard({
               <DialogHeader>
                 <DialogTitle>{communityName} Reviews</DialogTitle>
               </DialogHeader>
-              <ReviewsHover vendorId={vendor.id}>
-                <div className="w-full"></div>
-              </ReviewsHover>
+              <div className="mt-4">
+                <MobileReviewsModal vendorId={vendor.id} />
+              </div>
             </DialogContent>
           </Dialog>
 
           {vendor.google_rating != null && (
             <Dialog>
               <DialogTrigger asChild>
-                <div className="flex items-center justify-between p-2 rounded-md bg-green-50 hover:bg-green-100 transition-colors border border-green-200 cursor-pointer">
-                  <span className="text-sm font-medium text-muted-foreground">Google</span>
+                <div className="flex items-center justify-between p-2 rounded-md bg-green-50 hover:bg-green-100 transition-colors border border-green-200 cursor-pointer group">
+                  <span className="text-sm font-medium text-muted-foreground group-hover:underline">Google</span>
                   <div className="flex items-center gap-1">
-                    <RatingStars rating={vendor.google_rating} showValue />
+                    <div className="group-hover:underline">
+                      <RatingStars rating={vendor.google_rating} showValue />
+                    </div>
                     {vendor.google_rating_count && (
                       <span className="text-xs text-muted-foreground">({vendor.google_rating_count})</span>
                     )}
@@ -164,13 +170,13 @@ export default function VendorMobileCard({
                 <DialogHeader>
                   <DialogTitle>Google Reviews</DialogTitle>
                 </DialogHeader>
-                <GoogleReviewsHover 
-                  vendorId={vendor.id} 
-                  googleReviewsJson={vendor.google_reviews_json}
-                  googlePlaceId={vendor.google_place_id}
-                >
-                  <div className="w-full"></div>
-                </GoogleReviewsHover>
+                <div className="mt-4">
+                  <MobileGoogleReviewsModal 
+                    vendorId={vendor.id} 
+                    googleReviewsJson={vendor.google_reviews_json}
+                    googlePlaceId={vendor.google_place_id}
+                  />
+                </div>
               </DialogContent>
             </Dialog>
           )}
