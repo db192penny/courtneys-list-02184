@@ -6,6 +6,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import useIsAdmin from "@/hooks/useIsAdmin";
+import { UserMenu } from "@/components/UserMenu";
 
 const Header = () => {
   const [authed, setAuthed] = useState(false);
@@ -36,7 +37,7 @@ const Header = () => {
 
   const navigationItems = authed ? [
     { to: "/communities/boca-bridges", label: "Boca Bridges Overview" },
-    { to: "/profile", label: "Your Profile" },
+    { to: "/profile", label: "Rewards" },
     ...(isAdmin ? [{ to: "/admin", label: "Admin" }] : []),
   ] : [];
 
@@ -70,6 +71,16 @@ const Header = () => {
                     <Button 
                       variant="ghost" 
                       onClick={() => {
+                        setMobileMenuOpen(false);
+                        // TODO: Add account settings modal trigger for mobile
+                      }}
+                      className="justify-start"
+                    >
+                      Account Settings
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      onClick={() => {
                         handleSignOut();
                         setMobileMenuOpen(false);
                       }}
@@ -96,9 +107,7 @@ const Header = () => {
                     <Link to={to}>{label}</Link>
                   </Button>
                 ))}
-                <Button variant="ghost" onClick={handleSignOut} aria-label="Sign out">
-                  Sign out
-                </Button>
+                <UserMenu />
               </div>
             ) : (
               <Button asChild>

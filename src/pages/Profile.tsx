@@ -1,14 +1,8 @@
 import { useEffect, useState } from "react";
 import SEO from "@/components/SEO";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
-import { extractStreetName } from "@/utils/address";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link, useSearchParams } from "react-router-dom";
-import AddressInput, { AddressSelectedPayload } from "@/components/AddressInput";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { useBadgeLevels, getUserCurrentBadge, getUserNextBadge } from "@/hooks/useBadgeLevels";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
@@ -21,11 +15,7 @@ import BadgeLevelChart from "@/components/badges/BadgeLevelChart";
 
 
 const Profile = () => {
-  const { toast } = useToast();
   const [loading, setLoading] = useState(true);
-
-  const [name, setName] = useState("");
-  const [address, setAddress] = useState("");
   const [points, setPoints] = useState<number>(0);
   const [params] = useSearchParams();
   const onboarding = params.get("onboarding");
@@ -37,7 +27,7 @@ const Profile = () => {
   const nextBadge = getUserNextBadge(points, badgeLevels);
   
 
-useEffect(() => {
+  useEffect(() => {
     let cancel = false;
     (async () => {
       const { data: auth } = await supabase.auth.getUser();
@@ -47,7 +37,7 @@ useEffect(() => {
       }
       const { data, error } = await supabase
         .from("users")
-        .select("name, address, points")
+        .select("points")
         .eq("id", auth.user.id)
         .single();
 
@@ -55,8 +45,6 @@ useEffect(() => {
         console.warn("[Profile] load error:", error);
       }
       if (!cancel) {
-        setName(data?.name ?? "");
-        setAddress(data?.address ?? "");
         setPoints(data?.points ?? 0);
         setLoading(false);
       }
@@ -64,121 +52,17 @@ useEffect(() => {
     return () => { cancel = true; };
   }, []);
 
-  const onSave = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const { data: auth } = await supabase.auth.getUser();
-    if (!auth.user) return;
-
-    const trimmedAddress = address.trim();
-    const payload = {
-      id: auth.user.id,
-      email: auth.user.email ?? "", // required by DB/types
-      name: name.trim(),
-      address: trimmedAddress,
-      street_name: extractStreetName(trimmedAddress), // required by DB/types
-    };
-
-    const { error } = await supabase.from("users").upsert(payload);
-    if (error) {
-      console.error("[Profile] save error:", error);
-      toast({ title: "Could not save", description: error.message, variant: "destructive" });
-      return;
-    }
-    toast({ title: "Saved", description: "Your profile and privacy settings were updated." });
-  };
-
   const canonical = typeof window !== "undefined" ? window.location.href : undefined;
-
-  const handleAddressSelected = async (payload: AddressSelectedPayload) => {
-    // Validate the address before sending to backend
-    const incomingAddress = payload.household_address || payload.formatted_address || '';
-    
-    if (!incomingAddress || incomingAddress.trim().length === 0) {
-      console.warn("[Profile] Empty address provided to handleAddressSelected");
-      toast({
-        title: "Invalid address",
-        description: "Please select a valid address from the suggestions.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Check for obviously invalid addresses
-    const normalized = incomingAddress.toLowerCase().trim();
-    const invalidPatterns = [
-      'address not provided',
-      'no address',
-      'unknown',
-      'pending',
-      'not specified',
-      'n/a'
-    ];
-    
-    if (invalidPatterns.some(pattern => normalized.includes(pattern))) {
-      console.warn("[Profile] Invalid address pattern detected:", incomingAddress);
-      toast({
-        title: "Invalid address",
-        description: "Please enter a valid street address.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Require place_id for proper geocoding
-    if (!payload.place_id) {
-      console.warn("[Profile] No place_id provided");
-      toast({
-        title: "Invalid address",
-        description: "Please select an address from the dropdown suggestions.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Don't overwrite a good address with a potentially bad one
-    if (address && 
-        address !== 'Address Not Provided' && 
-        address.trim().length > 10 && // Has some substance
-        (!incomingAddress || incomingAddress.length < address.length / 2)) {
-      console.warn("[Profile] Refusing to overwrite good address with potentially bad one:", {
-        current: address,
-        incoming: incomingAddress
-      });
-      toast({
-        title: "Address not updated",
-        description: "The selected address appears incomplete. Please try again.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // POST to backend (Supabase Edge Function)
-    const { error } = await supabase.functions.invoke("household-address", {
-      body: payload,
-    });
-    if (error) {
-      console.error("[Profile] address save error:", error);
-      toast({
-        title: "Could not save address",
-        description: error.message || "Unknown error",
-        variant: "destructive",
-      });
-      return;
-    }
-    // Optimistic/local refresh
-    setAddress(payload.household_address);
-    toast({ title: "Address saved", description: "Your household address was updated." });
-  };
 
   return (
     <main className="min-h-screen bg-background">
       <SEO
-        title="Profile & Privacy — Courtney's List"
-        description="Manage your profile and privacy preferences."
+        title="Rewards & Activity — Courtney's List"
+        description="Track your activity points and community engagement rewards."
         canonical={canonical}
       />
       <section className="container max-w-4xl py-10">
-        <h1 className="text-3xl font-semibold mb-6">Your Profile</h1>
+        <h1 className="text-3xl font-semibold mb-6">Rewards & Activity</h1>
 {onboarding && (
           <Alert className="mb-4">
             <AlertTitle>Welcome!</AlertTitle>
@@ -191,7 +75,7 @@ useEffect(() => {
         )}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Your Profile</CardTitle>
+            <CardTitle className="text-base">Your Progress</CardTitle>
             <div className="flex flex-col gap-3 mt-3">
               <div className="flex items-center gap-3 flex-wrap">
                 {currentBadge && (
@@ -216,27 +100,6 @@ useEffect(() => {
               />
             </div>
           </CardHeader>
-          <form onSubmit={onSave}>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Name</Label>
-                <Input id="name" value={name} onChange={(e) => setName(e.currentTarget.value)} />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="address">Full Address</Label>
-                <AddressInput
-                  id="address"
-                  defaultValue={address}
-                  onSelected={handleAddressSelected}
-                  country={["us"]}
-                  placeholder="Start typing your address..."
-                />
-              </div>
-            </CardContent>
-            <CardFooter className="flex justify-end">
-              <Button type="submit" disabled={loading}>Save</Button>
-            </CardFooter>
-          </form>
         </Card>
         
         {/* Activity Insights Section */}
@@ -245,11 +108,7 @@ useEffect(() => {
           <BadgeLevelChart currentPoints={points} />
         </div>
         
-        <div className="mt-6 text-sm text-muted-foreground">
-          Your address is used for community verification. Only your street name may be shown publicly.
-        </div>
-        
-        {/* Point History Section - Moved to Bottom */}
+        {/* Point History Section */}
         <div className="mt-8">
           <PointHistoryTable />
         </div>
