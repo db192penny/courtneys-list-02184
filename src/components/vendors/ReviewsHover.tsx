@@ -52,7 +52,7 @@ export default function ReviewsHover({ vendorId, children }: { vendorId: string;
                       <span className="font-medium">{r.rating}/5</span>
                     </div>
                     <Badge variant="outline" className="text-xs px-2 py-0.5 bg-blue-50 text-blue-700 border-blue-200">
-                      by {r.author_label}
+                      {r.author_label}
                     </Badge>
                   </div>
                   {r.created_at && (

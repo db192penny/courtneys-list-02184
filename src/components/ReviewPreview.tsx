@@ -1,4 +1,4 @@
-import { capitalizeStreetName } from "@/utils/address";
+import { extractStreetName, capitalizeStreetName } from "@/utils/address";
 import { formatNameWithLastInitial } from "@/utils/nameFormatting";
 
 type ReviewPreviewProps = {
@@ -18,7 +18,8 @@ export default function ReviewPreview({ rating, showName, userName, streetName }
   };
 
   const displayName = showName ? formatName(userName) : "Neighbor";
-  const streetDisplay = streetName && streetName.trim() ? ` on ${capitalizeStreetName(streetName)}` : "";
+  const cleanStreet = streetName ? extractStreetName(streetName) : "";
+  const streetDisplay = cleanStreet ? ` on ${capitalizeStreetName(cleanStreet)}` : "";
 
   if (rating === 0) {
     return (

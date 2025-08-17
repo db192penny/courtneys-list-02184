@@ -77,7 +77,7 @@ export default function CostsHover({ vendorId, children }: Props) {
                       )}
                     </div>
                     <Badge variant="outline" className="text-xs px-2 py-0.5 bg-blue-50 text-blue-700 border-blue-200">
-                      by {cost.author_label}
+                      {cost.author_label}
                     </Badge>
                   </div>
                   <div className="text-[10px] text-muted-foreground">

@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CostEntry } from "./CostInputs";
-import { capitalizeStreetName } from "@/utils/address";
+import { extractStreetName, capitalizeStreetName } from "@/utils/address";
 
 type Props = {
   costs: CostEntry[];
@@ -47,9 +47,10 @@ export default function CostPreview({ costs, showNameInCosts, authorLabel }: Pro
                     )}
                   </div>
                   <Badge variant="outline" className="text-xs px-2 py-0.5 bg-blue-50 text-blue-700 border-blue-200">
-                    by {showNameInCosts ? authorLabel : (() => {
+                    {showNameInCosts ? authorLabel : (() => {
                       const streetMatch = authorLabel.match(/ on (.+)$/);
-                      return streetMatch ? `Neighbor on ${capitalizeStreetName(streetMatch[1])}` : "Neighbor";
+                      const cleanStreet = streetMatch ? extractStreetName(streetMatch[1]) : null;
+                      return cleanStreet ? `Neighbor on ${capitalizeStreetName(cleanStreet)}` : "Neighbor";
                     })()}
                   </Badge>
                 </div>
