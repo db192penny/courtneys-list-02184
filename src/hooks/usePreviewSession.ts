@@ -117,18 +117,8 @@ export const usePreviewSession = () => {
     if (!session) return "Neighbor";
     
     const formattedName = formatNameWithLastInitial(session.name);
-    
-    // Use street_name if available, otherwise extract from address
-    let streetName = session.street_name;
-    if (!streetName?.trim() && session.address) {
-      // Extract street name from full address using the same logic as the backend
-      const firstSegment = session.address.split(',')[0] || session.address;
-      streetName = firstSegment.replace(/^\s*\d+[\s-]*/, '').trim();
-      streetName = streetName.replace(/\b(apt|apartment|unit|#)\s*\w+$/i, '').trim();
-    }
-    
-    const streetDisplay = streetName?.trim() ? ` on ${capitalizeStreetName(streetName)}` : "";
-    return `${formattedName}${streetDisplay}`;
+    const streetName = session.street_name ? ` on ${capitalizeStreetName(session.street_name)}` : "";
+    return `${formattedName}${streetName}`;
   };
 
   return {
