@@ -1226,11 +1226,11 @@ export type Database = {
         Args: { _vendor_id: string }
         Returns: {
           author_label: string
-          comments: string
+          comment: string
           created_at: string
           id: string
           rating: number
-          recommended: boolean
+          user_id: string
         }[]
       }
       list_vendor_stats: {
