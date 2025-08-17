@@ -1,5 +1,7 @@
 import CostManagementModal from "./CostManagementModal";
 import PreviewCostManagementModal from "./PreviewCostManagementModal";
+import MobileCostManagementModal from "./MobileCostManagementModal";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 type Props = {
   open: boolean;
@@ -18,6 +20,8 @@ export default function CostManagementModalWrapper({
   isPreviewMode,
   communityName 
 }: Props) {
+  const isMobile = useIsMobile();
+  
   if (isPreviewMode) {
     return (
       <PreviewCostManagementModal
@@ -26,6 +30,17 @@ export default function CostManagementModalWrapper({
         vendor={vendor}
         onSuccess={onSuccess}
         communityName={communityName}
+      />
+    );
+  }
+
+  if (isMobile) {
+    return (
+      <MobileCostManagementModal
+        open={open}
+        onOpenChange={onOpenChange}
+        vendor={vendor}
+        onSuccess={onSuccess}
       />
     );
   }

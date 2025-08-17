@@ -1,5 +1,7 @@
 import RateVendorModal from "./RateVendorModal";
 import PreviewRateVendorModal from "./PreviewRateVendorModal";
+import MobileRateVendorModal from "./MobileRateVendorModal";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 type Props = {
   open: boolean;
@@ -18,6 +20,8 @@ export default function RateVendorModalWrapper({
   isPreviewMode,
   communityName 
 }: Props) {
+  const isMobile = useIsMobile();
+  
   if (isPreviewMode) {
     return (
       <PreviewRateVendorModal
@@ -26,6 +30,17 @@ export default function RateVendorModalWrapper({
         vendor={vendor}
         onSuccess={onSuccess}
         communityName={communityName}
+      />
+    );
+  }
+
+  if (isMobile) {
+    return (
+      <MobileRateVendorModal
+        open={open}
+        onOpenChange={onOpenChange}
+        vendor={vendor}
+        onSuccess={onSuccess}
       />
     );
   }
