@@ -63,7 +63,7 @@ export default function CommunityVendorTable({
   isAuthenticated?: boolean;
   isVerified?: boolean;
 }) {
-  const [category, setCategory] = useState<string>("pool");
+  const [category, setCategory] = useState<string>("Pool");
   const SORTS = getSorts(communityName);
   const [sortBy, setSortBy] = useState<typeof SORTS[number]["key"]>("homes");
   const isMobile = useIsMobile();
