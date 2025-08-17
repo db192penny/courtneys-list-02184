@@ -19,14 +19,10 @@ import useIsHoaAdmin from "@/hooks/useIsHoaAdmin";
 import { useUserData } from "@/hooks/useUserData";
 import ReviewPreview from "@/components/ReviewPreview";
 import VendorNameInput, { type VendorSelectedPayload } from "@/components/VendorNameInput";
-import { MobileBottomNav } from "@/components/MobileBottomNav";
-import { X } from "lucide-react";
-import { useIsMobile } from "@/hooks/use-mobile";
 const SubmitVendor = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const isMobile = useIsMobile();
 
   // form state
   const [category, setCategory] = useState<string>("");
@@ -435,17 +431,7 @@ const SubmitVendor = () => {
         canonical={canonical}
       />
       <section className="container py-10 max-w-2xl">
-        <header className="mb-6 relative">
-          {isMobile && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate(-1)}
-              className="absolute -top-2 -right-2 p-2"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          )}
+        <header className="mb-6">
           <h1 className="text-3xl font-bold tracking-tight">{vendorId ? "Edit Vendor" : "Submit a Vendor"}</h1>
           <p className="text-muted-foreground mt-2">
             {vendorId ? "Update provider details for your community." : "Share a provider you recommend. Your first submission unlocks full access after admin approval."}
@@ -532,7 +518,6 @@ const SubmitVendor = () => {
           </Button>
         </form>
       </section>
-      <MobileBottomNav />
     </main>
   );
 };
