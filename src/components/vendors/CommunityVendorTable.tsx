@@ -189,7 +189,7 @@ export default function CommunityVendorTable({
             <div className="text-sm text-muted-foreground text-center py-8">Unable to load providers.</div>
           )}
           {!isLoading && !error && formatted.length === 0 && (
-            <div className="text-sm text-muted-foreground text-center py-8">No vendors found.</div>
+            <div className="text-sm text-muted-foreground text-center py-8">What? No vendors? Please be the first to add one to this category and help out your neighbors :)</div>
           )}
           {formatted.map((vendor, idx) => (
             <VendorMobileCard
@@ -250,7 +250,7 @@ export default function CommunityVendorTable({
               )}
               {!isLoading && !error && formatted.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-sm text-muted-foreground">No vendors found.</TableCell>
+                  <TableCell colSpan={8} className="text-sm text-muted-foreground">What? No vendors? Please be the first to add one to this category and help out your neighbors :)</TableCell>
                 </TableRow>
               )}
               {formatted.map((r, idx) => (
