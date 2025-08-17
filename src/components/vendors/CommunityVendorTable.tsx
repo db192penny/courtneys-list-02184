@@ -182,6 +182,13 @@ export default function CommunityVendorTable({
 
       {isMobile ? (
         <div className="space-y-3">
+          {category !== "all" && (
+            <div className="text-center py-2">
+              <h3 className="text-lg font-semibold text-foreground">
+                {category} Providers
+              </h3>
+            </div>
+          )}
           {isLoading && (
             <div className="text-sm text-muted-foreground text-center py-8">Loading…</div>
           )}
