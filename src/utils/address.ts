@@ -10,21 +10,6 @@ export const extractStreetName = (fullAddress: string) => {
   return cleaned || firstSegment.trim();
 };
 
-export const cleanStreetNameDisplay = (streetName: string) => {
-  if (!streetName) return '';
-  
-  // Remove house numbers from beginning (handles: "123", "123A", "123-456", etc.)
-  let cleaned = streetName.replace(/^\s*\d+[A-Za-z]?[\s-]*/, '').trim();
-  
-  // Remove apartment/unit numbers from end
-  cleaned = cleaned.replace(/\s*(#|apt|apartment|unit)\s*\w+\s*$/i, '').trim();
-  
-  // Remove extra whitespace
-  cleaned = cleaned.replace(/\s+/g, ' ').trim();
-  
-  return cleaned || streetName.trim();
-};
-
 export const capitalizeStreetName = (streetName: string) => {
   if (!streetName || !streetName.trim()) return '';
   

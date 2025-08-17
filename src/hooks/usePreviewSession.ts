@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { capitalizeStreetName, cleanStreetNameDisplay, extractStreetName } from "@/utils/address";
+import { capitalizeStreetName } from "@/utils/address";
 import { formatNameWithLastInitial } from "@/utils/nameFormatting";
 
 export interface PreviewSession {
@@ -121,12 +121,13 @@ export const usePreviewSession = () => {
     // Use street_name if available, otherwise extract from address
     let streetName = session.street_name;
     if (!streetName?.trim() && session.address) {
-      streetName = extractStreetName(session.address);
+      // Extract street name from full address using the same logic as the backend
+      const firstSegment = session.address.split(',')[0] || session.address;
+      streetName = firstSegment.replace(/^\s*\d+[\s-]*/, '').trim();
+      streetName = streetName.replace(/\b(apt|apartment|unit|#)\s*\w+$/i, '').trim();
     }
     
-    // Clean the street name for display (remove house numbers, etc.)
-    const cleanedStreetName = cleanStreetNameDisplay(streetName || '');
-    const streetDisplay = cleanedStreetName?.trim() ? ` on ${capitalizeStreetName(cleanedStreetName)}` : "";
+    const streetDisplay = streetName?.trim() ? ` on ${capitalizeStreetName(streetName)}` : "";
     return `${formattedName}${streetDisplay}`;
   };
 
