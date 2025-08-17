@@ -10,3 +10,12 @@ verify_jwt = true
 
 [functions.send-auth-email]
 verify_jwt = false
+
+[functions.test-google-api]
+verify_jwt = false
+
+[functions.fetch-google-place-details]
+verify_jwt = false
+
+[functions.backfill-google-ratings]
+verify_jwt = false
