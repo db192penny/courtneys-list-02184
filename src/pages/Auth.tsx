@@ -208,16 +208,16 @@ const Auth = () => {
       console.log("[Auth] 🔍 Starting community detection for user:", userId);
       
       try {
-        // PRIORITY 0: Check URL params for community context first (magic link users)
-        if (communityName && isVerifiedMagicLink) {
-          destination = `/communities/${toSlug(communityName)}?welcome=true`;
-          console.log("[Auth] ✅ Verified magic link user with community, redirecting to:", destination);
-          // Skip database detection for verified magic link users
-          setTimeout(() => navigate(destination, { replace: true }), 100);
-          return;
-        } else if (communityName) {
+        // PRIORITY 0: Check URL params for community context first
+        if (communityName) {
           destination = `/communities/${toSlug(communityName)}?welcome=true`;
           console.log("[Auth] ✅ Community detected from URL params, redirecting to:", destination);
+          // For verified magic link users, skip database detection and redirect immediately
+          if (isVerifiedMagicLink) {
+            console.log("[Auth] ✅ Verified magic link user, redirecting immediately");
+            setTimeout(() => navigate(destination, { replace: true }), 100);
+            return;
+          }
         } else {
           // PRIORITY 1: Check signup_source for community affiliation
           const { data: userData, error: userErr } = await supabase
