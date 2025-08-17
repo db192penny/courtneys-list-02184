@@ -8,6 +8,7 @@ import CostInputs, { CostEntry, buildDefaultCosts } from "./CostInputs";
 import CostPreview from "./CostPreview";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
+import { extractStreetName, capitalizeStreetName } from "@/utils/address";
 
 type Props = {
   open: boolean;
@@ -60,7 +61,8 @@ export default function CostManagementModal({ open, onOpenChange, vendor, onSucc
                 ? `${userProfile.name.split(' ')[0]} ${userProfile.name.split(' ').slice(-1)[0][0]}.`
                 : userProfile.name.trim())
             : "Neighbor";
-          const streetSuffix = userProfile.street_name ? ` on ${userProfile.street_name}` : "";
+          const cleanStreet = userProfile.street_name ? extractStreetName(userProfile.street_name) : "";
+          const streetSuffix = cleanStreet ? ` on ${capitalizeStreetName(cleanStreet)}` : "";
           setAuthorLabel(displayName + streetSuffix);
         }
 

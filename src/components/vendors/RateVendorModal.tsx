@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useUserData } from "@/hooks/useUserData";
 import ReviewPreview from "@/components/ReviewPreview";
 import { useQueryClient } from "@tanstack/react-query";
+import { extractStreetName } from "@/utils/address";
 
 type Props = {
   open: boolean;
@@ -213,7 +214,7 @@ export default function RateVendorModal({ open, onOpenChange, vendor, onSuccess,
                 rating={rating}
                 showName={showNameInReview}
                 userName={userData?.name}
-                streetName={userData?.streetName}
+                streetName={userData?.streetName ? extractStreetName(userData.streetName) : undefined}
               />
             </div>
             <div className="pt-2 flex justify-end gap-2">
