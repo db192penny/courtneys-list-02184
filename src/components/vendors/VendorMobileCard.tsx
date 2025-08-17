@@ -194,6 +194,7 @@ export default function VendorMobileCard({
             marketAmount={vendor.market_amount}
             marketUnit={vendor.market_unit}
             showContact={showContact}
+            communityName={communityName}
           />
           <div className="text-sm">
             <span className="text-muted-foreground">Contact: </span>
