@@ -136,16 +136,6 @@ export default function CommunityVendorTable({
                   ))}
                 </SelectContent>
               </Select>
-              {category !== "all" && (
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={() => setCategory("all")}
-                  className="absolute -top-6 right-0 h-5 px-2 text-xs text-muted-foreground hover:text-foreground"
-                >
-                  Clear filter
-                </Button>
-              )}
             </div>
           </div>
           <div className="space-y-2">
