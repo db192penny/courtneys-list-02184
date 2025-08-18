@@ -44,7 +44,7 @@ const SignIn = () => {
       }
 
       if (statusResult === "approved") {
-        const redirectUrl = `${window.location.origin}/`;
+        const redirectUrl = `${window.location.origin}/auth`;
         const { error: signInError } = await supabase.auth.signInWithOtp({
           email: targetEmail,
           options: { emailRedirectTo: redirectUrl },
