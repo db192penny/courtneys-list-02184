@@ -58,9 +58,37 @@ export default function ActivityGuide() {
         ? crypto.randomUUID() 
         : Math.random().toString(36).slice(2) + Date.now().toString(36);
       
+      // Get user's community information
+      const { data: userProfile } = await supabase
+        .from('users')
+        .select('address')
+        .eq('id', userId)
+        .single();
+      
+      let communitySlug = null;
+      let communityName = null;
+      
+      if (userProfile?.address) {
+        const { data: hoaData } = await supabase
+          .from('household_hoa')
+          .select('hoa_name')
+          .eq('normalized_address', userProfile.address)
+          .single();
+        
+        if (hoaData?.hoa_name) {
+          communityName = hoaData.hoa_name;
+          communitySlug = hoaData.hoa_name.toLowerCase().replace(/\s+/g, '-');
+        }
+      }
+      
       const { error } = await supabase
         .from("invitations")
-        .insert({ invite_token: token, invited_by: userId });
+        .insert({ 
+          invite_token: token, 
+          invited_by: userId,
+          community_slug: communitySlug,
+          community_name: communityName 
+        });
       
       if (error) throw error;
       

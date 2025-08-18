@@ -466,6 +466,8 @@ export type Database = {
       invitations: {
         Row: {
           accepted_at: string | null
+          community_name: string | null
+          community_slug: string | null
           created_at: string | null
           id: string
           invite_token: string
@@ -475,6 +477,8 @@ export type Database = {
         }
         Insert: {
           accepted_at?: string | null
+          community_name?: string | null
+          community_slug?: string | null
           created_at?: string | null
           id?: string
           invite_token: string
@@ -484,6 +488,8 @@ export type Database = {
         }
         Update: {
           accepted_at?: string | null
+          community_name?: string | null
+          community_slug?: string | null
           created_at?: string | null
           id?: string
           invite_token?: string
@@ -1303,6 +1309,8 @@ export type Database = {
         Args: { _token: string }
         Returns: {
           accepted: boolean
+          community_name: string
+          community_slug: string
           created_at: string
           invite_id: string
           invited_email: string

@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -12,12 +12,15 @@ type InviteInfo = {
   status: string | null;
   accepted: boolean | null;
   created_at: string | null;
+  community_slug: string | null;
+  community_name: string | null;
 };
 
 const Invite = () => {
   const { token } = useParams<{ token: string }>();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [inviteInfo, setInviteInfo] = useState<InviteInfo | null>(null);
 
   const maskedEmail = (email?: string | null) => {
     if (!email) return "your email";
@@ -52,6 +55,9 @@ const Invite = () => {
         });
         return;
       }
+      
+      setInviteInfo(info);
+      
       if (info.accepted) {
         toast({
           title: "Invite already used",
@@ -71,7 +77,11 @@ const Invite = () => {
 
   const handleContinue = () => {
     // Prefer passing token via query, also keep localStorage fallback
-    navigate(`/auth?invite=${encodeURIComponent(tokenSafe)}`);
+    let authUrl = `/auth?invite=${encodeURIComponent(tokenSafe)}`;
+    if (inviteInfo?.community_slug) {
+      authUrl += `&community=${encodeURIComponent(inviteInfo.community_slug)}`;
+    }
+    navigate(authUrl);
   };
 
   return (
@@ -80,7 +90,12 @@ const Invite = () => {
         <Card>
           <CardHeader>
             <CardTitle>Invitation</CardTitle>
-            <CardDescription>Join Courtney's List — private community recommendations.</CardDescription>
+            <CardDescription>
+              {inviteInfo?.community_name 
+                ? `Join Courtney's List — ${inviteInfo.community_name} Private Community Recommendations for Service Providers.`
+                : "Join Courtney's List — private community recommendations."
+              }
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center gap-2">
