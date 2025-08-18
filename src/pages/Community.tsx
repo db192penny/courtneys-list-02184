@@ -112,16 +112,6 @@ export default function Community() {
                   </div>
                 )}
               </div>
-              {/* Submit Provider Button - inline on mobile */}
-              <Button
-                onClick={() => navigate(`/submit?community=${encodeURIComponent(communityName)}`)}
-                variant="outline"
-                size="sm"
-                className="shrink-0 sm:hidden"
-              >
-                <Plus className="h-4 w-4 mr-1" />
-                Submit Provider
-              </Button>
             </div>
             
             {/* Submit Provider Button - separate on desktop */}

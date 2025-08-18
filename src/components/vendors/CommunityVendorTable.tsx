@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { RatingStars } from "@/components/ui/rating-stars";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Star, Filter, ChevronUp, ChevronDown, ArrowUpDown } from "lucide-react";
+import { Star, Filter, ChevronUp, ChevronDown, ArrowUpDown, Plus } from "lucide-react";
 import { CATEGORIES } from "@/data/categories";
 import { useUserHomeVendors } from "@/hooks/useUserHomeVendors";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -182,10 +182,17 @@ export default function CommunityVendorTable({
       {isMobile ? (
         <div className="space-y-3">
           {category !== "all" && (
-            <div className="text-center py-2">
+            <div className="flex items-center justify-between py-2">
               <h3 className="text-lg font-semibold text-foreground">
                 {category} Providers
               </h3>
+              <button
+                onClick={() => window.location.href = `/submit?community=${communityName}&category=${category}`}
+                className="text-sm text-primary hover:text-primary/80 underline-offset-4 hover:underline flex items-center gap-1"
+              >
+                <Plus className="h-3 w-3" />
+                New Provider
+              </button>
             </div>
           )}
           {isLoading && (
