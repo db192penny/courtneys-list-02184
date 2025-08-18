@@ -42,8 +42,8 @@ const Header = () => {
 
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <nav className="container flex h-14 items-center justify-between">
-        <Link to="/" className="font-semibold text-lg">Courtney's List</Link>
+      <nav className="container flex h-12 sm:h-14 items-center justify-between">
+        <Link to="/" className="font-semibold text-base sm:text-lg">Courtney's List</Link>
         
         {isMobile ? (
           <div className="flex items-center gap-2">
@@ -82,7 +82,7 @@ const Header = () => {
                 </SheetContent>
               </Sheet>
             ) : (
-              <Button asChild size="sm">
+              <Button asChild size="sm" className="text-sm">
                 <Link to={signInLink}>Sign in</Link>
               </Button>
             )}

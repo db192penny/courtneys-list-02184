@@ -84,23 +84,23 @@ export default function Community() {
         canonical={canonical}
       />
 
-      <section className="container py-10 space-y-6">
+      <section className="container py-2 sm:py-10 space-y-2 sm:space-y-6">
         {/* Welcome toolbar for new users */}
         {profile?.isAuthenticated && <WelcomeToolbar communitySlug={slug} />}
         
         <header className="space-y-0">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+          <div className="flex flex-col gap-2 sm:gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex gap-2 sm:gap-4 items-center sm:flex-row">
               <img
                 src={photoUrl}
                 alt={`${communityName} HOA entrance sign and community graphic`}
-                className="h-16 w-16 rounded-md object-cover border"
+                className="h-10 w-10 sm:h-16 sm:w-16 rounded-md object-cover border"
                 loading="lazy"
               />
               <div className="flex-1">
-                <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight">{communityName}</h1>
-                <p className="text-sm text-muted-foreground">Your Trusted Neighborhood — {homesLabel} Homes</p>
-                <p className="text-sm text-muted-foreground">{addressLine}</p>
+                <h1 className="text-lg sm:text-2xl md:text-3xl font-semibold tracking-tight">{communityName}</h1>
+                <p className="text-sm text-muted-foreground truncate sm:whitespace-normal">Your Trusted Neighborhood — {homesLabel} Homes</p>
+                <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">{addressLine}</p>
                 {e164Phone && (
                   <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
                     <Button variant="outline" asChild size="sm">
@@ -112,14 +112,23 @@ export default function Community() {
                   </div>
                 )}
               </div>
+              {/* Submit Provider Button - inline on mobile */}
+              <Button
+                onClick={() => navigate(`/submit?community=${encodeURIComponent(communityName)}`)}
+                variant="outline"
+                size="sm"
+                className="shrink-0 sm:hidden"
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
             </div>
             
-            {/* Submit Provider Button */}
+            {/* Submit Provider Button - separate on desktop */}
             <Button
               onClick={() => navigate(`/submit?community=${encodeURIComponent(communityName)}`)}
               variant="outline"
               size="sm"
-              className="shrink-0"
+              className="shrink-0 hidden sm:flex"
             >
               <Plus className="h-4 w-4 mr-2" />
               Submit Provider
@@ -129,7 +138,7 @@ export default function Community() {
 
 
         {showSignUpPrompt && (
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-2 sm:gap-3">
             <Button 
               onClick={() => {
                 const url = `/auth?community=${encodeURIComponent(communityName)}`;
@@ -137,27 +146,49 @@ export default function Community() {
               }}
               size="sm"
               variant="outline"
-              className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700 w-auto"
+              className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700 w-auto py-2 text-sm"
             >
-              Sign Up As A Verified Neighbor
+              Request Access
             </Button>
             <p className="text-sm text-muted-foreground">
-              Join your community to rate vendors, share costs, and access detailed reviews. We keep this space for verified neighbors only, so everyone can share openly and safely.
+              Rate vendors, share costs, and read detailed neighbor reviews—verified neighbors only.
             </p>
           </div>
         )}
+
+        {/* Sticky Filters Bar */}
+        <div className="sticky top-[48px] sm:top-[56px] z-20 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/70 border-b py-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:border-0 sm:bg-transparent sm:static">
+          <div className="flex items-center gap-2">
+            <div className="flex-1">
+              <label htmlFor="category-filter" className="sr-only">Filter by Category</label>
+              <select
+                id="category-filter"
+                className="h-9 text-sm w-full rounded-md border border-input bg-background px-3 py-1 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                defaultValue="all"
+              >
+                <option value="all">All Categories</option>
+                <option value="landscaping">Landscaping</option>
+                <option value="home-services">Home Services</option>
+                <option value="contractors">Contractors</option>
+                <option value="utilities">Utilities</option>
+              </select>
+            </div>
+          </div>
+        </div>
 
         {isLoading && <div className="text-sm text-muted-foreground">Loading providers…</div>}
         {error && <div className="text-sm text-muted-foreground">Unable to load providers.</div>}
 
         {/* Show demo data only when no real data exists */}
         {!!data && data.length === 0 && !isLoading && (
-          <CommunityDemoTable communityName={communityName} />
+          <div className="mt-2 sm:mt-6">
+            <CommunityDemoTable communityName={communityName} />
+          </div>
         )}
 
         {/* Show real data when it exists */}
         {!!data && data.length > 0 && (
-          <div className="space-y-3">
+          <div className="mt-2 sm:mt-6 space-y-2 sm:space-y-3">
             <CommunityVendorTable 
               communityName={communityName} 
               showContact={true} 
