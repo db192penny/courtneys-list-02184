@@ -177,7 +177,7 @@ const App = () => (
           <AuthWatcher />
           <ConditionalHeader />
           <Routes>
-          <Route path="/" element={<Index />} />
+          <Route path="/" element={<Navigate to="/signin" replace />} />
           <Route path="/signin" element={<SignIn />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/auth/signup" element={<Auth />} /> {/* Alias to Auth */}

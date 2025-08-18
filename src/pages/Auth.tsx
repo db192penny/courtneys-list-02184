@@ -80,7 +80,7 @@ const Auth = () => {
     
     let retryCount = 0;
     const maxRetries = 3;
-    let destination = "/profile?onboarding=1";
+    let destination = "/communities/boca-bridges?welcome=true";
     
     // Enhanced error tracking
     const errorTracker = {
@@ -294,7 +294,7 @@ const Auth = () => {
       console.log("[Auth] 🎯 Navigating to final destination:", cleanDestination);
       
       // Show success modal for successful onboarding
-      if (destination !== "/profile?onboarding=1") {
+      if (destination !== "/communities/boca-bridges?welcome=true") {
         // Extract community name from destination for personalized message
         const communityMatch = destination.match(/\/communities\/(.+)/);
         const communityForDisplay = communityMatch 
@@ -325,7 +325,7 @@ const Auth = () => {
       });
       
       // Always ensure the user can access the app, even with partial failures
-      navigate("/profile?onboarding=1&error=signup_incomplete", { replace: true });
+      navigate("/communities/boca-bridges?welcome=true&error=signup_incomplete", { replace: true });
     }
   }, [inviteToken, navigate, toast, communityName]);
 

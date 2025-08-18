@@ -92,7 +92,7 @@ const Invite = () => {
             </p>
             <div className="flex gap-3">
               <Button onClick={handleContinue}>Continue to Sign Up</Button>
-              <Button variant="secondary" onClick={() => navigate("/")}>Go Home</Button>
+              <Button variant="secondary" onClick={() => navigate("/signin")}>Sign In</Button>
             </div>
             <p className="text-xs text-muted-foreground">
               Having trouble? You can request a new invite from the admin.

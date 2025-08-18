@@ -89,9 +89,9 @@ const CommunityPreview = () => {
         <div className="text-center space-y-4">
           <h1 className="text-2xl font-semibold">Invalid Preview Link</h1>
           <p className="text-muted-foreground">The preview link you accessed is not valid.</p>
-          <Button onClick={() => navigate("/")} variant="outline">
+          <Button onClick={() => navigate("/signin")} variant="outline">
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Main Site
+            Sign In
           </Button>
         </div>
       </div>

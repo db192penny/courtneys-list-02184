@@ -21,7 +21,7 @@ const Header = () => {
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
-    navigate("/");
+    navigate("/signin");
   };
 
   useEffect(() => {
@@ -43,7 +43,7 @@ const Header = () => {
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <nav className="container flex h-12 sm:h-14 items-center justify-between">
-        <Link to="/" className="font-semibold text-base sm:text-lg">Courtney's List</Link>
+        <span className="font-semibold text-base sm:text-lg cursor-default">Courtney's List</span>
         
         {isMobile ? (
           <div className="flex items-center gap-2">
