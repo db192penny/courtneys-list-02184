@@ -216,9 +216,35 @@ const Auth = () => {
             throw upsertError;
           }
           
-          console.log("[Auth] ✅ User data upserted successfully");
-          
-          // Auto-create household_hoa mapping for community signups
+           console.log("[Auth] ✅ User data upserted successfully");
+           
+           // Send admin notification about new signup
+           try {
+             const notificationData = {
+               userEmail: payload.email,
+               userName: payload.name,
+               userAddress: payload.address,
+               community: payload.signup_source?.startsWith('community:') 
+                 ? payload.signup_source.replace('community:', '').split('-').map(word => 
+                     word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
+                 : 'Direct Signup',
+               signupSource: payload.signup_source
+             };
+
+             const { error: notificationError } = await supabase.functions.invoke('send-admin-notification', {
+               body: notificationData
+             });
+
+             if (notificationError) {
+               console.warn("[Auth] ⚠️ Admin notification failed (non-fatal):", notificationError);
+             } else {
+               console.log("[Auth] ✅ Admin notification sent successfully");
+             }
+           } catch (notificationError) {
+             console.warn("[Auth] ⚠️ Admin notification error (non-fatal):", notificationError);
+           }
+           
+           // Auto-create household_hoa mapping for community signups
           if (payload.signup_source && payload.signup_source.startsWith('community:') && payload.address && payload.address !== 'Address Not Provided') {
             try {
               console.log("[Auth] 🏠 Creating household_hoa mapping for community signup");
