@@ -86,7 +86,7 @@ export default function Community() {
 
       <section className="container py-2 sm:py-10 space-y-2 sm:space-y-6">
         {/* Welcome toolbar for new users */}
-        {profile?.isAuthenticated && <WelcomeToolbar communitySlug={slug} />}
+        <WelcomeToolbar communitySlug={slug} />
         
         <header className="space-y-0">
           <div className="flex flex-col gap-2 sm:gap-4 sm:flex-row sm:items-center sm:justify-between">

@@ -68,10 +68,10 @@ export function WelcomeToolbar({ communitySlug }: WelcomeToolbarProps) {
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
       
-      // Auto-hide after 10 seconds (twice as long)
+      // Auto-hide after 15 seconds
       autoHideTimeoutRef.current = setTimeout(() => {
         handleDismiss(false); // Auto dismiss
-      }, 10000);
+      }, 15000);
     }
 
     // ESC key handler
