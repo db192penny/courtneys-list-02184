@@ -3,6 +3,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { PartyPopper, X } from "lucide-react";
 import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface WelcomeToolbarProps {
   communitySlug: string;
@@ -17,6 +18,7 @@ export function WelcomeToolbar({ communitySlug }: WelcomeToolbarProps) {
   const welcome = searchParams.get("welcome");
   const autoHideTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const cleanupTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isMobile = useIsMobile();
 
   const cleanupURL = () => {
     const newSearchParams = new URLSearchParams(searchParams);
@@ -61,10 +63,15 @@ export function WelcomeToolbar({ communitySlug }: WelcomeToolbarProps) {
     if (welcome === "true" && dismissed !== "1") {
       setIsVisible(true);
       
-      // Auto-hide after 5 seconds
+      // Scroll to top on mobile to ensure welcome message is visible
+      if (isMobile) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+      
+      // Auto-hide after 10 seconds (twice as long)
       autoHideTimeoutRef.current = setTimeout(() => {
         handleDismiss(false); // Auto dismiss
-      }, 5000);
+      }, 10000);
     }
 
     // ESC key handler
