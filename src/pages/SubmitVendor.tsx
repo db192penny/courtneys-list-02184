@@ -432,22 +432,7 @@ const SubmitVendor = () => {
       />
       <section className="container py-10 max-w-2xl">
         <header className="mb-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight">{vendorId ? "Edit Vendor" : "Submit a Vendor"}</h1>
-              <p className="text-muted-foreground mt-2">
-                {vendorId ? "Update provider details for your community." : "Share a provider you recommend. Your first submission unlocks full access after admin approval."}
-              </p>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => navigate(-1)}
-              className="shrink-0"
-            >
-              Cancel
-            </Button>
-          </div>
+          <h1 className="text-3xl font-bold tracking-tight">{vendorId ? "Edit Vendor" : "Submit a Vendor"}</h1>
         </header>
 
         <form onSubmit={onSubmit} className="space-y-6">
@@ -525,9 +510,19 @@ const SubmitVendor = () => {
             </div>
           </div>
 
-          <Button type="submit" className="w-full" disabled={submitting}>
-            {submitting ? (vendorId ? "Saving..." : "Submitting...") : (vendorId ? "Save changes" : "Submit")}
-          </Button>
+          <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => navigate(-1)}
+              className="sm:w-auto"
+            >
+              Cancel
+            </Button>
+            <Button type="submit" className="sm:w-auto" disabled={submitting}>
+              {submitting ? (vendorId ? "Saving..." : "Submitting...") : (vendorId ? "Save changes" : "Submit")}
+            </Button>
+          </div>
         </form>
       </section>
     </main>
