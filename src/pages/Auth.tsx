@@ -13,7 +13,7 @@ import AddressInput, { AddressSelectedPayload } from "@/components/AddressInput"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Info, Crown, PartyPopper } from "lucide-react";
+import { Info, Crown, PartyPopper, ArrowLeft } from "lucide-react";
 
 const Auth = () => {
   const [name, setName] = useState("");
@@ -40,6 +40,19 @@ const Auth = () => {
   const isVerifiedMagicLink = useMemo(() => {
     return params.get("verified") === "true";
   }, [params]);
+
+  const handleBack = () => {
+    // Try to go back in history first
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      // Fallback to community page or home
+      const fallbackUrl = communityName 
+        ? `/communities/${toSlug(communityName)}`
+        : "/communities/boca-bridges";
+      navigate(fallbackUrl);
+    }
+  };
 
   useEffect(() => {
     // Only pre-fill email if there's a valid invite token context
@@ -449,7 +462,18 @@ const Auth = () => {
         <h1 className="text-3xl font-semibold mb-6">{communityName ? `Join ${communityName.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}` : "Join Courtney's List"}</h1>
         <Card>
           <CardHeader className="space-y-4">
-            <CardTitle>Request Access</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle>Request Access</CardTitle>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleBack}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <ArrowLeft className="h-4 w-4 mr-1" />
+                Back
+              </Button>
+            </div>
             
             {/* Highlighted Invite-Only Test Family Message */}
             <div className="flex items-start gap-3 p-4 bg-yellow-50 dark:bg-yellow-950/20 rounded-lg border border-yellow-200 dark:border-yellow-800">

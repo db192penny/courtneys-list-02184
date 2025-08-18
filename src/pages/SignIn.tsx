@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,10 +8,12 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import SEO from "@/components/SEO";
 import { toast } from "@/hooks/use-toast";
-import { Mail, AlertTriangle } from "lucide-react";
+import { toSlug } from "@/utils/slug";
+import { Mail, AlertTriangle, ArrowLeft } from "lucide-react";
 
 const SignIn = () => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<"idle" | "approved" | "pending" | "not_found" | "error">("idle");
@@ -20,6 +22,19 @@ const SignIn = () => {
 
   const community = searchParams.get("community");
   const communityName = community ? community.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : null;
+
+  const handleBack = () => {
+    // Try to go back in history first
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      // Fallback to community page or home
+      const fallbackUrl = community 
+        ? `/communities/${toSlug(community)}`
+        : "/communities/boca-bridges";
+      navigate(fallbackUrl);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -84,8 +99,21 @@ const SignIn = () => {
       <section className="container max-w-lg py-12">
         <Card>
           <CardHeader>
-            <CardTitle>Sign In to {communityName || "Courtney's List"}</CardTitle>
-            <CardDescription>Enter your email to receive a magic link.</CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>Sign In to {communityName || "Courtney's List"}</CardTitle>
+                <CardDescription>Enter your email to receive a magic link.</CardDescription>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleBack}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <ArrowLeft className="h-4 w-4 mr-1" />
+                Back
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
