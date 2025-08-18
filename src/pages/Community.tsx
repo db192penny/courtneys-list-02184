@@ -156,25 +156,6 @@ export default function Community() {
           </div>
         )}
 
-        {/* Sticky Filters Bar */}
-        <div className="sticky top-[48px] sm:top-[56px] z-20 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/70 border-b py-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:border-0 sm:bg-transparent sm:static">
-          <div className="flex items-center gap-2">
-            <div className="flex-1">
-              <label htmlFor="category-filter" className="sr-only">Filter by Category</label>
-              <select
-                id="category-filter"
-                className="h-9 text-sm w-full rounded-md border border-input bg-background px-3 py-1 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-                defaultValue="all"
-              >
-                <option value="all">All Categories</option>
-                <option value="landscaping">Landscaping</option>
-                <option value="home-services">Home Services</option>
-                <option value="contractors">Contractors</option>
-                <option value="utilities">Utilities</option>
-              </select>
-            </div>
-          </div>
-        </div>
 
         {isLoading && <div className="text-sm text-muted-foreground">Loading providers…</div>}
         {error && <div className="text-sm text-muted-foreground">Unable to load providers.</div>}
