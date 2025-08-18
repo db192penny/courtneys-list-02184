@@ -141,26 +141,51 @@ const Auth = () => {
         errorTracker.pending_profile_missing = true;
       }
 
-      // STEP 2: Fallback data collection from sessionStorage and URL params
+      // STEP 2: Check existing user data to avoid overwriting valid profiles
       if (!pending) {
-        console.log("[Auth] 🔧 Attempting fallback data collection...");
-        const fallbackName = sessionStorage.getItem("signup_name") || "Unknown User";
-        const fallbackEmail = userEmail || sessionStorage.getItem("signup_email") || "unknown@example.com";
-        const fallbackAddress = sessionStorage.getItem("signup_address") || "Address Not Provided";
+        console.log("[Auth] 🔍 No pending data, checking existing user profile...");
         
-        pending = {
-          name: fallbackName,
-          email: fallbackEmail,
-          address: fallbackAddress,
-          street_name: extractStreetName(fallbackAddress),
-          signup_source: "fallback_recovery"
-        };
+        // Check if user already has valid profile data
+        const { data: existingUser, error: existingUserError } = await supabase
+          .from("users")
+          .select("name, address, signup_source")
+          .eq("id", userId)
+          .maybeSingle();
         
-        console.log("[Auth] 🔧 Using fallback data:", { 
-          name: pending.name, 
-          email: pending.email, 
-          hasAddress: !!pending.address 
-        });
+        if (existingUserError) {
+          console.warn("[Auth] ⚠️ Error checking existing user:", existingUserError);
+        }
+        
+        // Only use fallback recovery for truly orphaned users (with placeholder data)
+        const isOrphanedUser = existingUser && 
+          existingUser.signup_source === "fallback_recovery" &&
+          existingUser.name === "Unknown User" &&
+          existingUser.address === "Address Not Provided";
+        
+        if (!existingUser || isOrphanedUser) {
+          console.log("[Auth] 🔧 Using fallback data for genuinely orphaned user...");
+          const fallbackName = sessionStorage.getItem("signup_name") || "Unknown User";
+          const fallbackEmail = userEmail || sessionStorage.getItem("signup_email") || "unknown@example.com";
+          const fallbackAddress = sessionStorage.getItem("signup_address") || "Address Not Provided";
+          
+          pending = {
+            name: fallbackName,
+            email: fallbackEmail,
+            address: fallbackAddress,
+            street_name: extractStreetName(fallbackAddress),
+            signup_source: "fallback_recovery"
+          };
+          
+          console.log("[Auth] 🔧 Using fallback data:", { 
+            name: pending.name, 
+            email: pending.email, 
+            hasAddress: !!pending.address 
+          });
+        } else {
+          console.log("[Auth] ✅ User has valid profile data, skipping fallback recovery");
+          // User has valid data, skip the upsert and proceed to community detection
+          pending = null;
+        }
       }
 
       // STEP 3: Upsert user data with retry logic
