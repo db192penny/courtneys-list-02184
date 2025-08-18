@@ -180,7 +180,7 @@ export default function MobileRateVendorModal({ open, onOpenChange, vendor, onSu
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="max-h-[85vh]">
+      <DrawerContent className="max-h-[80vh] h-auto">
         <DrawerHeader className="text-left pb-4">
           <DrawerTitle>Rate Vendor — {vendor?.name}</DrawerTitle>
         </DrawerHeader>
