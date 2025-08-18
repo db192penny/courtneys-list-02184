@@ -89,28 +89,41 @@ export default function Community() {
         {profile?.isAuthenticated && <WelcomeToolbar communitySlug={slug} />}
         
         <header className="space-y-0">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-            <img
-              src={photoUrl}
-              alt={`${communityName} HOA entrance sign and community graphic`}
-              className="h-16 w-16 rounded-md object-cover border"
-              loading="lazy"
-            />
-            <div className="flex-1">
-              <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight">{communityName}</h1>
-              <p className="text-sm text-muted-foreground">Your Trusted Neighborhood — {homesLabel} Homes</p>
-              <p className="text-sm text-muted-foreground">{addressLine}</p>
-              {e164Phone && (
-                <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-                  <Button variant="outline" asChild size="sm">
-                    <a href={`tel:${e164Phone}`} aria-label="Call HOA contact">Call HOA</a>
-                  </Button>
-                  <Button variant="secondary" asChild size="sm">
-                    <a href={`sms:${e164Phone}`} aria-label="Text HOA contact">Text HOA</a>
-                  </Button>
-                </div>
-              )}
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+              <img
+                src={photoUrl}
+                alt={`${communityName} HOA entrance sign and community graphic`}
+                className="h-16 w-16 rounded-md object-cover border"
+                loading="lazy"
+              />
+              <div className="flex-1">
+                <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight">{communityName}</h1>
+                <p className="text-sm text-muted-foreground">Your Trusted Neighborhood — {homesLabel} Homes</p>
+                <p className="text-sm text-muted-foreground">{addressLine}</p>
+                {e164Phone && (
+                  <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+                    <Button variant="outline" asChild size="sm">
+                      <a href={`tel:${e164Phone}`} aria-label="Call HOA contact">Call HOA</a>
+                    </Button>
+                    <Button variant="secondary" asChild size="sm">
+                      <a href={`sms:${e164Phone}`} aria-label="Text HOA contact">Text HOA</a>
+                    </Button>
+                  </div>
+                )}
+              </div>
             </div>
+            
+            {/* Submit Provider Button */}
+            <Button
+              onClick={() => navigate(`/submit?community=${encodeURIComponent(communityName)}`)}
+              variant="outline"
+              size="sm"
+              className="shrink-0"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Submit Provider
+            </Button>
           </div>
         </header>
 
@@ -156,15 +169,6 @@ export default function Community() {
 
       </section>
 
-      {/* Floating Action Button */}
-      <Button
-        onClick={() => navigate(`/submit?community=${encodeURIComponent(communityName)}`)}
-        className="fixed bottom-20 right-4 h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-shadow z-50 md:bottom-6"
-        size="icon"
-        aria-label="Add a Service Provider"
-      >
-        <Plus className="h-6 w-6" />
-      </Button>
     </main>
   );
 }

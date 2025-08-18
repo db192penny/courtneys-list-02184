@@ -432,10 +432,22 @@ const SubmitVendor = () => {
       />
       <section className="container py-10 max-w-2xl">
         <header className="mb-6">
-          <h1 className="text-3xl font-bold tracking-tight">{vendorId ? "Edit Vendor" : "Submit a Vendor"}</h1>
-          <p className="text-muted-foreground mt-2">
-            {vendorId ? "Update provider details for your community." : "Share a provider you recommend. Your first submission unlocks full access after admin approval."}
-          </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">{vendorId ? "Edit Vendor" : "Submit a Vendor"}</h1>
+              <p className="text-muted-foreground mt-2">
+                {vendorId ? "Update provider details for your community." : "Share a provider you recommend. Your first submission unlocks full access after admin approval."}
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate(-1)}
+              className="shrink-0"
+            >
+              Cancel
+            </Button>
+          </div>
         </header>
 
         <form onSubmit={onSubmit} className="space-y-6">
