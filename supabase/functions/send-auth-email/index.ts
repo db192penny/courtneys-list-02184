@@ -1,5 +1,16 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.54.0";
 
+// Helper function to format community names for display
+function formatCommunityName(name: string): string {
+  if (!name) return '';
+  
+  return name
+    .replace(/-/g, ' ')  // Replace hyphens with spaces
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+}
+
 // Auth email function with basic webhook verification and community detection
 Deno.serve(async (req) => {
   console.log('🚀 Auth email webhook triggered')
@@ -177,7 +188,7 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         from: "Courtney's List <courtney@courtneys-list.com>",
         to: [webhookData.user.email],
-        subject: `${communityName || 'Your Neighborhood'} Access is Ready - Unlock it Now`,
+        subject: `${formatCommunityName(communityName) || 'Your Neighborhood'} Access is Ready - Unlock it Now`,
         html: html,
       }),
     })
