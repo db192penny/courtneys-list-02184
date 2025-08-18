@@ -119,7 +119,8 @@ export default function Community() {
                 size="sm"
                 className="shrink-0 sm:hidden"
               >
-                <Plus className="h-4 w-4" />
+                <Plus className="h-4 w-4 mr-1" />
+                Submit Provider
               </Button>
             </div>
             

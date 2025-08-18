@@ -120,9 +120,18 @@ export default function CommunityVendorTable({
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:gap-6">
           <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground flex items-center gap-2">
-              <Filter className="h-4 w-4" />
-              Filter by Category
+            <label className="text-sm font-medium text-foreground flex items-center gap-2 justify-between">
+              <span className="flex items-center gap-2">
+                <Filter className="h-4 w-4" />
+                Filter by Category
+              </span>
+              <button
+                onClick={() => refetch()}
+                disabled={isFetching}
+                className="text-sm text-primary hover:text-primary/80 underline-offset-4 hover:underline sm:hidden"
+              >
+                {isFetching ? "Loading..." : "Refresh"}
+              </button>
             </label>
             <div className="w-full sm:w-52 relative">
               <Select value={category} onValueChange={setCategory}>
@@ -157,7 +166,7 @@ export default function CommunityVendorTable({
             </div>
           </div>
         </div>
-        <div className="flex items-end">
+        <div className="hidden sm:flex items-end">
           <Button 
             variant="secondary" 
             onClick={() => refetch()} 
