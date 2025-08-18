@@ -217,6 +217,40 @@ const Auth = () => {
           }
           
           console.log("[Auth] ✅ User data upserted successfully");
+          
+          // Auto-create household_hoa mapping for community signups
+          if (payload.signup_source && payload.signup_source.startsWith('community:') && payload.address && payload.address !== 'Address Not Provided') {
+            try {
+              console.log("[Auth] 🏠 Creating household_hoa mapping for community signup");
+              
+              // Extract community name from signup_source (e.g., "community:boca-bridges" -> "Boca Bridges")
+              const communitySlug = payload.signup_source.replace('community:', '');
+              const communityDisplayName = communitySlug
+                .split('-')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(' ');
+              
+              const { error: hoaMappingError } = await supabase
+                .from('household_hoa')
+                .upsert({
+                  household_address: payload.address,
+                  normalized_address: payload.street_name,
+                  hoa_name: communityDisplayName,
+                  created_by: userId
+                }, {
+                  onConflict: 'household_address',
+                  ignoreDuplicates: true
+                });
+              
+              if (hoaMappingError) {
+                console.warn("[Auth] ⚠️ HOA mapping creation failed (non-fatal):", hoaMappingError);
+              } else {
+                console.log("[Auth] ✅ HOA mapping created successfully for:", communityDisplayName);
+              }
+            } catch (mappingError) {
+              console.warn("[Auth] ⚠️ HOA mapping creation failed (non-fatal):", mappingError);
+            }
+          }
         }, "user upsert");
 
         // STEP 4: Handle invite token acceptance
