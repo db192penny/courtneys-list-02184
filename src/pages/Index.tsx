@@ -50,8 +50,8 @@ const Index = () => {
   return (
     <main className="min-h-screen bg-background">
       <SEO
-        title="Courtney's List — Your Private Community's Trusted Guide to Local Services"
-        description="Invite-only community vendor recommendations for your neighborhood. Enter your address to view trusted providers."
+        title="Courtney's List – Your Neighbors' Trusted Vendors"
+        description="See which plumbers, HVAC, pool, pest, and landscapers your Boca Bridges neighbors actually use. Add your ratings and make homeownership less stressful."
         canonical={canonical}
       />
 
