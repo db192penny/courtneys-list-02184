@@ -249,12 +249,12 @@ const Auth = () => {
             try {
               console.log("[Auth] 🏠 Creating household_hoa mapping for community signup");
               
-              // Extract community name from signup_source (e.g., "community:boca-bridges" -> "Boca Bridges")
+              // Extract community name from signup_source 
+              // Handle both formats: "community:boca-bridges" and "community:Boca Bridges"
               const communitySlug = payload.signup_source.replace('community:', '');
-              const communityDisplayName = communitySlug
-                .split('-')
-                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-                .join(' ');
+              const communityDisplayName = communitySlug.includes('-') 
+                ? communitySlug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
+                : communitySlug; // Already formatted if it contains spaces
               
               const { error: hoaMappingError } = await supabase
                 .from('household_hoa')
