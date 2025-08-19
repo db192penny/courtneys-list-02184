@@ -216,7 +216,10 @@ export default function Household() {
       const token = (typeof crypto !== 'undefined' && 'randomUUID' in crypto) ? crypto.randomUUID() : Math.random().toString(36).slice(2) + Date.now().toString(36);
       const { error } = await supabase.from("invitations").insert({ invite_token: token, invited_by: userId });
       if (error) throw error;
-      const link = `${window.location.origin}/invite/${token}`;
+      const communitySlug = hoaName ? hoaName.toLowerCase().replace(/\s+/g, '-') : null;
+      const link = communitySlug 
+        ? `${window.location.origin}/communities/${communitySlug}?invite=${token}&welcome=true`
+        : `${window.location.origin}/invite/${token}`;
       await navigator.clipboard.writeText(link);
       toast({ title: "Invite link copied", description: "Share it with your neighbor." });
     } catch (e: any) {

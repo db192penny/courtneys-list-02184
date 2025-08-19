@@ -1,5 +1,5 @@
-import { useMemo } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useMemo, useEffect } from "react";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import SEO from "@/components/SEO";
@@ -24,7 +24,17 @@ function slugToName(slug: string) {
 export default function Community() {
   const { slug = "" } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { data: profile } = useUserProfile();
+
+  // Handle invite tokens from URL
+  useEffect(() => {
+    const inviteToken = searchParams.get('invite');
+    if (inviteToken) {
+      // Store invite token for later use during authentication
+      localStorage.setItem('invite_token', inviteToken);
+    }
+  }, [searchParams]);
 
   const communityName = useMemo(() => slugToName(slug), [slug]);
   const pageTitle = useMemo(() => (communityName === "Boca Bridges" ? "Boca Bridges Overview" : `${communityName} Overview`), [communityName]);

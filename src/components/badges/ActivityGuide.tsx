@@ -92,7 +92,9 @@ export default function ActivityGuide() {
       
       if (error) throw error;
       
-      const link = `${window.location.origin}/invite/${token}`;
+      const link = communitySlug 
+        ? `${window.location.origin}/communities/${communitySlug}?invite=${token}&welcome=true`
+        : `${window.location.origin}/invite/${token}`;
       setInviteLink(link);
       
       // Try to copy automatically
