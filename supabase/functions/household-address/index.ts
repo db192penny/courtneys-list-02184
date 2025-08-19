@@ -215,6 +215,38 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Detect community based on address content and create/update household_hoa entry
+    const detectedHoa = (() => {
+      const lowerAddr = incomingAddress.toLowerCase();
+      if (lowerAddr.includes('boca bridges') || 
+          lowerAddr.includes('33496') || 
+          lowerAddr.includes('boca raton')) {
+        return 'Boca Bridges';
+      }
+      return 'Unknown Community';
+    })();
+
+    // Create or update household_hoa entry if we can detect the community
+    if (detectedHoa !== 'Unknown Community') {
+      const { error: hoaError } = await supabase
+        .from('household_hoa')
+        .upsert({
+          household_address: normalizedOneLine,
+          normalized_address: streetName,
+          hoa_name: detectedHoa,
+          created_by: user.id
+        }, {
+          onConflict: 'normalized_address'
+        });
+
+      if (hoaError) {
+        console.warn('[household-address] Failed to update household_hoa:', hoaError);
+        // Don't fail the request for this - just log the warning
+      } else {
+        console.log(`[household-address] Successfully mapped address to HOA: ${detectedHoa}`);
+      }
+    }
+
     return new Response(JSON.stringify({ ok: true }), {
       status: 200,
       headers: { ...pre.headers, "Content-Type": "application/json", "Vary": "Origin" },
