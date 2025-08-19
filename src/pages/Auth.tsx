@@ -218,6 +218,39 @@ const Auth = () => {
           
            console.log("[Auth] ✅ User data upserted successfully");
            
+           // Award signup points (5 points for joining)
+           try {
+             console.log("[Auth] 🎯 Awarding signup points");
+             
+              // Update user points
+              const { error: pointsError } = await supabase
+                .from("users")
+                .update({ points: 5 })
+                .eq("id", userId);
+              
+              if (pointsError) {
+                console.warn("[Auth] ⚠️ Points update failed (non-fatal):", pointsError);
+              } else {
+                // Create point history entry
+                const { error: historyError } = await supabase
+                  .from("user_point_history")
+                  .insert({
+                    user_id: userId,
+                   activity_type: "join_site",
+                   points_earned: 5,
+                   description: "Welcome bonus for joining Courtney's List"
+                 });
+               
+               if (historyError) {
+                 console.warn("[Auth] ⚠️ Point history creation failed (non-fatal):", historyError);
+               } else {
+                 console.log("[Auth] ✅ Signup points awarded successfully");
+               }
+             }
+           } catch (pointError) {
+             console.warn("[Auth] ⚠️ Point award error (non-fatal):", pointError);
+           }
+           
            // Send admin notification about new signup
            try {
              const notificationData = {
