@@ -116,8 +116,8 @@ export function MobileAddCostModal({
         }
       }
       
-      // Plumbing/Electrical
-      else if (["plumbing", "electrical"].some(cat => categoryLower.includes(cat))) {
+      // Plumbing/Electrical/Pet Grooming
+      else if (["plumbing", "electrical", "pet grooming"].some(cat => categoryLower.includes(cat))) {
         if (serviceCall) {
           costsToInsert.push({
             vendor_id: vendorId,
@@ -264,8 +264,8 @@ export function MobileAddCostModal({
       );
     }
 
-    // Plumbing/Electrical
-    if (["plumbing", "electrical"].some(cat => categoryLower.includes(cat))) {
+    // Plumbing/Electrical/Pet Grooming
+    if (["plumbing", "electrical", "pet grooming"].some(cat => categoryLower.includes(cat))) {
       return (
         <div className="space-y-2">
           <Label htmlFor="serviceCall">Service Call</Label>

@@ -9,6 +9,7 @@ export const CATEGORIES = [
   "Handyman",
   "General Contractor",
   "Roofing",
+  "Pet Grooming",
 ] as const;
 
 export type Category = (typeof CATEGORIES)[number];
