@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerFooter } from "@/components/ui/drawer";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -30,6 +30,8 @@ export default function MobileRateVendorModal({ open, onOpenChange, vendor, onSu
   const [showNameInReview, setShowNameInReview] = useState<boolean>(true);
   const [useForHome, setUseForHome] = useState<boolean>(true);
   const [loading, setLoading] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let isActive = true;
@@ -93,6 +95,37 @@ export default function MobileRateVendorModal({ open, onOpenChange, vendor, onSu
       isActive = false;
     };
   }, [vendor?.id]);
+
+  // Handle textarea focus to ensure cursor stays visible on mobile
+  useEffect(() => {
+    const handleTextareaFocus = () => {
+      if (textareaRef.current && scrollAreaRef.current) {
+        // Small delay to ensure mobile keyboard is shown
+        setTimeout(() => {
+          const textarea = textareaRef.current;
+          const scrollArea = scrollAreaRef.current;
+          if (textarea && scrollArea) {
+            const rect = textarea.getBoundingClientRect();
+            const viewportHeight = window.innerHeight;
+            
+            // If textarea is below the visible area or close to bottom
+            if (rect.bottom > viewportHeight * 0.7) {
+              textarea.scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'center'
+              });
+            }
+          }
+        }, 300);
+      }
+    };
+
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.addEventListener('focus', handleTextareaFocus);
+      return () => textarea.removeEventListener('focus', handleTextareaFocus);
+    }
+  }, [open]);
 
   const onSubmit = async () => {
     if (!vendor) return;
@@ -180,13 +213,13 @@ export default function MobileRateVendorModal({ open, onOpenChange, vendor, onSu
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="max-h-[80vh] h-auto">
-        <DrawerHeader className="text-left pb-4">
+      <DrawerContent className="max-h-[85vh] min-h-[50vh] h-auto">
+        <DrawerHeader className="text-left pb-4 flex-shrink-0">
           <DrawerTitle>Rate Vendor — {vendor?.name}</DrawerTitle>
         </DrawerHeader>
         
         {vendor && (
-          <ScrollArea className="flex-1 px-4">
+          <ScrollArea ref={scrollAreaRef} className="flex-1 px-4 overflow-y-auto">
             <div className="space-y-6 pb-6">
               <div className="grid gap-3">
                 <Label>Rating</Label>
@@ -198,6 +231,7 @@ export default function MobileRateVendorModal({ open, onOpenChange, vendor, onSu
               <div className="grid gap-3">
                 <Label>Comments (Additional Color)</Label>
                 <Textarea 
+                  ref={textareaRef}
                   value={comments} 
                   onChange={(e) => setComments(e.currentTarget.value)} 
                   placeholder="Any helpful insights — pricing, professionalism, customer service, responsiveness — the more detailed the better for your neighbors."
@@ -242,7 +276,7 @@ export default function MobileRateVendorModal({ open, onOpenChange, vendor, onSu
           </ScrollArea>
         )}
         
-        <DrawerFooter className="pt-4">
+        <DrawerFooter className="pt-4 flex-shrink-0 bg-background border-t">
           <div className="flex gap-3">
             <Button 
               variant="outline" 
