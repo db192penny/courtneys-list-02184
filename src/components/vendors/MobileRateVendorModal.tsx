@@ -96,34 +96,13 @@ export default function MobileRateVendorModal({ open, onOpenChange, vendor, onSu
     };
   }, [vendor?.id]);
 
-  // Handle textarea focus to ensure cursor stays visible on mobile
+  // Prevent mobile zoom on focus by adding proper styling
   useEffect(() => {
-    const handleTextareaFocus = () => {
-      if (textareaRef.current && scrollAreaRef.current) {
-        // Small delay to ensure mobile keyboard is shown
-        setTimeout(() => {
-          const textarea = textareaRef.current;
-          const scrollArea = scrollAreaRef.current;
-          if (textarea && scrollArea) {
-            const rect = textarea.getBoundingClientRect();
-            const viewportHeight = window.innerHeight;
-            
-            // If textarea is below the visible area or close to bottom
-            if (rect.bottom > viewportHeight * 0.7) {
-              textarea.scrollIntoView({ 
-                behavior: 'smooth', 
-                block: 'center'
-              });
-            }
-          }
-        }, 300);
-      }
-    };
-
     const textarea = textareaRef.current;
-    if (textarea) {
-      textarea.addEventListener('focus', handleTextareaFocus);
-      return () => textarea.removeEventListener('focus', handleTextareaFocus);
+    if (textarea && open) {
+      // Add CSS to prevent zoom
+      textarea.style.fontSize = '16px'; // Prevents iOS zoom
+      textarea.style.transformOrigin = '0 0';
     }
   }, [open]);
 
@@ -235,7 +214,8 @@ export default function MobileRateVendorModal({ open, onOpenChange, vendor, onSu
                   value={comments} 
                   onChange={(e) => setComments(e.currentTarget.value)} 
                   placeholder="Any helpful insights — pricing, professionalism, customer service, responsiveness — the more detailed the better for your neighbors."
-                  className="min-h-[100px] resize-none"
+                  className="min-h-[100px] resize-none text-base"
+                  style={{ fontSize: '16px' }}
                   rows={4}
                 />
               </div>
