@@ -96,15 +96,21 @@ export default function MobileRateVendorModal({ open, onOpenChange, vendor, onSu
     };
   }, [vendor?.id]);
 
-  // Prevent mobile zoom on focus by adding proper styling
-  useEffect(() => {
-    const textarea = textareaRef.current;
-    if (textarea && open) {
-      // Add CSS to prevent zoom
-      textarea.style.fontSize = '16px'; // Prevents iOS zoom
-      textarea.style.transformOrigin = '0 0';
-    }
-  }, [open]);
+  const handleTextareaFocus = (e: React.FocusEvent<HTMLTextAreaElement>) => {
+    // Prevent viewport changes on focus
+    e.target.style.fontSize = '16px';
+    e.target.style.transform = 'scale(1)';
+    
+    // Prevent any scrolling behavior
+    e.preventDefault();
+    
+    // Keep the textarea in view without scrolling the whole modal
+    setTimeout(() => {
+      const target = e.target as HTMLTextAreaElement;
+      target.focus();
+      target.setSelectionRange(target.value.length, target.value.length);
+    }, 100);
+  };
 
   const onSubmit = async () => {
     if (!vendor) return;
@@ -213,9 +219,14 @@ export default function MobileRateVendorModal({ open, onOpenChange, vendor, onSu
                   ref={textareaRef}
                   value={comments} 
                   onChange={(e) => setComments(e.currentTarget.value)} 
+                  onFocus={handleTextareaFocus}
                   placeholder="Any helpful insights — pricing, professionalism, customer service, responsiveness — the more detailed the better for your neighbors."
-                  className="min-h-[100px] resize-none text-base"
-                  style={{ fontSize: '16px' }}
+                  className="min-h-[100px] resize-none"
+                  style={{ 
+                    fontSize: '16px',
+                    maxHeight: '120px',
+                    touchAction: 'manipulation'
+                  }}
                   rows={4}
                 />
               </div>
