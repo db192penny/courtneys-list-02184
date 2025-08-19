@@ -222,7 +222,7 @@ export default function CommunityVendorTable({
       ) : (
         <div className="space-y-4">
           {category !== "all" && (
-            <div className="text-center">
+            <div>
               <h3 className="text-xl font-semibold text-foreground">
                 {category} Providers
               </h3>
