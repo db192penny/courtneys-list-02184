@@ -6,9 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { extractStreetName } from "@/utils/address";
 import { Link, useSearchParams } from "react-router-dom";
-import AddressInput, { AddressSelectedPayload } from "@/components/AddressInput";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { useBadgeLevels, getUserCurrentBadge, getUserNextBadge } from "@/hooks/useBadgeLevels";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
@@ -18,11 +16,13 @@ import BadgeProgress from "@/components/badges/BadgeProgress";
 import PointHistoryTable from "@/components/badges/PointHistoryTable";
 import ActivityGuide from "@/components/badges/ActivityGuide";
 import BadgeLevelChart from "@/components/badges/BadgeLevelChart";
+import AddressChangeRequestModal from "@/components/profile/AddressChangeRequestModal";
 
 
 const Profile = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
+  const [showAddressChangeModal, setShowAddressChangeModal] = useState(false);
 
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
@@ -69,105 +69,32 @@ useEffect(() => {
     const { data: auth } = await supabase.auth.getUser();
     if (!auth.user) return;
 
-    const trimmedAddress = address.trim();
     const payload = {
       id: auth.user.id,
       email: auth.user.email ?? "", // required by DB/types
       name: name.trim(),
-      address: trimmedAddress,
-      street_name: extractStreetName(trimmedAddress), // required by DB/types
     };
 
-    const { error } = await supabase.from("users").upsert(payload);
+    const { error } = await supabase.from("users").update({ name: name.trim() }).eq("id", auth.user.id);
     if (error) {
       console.error("[Profile] save error:", error);
       toast({ title: "Could not save", description: error.message, variant: "destructive" });
       return;
     }
-    toast({ title: "Saved", description: "Your profile and privacy settings were updated." });
+    toast({ title: "Saved", description: "Your profile was updated." });
   };
 
   const canonical = typeof window !== "undefined" ? window.location.href : undefined;
 
-  const handleAddressSelected = async (payload: AddressSelectedPayload) => {
-    // Validate the address before sending to backend
-    const incomingAddress = payload.household_address || payload.formatted_address || '';
-    
-    if (!incomingAddress || incomingAddress.trim().length === 0) {
-      console.warn("[Profile] Empty address provided to handleAddressSelected");
-      toast({
-        title: "Invalid address",
-        description: "Please select a valid address from the suggestions.",
-        variant: "destructive",
-      });
-      return;
-    }
+  const handleRequestAddressChange = () => {
+    setShowAddressChangeModal(true);
+  };
 
-    // Check for obviously invalid addresses
-    const normalized = incomingAddress.toLowerCase().trim();
-    const invalidPatterns = [
-      'address not provided',
-      'no address',
-      'unknown',
-      'pending',
-      'not specified',
-      'n/a'
-    ];
-    
-    if (invalidPatterns.some(pattern => normalized.includes(pattern))) {
-      console.warn("[Profile] Invalid address pattern detected:", incomingAddress);
-      toast({
-        title: "Invalid address",
-        description: "Please enter a valid street address.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Require place_id for proper geocoding
-    if (!payload.place_id) {
-      console.warn("[Profile] No place_id provided");
-      toast({
-        title: "Invalid address",
-        description: "Please select an address from the dropdown suggestions.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Don't overwrite a good address with a potentially bad one
-    if (address && 
-        address !== 'Address Not Provided' && 
-        address.trim().length > 10 && // Has some substance
-        (!incomingAddress || incomingAddress.length < address.length / 2)) {
-      console.warn("[Profile] Refusing to overwrite good address with potentially bad one:", {
-        current: address,
-        incoming: incomingAddress
-      });
-      toast({
-        title: "Address not updated",
-        description: "The selected address appears incomplete. Please try again.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // POST to backend (Supabase Edge Function)
-    const { error } = await supabase.functions.invoke("household-address", {
-      body: payload,
+  const handleAddressChangeSuccess = () => {
+    toast({
+      title: "Request submitted",
+      description: "Your address change request has been submitted for admin review.",
     });
-    if (error) {
-      console.error("[Profile] address save error:", error);
-      toast({
-        title: "Could not save address",
-        description: error.message || "Unknown error",
-        variant: "destructive",
-      });
-      return;
-    }
-    // Optimistic/local refresh
-    setAddress(payload.household_address);
-    toast({ title: "Address saved", description: "Your household address was updated." });
   };
 
   return (
@@ -223,14 +150,19 @@ useEffect(() => {
                 <Input id="name" value={name} onChange={(e) => setName(e.currentTarget.value)} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="address">Full Address</Label>
-                <AddressInput
-                  id="address"
-                  defaultValue={address}
-                  onSelected={handleAddressSelected}
-                  country={["us"]}
-                  placeholder="Start typing your address..."
-                />
+                <Label htmlFor="address">Current Address</Label>
+                <div className="p-3 bg-muted rounded-md text-sm min-h-[40px] flex items-center">
+                  {address || "No address on file"}
+                </div>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  size="sm"
+                  onClick={handleRequestAddressChange}
+                  className="mt-2"
+                >
+                  Request Address Change
+                </Button>
               </div>
             </CardContent>
             <CardFooter className="flex justify-end">
@@ -247,12 +179,21 @@ useEffect(() => {
         
         <div className="mt-6 text-sm text-muted-foreground">
           Your address is used for community verification. Only your street name may be shown publicly.
+          Address changes require admin approval to maintain data integrity.
         </div>
         
         {/* Point History Section - Moved to Bottom */}
         <div className="mt-8">
           <PointHistoryTable />
         </div>
+
+        {/* Address Change Request Modal */}
+        <AddressChangeRequestModal
+          open={showAddressChangeModal}
+          onOpenChange={setShowAddressChangeModal}
+          currentAddress={address}
+          onSuccess={handleAddressChangeSuccess}
+        />
 
       </section>
     </main>
