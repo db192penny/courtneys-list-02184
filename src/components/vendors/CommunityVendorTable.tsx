@@ -146,6 +146,9 @@ export default function CommunityVendorTable({
                   {CATEGORIES.map((c) => (
                     <SelectItem key={c} value={c}>{c}</SelectItem>
                   ))}
+                  <div className="px-3 py-1.5 text-xs text-muted-foreground border-t border-border mt-1 pt-2">
+                    More Categories ↓
+                  </div>
                 </SelectContent>
               </Select>
             </div>
