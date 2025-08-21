@@ -129,6 +129,7 @@ export default function AddressChangeRequestModal({
               placeholder="Start typing your new address..."
               onSelected={handleAddressSelected}
               country={["us"]}
+              className="address-input-modal"
             />
             {newAddress && (
               <div className="text-sm text-muted-foreground">
