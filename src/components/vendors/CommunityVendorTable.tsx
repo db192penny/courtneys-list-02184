@@ -136,19 +136,13 @@ export default function CommunityVendorTable({
             <div className="w-full sm:w-52 relative">
               <Select value={category} onValueChange={setCategory}>
                 <SelectTrigger className="bg-background border-2 border-primary hover:border-primary/80 focus:border-primary transition-colors shadow-sm">
-                  <div className="flex items-center justify-between w-full">
-                    <SelectValue placeholder="All Categories" />
-                    <span className="text-muted-foreground text-xs ml-2">More Categories</span>
-                  </div>
+                  <SelectValue placeholder="All Categories" />
                 </SelectTrigger>
                 <SelectContent className="bg-background border-2">
                   <SelectItem value="all">All Categories</SelectItem>
                   {CATEGORIES.map((c) => (
                     <SelectItem key={c} value={c}>{c}</SelectItem>
                   ))}
-                  <div className="px-3 py-1.5 text-xs text-muted-foreground border-t border-border mt-1 pt-2">
-                    More Categories ↓
-                  </div>
                 </SelectContent>
               </Select>
             </div>
