@@ -34,7 +34,9 @@ const Auth = () => {
   }, [params]);
 
   const communityName = useMemo(() => {
-    return params.get("community") || "";
+    const urlCommunity = params.get("community") || "";
+    const storedCommunity = localStorage.getItem("selected_community") || "";
+    return urlCommunity || storedCommunity;
   }, [params]);
 
   const isVerifiedMagicLink = useMemo(() => {

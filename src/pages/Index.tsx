@@ -23,7 +23,8 @@ const Index = () => {
       console.log("Index: Address selected:", payload);
       setSelectedAddress(payload);
       localStorage.setItem("prefill_address", payload.formatted_address);
-      console.log("Index: Address stored in localStorage:", payload.formatted_address);
+      localStorage.setItem("selected_community", hoa);
+      console.log("Index: Address and community stored:", payload.formatted_address, hoa);
     } catch (e) {
       console.error("[Index] address select error:", e);
       toast({ title: "Something went wrong", description: "Please try again.", variant: "destructive" });

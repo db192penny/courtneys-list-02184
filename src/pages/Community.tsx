@@ -26,17 +26,23 @@ export default function Community() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { data: profile } = useUserProfile();
+  
+  const communityName = useMemo(() => slugToName(slug), [slug]);
 
-  // Handle invite tokens from URL
+  // Handle invite tokens from URL and store community context
   useEffect(() => {
     const inviteToken = searchParams.get('invite');
     if (inviteToken) {
       // Store invite token for later use during authentication
       localStorage.setItem('invite_token', inviteToken);
     }
-  }, [searchParams]);
-
-  const communityName = useMemo(() => slugToName(slug), [slug]);
+    
+    // Store community context for signup flow
+    if (communityName && communityName !== "Community") {
+      localStorage.setItem('selected_community', communityName);
+      console.log("Community: Stored community context:", communityName);
+    }
+  }, [searchParams, communityName]);
   const pageTitle = useMemo(() => (communityName === "Boca Bridges" ? "Boca Bridges Overview" : `${communityName} Overview`), [communityName]);
   const canonical = typeof window !== "undefined" ? window.location.href : undefined;
   const isAuthenticated = !!profile?.isAuthenticated;
