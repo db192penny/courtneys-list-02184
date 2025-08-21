@@ -524,9 +524,7 @@ const Auth = () => {
       email: email.trim(),
       address: address.trim(),
       street_name: extractStreetName(address.trim()),
-      signup_source: cameFromHomepage 
-        ? `homepage:${communityName || "unknown"}` 
-        : communityName ? `community:${communityName}` : undefined,
+      signup_source: communityName ? `community:${toSlug(communityName)}` : undefined,
     };
     
     // Store in multiple locations for redundancy
@@ -535,6 +533,7 @@ const Auth = () => {
     sessionStorage.setItem("signup_email", pending.email);
     sessionStorage.setItem("signup_address", pending.address);
     
+    // Clean up localStorage after successful signup
     if (inviteToken) {
       localStorage.setItem("invite_token", inviteToken);
       // Only store email if it's associated with a valid invite
@@ -543,6 +542,10 @@ const Auth = () => {
       // Clear any stored invite email if there's no invite context
       localStorage.removeItem("invite_email");
     }
+    
+    // Clean up address and community after storing in pending_profile
+    localStorage.removeItem("prefill_address");
+    localStorage.removeItem("selected_community");
     
     console.log("[Auth] 💾 Stored signup data with redundancy:", { 
       name: pending.name, 
