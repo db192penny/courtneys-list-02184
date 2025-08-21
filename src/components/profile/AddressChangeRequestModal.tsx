@@ -5,7 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import SimpleAddressInput, { AddressSelectedPayload } from "@/components/SimpleAddressInput";
+import AddressInput, { AddressSelectedPayload } from "@/components/AddressInput";
 
 interface AddressChangeRequestModalProps {
   open: boolean;
@@ -124,7 +124,7 @@ export default function AddressChangeRequestModal({
           
           <div className="space-y-2">
             <Label htmlFor="new-address">New Address *</Label>
-            <SimpleAddressInput
+            <AddressInput
               id="new-address"
               placeholder="Start typing your new address..."
               onSelected={handleAddressSelected}
