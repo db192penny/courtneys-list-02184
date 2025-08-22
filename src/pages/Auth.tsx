@@ -13,7 +13,8 @@ import AddressInput, { AddressSelectedPayload } from "@/components/AddressInput"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Info, Crown, PartyPopper, ArrowLeft } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Info, Crown, PartyPopper, ArrowLeft, Mail, AlertTriangle } from "lucide-react";
 
 const Auth = () => {
   const [name, setName] = useState("");
@@ -22,6 +23,7 @@ const Auth = () => {
   const [resident, setResident] = useState<"yes" | "no">("yes");
   const [errors, setErrors] = useState<{ name?: boolean; email?: boolean; address?: boolean; resident?: boolean }>({});
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showMagicLinkModal, setShowMagicLinkModal] = useState(false);
   const [detectedCommunity, setDetectedCommunity] = useState<string>("");
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -557,9 +559,11 @@ const Auth = () => {
     // Generate a temporary password the user never sees
     const tempPassword = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 
+    const redirectUrl = `${window.location.origin}/auth`;
     const { error } = await supabase.auth.signUp({
       email: email.trim(),
       password: tempPassword,
+      options: { emailRedirectTo: redirectUrl },
     });
 
     if (error) {
@@ -568,8 +572,8 @@ const Auth = () => {
       return;
     }
 
-    // Since email confirmation is disabled, user is immediately authenticated
-    // The onAuthStateChange listener will handle the rest
+    // Show magic link modal instead of immediate authentication
+    setShowMagicLinkModal(true);
   };
 
   const canonical = typeof window !== "undefined" ? window.location.href : undefined;
@@ -697,6 +701,51 @@ const Auth = () => {
           Enter your details, and once approved by your community admin, you'll get full access to your neighborhood's trusted providers.
         </div>
       </section>
+
+      {/* Magic Link Sent Modal */}
+      <Dialog open={showMagicLinkModal} onOpenChange={setShowMagicLinkModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-lg">
+              <Mail className="h-5 w-5 text-green-600" />
+              Magic Link Sent!
+            </DialogTitle>
+            <DialogDescription className="text-center pt-2">
+              We've sent a magic link to <strong>{email}</strong>
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="flex items-start gap-3 p-4 bg-yellow-50 dark:bg-yellow-950/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+              <AlertTriangle className="h-5 w-5 text-yellow-600 mt-0.5 flex-shrink-0" />
+              <div>
+                <p className="font-semibold text-yellow-800 dark:text-yellow-200">
+                  Don't forget to check your spam folder!
+                </p>
+                <p className="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
+                  Magic links sometimes end up in spam or junk mail folders.
+                </p>
+              </div>
+            </div>
+            
+            <div className="flex flex-col gap-2 pt-2">
+              <Button onClick={() => setShowMagicLinkModal(false)} className="w-full">
+                Got It!
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setShowMagicLinkModal(false);
+                  onSubmit(new Event('submit') as any);
+                }}
+                className="w-full"
+              >
+                Resend Magic Link
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Success Modal */}
       <AlertDialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
