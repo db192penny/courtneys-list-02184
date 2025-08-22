@@ -7,8 +7,6 @@ export const CATEGORIES = [
   "Plumbing",
   "Power Washing",
   "Handyman",
-  "General Contractor",
-  "Roofing",
   "Pet Grooming",
 ] as const;
 
