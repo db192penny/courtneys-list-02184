@@ -297,152 +297,45 @@ const Auth = () => {
       return;
     }
 
-    console.log("[Auth] ✅ Auth user created, now creating profile:", userId);
+    console.log("[Auth] ✅ Auth user created, profile will be created automatically via database trigger");
 
-    // Create user profile immediately in database
-    try {
-      const profileData = {
-        id: userId,
-        email: email.trim(),
-        name: name.trim(),
-        address: address.trim(),
-        street_name: extractStreetName(address.trim()),
-        signup_source: communityName ? `community:${toSlug(communityName)}` : null,
-        is_verified: true, // Auto-verify since they completed auth flow
-        show_name_public: true, // Default to showing name in reviews/costs
-      };
-      
-      console.log("[Auth] 📝 Creating user profile:", { 
-        id: profileData.id, 
-        email: profileData.email, 
-        name: profileData.name, 
-        signup_source: profileData.signup_source 
-      });
-      
-      const { error: upsertError } = await supabase.from("users").upsert(profileData);
-      if (upsertError) {
-        console.error("[Auth] ❌ User profile creation error:", upsertError);
-        toast({ title: "Profile creation failed", description: upsertError.message, variant: "destructive" });
-        return;
-      }
-      
-      console.log("[Auth] ✅ User profile created successfully");
-      
-      // Award signup points (5 points for joining)
-      try {
-        console.log("[Auth] 🎯 Awarding signup points");
-        
-        // Update user points
-        const { error: pointsError } = await supabase
-          .from("users")
-          .update({ points: 5 })
-          .eq("id", userId);
-        
-        if (pointsError) {
-          console.warn("[Auth] ⚠️ Points update failed (non-fatal):", pointsError);
-        } else {
-          // Create point history entry
-          const { error: historyError } = await supabase
-            .from("user_point_history")
-            .insert({
-              user_id: userId,
-              activity_type: "join_site",
-              points_earned: 5,
-              description: "Welcome bonus for joining Courtney's List"
-            });
-          
-          if (historyError) {
-            console.warn("[Auth] ⚠️ Point history creation failed (non-fatal):", historyError);
-          } else {
-            console.log("[Auth] ✅ Signup points awarded successfully");
-          }
-        }
-      } catch (pointError) {
-        console.warn("[Auth] ⚠️ Point award error (non-fatal):", pointError);
-      }
-      
-      // Send admin notification about new signup
-      try {
-        const notificationData = {
-          userEmail: profileData.email,
-          userName: profileData.name,
-          userAddress: profileData.address,
-          community: profileData.signup_source?.startsWith('community:') 
-            ? profileData.signup_source.replace('community:', '').split('-').map(word => 
-                word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
-            : 'Direct Signup',
-          signupSource: profileData.signup_source
-        };
-
-        const { error: notificationError } = await supabase.functions.invoke('send-admin-notification', {
-          body: notificationData
-        });
-
-        if (notificationError) {
-          console.warn("[Auth] ⚠️ Admin notification failed (non-fatal):", notificationError);
-        } else {
-          console.log("[Auth] ✅ Admin notification sent successfully");
-        }
-      } catch (notificationError) {
-        console.warn("[Auth] ⚠️ Admin notification error (non-fatal):", notificationError);
-      }
-      
-      // Auto-create household_hoa mapping for community signups
-      if (profileData.signup_source && profileData.signup_source.startsWith('community:') && profileData.address && profileData.address !== 'Address Not Provided') {
-        try {
-          console.log("[Auth] 🏠 Creating household_hoa mapping for community signup");
-          
-          // Extract community name from signup_source 
-          const communitySlug = profileData.signup_source.replace('community:', '');
-          const communityDisplayName = communitySlug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-          
-          const { error: hoaMappingError } = await supabase
-            .from('household_hoa')
-            .upsert({
-              household_address: profileData.address,
-              normalized_address: profileData.address.toLowerCase().trim(),
-              hoa_name: communityDisplayName,
-              created_by: userId
-            }, {
-              onConflict: 'normalized_address',
-              ignoreDuplicates: true
-            });
-          
-          if (hoaMappingError) {
-            console.warn("[Auth] ⚠️ HOA mapping creation failed (non-fatal):", hoaMappingError);
-          } else {
-            console.log("[Auth] ✅ HOA mapping created successfully for:", communityDisplayName);
-          }
-        } catch (mappingError) {
-          console.warn("[Auth] ⚠️ HOA mapping creation failed (non-fatal):", mappingError);
-        }
-      }
-
-      // Handle invite token acceptance
-      if (inviteToken) {
-        try {
-          const { error: markErr } = await supabase.rpc("mark_invite_accepted", {
-            _token: inviteToken,
-            _user_id: userId,
-          });
-          if (markErr) {
-            console.warn("[Auth] ⚠️ mark_invite_accepted error (non-fatal):", markErr);
-          } else {
-            console.log("[Auth] ✅ Invite token marked as accepted");
-          }
-        } catch (inviteError) {
-          console.warn("[Auth] ⚠️ Invite processing failed (non-fatal):", inviteError);
-        }
-      }
-
-    } catch (error) {
-      console.error("[Auth] ❌ Profile creation failed:", error);
-      toast({ title: "Account setup failed", description: "Could not complete account setup", variant: "destructive" });
-      return;
+    // Store user data in metadata for the trigger to use
+    const metaData = {
+      name: name.trim(),
+      address: address.trim(),
+      street_name: extractStreetName(address.trim()),
+      signup_source: communityName ? `community:${toSlug(communityName)}` : null,
+    };
+    
+    // Update the auth user's metadata for the trigger
+    const { error: metadataError } = await supabase.auth.updateUser({
+      data: metaData
+    });
+    
+    if (metadataError) {
+      console.warn("[Auth] ⚠️ Could not update user metadata (non-fatal):", metadataError);
     }
 
-    // Show magic link modal 
+    // Handle invite token acceptance if present
+    if (inviteToken) {
+      try {
+        const { error: markErr } = await supabase.rpc("mark_invite_accepted", {
+          _token: inviteToken,
+          _user_id: userId,
+        });
+        if (markErr) {
+          console.warn("[Auth] ⚠️ mark_invite_accepted error (non-fatal):", markErr);
+        } else {
+          console.log("[Auth] ✅ Invite token marked as accepted");
+        }
+      } catch (inviteErr) {
+        console.warn("[Auth] ⚠️ Invite acceptance error (non-fatal):", inviteErr);
+      }
+    }
+    
+    // Success: Show magic link modal
     setShowMagicLinkModal(true);
+    console.log("[Auth] ✅ Auth signup completed successfully - profile will be created by trigger");
   };
 
   const canonical = typeof window !== "undefined" ? window.location.href : undefined;
