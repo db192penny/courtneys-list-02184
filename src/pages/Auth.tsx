@@ -1,5 +1,5 @@
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -274,6 +274,59 @@ const Auth = () => {
     
     console.log("[Auth] 🚀 Starting user creation process");
 
+    // First, check if email already exists and get its status
+    const targetEmail = email.trim().toLowerCase();
+    console.log("[Auth] 🔍 Checking email status for:", targetEmail);
+    
+    try {
+      const { data: emailStatus, error: statusError } = await supabase.rpc("get_email_status", {
+        _email: targetEmail,
+      });
+
+      if (statusError) {
+        console.error("[Auth] get_email_status error:", statusError);
+        toast({ 
+          title: "Account check failed", 
+          description: "Unable to verify email status. Please try again.", 
+          variant: "destructive" 
+        });
+        return;
+      }
+
+      console.log("[Auth] 📊 Email status result:", emailStatus);
+
+      // Handle different email statuses
+      if (emailStatus === "approved") {
+        toast({
+          title: "Account already exists",
+          description: "An account with this email is already active. Please sign in instead.",
+          variant: "destructive",
+        });
+        
+        // Redirect to sign in page with context
+        const signInUrl = communityName 
+          ? `/signin?community=${toSlug(communityName)}` 
+          : "/signin";
+        navigate(signInUrl);
+        return;
+      } else if (emailStatus === "pending") {
+        toast({
+          title: "Account pending approval",
+          description: "Your account is already registered but still under review. Please check back later.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // If we get here, emailStatus is "not_found" and we can proceed with signup
+      console.log("[Auth] ✅ Email available, proceeding with signup");
+      
+    } catch (emailCheckError) {
+      console.error("[Auth] Email check failed:", emailCheckError);
+      // Continue with signup attempt if email check fails
+      console.log("[Auth] ⚠️ Email check failed, attempting signup anyway");
+    }
+
     // Store user data in metadata for the trigger to use
     const metaData = {
       name: name.trim(),
@@ -289,7 +342,7 @@ const Auth = () => {
 
     const redirectUrl = `${window.location.origin}/auth`;
     const { data: authData, error: signUpError } = await supabase.auth.signUp({
-      email: email.trim(),
+      email: targetEmail,
       password: tempPassword,
       options: { 
         emailRedirectTo: redirectUrl,
@@ -304,12 +357,23 @@ const Auth = () => {
       let errorTitle = "Could not create account";
       let errorDescription = signUpError.message;
       
-      // Check for common error patterns
+      // Check for common error patterns and provide actionable guidance
       if (signUpError.message.includes("User already registered") || 
           signUpError.message.includes("already been taken") ||
-          signUpError.message.includes("already exists")) {
-        errorTitle = "Email already exists";
-        errorDescription = "An account with this email already exists. Please use a different email or contact support if you believe this is an error.";
+          signUpError.message.includes("already exists") ||
+          signUpError.message.includes("duplicate key") ||
+          signUpError.message.includes("unique constraint")) {
+        errorTitle = "Email already registered";
+        errorDescription = "This email is already registered. Please sign in instead or contact support if you think this is an error.";
+        
+        // Show sign in button in toast or redirect
+        setTimeout(() => {
+          const signInUrl = communityName 
+            ? `/signin?community=${toSlug(communityName)}` 
+            : "/signin";
+          navigate(signInUrl);
+        }, 2000);
+        
       } else if (signUpError.message.includes("invalid email")) {
         errorTitle = "Invalid email";
         errorDescription = "Please enter a valid email address.";
@@ -486,6 +550,15 @@ const Auth = () => {
                 <Button type="submit" size="lg" className="w-full">
                   Request Access
                 </Button>
+
+                <div className="pt-2 text-center">
+                  <Link 
+                    to={communityName ? `/signin?community=${toSlug(communityName)}` : "/signin"} 
+                    className="underline underline-offset-4 text-sm text-muted-foreground hover:text-foreground"
+                  >
+                    Already have an account? Sign In
+                  </Link>
+                </div>
               </form>
             </CardContent>
 
