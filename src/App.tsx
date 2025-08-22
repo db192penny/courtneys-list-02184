@@ -90,21 +90,8 @@ function AuthWatcher() {
       });
       
       if (hasSession) {
-        // Handle authenticated users landing on /auth with community parameters (magic link users)
-        if (location.pathname === "/auth") {
-          const urlParams = new URLSearchParams(location.search);
-          const communityParam = urlParams.get('community');
-          const isVerified = urlParams.get('verified') === 'true';
-          
-          if (communityParam && isVerified) {
-            console.log('AuthWatcher: detected authenticated magic link user, redirecting to community:', communityParam);
-            navigate(`/communities/${communityParam}`, { replace: true });
-            return;
-          }
-        }
-        
-        // Only redirect from /signin - let /auth page handle its own community detection
-        else if (location.pathname === "/signin") {
+        // Only redirect from /signin - let /auth page handle magic link users
+        if (location.pathname === "/signin") {
           console.log('AuthWatcher: redirecting authenticated user from signin');
           navigate("/communities/boca-bridges", { replace: true });
         }

@@ -24,6 +24,7 @@ const Auth = () => {
   const [errors, setErrors] = useState<{ name?: boolean; email?: boolean; address?: boolean; resident?: boolean }>({});
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showMagicLinkModal, setShowMagicLinkModal] = useState(false);
+  const [isMagicLinkUser, setIsMagicLinkUser] = useState(false);
   const [detectedCommunity, setDetectedCommunity] = useState<string>("");
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -464,9 +465,18 @@ const Auth = () => {
     }
   }, [inviteToken, navigate, toast, communityName]);
 
+  // Handle authentication state changes (magic link completion)
   useEffect(() => {
+    // Check if user arrived via magic link
+    const urlParams = new URLSearchParams(window.location.search);
+    const hasUserParams = urlParams.get('community') || urlParams.get('verified');
+    
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
+        console.log('[Auth] onAuthStateChange: User authenticated, checking for magic link');
+        if (hasUserParams) {
+          setIsMagicLinkUser(true);
+        }
         // Defer any Supabase calls out of the callback to avoid deadlocks
         setTimeout(() => finalizeOnboarding(session.user!.id, session.user!.email ?? null), 0);
       }
@@ -474,6 +484,10 @@ const Auth = () => {
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
+        console.log('[Auth] getSession: User already authenticated');
+        if (hasUserParams) {
+          setIsMagicLinkUser(true);
+        }
         finalizeOnboarding(session.user.id, session.user.email ?? null);
       }
     });
@@ -585,122 +599,144 @@ const Auth = () => {
         description="Join the invite only test family - automatically verified access to exclusive vendor info."
         canonical={canonical}
       />
-      <section className="container max-w-xl py-10">
-        <h1 className="text-3xl font-semibold mb-6">{communityName ? `Join ${communityName.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}` : "Join Courtney's List"}</h1>
-        <Card>
-          <CardHeader className="space-y-4">
-            <div className="flex items-center justify-between">
-              <CardTitle>Request Access</CardTitle>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleBack}
-                className="text-muted-foreground hover:text-foreground"
-              >
-                <ArrowLeft className="h-4 w-4 mr-1" />
-                Back
-              </Button>
-            </div>
-            
-            {/* Highlighted Invite-Only Test Family Message */}
-            <div className="flex items-start gap-3 p-4 bg-yellow-50 dark:bg-yellow-950/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
-              <Crown className="h-5 w-5 text-yellow-600 dark:text-yellow-400 mt-0.5 flex-shrink-0" />
-              <div className="space-y-1">
-                <p className="text-sm text-yellow-800 dark:text-yellow-200">
-                  Since you're part of the <strong>invite-only test group</strong> (thanks!), you'll be <strong>automatically verified</strong>. In the future, neighbors will need admin approval (that'll be me—unless one of you volunteers :)).
-                </p>
+      
+      {isMagicLinkUser ? (
+        <section className="bg-gradient-to-br from-background via-background to-secondary/5 py-24 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-md mx-auto space-y-8">
+            <div className="text-center">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 dark:bg-green-900/20 rounded-full mb-4">
+                <Mail className="h-8 w-8 text-green-600" />
               </div>
-            </div>
-          </CardHeader>
-
-          <CardContent className="space-y-4">
-            <form onSubmit={onSubmit} className="space-y-4">
-              <p className="text-xs text-muted-foreground">* Required fields</p>
-              <div className="space-y-2">
-                <Label htmlFor="name">Name <span className="text-foreground" aria-hidden>*</span></Label>
-                <Input
-                  id="name"
-                  value={name}
-                  onChange={(e) => setName(e.currentTarget.value)}
-                  placeholder="Your full name"
-                  required
-                  className={errors.name ? "border-destructive focus-visible:ring-destructive" : undefined}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="email">Email <span className="text-foreground" aria-hidden>*</span></Label>
-                <Input
-                  id="email"
-                  type="email"
-                  autoComplete="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.currentTarget.value)}
-                  required
-                  className={errors.email ? "border-destructive focus-visible:ring-destructive" : undefined}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <Label htmlFor="address">Full Address <span className="text-foreground" aria-hidden>*</span></Label>
-                  <TooltipProvider delayDuration={200}>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <button type="button" aria-label="Why we need your address" className="text-muted-foreground">
-                          <Info className="h-4 w-4" />
-                        </button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Your address helps us link you with your community's exclusive vendor info</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </div>
-                <AddressInput
-                  id="address"
-                  defaultValue={address}
-                  placeholder="Full home address"
-                  className={errors.address ? "border-destructive focus-visible:ring-destructive" : undefined}
-                  onSelected={(addr: AddressSelectedPayload) => {
-                    setAddress(addr.formatted_address);
-                  }}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="resident">Are you a resident? <span className="text-foreground" aria-hidden>*</span></Label>
-                <Select required value={resident} onValueChange={(v) => setResident(v as "yes" | "no")}>
-                  <SelectTrigger id="resident" className={errors.resident ? "border-destructive" : undefined}>
-                    <SelectValue placeholder="Select yes or no" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="yes">Yes, I live here</SelectItem>
-                    <SelectItem value="no">No, I'm not a resident</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <Button type="submit" size="lg" className="w-full">
-                Request Access
-              </Button>
-            </form>
-          </CardContent>
-
-          {/* TEMPORARY FALLBACK UI */}
-          {resident === "no" && (
-            <CardFooter className="pt-0">
-              <p className="text-sm text-muted-foreground">
-                Currently, access is restricted to residents only. We may expand to other users in the future.
+              <h1 className="text-3xl font-bold tracking-tight text-foreground">
+                Completing Your Signup
+              </h1>
+              <p className="mt-2 text-muted-foreground">
+                Please wait while we finish setting up your account...
               </p>
-            </CardFooter>
-          )}
-        </Card>
+              <div className="mt-6 flex justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+      ) : (
+        <section className="container max-w-xl py-10">
+          <h1 className="text-3xl font-semibold mb-6">{communityName ? `Join ${communityName.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}` : "Join Courtney's List"}</h1>
+          <Card>
+            <CardHeader className="space-y-4">
+              <div className="flex items-center justify-between">
+                <CardTitle>Request Access</CardTitle>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleBack}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  <ArrowLeft className="h-4 w-4 mr-1" />
+                  Back
+                </Button>
+              </div>
+              
+              {/* Highlighted Invite-Only Test Family Message */}
+              <div className="flex items-start gap-3 p-4 bg-yellow-50 dark:bg-yellow-950/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                <Crown className="h-5 w-5 text-yellow-600 dark:text-yellow-400 mt-0.5 flex-shrink-0" />
+                <div className="space-y-1">
+                  <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                    Since you're part of the <strong>invite-only test group</strong> (thanks!), you'll be <strong>automatically verified</strong>. In the future, neighbors will need admin approval (that'll be me—unless one of you volunteers :)).
+                  </p>
+                </div>
+              </div>
+            </CardHeader>
 
-        <div className="mt-4 text-center text-sm text-muted-foreground">
-          Enter your details, and once approved by your community admin, you'll get full access to your neighborhood's trusted providers.
-        </div>
-      </section>
+            <CardContent className="space-y-4">
+              <form onSubmit={onSubmit} className="space-y-4">
+                <p className="text-xs text-muted-foreground">* Required fields</p>
+                <div className="space-y-2">
+                  <Label htmlFor="name">Name <span className="text-foreground" aria-hidden>*</span></Label>
+                  <Input
+                    id="name"
+                    value={name}
+                    onChange={(e) => setName(e.currentTarget.value)}
+                    placeholder="Your full name"
+                    required
+                    className={errors.name ? "border-destructive focus-visible:ring-destructive" : undefined}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email <span className="text-foreground" aria-hidden>*</span></Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    autoComplete="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.currentTarget.value)}
+                    required
+                    className={errors.email ? "border-destructive focus-visible:ring-destructive" : undefined}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Label htmlFor="address">Full Address <span className="text-foreground" aria-hidden>*</span></Label>
+                    <TooltipProvider delayDuration={200}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button type="button" aria-label="Why we need your address" className="text-muted-foreground">
+                            <Info className="h-4 w-4" />
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Your address helps us link you with your community's exclusive vendor info</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                  <AddressInput
+                    id="address"
+                    defaultValue={address}
+                    placeholder="Full home address"
+                    className={errors.address ? "border-destructive focus-visible:ring-destructive" : undefined}
+                    onSelected={(addr: AddressSelectedPayload) => {
+                      setAddress(addr.formatted_address);
+                    }}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="resident">Are you a resident? <span className="text-foreground" aria-hidden>*</span></Label>
+                  <Select required value={resident} onValueChange={(v) => setResident(v as "yes" | "no")}>
+                    <SelectTrigger id="resident" className={errors.resident ? "border-destructive" : undefined}>
+                      <SelectValue placeholder="Select yes or no" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="yes">Yes, I live here</SelectItem>
+                      <SelectItem value="no">No, I'm not a resident</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <Button type="submit" size="lg" className="w-full">
+                  Request Access
+                </Button>
+              </form>
+            </CardContent>
+
+            {/* TEMPORARY FALLBACK UI */}
+            {resident === "no" && (
+              <CardFooter className="pt-0">
+                <p className="text-sm text-muted-foreground">
+                  Currently, access is restricted to residents only. We may expand to other users in the future.
+                </p>
+              </CardFooter>
+            )}
+          </Card>
+
+          <div className="mt-4 text-center text-sm text-muted-foreground">
+            Enter your details, and once approved by your community admin, you'll get full access to your neighborhood's trusted providers.
+          </div>
+        </section>
+      )}
 
       {/* Magic Link Sent Modal */}
       <Dialog open={showMagicLinkModal} onOpenChange={setShowMagicLinkModal}>
