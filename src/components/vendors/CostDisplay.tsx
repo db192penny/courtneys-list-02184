@@ -5,6 +5,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useUserProfile } from "@/hooks/useUserProfile";
 import { EditMarketPriceModal } from "./EditMarketPriceModal";
 import CostsHover from "./CostsHover";
 import { MobileCostsModal } from "./MobileCostsModal";
@@ -54,8 +55,11 @@ export function CostDisplay({
   communityName
 }: CostDisplayProps) {
   const { data: isAdmin } = useIsAdmin();
+  const { data: profile } = useUserProfile();
   const isMobile = useIsMobile();
   const [showEditMarket, setShowEditMarket] = useState(false);
+  
+  const isVerified = !!profile?.isVerified;
 
   const communityPrice = formatPrice(communityAmount, communityUnit);
   const marketPrice = formatPrice(marketAmount, marketUnit);
@@ -86,7 +90,13 @@ export function CostDisplay({
                     <DialogTitle>Cost Details</DialogTitle>
                   </DialogHeader>
                   <div className="mt-4">
-                    <MobileCostsModal vendorId={vendorId} />
+                    {!isVerified ? (
+                      <div className="text-sm text-muted-foreground p-4">
+                        Costs are shared just within our neighborhood circle. Sign up to view them.
+                      </div>
+                    ) : (
+                      <MobileCostsModal vendorId={vendorId} />
+                    )}
                   </div>
                 </DialogContent>
               </Dialog>
