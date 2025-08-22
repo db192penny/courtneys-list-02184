@@ -1018,6 +1018,16 @@ export type Database = {
           hoa_name: string
         }[]
       }
+      admin_check_missing_hoa_mappings: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          address: string
+          email: string
+          missing_mapping: boolean
+          signup_source: string
+          user_id: string
+        }[]
+      }
       admin_cleanup_orphaned_user: {
         Args: { _user_id: string }
         Returns: boolean
@@ -1113,6 +1123,15 @@ export type Database = {
           review_count: number
           user_email: string
           vendor_count: number
+        }[]
+      }
+      backfill_missing_hoa_mappings: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          email: string
+          error_message: string
+          fixed: boolean
+          user_id: string
         }[]
       }
       check_orphaned_users: {
