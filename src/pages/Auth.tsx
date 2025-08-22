@@ -295,11 +295,11 @@ const Auth = () => {
                 .from('household_hoa')
                 .upsert({
                   household_address: payload.address,
-                  normalized_address: payload.street_name,
+                  normalized_address: payload.address.toLowerCase().trim(),
                   hoa_name: communityDisplayName,
                   created_by: userId
                 }, {
-                  onConflict: 'household_address',
+                  onConflict: 'normalized_address',
                   ignoreDuplicates: true
                 });
               
