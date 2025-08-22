@@ -115,8 +115,8 @@ export function AddCostModal({
         }
       }
       
-      // Plumbing/Electrical/Pet Grooming/House Cleaning/Mobile Tire Repair
-      else if (["plumbing", "electrical", "pet grooming", "house cleaning", "mobile tire repair"].some(cat => categoryLower.includes(cat))) {
+      // Plumbing/Electrical/Pet Grooming/House Cleaning/Mobile Tire Repair/Appliance Repair
+      else if (["plumbing", "electrical", "pet grooming", "house cleaning", "mobile tire repair", "appliance repair"].some(cat => categoryLower.includes(cat))) {
         if (serviceCall) {
           costsToInsert.push({
             vendor_id: vendorId,
@@ -260,8 +260,8 @@ export function AddCostModal({
       );
     }
 
-    // Plumbing/Electrical/Pet Grooming/House Cleaning/Mobile Tire Repair
-    if (["plumbing", "electrical", "pet grooming", "house cleaning", "mobile tire repair"].some(cat => categoryLower.includes(cat))) {
+    // Plumbing/Electrical/Pet Grooming/House Cleaning/Mobile Tire Repair/Appliance Repair
+    if (["plumbing", "electrical", "pet grooming", "house cleaning", "mobile tire repair", "appliance repair"].some(cat => categoryLower.includes(cat))) {
       return (
         <div>
           <Label htmlFor="serviceCall">Service Call</Label>
