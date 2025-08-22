@@ -15,11 +15,11 @@ export function useDataDiagnostics() {
       }
       
       // Check home_vendors vs reviews counts
-      const { data: homeVendorsCount } = await supabase
+      const { count: homeVendorsCount } = await supabase
         .from("home_vendors")
         .select("user_id", { count: "exact", head: true });
       
-      const { data: reviewsCount } = await supabase
+      const { count: reviewsCount } = await supabase
         .from("reviews")
         .select("user_id", { count: "exact", head: true });
       
