@@ -75,16 +75,18 @@ Deno.serve(async (req) => {
           
           // Check signup_source first - handle both community: and homepage: patterns
           if (user.signup_source?.startsWith('community:')) {
-            communityName = user.signup_source.split('community:')[1]
-            console.log('🏘️ Community from signup_source (community:):', communityName)
+            const communitySlug = user.signup_source.split('community:')[1]
+            communityName = communitySlug
+            console.log('🏘️ Community slug from signup_source:', communitySlug)
+            // For new community signups, redirect to the community page with welcome toolbar
+            communityRedirect = `https://courtneys-list.com/communities/${encodeURIComponent(communitySlug)}?welcome=true`
+            console.log('🏘️ Setting community signup redirect to:', communityRedirect)
           } else if (user.signup_source?.startsWith('homepage:')) {
             communityName = user.signup_source.split('homepage:')[1]
             console.log('🏘️ Community from signup_source (homepage:):', communityName)
-          }
-          
-          if (communityName) {
+            // For homepage signups, keep existing auth redirect
             communityRedirect = `https://courtneys-list.com/auth?community=${encodeURIComponent(communityName)}&verified=true`
-            console.log('🏘️ Setting community redirect to:', communityRedirect)
+            console.log('🏘️ Setting homepage redirect to:', communityRedirect)
           } else if (user.address) {
             // Query household_hoa to find their community
             console.log('🔍 Looking up community by address:', user.address)
