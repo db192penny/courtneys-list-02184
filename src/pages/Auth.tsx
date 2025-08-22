@@ -299,7 +299,30 @@ const Auth = () => {
 
     if (signUpError) {
       console.error("[Auth] signup error:", signUpError);
-      toast({ title: "Could not create account", description: signUpError.message, variant: "destructive" });
+      
+      // Handle specific error types with user-friendly messages
+      let errorTitle = "Could not create account";
+      let errorDescription = signUpError.message;
+      
+      // Check for common error patterns
+      if (signUpError.message.includes("User already registered") || 
+          signUpError.message.includes("already been taken") ||
+          signUpError.message.includes("already exists")) {
+        errorTitle = "Email already exists";
+        errorDescription = "An account with this email already exists. Please use a different email or contact support if you believe this is an error.";
+      } else if (signUpError.message.includes("invalid email")) {
+        errorTitle = "Invalid email";
+        errorDescription = "Please enter a valid email address.";
+      } else if (signUpError.message.includes("password")) {
+        errorTitle = "Password issue";
+        errorDescription = "There was an issue with the password. Please try again.";
+      }
+      
+      toast({ 
+        title: errorTitle, 
+        description: errorDescription, 
+        variant: "destructive" 
+      });
       return;
     }
 
