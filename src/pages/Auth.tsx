@@ -274,6 +274,16 @@ const Auth = () => {
     
     console.log("[Auth] 🚀 Starting user creation process");
 
+    // Store user data in metadata for the trigger to use
+    const metaData = {
+      name: name.trim(),
+      address: address.trim(),
+      street_name: extractStreetName(address.trim()),
+      signup_source: communityName ? `community:${toSlug(communityName)}` : null,
+    };
+
+    console.log("[Auth] 📝 Creating auth user with metadata for trigger:", metaData);
+
     // Generate a temporary password the user never sees
     const tempPassword = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 
@@ -281,7 +291,10 @@ const Auth = () => {
     const { data: authData, error: signUpError } = await supabase.auth.signUp({
       email: email.trim(),
       password: tempPassword,
-      options: { emailRedirectTo: redirectUrl },
+      options: { 
+        emailRedirectTo: redirectUrl,
+        data: metaData // Pass metadata during signup so trigger has access
+      },
     });
 
     if (signUpError) {
@@ -298,23 +311,6 @@ const Auth = () => {
     }
 
     console.log("[Auth] ✅ Auth user created, profile will be created automatically via database trigger");
-
-    // Store user data in metadata for the trigger to use
-    const metaData = {
-      name: name.trim(),
-      address: address.trim(),
-      street_name: extractStreetName(address.trim()),
-      signup_source: communityName ? `community:${toSlug(communityName)}` : null,
-    };
-    
-    // Update the auth user's metadata for the trigger
-    const { error: metadataError } = await supabase.auth.updateUser({
-      data: metaData
-    });
-    
-    if (metadataError) {
-      console.warn("[Auth] ⚠️ Could not update user metadata (non-fatal):", metadataError);
-    }
 
     // Handle invite token acceptance if present
     if (inviteToken) {
