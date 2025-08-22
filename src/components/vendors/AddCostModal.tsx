@@ -115,8 +115,8 @@ export function AddCostModal({
         }
       }
       
-      // Plumbing/Electrical
-      else if (["plumbing", "electrical"].some(cat => categoryLower.includes(cat))) {
+      // Plumbing/Electrical/Pet Grooming/House Cleaning
+      else if (["plumbing", "electrical", "pet grooming", "house cleaning"].some(cat => categoryLower.includes(cat))) {
         if (serviceCall) {
           costsToInsert.push({
             vendor_id: vendorId,
@@ -260,8 +260,8 @@ export function AddCostModal({
       );
     }
 
-    // Plumbing/Electrical
-    if (["plumbing", "electrical"].some(cat => categoryLower.includes(cat))) {
+    // Plumbing/Electrical/Pet Grooming/House Cleaning
+    if (["plumbing", "electrical", "pet grooming", "house cleaning"].some(cat => categoryLower.includes(cat))) {
       return (
         <div>
           <Label htmlFor="serviceCall">Service Call</Label>
