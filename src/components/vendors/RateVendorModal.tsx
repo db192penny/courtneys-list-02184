@@ -1,3 +1,4 @@
+
 import { useEffect, useMemo, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
@@ -86,8 +87,8 @@ export default function RateVendorModal({ open, onOpenChange, vendor, onSuccess,
         // If there's an existing review, use its anonymous setting; otherwise use user's global preference
         setShowNameInReview(review ? !review.anonymous : (userProfile?.show_name_public ?? true));
 
-        // Default to true for "use for home" - user should be using vendor they're rating
-        setUseForHome(homeVendor?.id !== undefined ? !!homeVendor?.id : true);
+        // Set useForHome based on whether there's an existing home_vendors entry
+        setUseForHome(homeVendor?.id !== undefined);
       } catch (e) {
         console.warn("[RateVendorModal] prefill error", e);
       }
@@ -141,26 +142,64 @@ export default function RateVendorModal({ open, onOpenChange, vendor, onSuccess,
         await supabase.from("reviews").insert({ vendor_id: vendor.id, user_id: userId, rating: rating, comments: comments || null, anonymous: !showNameInReview });
       }
 
-      // 2) Add to home_vendors table if user selected to use this vendor
+      // 2) Handle home_vendors table with better error handling
       if (useForHome) {
-        const hv = {
-          user_id: userId,
-          vendor_id: vendor.id,
-          my_rating: rating,
-          amount: null,
-          currency: null,
-          period: "monthly",
-        } as any;
-        // upsert requires unique index on (user_id, vendor_id)
-        const { error: hvErr } = await supabase.from("home_vendors").upsert(hv, { onConflict: "user_id,vendor_id" });
-        if (hvErr) console.warn("[RateVendorModal] home_vendors upsert error", hvErr);
+        console.log("[RateVendorModal] Adding/updating home vendor entry...");
+        
+        // First check if entry already exists
+        const { data: existingHomeVendor } = await supabase
+          .from("home_vendors")
+          .select("id")
+          .eq("vendor_id", vendor.id)
+          .eq("user_id", userId)
+          .maybeSingle();
+        
+        if (existingHomeVendor?.id) {
+          // Update existing entry
+          const { error: updateErr } = await supabase
+            .from("home_vendors")
+            .update({ my_rating: rating })
+            .eq("id", existingHomeVendor.id);
+          
+          if (updateErr) {
+            console.warn("[RateVendorModal] home_vendors update error:", updateErr);
+          }
+        } else {
+          // Insert new entry
+          const hv = {
+            user_id: userId,
+            vendor_id: vendor.id,
+            my_rating: rating,
+            amount: null,
+            currency: null,
+            period: "monthly",
+          };
+          
+          const { error: insertErr } = await supabase
+            .from("home_vendors")
+            .insert(hv);
+          
+          if (insertErr) {
+            console.error("[RateVendorModal] home_vendors insert error:", insertErr);
+            // Don't fail the whole operation, just log it
+            toast({ 
+              title: "Review saved", 
+              description: "Your review was saved but there was an issue adding to your home vendors list." 
+            });
+          }
+        }
       } else {
         // Remove from home_vendors if unchecked
-        await supabase
+        console.log("[RateVendorModal] Removing home vendor entry...");
+        const { error: deleteErr } = await supabase
           .from("home_vendors")
           .delete()
           .eq("vendor_id", vendor.id)
           .eq("user_id", userId);
+        
+        if (deleteErr) {
+          console.warn("[RateVendorModal] home_vendors delete error:", deleteErr);
+        }
       }
 
       // Invalidate relevant caches to ensure fresh data
@@ -178,7 +217,7 @@ export default function RateVendorModal({ open, onOpenChange, vendor, onSuccess,
       onOpenChange(false);
       onSuccess?.();
     } catch (e: any) {
-      console.error(e);
+      console.error("[RateVendorModal] Submit error:", e);
       toast({ title: "Error", description: e?.message || "Please try again.", variant: "destructive" });
     } finally {
       setLoading(false);
