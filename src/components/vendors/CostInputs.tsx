@@ -28,8 +28,8 @@ export function buildDefaultCosts(category?: string): CostEntry[] {
     ];
   }
   
-  // Plumbing/Electrical/Pet Grooming/House Cleaning: Service Call only
-  if (c === "plumbing" || c === "electrical" || c === "pet grooming" || c === "house cleaning") {
+  // Plumbing/Electrical/Pet Grooming/House Cleaning/Mobile Tire Repair: Service Call only
+  if (c === "plumbing" || c === "electrical" || c === "pet grooming" || c === "house cleaning" || c === "mobile tire repair") {
     return [
       { cost_kind: "service_call", amount: null, unit: "visit" },
     ];
