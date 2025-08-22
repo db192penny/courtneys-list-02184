@@ -108,3 +108,23 @@ All colors MUST be HSL.
 .address-input-modal .pac-container {
   z-index: 9999 !important;
 }
+
+/* Prevent mobile zoom on input focus */
+@media (max-width: 768px) {
+  input[type="text"],
+  input[type="number"],
+  input[type="email"],
+  input[type="tel"],
+  textarea,
+  select {
+    font-size: 16px !important;
+    touch-action: manipulation;
+  }
+  
+  /* Ensure modal containers don't interfere with zoom prevention */
+  .modal-container,
+  [data-vaul-drawer],
+  [role="dialog"] {
+    touch-action: manipulation;
+  }
+}
