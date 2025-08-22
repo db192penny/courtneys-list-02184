@@ -1320,6 +1320,10 @@ export type Database = {
         Args: { full_name: string }
         Returns: string
       }
+      slug_to_community_name: {
+        Args: { _slug: string }
+        Returns: string
+      }
       street_only: {
         Args: { addr: string }
         Returns: string
