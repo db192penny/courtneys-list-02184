@@ -399,6 +399,24 @@ const Auth = () => {
 
     console.log("[Auth] ✅ Auth user created, profile will be created automatically via database trigger");
 
+    // Send admin notification via edge function (replaces the database trigger approach)
+    try {
+      console.log("[Auth] 📧 Sending admin notification");
+      await supabase.functions.invoke('send-admin-notification', {
+        body: {
+          userEmail: targetEmail,
+          userName: name.trim(),
+          userAddress: address.trim(),
+          community: communityName || 'Direct Signup',
+          signupSource: communityName ? `community:${toSlug(communityName)}` : 'direct'
+        }
+      });
+      console.log("[Auth] ✅ Admin notification sent successfully");
+    } catch (adminNotificationError) {
+      console.warn("[Auth] ⚠️ Admin notification failed (non-fatal):", adminNotificationError);
+      // Don't fail the signup process if admin notification fails
+    }
+
     // Handle invite token acceptance if present
     if (inviteToken) {
       try {
