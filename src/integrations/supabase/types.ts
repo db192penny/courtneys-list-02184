@@ -1203,7 +1203,6 @@ export type Database = {
         Returns: {
           name: string
           points: number
-          street_name: string
         }[]
       }
       get_email_status: {

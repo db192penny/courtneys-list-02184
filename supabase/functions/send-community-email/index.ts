@@ -73,15 +73,23 @@ const handler = async (req: Request): Promise<Response> => {
       console.error("Error fetching leaderboard:", leaderboardError);
     }
 
-    // Create leaderboard text with street names
-    const leaderboard = leaderboardData && leaderboardData.length > 0 
-      ? leaderboardData.map((user: any, index: number) => {
-          const medals = ['🥇', '🥈', '🥉', '🏅', '⭐'];
+    // Create simplified leaderboard text (first name + last initial format)
+    let leaderboard = 'No leaderboard data available yet - be the first to earn points!';
+    
+    try {
+      if (leaderboardData && leaderboardData.length > 0) {
+        const medals = ['🥇', '🥈', '🥉', '🏅', '⭐'];
+        leaderboard = leaderboardData.map((user: any, index: number) => {
           const displayName = formatNameWithLastInitial(user.name || 'Neighbor');
-          const streetName = user.street_name || 'Unknown Street';
-          return `${medals[index]} ${displayName} on ${streetName} – ${user.points} pts`;
-        }).join('\n') 
-      : 'No leaderboard data available yet - be the first to earn points!';
+          return `${medals[index]} ${displayName} – ${user.points} pts`;
+        }).join('\n');
+        
+        console.log(`📊 Generated leaderboard for ${communityName}:`, leaderboard);
+      }
+    } catch (error) {
+      console.error("Error formatting leaderboard:", error);
+      leaderboard = 'Leaderboard temporarily unavailable';
+    }
 
     // Fetch all user data to get individual emails and generate invite links
     const { data: allUsers, error: usersError } = await supabase
@@ -130,7 +138,7 @@ const handler = async (req: Request): Promise<Response> => {
         .replace('{{VIEW_LIST_LINK}}', viewListLink);
 
       return resend.emails.send({
-        from: `${senderName} <noreply@courtneys-list.com>`,
+        from: `Courtney's List <noreply@courtneys-list.com>`,
         to: [user.email],
         subject: subject,
         html: `
