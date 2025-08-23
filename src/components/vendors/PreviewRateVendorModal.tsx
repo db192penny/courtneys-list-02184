@@ -159,7 +159,10 @@ export default function PreviewRateVendorModal({ open, onOpenChange, vendor, onS
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
+      <DialogContent 
+        className="sm:max-w-lg max-h-[90vh] overflow-y-auto"
+        style={{ touchAction: 'manipulation' }}
+      >
         <DialogHeader>
           <DialogTitle>Rate {vendor?.name}</DialogTitle>
         </DialogHeader>
@@ -182,8 +185,19 @@ export default function PreviewRateVendorModal({ open, onOpenChange, vendor, onS
               id="comments"
               value={comments}
               onChange={(e) => setComments(e.target.value)}
+              onFocus={(e) => {
+                // Prevent iOS zoom and unwanted scrolling
+                e.target.style.fontSize = '16px';
+                setTimeout(() => {
+                  e.target.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+                }, 100);
+              }}
               placeholder="Share your experience with this provider..."
               className="min-h-[100px]"
+              style={{ 
+                fontSize: '16px',
+                touchAction: 'manipulation'
+              }}
             />
           </div>
 

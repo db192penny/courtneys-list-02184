@@ -226,7 +226,7 @@ export default function RateVendorModal({ open, onOpenChange, vendor, onSuccess,
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent style={{ touchAction: 'manipulation' }}>
         <DialogHeader>
           <DialogTitle>Rate Vendor — {vendor?.name}</DialogTitle>
         </DialogHeader>
@@ -238,7 +238,23 @@ export default function RateVendorModal({ open, onOpenChange, vendor, onSuccess,
             </div>
             <div className="grid gap-2">
               <Label>Comments (Additional Color)</Label>
-              <Textarea value={comments} onChange={(e) => setComments(e.currentTarget.value)} placeholder="Any helpful insights — pricing, professionalism, customer service, responsiveness — the more detailed the better for your neighbors." />
+              <Textarea 
+                value={comments} 
+                onChange={(e) => setComments(e.currentTarget.value)} 
+                onFocus={(e) => {
+                  // Prevent iOS zoom and unwanted scrolling
+                  e.target.style.fontSize = '16px';
+                  setTimeout(() => {
+                    e.target.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+                  }, 100);
+                }}
+                placeholder="Any helpful insights — pricing, professionalism, customer service, responsiveness — the more detailed the better for your neighbors."
+                className="min-h-[100px]"
+                style={{ 
+                  fontSize: '16px',
+                  touchAction: 'manipulation'
+                }}
+              />
             </div>
             <div className="space-y-4">
               <div className="flex items-center space-x-2">

@@ -97,19 +97,30 @@ export default function MobileRateVendorModal({ open, onOpenChange, vendor, onSu
   }, [vendor?.id]);
 
   const handleTextareaFocus = (e: React.FocusEvent<HTMLTextAreaElement>) => {
-    // Prevent viewport changes on focus
+    // Prevent iOS zoom by ensuring 16px font size
     e.target.style.fontSize = '16px';
-    e.target.style.transform = 'scale(1)';
     
-    // Prevent any scrolling behavior
-    e.preventDefault();
-    
-    // Keep the textarea in view without scrolling the whole modal
+    // Smooth scroll to keep textarea in view within the drawer
     setTimeout(() => {
-      const target = e.target as HTMLTextAreaElement;
-      target.focus();
-      target.setSelectionRange(target.value.length, target.value.length);
-    }, 100);
+      if (scrollAreaRef.current && textareaRef.current) {
+        const textarea = textareaRef.current;
+        const scrollContainer = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
+        
+        if (scrollContainer) {
+          const textareaRect = textarea.getBoundingClientRect();
+          const containerRect = scrollContainer.getBoundingClientRect();
+          
+          // Only scroll if textarea is not fully visible
+          if (textareaRect.bottom > containerRect.bottom || textareaRect.top < containerRect.top) {
+            textarea.scrollIntoView({ 
+              block: 'nearest', 
+              behavior: 'smooth',
+              inline: 'nearest'
+            });
+          }
+        }
+      }
+    }, 150);
   };
 
   const onSubmit = async () => {
@@ -198,7 +209,10 @@ export default function MobileRateVendorModal({ open, onOpenChange, vendor, onSu
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="max-h-[85vh] min-h-[50vh] h-auto">
+      <DrawerContent 
+        className="max-h-[85vh] min-h-[50vh] h-auto" 
+        style={{ touchAction: 'manipulation' }}
+      >
         <DrawerHeader className="text-left pb-4 flex-shrink-0">
           <DrawerTitle>Rate Vendor — {vendor?.name}</DrawerTitle>
         </DrawerHeader>
@@ -225,7 +239,8 @@ export default function MobileRateVendorModal({ open, onOpenChange, vendor, onSu
                   style={{ 
                     fontSize: '16px',
                     maxHeight: '120px',
-                    touchAction: 'manipulation'
+                    touchAction: 'manipulation',
+                    scrollMargin: '20px'
                   }}
                   rows={4}
                 />
