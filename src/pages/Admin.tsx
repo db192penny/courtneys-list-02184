@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Link } from "react-router-dom";
 import { AdminQuickAccess } from "@/components/admin/AdminQuickAccess";
+import EmailTemplatePanel from "@/components/admin/EmailTemplatePanel";
+
 interface PendingRow {
   household_address: string;
   hoa_name: string;
@@ -355,6 +357,17 @@ const [householdLoading, setHouseholdLoading] = useState<Record<string, boolean>
 
         {authed && isHoaAdmin && (
           <div className="grid gap-6 mt-6">
+            {/* Email Management Section */}
+            <div className="rounded-md border border-border p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="font-medium">Community Communication</h2>
+                <EmailTemplatePanel communityName={hoaName || ""} />
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Send welcome emails and updates to your community members with personalized leaderboards and invite links.
+              </p>
+            </div>
+
             <div className="rounded-md border border-border p-4">
               <h2 className="font-medium mb-3">Pending Households ({pendingHouseholds.length})</h2>
               <p className="text-sm text-muted-foreground mb-3">Households are addresses in your HOA that have not yet been approved by an HOA admin. Approving allows residents at that address to access community-only features.</p>
