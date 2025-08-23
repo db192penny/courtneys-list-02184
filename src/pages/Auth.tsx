@@ -25,6 +25,7 @@ const Auth = () => {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showMagicLinkModal, setShowMagicLinkModal] = useState(false);
   const [detectedCommunity, setDetectedCommunity] = useState<string>("");
+  const [justSignedUp, setJustSignedUp] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
   const [params] = useSearchParams();
@@ -205,39 +206,48 @@ const Auth = () => {
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
-        console.log('[Auth] onAuthStateChange: User authenticated');
+        console.log('[Auth] onAuthStateChange: User authenticated', {
+          justSignedUp,
+          isVerifiedMagicLink,
+          event: _event
+        });
         
-        // Check if this is a verified magic link access
-        if (isVerifiedMagicLink) {
-          console.log('[Auth] Verified magic link detected, proceeding with finalization');
+        // Only redirect if it's NOT a fresh signup OR it's a verified magic link return
+        if (!justSignedUp || isVerifiedMagicLink) {
+          console.log('[Auth] Proceeding with finalization - not a fresh signup or verified magic link');
           setTimeout(() => finalizeOnboarding(session.user!.id, session.user!.email ?? null), 0);
         } else {
-          console.log('[Auth] Regular auth detected, proceeding with finalization');
-          setTimeout(() => finalizeOnboarding(session.user!.id, session.user!.email ?? null), 0);
+          console.log('[Auth] Skipping finalization - user just signed up, waiting for magic link');
         }
       }
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
-        console.log('[Auth] getSession: User already authenticated');
+        console.log('[Auth] getSession: User already authenticated', {
+          justSignedUp,
+          isVerifiedMagicLink
+        });
         
-        // Check if this is a verified magic link access
-        if (isVerifiedMagicLink) {
-          console.log('[Auth] Verified magic link session detected, proceeding with finalization');
+        // Only redirect if it's NOT a fresh signup OR it's a verified magic link return
+        if (!justSignedUp || isVerifiedMagicLink) {
+          console.log('[Auth] Proceeding with finalization - existing session or verified magic link');
           finalizeOnboarding(session.user.id, session.user.email ?? null);
         } else {
-          console.log('[Auth] Regular session detected, proceeding with finalization');
-          finalizeOnboarding(session.user.id, session.user.email ?? null);
+          console.log('[Auth] Skipping finalization - user just signed up, waiting for magic link');
         }
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [finalizeOnboarding, isVerifiedMagicLink]);
+  }, [finalizeOnboarding, isVerifiedMagicLink, justSignedUp]);
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    
+    // Mark that this is a fresh signup to prevent premature redirection
+    setJustSignedUp(true);
+    console.log('[Auth] Setting justSignedUp = true for fresh signup');
 
     if (resident === "no") {
       toast({ title: "Residents only", description: "Currently, access is restricted to residents only.", variant: "destructive" });
@@ -610,7 +620,13 @@ const Auth = () => {
         </section>
 
       {/* Magic Link Sent Modal */}
-      <Dialog open={showMagicLinkModal} onOpenChange={setShowMagicLinkModal}>
+      <Dialog open={showMagicLinkModal} onOpenChange={(open) => {
+        setShowMagicLinkModal(open);
+        if (!open) {
+          setJustSignedUp(false);
+          console.log('[Auth] Resetting justSignedUp = false (modal closed)');
+        }
+      }}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-lg">
@@ -636,13 +652,19 @@ const Auth = () => {
             </div>
             
             <div className="flex flex-col gap-2 pt-2">
-              <Button onClick={() => setShowMagicLinkModal(false)} className="w-full">
+              <Button onClick={() => {
+                setShowMagicLinkModal(false);
+                setJustSignedUp(false);
+                console.log('[Auth] Resetting justSignedUp = false (modal dismissed)');
+              }} className="w-full">
                 Got It!
               </Button>
               <Button 
                 variant="outline" 
                 onClick={() => {
                   setShowMagicLinkModal(false);
+                  setJustSignedUp(false);
+                  console.log('[Auth] Resending magic link and resetting justSignedUp = false');
                   onSubmit(new Event('submit') as any);
                 }}
                 className="w-full"
