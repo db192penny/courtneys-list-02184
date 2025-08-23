@@ -94,6 +94,12 @@ const Auth = () => {
   const finalizeOnboarding = useCallback(async (userId: string, userEmail: string | null) => {
     console.log("[Auth] 🚀 Starting finalizeOnboarding (community detection only) for user:", userId);
     
+    // CRITICAL: Prevent finalization for fresh signups
+    if (justCompletedSignup) {
+      console.log("[Auth] 🛑 Skipping finalizeOnboarding - user just completed signup, should use magic link");
+      return;
+    }
+    
     let destination = "/communities/boca-bridges?welcome=true";
     
     try {
@@ -198,6 +204,12 @@ const Auth = () => {
     } catch (e) {
       console.error("[Auth] ❌ finalizeOnboarding failed with error:", e);
       
+      // CRITICAL: Don't redirect during fresh signups
+      if (justCompletedSignup) {
+        console.log("[Auth] 🛑 Not redirecting due to error - user just completed signup");
+        return;
+      }
+      
       // Show user-friendly error message
       toast({ 
         title: "Navigation Issue", 
@@ -205,7 +217,7 @@ const Auth = () => {
         variant: "destructive" 
       });
       
-      // Always ensure the user can access the app
+      // Always ensure the user can access the app (only for non-fresh signups)
       navigate("/communities/boca-bridges?welcome=true", { replace: true });
     }
   }, [navigate, toast, communityName]);
@@ -429,6 +441,9 @@ const Auth = () => {
       
       // Mark that signup just completed to prevent immediate redirection
       setJustCompletedSignup(true);
+      
+      // Show magic link modal immediately
+      setShowMagicLinkModal(true);
       
       // For auto-verified users, manually send the magic link email
       try {
