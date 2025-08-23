@@ -126,7 +126,7 @@ const handler = async (req: Request): Promise<Response> => {
       }
       
       // Generate proper custom invite link
-      const inviteLink = `https://courtneys-list.com/invite/${inviteToken}`;
+      const inviteLink = `https://courtneys-list.com/community-preview/${communitySlug}?invite=${inviteToken}&welcome=true`;
       
       // Generate view latest list link
       const viewListLink = `https://courtneys-list.com/community-preview/${communitySlug}`;
