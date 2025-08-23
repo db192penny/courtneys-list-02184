@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { usePreviewSession } from "@/hooks/usePreviewSession";
 import IdentityGateModal from "@/components/preview/IdentityGateModal";
 import ReviewPreview from "@/components/ReviewPreview";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface Props {
   open: boolean;
@@ -21,6 +22,7 @@ interface Props {
 
 export default function PreviewRateVendorModal({ open, onOpenChange, vendor, onSuccess, communityName }: Props) {
   const { session, createSession, trackEvent, getAuthorLabel } = usePreviewSession();
+  const queryClient = useQueryClient();
   const [rating, setRating] = useState(0);
   const [comments, setComments] = useState("");
   const [showNameInReview, setShowNameInReview] = useState(true);
@@ -127,6 +129,10 @@ export default function PreviewRateVendorModal({ open, onOpenChange, vendor, onS
         vendor_category: vendor.category,
         use_for_home: useForHome,
       });
+
+      // Invalidate relevant caches to ensure fresh data
+      queryClient.invalidateQueries({ queryKey: ["community-stats"] });
+      queryClient.invalidateQueries({ queryKey: ["reviews-hover"] });
 
       toast({
         title: "Review Saved",
