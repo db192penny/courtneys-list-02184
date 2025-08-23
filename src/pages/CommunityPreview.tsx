@@ -7,6 +7,7 @@ import { ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import CommunityVendorTable from "@/components/vendors/CommunityVendorTable";
 import { usePreviewSession } from "@/hooks/usePreviewSession";
+import EmailManagementPanel from "@/components/preview/EmailManagementPanel";
 
 function slugToName(slug: string): string {
   return slug
@@ -153,10 +154,13 @@ const CommunityPreview = () => {
         {/* Vendor Table */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold">Service Providers</h2>
-            <p className="text-sm text-muted-foreground">
-              Rate and share your experiences
-            </p>
+            <div>
+              <h2 className="text-xl font-semibold">Service Providers</h2>
+              <p className="text-sm text-muted-foreground">
+                Rate and share your experiences
+              </p>
+            </div>
+            <EmailManagementPanel communityName={communityName} />
           </div>
           
           <CommunityVendorTable 
