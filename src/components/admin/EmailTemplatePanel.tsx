@@ -41,20 +41,20 @@ const EMAIL_TEMPLATES: EmailTemplate[] = [
     id: "welcome-1",
     name: "Welcome Email #1 - Community Leaderboard Update",
     description: "Welcome email with current leaderboard and invitation links",
-    subject: "🎉 30+ {COMMUNITY_NAME} homes now on Courtney's List + leaderboard",
+    subject: "30+ {COMMUNITY_NAME} homes now on Courtney's List + leaderboard",
     body: `Hi Neighbors 💜,
 
 Thanks so much for signing up — we now have 30+ {COMMUNITY_NAME} homes on Courtney's List! Already, just by reading the organized reviews, I know who I'm calling for my next AC repair, and we even found a new pool vendor.
 
-To make this fun, we added a points system and a leaderboard (aka neighborhood street cred 😎):
-   •   ⭐ Rate a Vendor = +5 pts
-   •   ➕ Submit a New Vendor = +5 pts
-   •   📩 Invite a Neighbor = +10 pts
+To make this fun, we added a points system and a leaderboard:
+   •   Rate a Vendor = +5 pts
+   •   Submit a New Vendor = +5 pts
+   •   Invite a Neighbor = +10 pts
 
 Here's the current leaderboard 🏆:
 {{LEADERBOARD}}
 
-💡 New this week: categories now include Mobile Tire Repair and Pet Groomers. Keep the feedback coming and let us know about any bugs!
+New this week: categories now include Mobile Tire Repair and Pet Groomers. Keep the feedback coming and let us know about any bugs!
 
 👉 Want to climb the leaderboard?
 	1.	Rate 3–4 of your vendors to help your neighbors.

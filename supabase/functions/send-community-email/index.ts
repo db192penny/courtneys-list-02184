@@ -63,32 +63,25 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error("Missing required fields: subject, body, recipients, or communityName");
     }
 
-    // Fetch leaderboard data for this specific community, excluding test users
-    const { data: leaderboardData, error: leaderboardError } = await supabase
-      .from('users')
-      .select(`
-        name, 
-        points, 
-        street_name,
-        household_hoa!inner(hoa_name)
-      `)
-      .eq('is_verified', true)
-      .not('email', 'in', '("davebirnbaum@gmail.com","clkramer@gmail.com")')
-      .eq('household_hoa.hoa_name', communityName)
-      .order('points', { ascending: false })
-      .limit(5);
+    // Fetch leaderboard data using database function
+    const { data: leaderboardData, error: leaderboardError } = await supabase.rpc(
+      'get_community_leaderboard', 
+      { _community_name: communityName, _limit: 5 }
+    );
 
     if (leaderboardError) {
       console.error("Error fetching leaderboard:", leaderboardError);
     }
 
     // Create leaderboard text with street names
-    const leaderboard = leaderboardData ? leaderboardData.map((user: any, index: number) => {
-      const medals = ['🥇', '🥈', '🥉', '🏅', '⭐'];
-      const displayName = formatNameWithLastInitial(user.name || 'Neighbor');
-      const streetName = user.street_name || 'Unknown Street';
-      return `${medals[index]} ${displayName} on ${streetName} – ${user.points} pts`;
-    }).join('\n') : '🥇 Loading leaderboard...';
+    const leaderboard = leaderboardData && leaderboardData.length > 0 
+      ? leaderboardData.map((user: any, index: number) => {
+          const medals = ['🥇', '🥈', '🥉', '🏅', '⭐'];
+          const displayName = formatNameWithLastInitial(user.name || 'Neighbor');
+          const streetName = user.street_name || 'Unknown Street';
+          return `${medals[index]} ${displayName} on ${streetName} – ${user.points} pts`;
+        }).join('\n') 
+      : 'No leaderboard data available yet - be the first to earn points!';
 
     // Fetch all user data to get individual emails and generate invite links
     const { data: allUsers, error: usersError } = await supabase
@@ -142,7 +135,7 @@ const handler = async (req: Request): Promise<Response> => {
         subject: subject,
         html: `
           <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; line-height: 1.6;">
-            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 8px 8px 0 0; text-align: center;">
+            <div style="background: #4f46e5; color: white; padding: 20px; border-radius: 8px 8px 0 0; text-align: center;">
               <h1 style="margin: 0; font-size: 24px;">${communityName}</h1>
               <p style="margin: 5px 0 0; opacity: 0.9;">Neighbor Updates</p>
             </div>
@@ -154,8 +147,8 @@ ${personalizedBody}
               
               <div style="margin-top: 20px; text-align: center;">
                 <a href="${communitySlug ? `https://courtneys-list.com/community-preview/${communitySlug}` : '#'}" 
-                   style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; margin: 10px 0;">
-                  📋 View Latest List
+                   style="display: inline-block; background: #4f46e5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; margin: 10px 0;">
+                  👉 View Latest List
                 </a>
               </div>
               
@@ -165,6 +158,12 @@ ${personalizedBody}
                 </p>
                 <p style="color: #718096; font-size: 12px; margin: 5px 0 0;">
                   You received this because you're part of our community directory.
+                </p>
+                <p style="color: #718096; font-size: 12px; margin: 10px 0 0;">
+                  <a href="mailto:noreply@courtneys-list.com?subject=Unsubscribe%20from%20Community%20Emails" 
+                     style="color: #4299e1; text-decoration: underline;">
+                    Unsubscribe from community emails
+                  </a>
                 </p>
               </div>
             </div>

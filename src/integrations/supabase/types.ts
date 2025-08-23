@@ -1198,6 +1198,14 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_community_leaderboard: {
+        Args: { _community_name: string; _limit?: number }
+        Returns: {
+          name: string
+          points: number
+          street_name: string
+        }[]
+      }
       get_email_status: {
         Args: { _email: string }
         Returns: string
