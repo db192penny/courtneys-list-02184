@@ -25,37 +25,31 @@ interface Props {
 
 export default function EmailManagementPanel({ communityName }: Props) {
   const [open, setOpen] = useState(false);
-  const [subject, setSubject] = useState("🎉 Courtney's List update: 20+ homes, leaderboard & your invite link!");
-  const [body, setBody] = useState(`Hey neighbors,
+  const [subject, setSubject] = useState("🎉 20+ Boca Bridges homes now on Courtney's List + leaderboard");
+  const [body, setBody] = useState(`Hi Neighbors 💜,
 
-Big thanks to everyone who already signed up for Courtney's List! We've got 20+ homes on board already — and honestly, it's already making my life easier. Just from reading your reviews, I now know who we're using for AC and a new pool vendor 😅.
+Thanks so much for signing up — we now have 20+ Boca Bridges homes on Courtney's List! Already, just by reading the organized reviews, I know who I'm calling for my next AC repair, and we even found a new pool vendor.
 
-To make it fun, we've added a points & leaderboard system (aka neighborhood "street cred"). Here's how you earn points:
-   •   ⭐ Rate a vendor = +5 pts
-   •   ➕ Add a new vendor = +5 pts
-   •   📩 Invite a neighbor = +10 pts (use your unique invite link from your Profile page so you get credit!)
+To make this fun, we added a points system and a leaderboard (aka neighborhood street cred 😎):
+   •   ⭐ Rate a Vendor = +5 pts
+   •   ➕ Submit a New Vendor = +5 pts
+   •   📩 Invite a Neighbor = +10 pts
 
-And here's the leaderboard so far:
+Here's the current leaderboard 🏆:
+{{LEADERBOARD}}
 
-🥇 [Neighbor Name] – 45 pts
-🥈 [Neighbor Name] – 30 pts
-🥉 [Neighbor Name] – 20 pts
-… (and more climbing up fast!)
+💡 New this week: categories now include Mobile Tire Repair and Pet Groomers. Keep the feedback coming and let us know about any bugs!
 
-👉 Can you crack the Top 5? Just rate a few of your vendors and you'll be right up there.
+👉 Want to climb the leaderboard?
+	1.	Rate 3–4 of your vendors to help your neighbors.
+	2.	Invite a friend in Boca Bridges using your personal link below (points are tracked automatically when they join):
 
-We also just added Mobile Tire Repair and Pet Groomers to the categories 🐾🚗 — so check them out and keep the feedback coming.
+Your Invite Link:
+{{INVITE_LINK}}
 
-Next goal: 50 homes (10% of the community)!
-➡️ You can help us get there by:
-	1.	Inviting your neighbors with your link (grab it from your Profile page).
-	2.	Checking out the latest vendors and adding your reviews.
+The more we all contribute, the more valuable (and stress-free!) this list becomes for the whole community.
 
-Every review and rating makes it easier for all of us to find a trusted plumber, AC guy, pool service, or pest control — without scrolling through endless FB posts.
-
-Thanks again for making this a community effort 💜 — let's hit that 10% 
-
-- Courtney`);
+💜 Courtney`);
   const [recipientMode, setRecipientMode] = useState<"all" | "selected">("all");
   const [selectedRecipients, setSelectedRecipients] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
