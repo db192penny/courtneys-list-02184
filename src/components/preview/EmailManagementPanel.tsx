@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
-import { Mail, Send, Users } from "lucide-react";
+import { Mail, Send, Users, UserPlus, X } from "lucide-react";
 
 interface EmailRecipient {
   id: string;
@@ -17,6 +17,11 @@ interface EmailRecipient {
   email: string;
   address: string;
   display: string;
+}
+
+interface CustomRecipient {
+  name: string;
+  email: string;
 }
 
 interface Props {
@@ -50,8 +55,11 @@ Your Invite Link:
 The more we all contribute, the more valuable (and stress-free!) this list becomes for the whole community.
 
 💜 Courtney`);
-  const [recipientMode, setRecipientMode] = useState<"all" | "selected">("all");
+  const [recipientMode, setRecipientMode] = useState<"all" | "selected" | "custom">("all");
   const [selectedRecipients, setSelectedRecipients] = useState<string[]>([]);
+  const [customRecipients, setCustomRecipients] = useState<CustomRecipient[]>([]);
+  const [customName, setCustomName] = useState("");
+  const [customEmail, setCustomEmail] = useState("");
   const [loading, setLoading] = useState(false);
 
   const { data: users = [] } = useQuery({
@@ -106,12 +114,23 @@ The more we all contribute, the more valuable (and stress-free!) this list becom
       return;
     }
 
+    if (recipientMode === "custom" && customRecipients.length === 0) {
+      toast({
+        title: "No Custom Recipients Added",
+        description: "Please add at least one custom recipient.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
       const recipients = recipientMode === "all" 
         ? users.map(u => u.email)
-        : users.filter(u => selectedRecipients.includes(u.id)).map(u => u.email);
+        : recipientMode === "selected"
+        ? users.filter(u => selectedRecipients.includes(u.id)).map(u => u.email)
+        : customRecipients.map(r => r.email);
 
       const { data, error } = await supabase.functions.invoke("send-community-email", {
         body: {
@@ -151,6 +170,43 @@ The more we all contribute, the more valuable (and stress-free!) this list becom
     );
   };
 
+  const addCustomRecipient = () => {
+    if (!customName.trim() || !customEmail.trim()) {
+      toast({
+        title: "Missing Information",
+        description: "Please provide both name and email.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!/\S+@\S+\.\S+/.test(customEmail)) {
+      toast({
+        title: "Invalid Email",
+        description: "Please provide a valid email address.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (customRecipients.some(r => r.email.toLowerCase() === customEmail.toLowerCase())) {
+      toast({
+        title: "Duplicate Email",
+        description: "This email is already in the list.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setCustomRecipients(prev => [...prev, { name: customName.trim(), email: customEmail.trim() }]);
+    setCustomName("");
+    setCustomEmail("");
+  };
+
+  const removeCustomRecipient = (index: number) => {
+    setCustomRecipients(prev => prev.filter((_, i) => i !== index));
+  };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -171,7 +227,7 @@ The more we all contribute, the more valuable (and stress-free!) this list becom
           {/* Recipients Section */}
           <div className="space-y-4">
             <Label>Recipients</Label>
-            <Select value={recipientMode} onValueChange={(value: "all" | "selected") => setRecipientMode(value)}>
+            <Select value={recipientMode} onValueChange={(value: "all" | "selected" | "custom") => setRecipientMode(value)}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -183,6 +239,12 @@ The more we all contribute, the more valuable (and stress-free!) this list becom
                   </div>
                 </SelectItem>
                 <SelectItem value="selected">Select Specific Recipients</SelectItem>
+                <SelectItem value="custom">
+                  <div className="flex items-center gap-2">
+                    <UserPlus className="w-4 h-4" />
+                    Add Custom Recipients
+                  </div>
+                </SelectItem>
               </SelectContent>
             </Select>
 
@@ -209,6 +271,65 @@ The more we all contribute, the more valuable (and stress-free!) this list becom
                     </div>
                   ))}
                 </div>
+              </div>
+            )}
+
+            {recipientMode === "custom" && (
+              <div className="space-y-4">
+                <div className="text-sm text-muted-foreground">
+                  Add custom recipients: {customRecipients.length} added
+                </div>
+                
+                {/* Add Custom Recipient Form */}
+                <div className="flex gap-2">
+                  <div className="flex-1">
+                    <Input
+                      placeholder="Name"
+                      value={customName}
+                      onChange={(e) => setCustomName(e.target.value)}
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <Input
+                      type="email"
+                      placeholder="Email"
+                      value={customEmail}
+                      onChange={(e) => setCustomEmail(e.target.value)}
+                    />
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={addCustomRecipient}
+                  >
+                    <UserPlus className="w-4 h-4" />
+                  </Button>
+                </div>
+
+                {/* Custom Recipients List */}
+                {customRecipients.length > 0 && (
+                  <div className="max-h-48 overflow-y-auto border rounded-lg p-3 space-y-2">
+                    {customRecipients.map((recipient, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between p-2 rounded bg-muted/50"
+                      >
+                        <span className="text-sm">
+                          {recipient.name} ({recipient.email})
+                        </span>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => removeCustomRecipient(index)}
+                          className="h-6 w-6"
+                        >
+                          <X className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>
