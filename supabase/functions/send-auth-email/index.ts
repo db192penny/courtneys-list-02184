@@ -52,7 +52,7 @@ Deno.serve(async (req) => {
           user: { email: webhookData.userEmail },
           email_data: {
             email_action_type: 'signup',
-            redirect_to: webhookData.redirectTo || `https://courtneys-list.com/communities/${webhookData.communitySlug || 'boca-bridges'}?welcome=true`
+            redirect_to: webhookData.redirectTo || `https://courtneys-list.com/auth?verified=true&community=${webhookData.communitySlug || 'boca-bridges'}`
           }
         }
       }
@@ -104,14 +104,14 @@ Deno.serve(async (req) => {
             const communitySlug = user.signup_source.split('community:')[1]
             communityName = communitySlug
             console.log('🏘️ Community slug from signup_source:', communitySlug)
-            // For new community signups, redirect to the community page with welcome toolbar
-            communityRedirect = `https://courtneys-list.com/communities/${encodeURIComponent(communitySlug)}?welcome=true`
+            // For new community signups, redirect back to auth page for verification
+            communityRedirect = `https://courtneys-list.com/auth?verified=true&community=${encodeURIComponent(communitySlug)}`
             console.log('🏘️ Setting community signup redirect to:', communityRedirect)
           } else if (user.signup_source?.startsWith('homepage:')) {
             communityName = user.signup_source.split('homepage:')[1]
             console.log('🏘️ Community from signup_source (homepage:):', communityName)
-            // For homepage signups, keep existing auth redirect
-            communityRedirect = `https://courtneys-list.com/auth?community=${encodeURIComponent(communityName)}&verified=true`
+            // For homepage signups, redirect to auth page for verification
+            communityRedirect = `https://courtneys-list.com/auth?verified=true&community=${encodeURIComponent(communityName)}`
             console.log('🏘️ Setting homepage redirect to:', communityRedirect)
           } else if (user.address) {
             // Query household_hoa to find their community
@@ -137,7 +137,7 @@ Deno.serve(async (req) => {
                   console.log('⚠️ HOA lookup error:', hoaError.message)
                 } else if (hoa?.hoa_name) {
                   communityName = hoa.hoa_name
-                  communityRedirect = `https://courtneys-list.com/auth?community=${encodeURIComponent(hoa.hoa_name)}&verified=true`
+                  communityRedirect = `https://courtneys-list.com/auth?verified=true&community=${encodeURIComponent(hoa.hoa_name)}`
                   console.log('🏘️ Community from address:', hoa.hoa_name)
                 } else {
                   console.log('⚠️ No HOA found for normalized address:', normalizedAddr)

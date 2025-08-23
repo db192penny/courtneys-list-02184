@@ -24,9 +24,7 @@ const Auth = () => {
   const [errors, setErrors] = useState<{ name?: boolean; email?: boolean; address?: boolean; resident?: boolean }>({});
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showMagicLinkModal, setShowMagicLinkModal] = useState(false);
-  const [isMagicLinkUser, setIsMagicLinkUser] = useState(false);
   const [detectedCommunity, setDetectedCommunity] = useState<string>("");
-  const [justCompletedSignup, setJustCompletedSignup] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
   const [params] = useSearchParams();
@@ -43,13 +41,6 @@ const Auth = () => {
 
   const isVerifiedMagicLink = useMemo(() => {
     return params.get("verified") === "true";
-  }, [params]);
-
-  const isMagicLinkAccess = useMemo(() => {
-    // Check for magic link indicators in URL
-    const hasTokenParams = params.get("token_hash") || params.get("type") || params.get("access_token");
-    const hasVerificationParams = params.get("verified") === "true";
-    return !!(hasTokenParams || hasVerificationParams);
   }, [params]);
 
   const handleBack = () => {
@@ -92,13 +83,7 @@ const Auth = () => {
   }, [email, address, params, inviteToken]);
 
   const finalizeOnboarding = useCallback(async (userId: string, userEmail: string | null) => {
-    console.log("[Auth] 🚀 Starting finalizeOnboarding (community detection only) for user:", userId);
-    
-    // CRITICAL: Prevent finalization for fresh signups
-    if (justCompletedSignup) {
-      console.log("[Auth] 🛑 Skipping finalizeOnboarding - user just completed signup, should use magic link");
-      return;
-    }
+    console.log("[Auth] 🚀 Starting finalizeOnboarding for user:", userId);
     
     let destination = "/communities/boca-bridges?welcome=true";
     
@@ -204,12 +189,6 @@ const Auth = () => {
     } catch (e) {
       console.error("[Auth] ❌ finalizeOnboarding failed with error:", e);
       
-      // CRITICAL: Don't redirect during fresh signups
-      if (justCompletedSignup) {
-        console.log("[Auth] 🛑 Not redirecting due to error - user just completed signup");
-        return;
-      }
-      
       // Show user-friendly error message
       toast({ 
         title: "Navigation Issue", 
@@ -217,26 +196,21 @@ const Auth = () => {
         variant: "destructive" 
       });
       
-      // Always ensure the user can access the app (only for non-fresh signups)
+      // Always ensure the user can access the app
       navigate("/communities/boca-bridges?welcome=true", { replace: true });
     }
   }, [navigate, toast, communityName]);
 
-  // Handle authentication state changes (magic link completion)
+  // Handle authentication state changes - simplified magic link flow
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
         console.log('[Auth] onAuthStateChange: User authenticated');
         
-        // Only redirect if this is a magic link access (not fresh signup)
-        if (isMagicLinkAccess && !justCompletedSignup) {
-          console.log('[Auth] Magic link detected, proceeding with finalization');
-          setIsMagicLinkUser(true);
-          // Defer any Supabase calls out of the callback to avoid deadlocks
+        // Check if this is a verified magic link access
+        if (isVerifiedMagicLink) {
+          console.log('[Auth] Verified magic link detected, proceeding with finalization');
           setTimeout(() => finalizeOnboarding(session.user!.id, session.user!.email ?? null), 0);
-        } else if (justCompletedSignup) {
-          console.log('[Auth] Fresh signup detected, staying on page for magic link modal');
-          // Don't redirect, let the user see the magic link modal
         } else {
           console.log('[Auth] Regular auth detected, proceeding with finalization');
           setTimeout(() => finalizeOnboarding(session.user!.id, session.user!.email ?? null), 0);
@@ -248,14 +222,10 @@ const Auth = () => {
       if (session?.user) {
         console.log('[Auth] getSession: User already authenticated');
         
-        // Only redirect if this is a magic link access (not fresh signup)
-        if (isMagicLinkAccess && !justCompletedSignup) {
-          console.log('[Auth] Magic link session detected, proceeding with finalization');
-          setIsMagicLinkUser(true);
+        // Check if this is a verified magic link access
+        if (isVerifiedMagicLink) {
+          console.log('[Auth] Verified magic link session detected, proceeding with finalization');
           finalizeOnboarding(session.user.id, session.user.email ?? null);
-        } else if (justCompletedSignup) {
-          console.log('[Auth] Fresh signup session detected, staying on page for magic link modal');
-          // Don't redirect, let the user see the magic link modal
         } else {
           console.log('[Auth] Regular session detected, proceeding with finalization');
           finalizeOnboarding(session.user.id, session.user.email ?? null);
@@ -264,7 +234,7 @@ const Auth = () => {
     });
 
     return () => subscription.unsubscribe();
-  }, [finalizeOnboarding, isMagicLinkAccess, justCompletedSignup]);
+  }, [finalizeOnboarding, isVerifiedMagicLink]);
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -439,31 +409,23 @@ const Auth = () => {
       console.log("[Auth] 🔍 User was auto-logged in, checking if they need magic link email");
       userWasAutoVerified = true;
       
-      // Mark that signup just completed to prevent immediate redirection
-      setJustCompletedSignup(true);
-      
       // Show magic link modal immediately
       setShowMagicLinkModal(true);
       
-      // For auto-verified users, manually send the magic link email
+      // Log out the user immediately to keep them on the auth page
+      await supabase.auth.signOut();
+      
+      // Send custom magic link email that redirects back to /auth
       try {
-        console.log("[Auth] 📧 Sending magic link email for auto-verified user");
-        const communitySlug = communityName ? toSlug(communityName) : 'boca-bridges';
-        const redirectUrl = `https://courtneys-list.com/communities/${communitySlug}?welcome=true`;
-        
+        console.log("[Auth] 🔄 Sending magic link email");
         await supabase.functions.invoke('send-auth-email', {
-          body: {
+          body: { 
             userEmail: targetEmail,
-            userName: name.trim(),
-            communitySlug,
-            redirectTo: redirectUrl
+            communitySlug: communityName ? toSlug(communityName) : 'boca-bridges',
+            redirectTo: `${window.location.origin}/auth?verified=true&community=${communityName ? toSlug(communityName) : 'boca-bridges'}`
           }
         });
         console.log("[Auth] ✅ Magic link email sent successfully");
-        
-        // Log out the user after sending the email so they must use the magic link
-        await supabase.auth.signOut();
-        console.log("[Auth] 🚪 User logged out, must use magic link to access community");
         
       } catch (emailError) {
         console.warn("[Auth] ⚠️ Magic link email failed (non-fatal):", emailError);
@@ -521,26 +483,6 @@ const Auth = () => {
         canonical={canonical}
       />
       
-      {isMagicLinkUser ? (
-        <section className="bg-gradient-to-br from-background via-background to-secondary/5 py-24 px-4 sm:px-6 lg:px-8">
-          <div className="max-w-md mx-auto space-y-8">
-            <div className="text-center">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 dark:bg-green-900/20 rounded-full mb-4">
-                <Mail className="h-8 w-8 text-green-600" />
-              </div>
-              <h1 className="text-3xl font-bold tracking-tight text-foreground">
-                Completing Your Signup
-              </h1>
-              <p className="mt-2 text-muted-foreground">
-                Please wait while we finish setting up your account...
-              </p>
-              <div className="mt-6 flex justify-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-              </div>
-            </div>
-          </div>
-        </section>
-      ) : (
         <section className="container max-w-xl py-10">
           <h1 className="text-3xl font-semibold mb-6">{communityName ? `Join ${communityName.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}` : "Join Courtney's List"}</h1>
           <Card>
@@ -666,7 +608,6 @@ const Auth = () => {
             Enter your details, and once approved by your community admin, you'll get full access to your neighborhood's trusted providers.
           </div>
         </section>
-      )}
 
       {/* Magic Link Sent Modal */}
       <Dialog open={showMagicLinkModal} onOpenChange={setShowMagicLinkModal}>
