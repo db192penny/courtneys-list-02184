@@ -30,10 +30,10 @@ interface Props {
 
 export default function EmailManagementPanel({ communityName }: Props) {
   const [open, setOpen] = useState(false);
-  const [subject, setSubject] = useState("🎉 20+ Boca Bridges homes now on Courtney's List + leaderboard");
+  const [subject, setSubject] = useState("🎉 30+ Boca Bridges homes now on Courtney's List + leaderboard");
   const [body, setBody] = useState(`Hi Neighbors 💜,
 
-Thanks so much for signing up — we now have 20+ Boca Bridges homes on Courtney's List! Already, just by reading the organized reviews, I know who I'm calling for my next AC repair, and we even found a new pool vendor.
+Thanks so much for signing up — we now have 30+ Boca Bridges homes on Courtney's List! Already, just by reading the organized reviews, I know who I'm calling for my next AC repair, and we even found a new pool vendor.
 
 To make this fun, we added a points system and a leaderboard (aka neighborhood street cred 😎):
    •   ⭐ Rate a Vendor = +5 pts

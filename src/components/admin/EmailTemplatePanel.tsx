@@ -41,10 +41,10 @@ const EMAIL_TEMPLATES: EmailTemplate[] = [
     id: "welcome-1",
     name: "Welcome Email #1 - Community Leaderboard Update",
     description: "Welcome email with current leaderboard and invitation links",
-    subject: "🎉 20+ {COMMUNITY_NAME} homes now on Courtney's List + leaderboard",
+    subject: "🎉 30+ {COMMUNITY_NAME} homes now on Courtney's List + leaderboard",
     body: `Hi Neighbors 💜,
 
-Thanks so much for signing up — we now have 20+ {COMMUNITY_NAME} homes on Courtney's List! Already, just by reading the organized reviews, I know who I'm calling for my next AC repair, and we even found a new pool vendor.
+Thanks so much for signing up — we now have 30+ {COMMUNITY_NAME} homes on Courtney's List! Already, just by reading the organized reviews, I know who I'm calling for my next AC repair, and we even found a new pool vendor.
 
 To make this fun, we added a points system and a leaderboard (aka neighborhood street cred 😎):
    •   ⭐ Rate a Vendor = +5 pts
