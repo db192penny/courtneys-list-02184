@@ -11,13 +11,23 @@ function formatCommunityName(name: string): string {
     .join(' ');
 }
 
-// Auth email function with basic webhook verification and community detection
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
+
+// Auth email function with webhook verification and direct call support
 Deno.serve(async (req) => {
-  console.log('🚀 Auth email webhook triggered')
+  console.log('🚀 Auth email function triggered')
+  
+  // Handle CORS preflight requests
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
   
   if (req.method !== 'POST') {
     console.log('❌ Method not allowed:', req.method)
-    return new Response('Method not allowed', { status: 405 })
+    return new Response('Method not allowed', { status: 405, headers: corsHeaders })
   }
 
   try {
@@ -25,16 +35,32 @@ Deno.serve(async (req) => {
     const payload = await req.text()
     console.log('📦 Payload length:', payload.length)
     
-    // Parse the webhook payload directly without verification for now
     let webhookData
+    let isDirectCall = false
+    
     try {
       webhookData = JSON.parse(payload)
       console.log('✅ Payload parsed successfully')
+      
+      // Check if this is a direct call (has userEmail field) vs webhook call (has user.email)
+      if (webhookData.userEmail && !webhookData.user) {
+        isDirectCall = true
+        console.log('📞 Direct function call detected')
+        
+        // Transform direct call format to webhook format for processing
+        webhookData = {
+          user: { email: webhookData.userEmail },
+          email_data: {
+            email_action_type: 'signup',
+            redirect_to: webhookData.redirectTo || `https://courtneys-list.com/communities/${webhookData.communitySlug || 'boca-bridges'}?welcome=true`
+          }
+        }
+      }
     } catch (parseError) {
       console.error('❌ Failed to parse payload:', parseError.message)
       return new Response(JSON.stringify({ error: 'Invalid payload' }), {
         status: 400,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json', ...corsHeaders }
       })
     }
 
@@ -44,7 +70,7 @@ Deno.serve(async (req) => {
       console.error('❌ No user email in payload')
       return new Response(JSON.stringify({ error: 'No user email found' }), {
         status: 400,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json', ...corsHeaders }
       })
     }
 
@@ -130,15 +156,53 @@ Deno.serve(async (req) => {
 
     // Create magic link
     const supabaseUrl = Deno.env.get('SUPABASE_URL')
-    const token = webhookData.email_data?.token_hash || webhookData.email_data?.token || 'missing-token'
-    const emailActionType = webhookData.email_data?.email_action_type || 'recovery'
+    let token, emailActionType
+    
+    if (isDirectCall) {
+      // For direct calls, generate a new magic link token
+      console.log('🔑 Generating magic link for direct call')
+      
+      try {
+        const supabase = createClient(supabaseUrl!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!)
+        
+        // Generate OTP for the user
+        const { data: otpData, error: otpError } = await supabase.auth.admin.generateLink({
+          type: 'magiclink',
+          email: webhookData.user.email,
+          options: {
+            redirectTo: webhookData.email_data.redirect_to
+          }
+        })
+        
+        if (otpError || !otpData.properties) {
+          console.error('❌ Failed to generate OTP:', otpError)
+          throw new Error('Failed to generate magic link')
+        }
+        
+        // Extract token from the generated link
+        const generatedUrl = new URL(otpData.properties.action_link)
+        token = generatedUrl.searchParams.get('token')
+        emailActionType = generatedUrl.searchParams.get('type') || 'magiclink'
+        
+        console.log('✅ Magic link generated successfully')
+      } catch (otpError) {
+        console.error('❌ OTP generation failed:', otpError)
+        throw new Error('Failed to generate magic link token')
+      }
+    } else {
+      // For webhook calls, use provided tokens
+      token = webhookData.email_data?.token_hash || webhookData.email_data?.token || 'missing-token'
+      emailActionType = webhookData.email_data?.email_action_type || 'recovery'
+    }
+    
     const redirectTo = webhookData.email_data?.redirect_to || communityRedirect
     
     console.log('🔗 Magic link details:', {
-      token: token.substring(0, 10) + '...',
+      token: token?.substring(0, 10) + '...',
       emailActionType,
       providedRedirectTo: webhookData.email_data?.redirect_to,
-      finalRedirectTo: redirectTo
+      finalRedirectTo: redirectTo,
+      isDirectCall
     })
     
     const magicLinkUrl = `${supabaseUrl}/auth/v1/verify?token=${token}&type=${emailActionType}&redirect_to=${redirectTo}`
@@ -206,7 +270,7 @@ Deno.serve(async (req) => {
 
     return new Response(JSON.stringify({ success: true, emailId: emailResult.id }), {
       status: 200,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...corsHeaders },
     })
     
   } catch (error) {
@@ -217,7 +281,7 @@ Deno.serve(async (req) => {
       stack: error.stack 
     }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...corsHeaders },
     })
   }
 })

@@ -399,6 +399,33 @@ const Auth = () => {
 
     console.log("[Auth] ✅ Auth user created, profile will be created automatically via database trigger");
 
+    // Check if user was auto-verified (community signups)
+    let userWasAutoVerified = false;
+    if (authData.session?.user) {
+      console.log("[Auth] 🔍 User was auto-logged in, checking if they need magic link email");
+      userWasAutoVerified = true;
+      
+      // For auto-verified users, manually send the magic link email
+      try {
+        console.log("[Auth] 📧 Sending magic link email for auto-verified user");
+        const communitySlug = communityName ? toSlug(communityName) : 'boca-bridges';
+        const redirectUrl = `https://courtneys-list.com/communities/${communitySlug}?welcome=true`;
+        
+        await supabase.functions.invoke('send-auth-email', {
+          body: {
+            userEmail: targetEmail,
+            userName: name.trim(),
+            communitySlug,
+            redirectTo: redirectUrl
+          }
+        });
+        console.log("[Auth] ✅ Magic link email sent successfully");
+      } catch (emailError) {
+        console.warn("[Auth] ⚠️ Magic link email failed (non-fatal):", emailError);
+        // Don't fail the signup process if email fails
+      }
+    }
+
     // Send admin notification via edge function (replaces the database trigger approach)
     try {
       console.log("[Auth] 📧 Sending admin notification");
@@ -434,7 +461,7 @@ const Auth = () => {
       }
     }
     
-    // Success: Show magic link modal
+    // Success: Show magic link modal for ALL signups (both auto-verified and regular)
     setShowMagicLinkModal(true);
     console.log("[Auth] ✅ Auth signup completed successfully - profile will be created by trigger");
   };

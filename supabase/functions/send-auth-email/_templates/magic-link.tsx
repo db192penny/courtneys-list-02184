@@ -74,33 +74,29 @@ export const MagicLinkEmail = ({
             Cheers,<br/>
             Courtney
           </Text>
+          
+          <Text style={unsubscribe}>
+            <Link
+              href={`https://courtneys-list.com/unsubscribe?email=${encodeURIComponent(name)}`}
+              target="_blank"
+              style={{ color: '#ccc', textDecoration: 'underline' }}
+            >
+              Unsubscribe
+            </Link>
+            {' | '}
+            <Link
+              href="https://courtneys-list.com/contact"
+              target="_blank"
+              style={{ color: '#ccc', textDecoration: 'underline' }}
+            >
+              Contact Us
+            </Link>
+          </Text>
         </Container>
       </Body>
     </Html>
   )
 }
-        
-        <Text style={unsubscribe}>
-          <Link
-            href={`https://courtneys-list.com/unsubscribe?email=${encodeURIComponent(name)}`}
-            target="_blank"
-            style={{ color: '#ccc', textDecoration: 'underline' }}
-          >
-            Unsubscribe
-          </Link>
-          {' | '}
-          <Link
-            href="https://courtneys-list.com/contact"
-            target="_blank"
-            style={{ color: '#ccc', textDecoration: 'underline' }}
-          >
-            Contact Us
-          </Link>
-        </Text>
-      </Container>
-    </Body>
-  </Html>
-)
 
 export default MagicLinkEmail
 
