@@ -26,6 +26,7 @@ const Auth = () => {
   const [showMagicLinkModal, setShowMagicLinkModal] = useState(false);
   const [isMagicLinkUser, setIsMagicLinkUser] = useState(false);
   const [detectedCommunity, setDetectedCommunity] = useState<string>("");
+  const [justCompletedSignup, setJustCompletedSignup] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
   const [params] = useSearchParams();
@@ -42,6 +43,13 @@ const Auth = () => {
 
   const isVerifiedMagicLink = useMemo(() => {
     return params.get("verified") === "true";
+  }, [params]);
+
+  const isMagicLinkAccess = useMemo(() => {
+    // Check for magic link indicators in URL
+    const hasTokenParams = params.get("token_hash") || params.get("type") || params.get("access_token");
+    const hasVerificationParams = params.get("verified") === "true";
+    return !!(hasTokenParams || hasVerificationParams);
   }, [params]);
 
   const handleBack = () => {
@@ -204,33 +212,47 @@ const Auth = () => {
 
   // Handle authentication state changes (magic link completion)
   useEffect(() => {
-    // Check if user arrived via magic link
-    const urlParams = new URLSearchParams(window.location.search);
-    const hasUserParams = urlParams.get('community') || urlParams.get('verified');
-    
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
-        console.log('[Auth] onAuthStateChange: User authenticated, checking for magic link');
-        if (hasUserParams) {
+        console.log('[Auth] onAuthStateChange: User authenticated');
+        
+        // Only redirect if this is a magic link access (not fresh signup)
+        if (isMagicLinkAccess && !justCompletedSignup) {
+          console.log('[Auth] Magic link detected, proceeding with finalization');
           setIsMagicLinkUser(true);
+          // Defer any Supabase calls out of the callback to avoid deadlocks
+          setTimeout(() => finalizeOnboarding(session.user!.id, session.user!.email ?? null), 0);
+        } else if (justCompletedSignup) {
+          console.log('[Auth] Fresh signup detected, staying on page for magic link modal');
+          // Don't redirect, let the user see the magic link modal
+        } else {
+          console.log('[Auth] Regular auth detected, proceeding with finalization');
+          setTimeout(() => finalizeOnboarding(session.user!.id, session.user!.email ?? null), 0);
         }
-        // Defer any Supabase calls out of the callback to avoid deadlocks
-        setTimeout(() => finalizeOnboarding(session.user!.id, session.user!.email ?? null), 0);
       }
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         console.log('[Auth] getSession: User already authenticated');
-        if (hasUserParams) {
+        
+        // Only redirect if this is a magic link access (not fresh signup)
+        if (isMagicLinkAccess && !justCompletedSignup) {
+          console.log('[Auth] Magic link session detected, proceeding with finalization');
           setIsMagicLinkUser(true);
+          finalizeOnboarding(session.user.id, session.user.email ?? null);
+        } else if (justCompletedSignup) {
+          console.log('[Auth] Fresh signup session detected, staying on page for magic link modal');
+          // Don't redirect, let the user see the magic link modal
+        } else {
+          console.log('[Auth] Regular session detected, proceeding with finalization');
+          finalizeOnboarding(session.user.id, session.user.email ?? null);
         }
-        finalizeOnboarding(session.user.id, session.user.email ?? null);
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [finalizeOnboarding]);
+  }, [finalizeOnboarding, isMagicLinkAccess, justCompletedSignup]);
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -405,6 +427,9 @@ const Auth = () => {
       console.log("[Auth] 🔍 User was auto-logged in, checking if they need magic link email");
       userWasAutoVerified = true;
       
+      // Mark that signup just completed to prevent immediate redirection
+      setJustCompletedSignup(true);
+      
       // For auto-verified users, manually send the magic link email
       try {
         console.log("[Auth] 📧 Sending magic link email for auto-verified user");
@@ -420,6 +445,11 @@ const Auth = () => {
           }
         });
         console.log("[Auth] ✅ Magic link email sent successfully");
+        
+        // Log out the user after sending the email so they must use the magic link
+        await supabase.auth.signOut();
+        console.log("[Auth] 🚪 User logged out, must use magic link to access community");
+        
       } catch (emailError) {
         console.warn("[Auth] ⚠️ Magic link email failed (non-fatal):", emailError);
         // Don't fail the signup process if email fails
