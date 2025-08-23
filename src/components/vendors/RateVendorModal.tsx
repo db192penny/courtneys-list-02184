@@ -87,8 +87,8 @@ export default function RateVendorModal({ open, onOpenChange, vendor, onSuccess,
         // If there's an existing review, use its anonymous setting; otherwise use user's global preference
         setShowNameInReview(review ? !review.anonymous : (userProfile?.show_name_public ?? true));
 
-        // Set useForHome based on whether there's an existing home_vendors entry
-        setUseForHome(homeVendor?.id !== undefined);
+        // Set useForHome - default to true for new users, respect existing preference
+        setUseForHome(homeVendor?.id !== undefined ? !!homeVendor?.id : true);
       } catch (e) {
         console.warn("[RateVendorModal] prefill error", e);
       }

@@ -24,6 +24,7 @@ export default function PreviewRateVendorModal({ open, onOpenChange, vendor, onS
   const [rating, setRating] = useState(0);
   const [comments, setComments] = useState("");
   const [showNameInReview, setShowNameInReview] = useState(true);
+  const [useForHome, setUseForHome] = useState(true);
   const [loading, setLoading] = useState(false);
   const [showIdentityGate, setShowIdentityGate] = useState(false);
 
@@ -40,6 +41,7 @@ export default function PreviewRateVendorModal({ open, onOpenChange, vendor, onS
       setRating(0);
       setComments("");
       setShowNameInReview(true);
+      setUseForHome(true);
     }
   }, [open]);
 
@@ -60,6 +62,12 @@ export default function PreviewRateVendorModal({ open, onOpenChange, vendor, onS
           setRating(existingReview.rating);
           setComments(existingReview.comments || "");
           setShowNameInReview(!existingReview.anonymous);
+          // For preview, we store the useForHome preference in the review comments field as metadata
+          // But for simplicity, let's just default to true for new users
+          setUseForHome(true);
+        } else {
+          // Default to true for new preview users
+          setUseForHome(true);
         }
       } catch (error) {
         console.warn("Failed to prefill review data:", error);
@@ -109,11 +117,15 @@ export default function PreviewRateVendorModal({ open, onOpenChange, vendor, onS
 
       if (error) throw error;
 
+      // Note: Preview mode doesn't persist home vendor preferences to database
+      // This checkbox is just for UI consistency with the main rating modals
+
       // Track the event
       await trackEvent("rate_vendor", vendor.id, {
         rating,
         vendor_name: vendor.name,
         vendor_category: vendor.category,
+        use_for_home: useForHome,
       });
 
       toast({
@@ -175,18 +187,34 @@ export default function PreviewRateVendorModal({ open, onOpenChange, vendor, onS
             />
           </div>
 
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="showName"
-              checked={showNameInReview}
-              onCheckedChange={(checked) => setShowNameInReview(!!checked)}
-            />
-            <Label
-              htmlFor="showName"
-              className="text-sm font-normal cursor-pointer"
-            >
-              Show my name in this review
-            </Label>
+          <div className="space-y-3">
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="useForHome"
+                checked={useForHome}
+                onCheckedChange={(checked) => setUseForHome(!!checked)}
+              />
+              <Label
+                htmlFor="useForHome"
+                className="text-sm font-normal cursor-pointer"
+              >
+                Do you currently use this vendor for your home?
+              </Label>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="showName"
+                checked={showNameInReview}
+                onCheckedChange={(checked) => setShowNameInReview(!!checked)}
+              />
+              <Label
+                htmlFor="showName"
+                className="text-sm font-normal cursor-pointer"
+              >
+                Show my name in this review
+              </Label>
+            </div>
           </div>
 
           {rating > 0 && (
