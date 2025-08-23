@@ -96,7 +96,29 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send personalized emails to each user
     const emailPromises = allUsers.map(async (user: any) => {
-      const inviteLink = `https://iuxacgyocpwblpmmbwwc.supabase.co/auth/v1/verify?type=signup&token=invite_${user.id}&redirect_to=${encodeURIComponent('https://courtneys-list.com/communities/boca-bridges')}`;
+      // Generate a unique invite token for this user to share
+      const inviteToken = crypto.randomUUID();
+      
+      // Convert community name to slug format
+      const communitySlug = communityName.toLowerCase().replace(/\s+/g, '-');
+      
+      // Create invite record in the database for tracking
+      const { error: inviteError } = await supabase
+        .from('invitations')
+        .insert({
+          invite_token: inviteToken,
+          invited_by: user.id,
+          community_name: communityName,
+          community_slug: communitySlug,
+          status: 'pending'
+        });
+      
+      if (inviteError) {
+        console.error(`Error creating invite record for user ${user.id}:`, inviteError);
+      }
+      
+      // Generate proper custom invite link
+      const inviteLink = `https://courtneys-list.com/invite/${inviteToken}`;
       
       const personalizedBody = body
         .replace('{{LEADERBOARD}}', leaderboard)
