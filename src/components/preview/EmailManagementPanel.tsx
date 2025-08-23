@@ -55,32 +55,36 @@ The more we all contribute, the more valuable (and stress-free!) this list becom
   const [loading, setLoading] = useState(false);
 
   const { data: users = [] } = useQuery({
-    queryKey: ["community-users", communityName],
+    queryKey: ["community-users"],
     queryFn: async () => {
+      console.log("Fetching users for email dropdown...");
+      
       const { data, error } = await supabase
         .from("users")
         .select("id, name, email, address")
-        .eq("is_verified", true);
+        .eq("is_verified", true)
+        .not("name", "is", null)
+        .not("email", "is", null)
+        .not("address", "is", null);
 
       if (error) {
         console.error("Failed to fetch users:", error);
         return [];
       }
 
-      // Filter by community based on address (simplified matching)
-      const communityUsers = data.filter(user => 
-        user.address && user.name && user.email
-      ).map(user => ({
+      console.log("Raw user data:", data);
+
+      const communityUsers = data.map(user => ({
         id: user.id,
         name: user.name,
         email: user.email,
         address: user.address,
-        display: `${user.name.split(' ')[0]} ${user.name.split(' ').slice(-1)[0]?.charAt(0)}. - ${user.address.split(',')[0]}`
+        display: `${user.name.split(' ')[0]} ${user.name.split(' ').slice(-1)[0]?.charAt(0) || ''}. - ${user.address.split(',')[0]}`
       }));
 
+      console.log("Processed users for dropdown:", communityUsers);
       return communityUsers;
     },
-    enabled: open,
   });
 
   const handleSendEmail = async () => {
