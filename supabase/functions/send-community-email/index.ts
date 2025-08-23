@@ -63,11 +63,18 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error("Missing required fields: subject, body, recipients, or communityName");
     }
 
-    // Fetch leaderboard data
+    // Fetch leaderboard data for this specific community, excluding test users
     const { data: leaderboardData, error: leaderboardError } = await supabase
       .from('users')
-      .select('name, points')
+      .select(`
+        name, 
+        points, 
+        street_name,
+        household_hoa!inner(hoa_name)
+      `)
       .eq('is_verified', true)
+      .not('email', 'in', '("davebirnbaum@gmail.com","clkramer@gmail.com")')
+      .eq('household_hoa.hoa_name', communityName)
       .order('points', { ascending: false })
       .limit(5);
 
@@ -75,11 +82,12 @@ const handler = async (req: Request): Promise<Response> => {
       console.error("Error fetching leaderboard:", leaderboardError);
     }
 
-    // Create leaderboard text
+    // Create leaderboard text with street names
     const leaderboard = leaderboardData ? leaderboardData.map((user: any, index: number) => {
       const medals = ['🥇', '🥈', '🥉', '🏅', '⭐'];
       const displayName = formatNameWithLastInitial(user.name || 'Neighbor');
-      return `${medals[index]} ${displayName} – ${user.points} pts`;
+      const streetName = user.street_name || 'Unknown Street';
+      return `${medals[index]} ${displayName} on ${streetName} – ${user.points} pts`;
     }).join('\n') : '🥇 Loading leaderboard...';
 
     // Fetch all user data to get individual emails and generate invite links
@@ -120,9 +128,13 @@ const handler = async (req: Request): Promise<Response> => {
       // Generate proper custom invite link
       const inviteLink = `https://courtneys-list.com/invite/${inviteToken}`;
       
+      // Generate view latest list link
+      const viewListLink = `https://courtneys-list.com/community-preview/${communitySlug}`;
+      
       const personalizedBody = body
         .replace('{{LEADERBOARD}}', leaderboard)
-        .replace('{{INVITE_LINK}}', inviteLink);
+        .replace('{{INVITE_LINK}}', inviteLink)
+        .replace('{{VIEW_LIST_LINK}}', viewListLink);
 
       return resend.emails.send({
         from: `${senderName} <noreply@courtneys-list.com>`,
@@ -138,6 +150,13 @@ const handler = async (req: Request): Promise<Response> => {
             <div style="background: white; padding: 30px; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 8px 8px;">
               <div style="white-space: pre-wrap; color: #2d3748; font-size: 16px;">
 ${personalizedBody}
+              </div>
+              
+              <div style="margin-top: 20px; text-align: center;">
+                <a href="${communitySlug ? `https://courtneys-list.com/community-preview/${communitySlug}` : '#'}" 
+                   style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; margin: 10px 0;">
+                  📋 View Latest List
+                </a>
               </div>
               
               <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e2e8f0; text-align: center;">
