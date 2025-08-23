@@ -1208,6 +1208,14 @@ export type Database = {
           hoa_name: string
         }[]
       }
+      get_user_leaderboard_position: {
+        Args: { _community_name: string; _user_id: string }
+        Returns: {
+          points: number
+          rank_position: number
+          total_users: number
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

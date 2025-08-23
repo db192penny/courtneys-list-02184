@@ -22,3 +22,18 @@ verify_jwt = false
 
 [functions.backfill-google-ratings]
 verify_jwt = false
+
+[functions.send-invite-success-email]
+verify_jwt = false
+
+[functions.send-invite-success-email-listener]
+verify_jwt = false
+
+[functions.send-community-email]
+verify_jwt = false
+
+[functions.send-welcome-email]
+verify_jwt = false
+
+[functions.populate-preview-data]
+verify_jwt = false
