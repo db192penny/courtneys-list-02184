@@ -277,26 +277,69 @@ const SubmitVendor = () => {
         }
       }
 
-      // 3) Handle home vendor association for existing vendors
+      // 3) Handle home vendor association for existing vendors - ALL household members
       if (useForHome) {
-        const primary = costEntries.find(c => c.cost_kind === "monthly_plan" && c.amount != null) || costEntries.find(c => c.amount != null);
-        const hv = {
-          user_id: userId,
-          vendor_id: vendorId,
-          my_rating: rating || undefined,
-          amount: primary?.amount ?? null,
-          currency: primary?.amount != null ? "USD" : null,
-          period: primary?.cost_kind === "monthly_plan" ? "monthly" : (primary?.cost_kind === "hourly" ? "hourly" : null),
-        } as any;
-        const { error: hvErr } = await supabase.from("home_vendors").upsert(hv, { onConflict: "user_id,vendor_id" });
-        if (hvErr) console.warn("[SubmitVendor] home_vendors upsert error", hvErr);
+        // Get user's address first
+        const { data: currentUserProfile } = await supabase
+          .from("users")
+          .select("address")
+          .eq("id", userId)
+          .single();
+          
+        if (!currentUserProfile?.address) {
+          toast({ title: "Error", description: "Unable to determine your address", variant: "destructive" });
+          return;
+        }
+        
+        // Get all users at the same address
+        const { data: householdUsers, error: householdError } = await supabase
+          .from("users")
+          .select("id")
+          .eq("address", currentUserProfile.address);
+        
+        if (householdError) {
+          console.warn("[SubmitVendor] Error fetching household users:", householdError);
+        } else if (householdUsers) {
+          const primary = costEntries.find(c => c.cost_kind === "monthly_plan" && c.amount != null) || costEntries.find(c => c.amount != null);
+          
+          // Create/update home_vendors entry for each household member
+          for (const householdUser of householdUsers) {
+            const hv = {
+              user_id: householdUser.id,
+              vendor_id: vendorId,
+              my_rating: rating || undefined,
+              amount: primary?.amount ?? null,
+              currency: primary?.amount != null ? "USD" : null,
+              period: primary?.cost_kind === "monthly_plan" ? "monthly" : (primary?.cost_kind === "hourly" ? "hourly" : null),
+            } as any;
+            const { error: hvErr } = await supabase.from("home_vendors").upsert(hv, { onConflict: "user_id,vendor_id" });
+            if (hvErr) console.warn("[SubmitVendor] home_vendors upsert error", hvErr);
+          }
+        }
       } else {
-        // Remove from home_vendors if unchecked
-        await supabase
-          .from("home_vendors")
-          .delete()
-          .eq("vendor_id", vendorId)
-          .eq("user_id", userId);
+        // Remove from home_vendors for all household members if unchecked
+        const { data: currentUserProfile } = await supabase
+          .from("users")
+          .select("address")
+          .eq("id", userId)
+          .single();
+          
+        if (currentUserProfile?.address) {
+          const { data: householdUsers, error: householdError } = await supabase
+            .from("users")
+            .select("id")
+            .eq("address", currentUserProfile.address);
+          
+          if (!householdError && householdUsers) {
+            for (const householdUser of householdUsers) {
+              await supabase
+                .from("home_vendors")
+                .delete()
+                .eq("vendor_id", vendorId)
+                .eq("user_id", householdUser.id);
+            }
+          }
+        }
       }
 
       toast({ title: "Saved!", description: "Your changes have been saved." });
@@ -398,19 +441,42 @@ const SubmitVendor = () => {
       }
     }
 
-    // 4) Add to home_vendors table if user selected to use this vendor
+    // 4) Add to home_vendors table for ALL household members if user selected to use this vendor
     if (useForHome) {
-      const primary = costEntries.find(c => c.cost_kind === "monthly_plan" && c.amount != null) || costEntries.find(c => c.amount != null);
-      const hv = {
-        user_id: userId,
-        vendor_id: vendorIdNew,
-        my_rating: rating,
-        amount: primary?.amount ?? null,
-        currency: primary?.amount != null ? "USD" : null,
-        period: primary?.cost_kind === "monthly_plan" ? "monthly" : (primary?.cost_kind === "hourly" ? "hourly" : null),
-      } as any;
-      const { error: hvErr } = await supabase.from("home_vendors").upsert(hv, { onConflict: "user_id,vendor_id" });
-      if (hvErr) console.warn("[SubmitVendor] home_vendors upsert error", hvErr);
+      // Get user's address for home_vendors
+      const { data: userProfile } = await supabase
+        .from("users")
+        .select("address")
+        .eq("id", userId)
+        .single();
+
+      if (userProfile?.address) {
+        // Get all users at the same address
+        const { data: householdUsers, error: householdError } = await supabase
+          .from("users")
+          .select("id")
+          .eq("address", userProfile.address);
+        
+        if (householdError) {
+          console.warn("[SubmitVendor] Error fetching household users:", householdError);
+        } else if (householdUsers) {
+          const primary = costEntries.find(c => c.cost_kind === "monthly_plan" && c.amount != null) || costEntries.find(c => c.amount != null);
+          
+          // Create home_vendors entry for each household member
+          for (const householdUser of householdUsers) {
+            const hv = {
+              user_id: householdUser.id,
+              vendor_id: vendorIdNew,
+              my_rating: rating,
+              amount: primary?.amount ?? null,
+              currency: primary?.amount != null ? "USD" : null,
+              period: primary?.cost_kind === "monthly_plan" ? "monthly" : (primary?.cost_kind === "hourly" ? "hourly" : null),
+            } as any;
+            const { error: hvErr } = await supabase.from("home_vendors").upsert(hv, { onConflict: "user_id,vendor_id" });
+            if (hvErr) console.warn("[SubmitVendor] home_vendors upsert error", hvErr);
+          }
+        }
+      }
     }
 
     // DB trigger will mark the user as verified and increment submission count

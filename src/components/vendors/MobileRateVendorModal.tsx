@@ -165,25 +165,64 @@ export default function MobileRateVendorModal({ open, onOpenChange, vendor, onSu
         await supabase.from("reviews").insert({ vendor_id: vendor.id, user_id: userId, rating: rating, comments: comments || null, anonymous: !showNameInReview });
       }
 
-      // 2) Add to home_vendors table if user selected to use this vendor
+      // 2) Add to home_vendors table for ALL household members if user selected to use this vendor
       if (useForHome) {
-        const hv = {
-          user_id: userId,
-          vendor_id: vendor.id,
-          my_rating: rating,
-          amount: null,
-          currency: null,
-          period: "monthly",
-        } as any;
-        const { error: hvErr } = await supabase.from("home_vendors").upsert(hv, { onConflict: "user_id,vendor_id" });
-        if (hvErr) console.warn("[MobileRateVendorModal] home_vendors upsert error", hvErr);
+        // Get user's address first
+        const { data: userProfile } = await supabase
+          .from("users")
+          .select("address")
+          .eq("id", userId)
+          .single();
+          
+        if (userProfile?.address) {
+          // Get all users at the same address
+          const { data: householdUsers, error: householdError } = await supabase
+            .from("users")
+            .select("id")
+            .eq("address", userProfile.address);
+          
+          if (householdError) {
+            console.warn("[MobileRateVendorModal] Error fetching household users:", householdError);
+          } else if (householdUsers) {
+            // Create/update home_vendors entry for each household member
+            for (const householdUser of householdUsers) {
+              const hv = {
+                user_id: householdUser.id,
+                vendor_id: vendor.id,
+                my_rating: rating,
+                amount: null,
+                currency: 'USD',
+                period: "monthly",
+              } as any;
+              const { error: hvErr } = await supabase.from("home_vendors").upsert(hv, { onConflict: "user_id,vendor_id" });
+              if (hvErr) console.warn("[MobileRateVendorModal] home_vendors upsert error", hvErr);
+            }
+          }
+        }
       } else {
-        // Remove from home_vendors if unchecked
-        await supabase
-          .from("home_vendors")
-          .delete()
-          .eq("vendor_id", vendor.id)
-          .eq("user_id", userId);
+        // Remove from home_vendors for all household members if unchecked
+        const { data: userProfile } = await supabase
+          .from("users")
+          .select("address")
+          .eq("id", userId)
+          .single();
+          
+        if (userProfile?.address) {
+          const { data: householdUsers, error: householdError } = await supabase
+            .from("users")
+            .select("id")
+            .eq("address", userProfile.address);
+          
+          if (!householdError && householdUsers) {
+            for (const householdUser of householdUsers) {
+              await supabase
+                .from("home_vendors")
+                .delete()
+                .eq("vendor_id", vendor.id)
+                .eq("user_id", householdUser.id);
+            }
+          }
+        }
       }
 
       // Invalidate relevant caches to ensure fresh data
