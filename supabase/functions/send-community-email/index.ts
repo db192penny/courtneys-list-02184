@@ -130,7 +130,7 @@ const handler = async (req: Request): Promise<Response> => {
       const inviteLink = `https://courtneys-list.com/community-preview/${communitySlug}?invite=${inviteToken}&welcome=true`;
       
       // Generate view latest list link
-      const viewListLink = `https://courtneys-list.com/community-preview/${communitySlug}`;
+      const viewListLink = `https://courtneys-list.com/communities/${communitySlug}?welcome=true`;
       
       const personalizedBody = body
         .replace('{{LEADERBOARD}}', leaderboard)
@@ -154,9 +154,16 @@ ${personalizedBody}
               </div>
               
               <div style="margin-top: 20px; text-align: center;">
-                <a href="${communitySlug ? `https://courtneys-list.com/community-preview/${communitySlug}` : '#'}" 
-                   style="display: inline-block; background: #4f46e5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; margin: 10px 0;">
-                  👉 View Latest List
+                <p style="color: #2d3748; font-size: 16px; margin-bottom: 15px;">
+                  <strong>Invite a friend</strong> (most points) in ${communityName} using your personal link below - points are tracked automatically when they join:
+                </p>
+                <a href="${personalizedBody.includes('{{INVITE_LINK}}') ? inviteLink : '#'}" 
+                   style="display: inline-block; background: #10b981; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; margin: 10px 10px;">
+                  🤝 Your Personal Invite Link
+                </a>
+                <a href="${communitySlug ? `https://courtneys-list.com/communities/${communitySlug}?welcome=true` : '#'}" 
+                   style="display: inline-block; background: #4f46e5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; margin: 10px 10px;">
+                  👉 View Updated List
                 </a>
               </div>
               
