@@ -1310,7 +1310,11 @@ export type Database = {
       }
       mark_invite_accepted: {
         Args: { _token: string; _user_id: string }
-        Returns: boolean
+        Returns: {
+          inviter_email: string
+          points_awarded: number
+          success: boolean
+        }[]
       }
       monthlyize_cost: {
         Args: { _amount: number; _period: string }
