@@ -142,63 +142,93 @@ export default function RateVendorModal({ open, onOpenChange, vendor, onSuccess,
         await supabase.from("reviews").insert({ vendor_id: vendor.id, user_id: userId, rating: rating, comments: comments || null, anonymous: !showNameInReview });
       }
 
-      // 2) Handle home_vendors table with better error handling
+      // 2) Handle home_vendors table - add for ALL users at this address
       if (useForHome) {
-        console.log("[RateVendorModal] Adding/updating home vendor entry...");
+        console.log("[RateVendorModal] Adding to home vendors for all household members...");
         
-        // First check if entry already exists
-        const { data: existingHomeVendor } = await supabase
-          .from("home_vendors")
+        if (!userData?.address) {
+          toast({ title: "Error", description: "Unable to determine your address", variant: "destructive" });
+          return;
+        }
+        
+        // Get all users at the same address
+        const { data: householdUsers, error: householdError } = await supabase
+          .from("users")
           .select("id")
-          .eq("vendor_id", vendor.id)
-          .eq("user_id", userId)
-          .maybeSingle();
+          .eq("address", userData.address);
         
-        if (existingHomeVendor?.id) {
-          // Update existing entry
-          const { error: updateErr } = await supabase
-            .from("home_vendors")
-            .update({ my_rating: rating })
-            .eq("id", existingHomeVendor.id);
-          
-          if (updateErr) {
-            console.warn("[RateVendorModal] home_vendors update error:", updateErr);
-          }
-        } else {
-          // Insert new entry
-          const hv = {
-            user_id: userId,
-            vendor_id: vendor.id,
-            my_rating: rating,
-            amount: null,
-            currency: null,
-            period: "monthly",
-          };
-          
-          const { error: insertErr } = await supabase
-            .from("home_vendors")
-            .insert(hv);
-          
-          if (insertErr) {
-            console.error("[RateVendorModal] home_vendors insert error:", insertErr);
-            // Don't fail the whole operation, just log it
-            toast({ 
-              title: "Review saved", 
-              description: "Your review was saved but there was an issue adding to your home vendors list." 
-            });
+        if (householdError) {
+          console.warn("[RateVendorModal] Error fetching household users:", householdError);
+        } else if (householdUsers) {
+          // Create/update home_vendors entry for each household member
+          for (const householdUser of householdUsers) {
+            const { data: existingHomeVendor } = await supabase
+              .from("home_vendors")
+              .select("id")
+              .eq("user_id", householdUser.id)
+              .eq("vendor_id", vendor.id)
+              .maybeSingle();
+
+            if (existingHomeVendor) {
+              // Update existing entry
+              const { error: updateErr } = await supabase
+                .from("home_vendors")
+                .update({ my_rating: rating })
+                .eq("id", existingHomeVendor.id);
+              
+              if (updateErr) {
+                console.warn("[RateVendorModal] home_vendors update error:", updateErr);
+              }
+            } else {
+              // Create new entry
+              const hv = {
+                user_id: householdUser.id,
+                vendor_id: vendor.id,
+                amount: null,
+                currency: 'USD',
+                period: 'monthly',
+                my_rating: rating,
+                my_comments: comments,
+                share_review_public: !showNameInReview,
+              };
+              
+              const { error: insertErr } = await supabase
+                .from("home_vendors")
+                .insert(hv);
+              
+              if (insertErr) {
+                console.error("[RateVendorModal] home_vendors insert error:", insertErr);
+              }
+            }
           }
         }
       } else {
-        // Remove from home_vendors if unchecked
-        console.log("[RateVendorModal] Removing home vendor entry...");
-        const { error: deleteErr } = await supabase
-          .from("home_vendors")
-          .delete()
-          .eq("vendor_id", vendor.id)
-          .eq("user_id", userId);
+        // Remove from home_vendors for all household members if unchecked
+        console.log("[RateVendorModal] Removing home vendor entry for all household members...");
         
-        if (deleteErr) {
-          console.warn("[RateVendorModal] home_vendors delete error:", deleteErr);
+        if (userData?.address) {
+          // Get all users at the same address
+          const { data: householdUsers, error: householdError } = await supabase
+            .from("users")
+            .select("id")
+            .eq("address", userData.address);
+          
+          if (householdError) {
+            console.warn("[RateVendorModal] Error fetching household users:", householdError);
+          } else if (householdUsers) {
+            // Remove home_vendors entry for each household member
+            for (const householdUser of householdUsers) {
+              const { error: deleteErr } = await supabase
+                .from("home_vendors")
+                .delete()
+                .eq("user_id", householdUser.id)
+                .eq("vendor_id", vendor.id);
+              
+              if (deleteErr) {
+                console.warn("[RateVendorModal] home_vendors delete error:", deleteErr);
+              }
+            }
+          }
         }
       }
 

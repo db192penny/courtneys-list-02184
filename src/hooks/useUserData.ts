@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 export type UserData = {
   name?: string;
   streetName?: string;
+  address?: string;
   communityName?: string;
   isAuthenticated: boolean;
 };
@@ -19,7 +20,7 @@ export function useUserData() {
       }
       const { data, error } = await supabase
         .from("users")
-        .select("name, street_name")
+        .select("name, street_name, address")
         .eq("id", user.id)
         .maybeSingle();
 
@@ -39,6 +40,7 @@ export function useUserData() {
       return {
         name: data?.name || undefined,
         streetName: data?.street_name || undefined,
+        address: data?.address || undefined,
         communityName,
         isAuthenticated: true,
       };
