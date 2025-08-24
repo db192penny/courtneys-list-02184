@@ -52,7 +52,15 @@ export default function VendorMobileCard({
                   New
                 </Badge>
               )}
-              {userHomeVendors?.has(vendor.id) && (
+              {(() => {
+                const hasVendor = userHomeVendors?.has(vendor.id);
+                console.log(`[VendorMobileCard] Checking vendor ${vendor.name} (${vendor.id}):`, {
+                  hasVendor,
+                  userHomeVendorsSize: userHomeVendors?.size,
+                  userHomeVendorsArray: userHomeVendors ? Array.from(userHomeVendors) : []
+                });
+                return hasVendor;
+              })() && (
                 <Badge 
                   variant="secondary" 
                   className="text-[10px] px-1 py-0 bg-green-100 text-green-800 hover:bg-green-200 whitespace-nowrap"

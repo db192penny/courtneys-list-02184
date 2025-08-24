@@ -6,16 +6,27 @@ export function useUserHomeVendors() {
     queryKey: ["user-home-vendors"],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return new Set<string>();
+      if (!user) {
+        console.log("[useUserHomeVendors] No user found");
+        return new Set<string>();
+      }
 
+      console.log("[useUserHomeVendors] Fetching for user:", user.id);
       const { data, error } = await supabase
         .from("home_vendors")
         .select("vendor_id")
         .eq("user_id", user.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error("[useUserHomeVendors] Error:", error);
+        throw error;
+      }
       
-      return new Set(data?.map(item => item.vendor_id) || []);
+      console.log("[useUserHomeVendors] Raw data:", data);
+      const vendorSet = new Set(data?.map(item => item.vendor_id) || []);
+      console.log("[useUserHomeVendors] Vendor IDs Set:", Array.from(vendorSet));
+      
+      return vendorSet;
     },
     enabled: true,
   });
