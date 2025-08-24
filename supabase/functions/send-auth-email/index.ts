@@ -52,7 +52,7 @@ Deno.serve(async (req) => {
           user: { email: webhookData.userEmail },
           email_data: {
             email_action_type: 'signup',
-            redirect_to: webhookData.redirectTo || `https://courtneys-list.com/auth?verified=true&community=${webhookData.communitySlug || 'boca-bridges'}`
+            redirect_to: webhookData.redirectTo || `https://courtneys-list.com/communities/boca-bridges?welcome=true`
           }
         }
       }
@@ -75,7 +75,7 @@ Deno.serve(async (req) => {
     }
 
     // Detect community for better redirect and email personalization
-    let communityRedirect = 'https://courtneys-list.com'
+    let communityRedirect = 'https://courtneys-list.com/communities/boca-bridges?welcome=true'
     let communityName = null
     let userName = null
     
@@ -104,14 +104,14 @@ Deno.serve(async (req) => {
             const communitySlug = user.signup_source.split('community:')[1]
             communityName = communitySlug
             console.log('🏘️ Community slug from signup_source:', communitySlug)
-            // For new community signups, redirect back to auth page for verification
-            communityRedirect = `https://courtneys-list.com/auth?verified=true&community=${encodeURIComponent(communitySlug)}`
-            console.log('🏘️ Setting community signup redirect to:', communityRedirect)
+            // Always redirect to community page now
+            communityRedirect = `https://courtneys-list.com/communities/boca-bridges?welcome=true`
+            console.log('🏘️ Setting community redirect to:', communityRedirect)
           } else if (user.signup_source?.startsWith('homepage:')) {
             communityName = user.signup_source.split('homepage:')[1]
             console.log('🏘️ Community from signup_source (homepage:):', communityName)
-            // For homepage signups, redirect to auth page for verification
-            communityRedirect = `https://courtneys-list.com/auth?verified=true&community=${encodeURIComponent(communityName)}`
+            // Always redirect to community page now
+            communityRedirect = `https://courtneys-list.com/communities/boca-bridges?welcome=true`
             console.log('🏘️ Setting homepage redirect to:', communityRedirect)
           } else if (user.address) {
             // Query household_hoa to find their community
@@ -137,7 +137,8 @@ Deno.serve(async (req) => {
                   console.log('⚠️ HOA lookup error:', hoaError.message)
                 } else if (hoa?.hoa_name) {
                   communityName = hoa.hoa_name
-                  communityRedirect = `https://courtneys-list.com/auth?verified=true&community=${encodeURIComponent(hoa.hoa_name)}`
+                  // Always redirect to community page now
+                  communityRedirect = `https://courtneys-list.com/communities/boca-bridges?welcome=true`
                   console.log('🏘️ Community from address:', hoa.hoa_name)
                 } else {
                   console.log('⚠️ No HOA found for normalized address:', normalizedAddr)

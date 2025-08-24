@@ -59,7 +59,7 @@ const SignIn = () => {
       }
 
       if (statusResult === "approved") {
-        const redirectUrl = `${window.location.origin}/auth`;
+        const redirectUrl = `${window.location.origin}/communities/boca-bridges?welcome=true`;
         const { error: signInError } = await supabase.auth.signInWithOtp({
           email: targetEmail,
           options: { emailRedirectTo: redirectUrl },
