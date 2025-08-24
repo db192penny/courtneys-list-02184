@@ -154,16 +154,9 @@ ${personalizedBody}
               </div>
               
               <div style="margin-top: 20px; text-align: center;">
-                <p style="color: #2d3748; font-size: 16px; margin-bottom: 15px;">
-                  <strong>Invite a friend</strong> (most points) in ${communityName} using your personal link below - points are tracked automatically when they join:
-                </p>
-                <a href="${personalizedBody.includes('{{INVITE_LINK}}') ? inviteLink : '#'}" 
-                   style="display: inline-block; background: #10b981; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; margin: 10px 10px;">
-                  🤝 Your Personal Invite Link
-                </a>
                 <a href="${communitySlug ? `https://courtneys-list.com/communities/${communitySlug}?welcome=true` : '#'}" 
                    style="display: inline-block; background: #4f46e5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; margin: 10px 10px;">
-                  👉 View Updated List
+                  👉 Updated Provider List
                 </a>
               </div>
               
