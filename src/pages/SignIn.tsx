@@ -16,9 +16,11 @@ const SignIn = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
   const [status, setStatus] = useState<"idle" | "approved" | "pending" | "not_found" | "error">("idle");
   const [message, setMessage] = useState("");
   const [showMagicLinkModal, setShowMagicLinkModal] = useState(false);
+  const [modalShown, setModalShown] = useState(false);
 
   const community = searchParams.get("community");
   const communityName = community ? community.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : null;
@@ -33,6 +35,34 @@ const SignIn = () => {
         ? `/communities/${toSlug(community)}`
         : "/communities/boca-bridges";
       navigate(fallbackUrl);
+    }
+  };
+
+  const resendMagicLink = async () => {
+    const targetEmail = email.trim().toLowerCase();
+    if (!targetEmail) return;
+
+    console.log("[SignIn] Resending magic link for:", targetEmail);
+    setResendLoading(true);
+
+    try {
+      const redirectUrl = `${window.location.origin}/communities/boca-bridges?welcome=true`;
+      const { error: signInError } = await supabase.auth.signInWithOtp({
+        email: targetEmail,
+        options: { emailRedirectTo: redirectUrl },
+      });
+      
+      if (signInError) {
+        console.error("[SignIn] resend signInWithOtp error", signInError);
+        toast({ title: "Resend failed", description: signInError.message, variant: "destructive" });
+      } else {
+        toast({ title: "Magic link resent!", description: "Please check your inbox (and spam folder)." });
+      }
+    } catch (error) {
+      console.error("[SignIn] resend error", error);
+      toast({ title: "Resend failed", description: "Please try again.", variant: "destructive" });
+    } finally {
+      setResendLoading(false);
     }
   };
 
@@ -73,7 +103,13 @@ const SignIn = () => {
         }
         setStatus("approved");
         setMessage("If that email is registered, a magic link has been sent. Please check your inbox.");
-        setShowMagicLinkModal(true);
+        
+        // Prevent double modal display
+        if (!modalShown) {
+          console.log("[SignIn] Showing magic link modal");
+          setModalShown(true);
+          setShowMagicLinkModal(true);
+        }
       } else if (statusResult === "not_found") {
         setStatus("not_found");
         setMessage("We couldn't find an account with that email. Please sign up to request access.");
@@ -179,18 +215,22 @@ const SignIn = () => {
             
             
             <div className="flex flex-col gap-2 pt-2">
-              <Button onClick={() => setShowMagicLinkModal(false)} className="w-full">
+              <Button 
+                onClick={() => {
+                  console.log("[SignIn] Got it clicked, closing modal");
+                  setShowMagicLinkModal(false);
+                }} 
+                className="w-full"
+              >
                 Got It!
               </Button>
               <Button 
                 variant="outline" 
-                onClick={() => {
-                  setShowMagicLinkModal(false);
-                  handleSubmit(new Event('submit') as any);
-                }}
+                onClick={resendMagicLink}
+                disabled={resendLoading}
                 className="w-full"
               >
-                Resend Magic Link
+                {resendLoading ? "Resending..." : "Resend Magic Link"}
               </Button>
             </div>
           </div>
