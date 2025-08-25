@@ -71,24 +71,20 @@ The more we all contribute, the more valuable (and stress-free!) this list becom
     id: "apology-email",
     name: "Apology Email - Fresh Login Links",
     description: "Send apology email with fresh magic login links to community members",
-    subject: "⚠️ {COMMUNITY_NAME} Login Issue - Fresh Links Inside",
-    body: `Hi {COMMUNITY_NAME} Neighbors,
+    subject: "Your Boca Bridges Access Login Issue - Fresh Links Inside",
+    body: `Hi Boca Bridges Neighbors,
 
-We're so sorry for the confusion with the login links! Some folks have been having trouble accessing the {COMMUNITY_NAME} providers list.
+We're so sorry for the confusion with the login links!We had a bad bug (I'll blmae David :) that that caused some of you to keep going to a log-in page - you are VIP and we made you stand in line - apologies!
 
-We've generated a fresh login link just for you — this should work perfectly:
-
-{{MAGIC_LINK}}
-
-Once you're in, you can see all the {COMMUNITY_NAME} service providers:
+We've generated a fresh  link just for you to see all the providers and rate and have fun. 
 
 {{VIEW_PROVIDERS_BUTTON}}
 
-Again, our apologies for the technical hiccup. We really appreciate your patience as we work out these kinks.
+Again, our apologies for the technical hiccup. We really appreciate your patience as we work out these kinks. We promise this will save all of us stress in finding service providers :)
 
 💜 Courtney
 
-P.S. If you continue having issues, just reply to this email and we'll get it sorted out immediately.`
+P.S Reach out to me on Whatsapp with any feedback or other categories you would want to see`
   },
   {
     id: "custom",
@@ -443,7 +439,7 @@ export default function EmailTemplatePanel({ communityName }: Props) {
                 className="min-h-[300px] resize-none"
               />
               <div className="text-xs text-muted-foreground">
-                Available placeholders: <code>{`{{LEADERBOARD}}`}</code>, <code>{`{{INVITE_LINK}}`}</code>, <code>{`{{MAGIC_LINK}}`}</code>, and <code>{`{{VIEW_PROVIDERS_BUTTON}}`}</code> will be automatically replaced for each recipient.
+                Available placeholders: <code>{`{{LEADERBOARD}}`}</code>, <code>{`{{INVITE_LINK}}`}</code>, and <code>{`{{VIEW_PROVIDERS_BUTTON}}`}</code> will be automatically replaced for each recipient.
               </div>
             </div>
           </div>

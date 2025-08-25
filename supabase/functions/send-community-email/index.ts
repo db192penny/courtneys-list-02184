@@ -128,12 +128,10 @@ const handler = async (req: Request): Promise<Response> => {
           throw authError;
         }
 
-        const magicLink = authData.properties?.action_link || '';
-        const viewProvidersButton = `<a href="https://courtneys-list.com/communities/${communitySlug}?welcome=true" style="background-color: #4f46e5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold; margin: 10px 0;">See ${communityName} Providers</a>`;
+        const magicLinkUrl = authData.properties?.action_link || '';
+        const viewProvidersButton = `<a href="${magicLinkUrl}" style="background-color: #4f46e5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold; margin: 10px 0;">See Boca Bridges Providers</a>`;
         
-        personalizedBody = personalizedBody
-          .replace(/\{\{MAGIC_LINK\}\}/g, magicLink)
-          .replace(/\{\{VIEW_PROVIDERS_BUTTON\}\}/g, viewProvidersButton);
+        personalizedBody = personalizedBody.replace(/\{\{VIEW_PROVIDERS_BUTTON\}\}/g, viewProvidersButton);
       } else {
         // Generate a unique invite token for this user to share
         const inviteToken = crypto.randomUUID();
