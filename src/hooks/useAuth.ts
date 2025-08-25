@@ -38,9 +38,12 @@ export function useAuth(): AuthState {
       latestAuthState = { ...newState, isLoading: true };
       
       // Only set loading to false when both operations are complete
-      if (authListenerReady && sessionCheckComplete) {
-        console.log("[useAuth] Both operations complete, setting loading to false");
-        setAuthState({ ...newState, isLoading: false });
+      if (authListenerReady && sessionCheckComplete && latestAuthState) {
+        console.log("[useAuth] Both operations complete, setting loading to false with latest state:", {
+          hasSession: !!latestAuthState.session,
+          isAuthenticated: latestAuthState.isAuthenticated
+        });
+        setAuthState({ ...latestAuthState, isLoading: false });
       }
     };
 

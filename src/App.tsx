@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Dashboard from "./pages/Dashboard";
@@ -77,37 +78,29 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 function AuthWatcher() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { isAuthenticated, isLoading } = useAuth();
+  
   useEffect(() => {
-    let mounted = true;
-    const redirectIfNeeded = (hasSession: boolean) => {
-      if (!mounted) return;
-      console.log('AuthWatcher: checking redirect', { 
-        hasSession, 
-        pathname: location.pathname, 
-        search: location.search, 
-        hash: location.hash,
-        fullLocation: window.location.href 
-      });
-      
-      if (hasSession) {
-        // Only redirect from /signin - let /auth page handle magic link users
-        if (location.pathname === "/signin") {
-          console.log('AuthWatcher: redirecting authenticated user from signin');
-          navigate("/communities/boca-bridges", { replace: true });
-        }
+    // Don't redirect while auth is still loading
+    if (isLoading) return;
+    
+    console.log('AuthWatcher: checking redirect', { 
+      isAuthenticated, 
+      pathname: location.pathname, 
+      search: location.search, 
+      hash: location.hash,
+      fullLocation: window.location.href 
+    });
+    
+    if (isAuthenticated) {
+      // Only redirect from /signin - let /auth page handle magic link users
+      if (location.pathname === "/signin") {
+        console.log('AuthWatcher: redirecting authenticated user from signin');
+        navigate("/communities/boca-bridges", { replace: true });
       }
-    };
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      redirectIfNeeded(!!session);
-    });
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      redirectIfNeeded(!!session);
-    });
-    return () => {
-      mounted = false;
-      subscription.unsubscribe();
-    };
-  }, [navigate, location.pathname, location.hash, location.search]);
+    }
+  }, [isAuthenticated, isLoading, navigate, location.pathname, location.hash, location.search]);
+  
   return null;
 }
 
