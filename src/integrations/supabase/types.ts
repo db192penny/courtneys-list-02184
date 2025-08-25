@@ -1059,6 +1059,7 @@ export type Database = {
           created_at: string
           email: string
           email_confirmed_at: string
+          hoa_name: string
           id: string
           is_orphaned: boolean
           is_verified: boolean

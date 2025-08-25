@@ -25,6 +25,7 @@ interface User {
   submissions_count: number | null;
   is_orphaned?: boolean;
   email_confirmed_at?: string | null;
+  hoa_name?: string | null;
 }
 
 interface UserActivity {
@@ -268,6 +269,7 @@ const AdminUsers = () => {
                     <TableHead>Name</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Signup Source</TableHead>
+                    <TableHead>Community</TableHead>
                     <TableHead>Points</TableHead>
                     <TableHead>Joined</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
@@ -276,13 +278,13 @@ const AdminUsers = () => {
                 <TableBody>
                   {isLoading ? (
                     <TableRow>
-                      <TableCell colSpan={7} className="text-center py-8">
+                      <TableCell colSpan={8} className="text-center py-8">
                         Loading users...
                       </TableCell>
                     </TableRow>
                   ) : filteredUsers.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={7} className="text-center py-8">
+                      <TableCell colSpan={8} className="text-center py-8">
                         No users found matching the current filters.
                       </TableCell>
                     </TableRow>
@@ -293,6 +295,7 @@ const AdminUsers = () => {
                         <TableCell>{user.name || "—"}</TableCell>
                         <TableCell>{getStatusBadge(user)}</TableCell>
                         <TableCell>{getSignupSourceDisplay(user.signup_source)}</TableCell>
+                        <TableCell>{user.hoa_name || "Not Mapped"}</TableCell>
                         <TableCell>{user.points || 0}</TableCell>
                         <TableCell>
                           {new Date(user.created_at).toLocaleDateString()}
@@ -395,10 +398,16 @@ const AdminUsers = () => {
                       {selectedUser.formatted_address || selectedUser.address || "—"}
                     </p>
                   </div>
-                  <div className="col-span-2">
+                  <div>
                     <label className="text-sm font-medium">Signup Source</label>
                     <p className="text-sm text-muted-foreground">
                       {getSignupSourceDisplay(selectedUser.signup_source)}
+                    </p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">Community</label>
+                    <p className="text-sm text-muted-foreground">
+                      {selectedUser.hoa_name || "Not Mapped"}
                     </p>
                   </div>
                 </div>
