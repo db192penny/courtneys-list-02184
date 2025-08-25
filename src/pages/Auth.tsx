@@ -212,8 +212,8 @@ const Auth = () => {
           event: _event
         });
         
-        // Only redirect if it's NOT a fresh signup OR it's a verified magic link return
-        if (!justSignedUp || isVerifiedMagicLink) {
+        // Redirect authenticated users to their community
+        if (isVerifiedMagicLink || session?.user) {
           console.log('[Auth] Proceeding with finalization - not a fresh signup or verified magic link');
           setTimeout(() => finalizeOnboarding(session.user!.id, session.user!.email ?? null), 0);
         } else {
@@ -229,8 +229,8 @@ const Auth = () => {
           isVerifiedMagicLink
         });
         
-        // Only redirect if it's NOT a fresh signup OR it's a verified magic link return
-        if (!justSignedUp || isVerifiedMagicLink) {
+        // Redirect authenticated users to their community
+        if (isVerifiedMagicLink || session?.user) {
           console.log('[Auth] Proceeding with finalization - existing session or verified magic link');
           finalizeOnboarding(session.user.id, session.user.email ?? null);
         } else {
@@ -245,9 +245,7 @@ const Auth = () => {
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     
-    // Mark that this is a fresh signup to prevent premature redirection
-    setJustSignedUp(true);
-    console.log('[Auth] Setting justSignedUp = true for fresh signup');
+    console.log('[Auth] Starting signup process');
 
     if (resident === "no") {
       toast({ title: "Residents only", description: "Currently, access is restricted to residents only.", variant: "destructive" });
@@ -419,11 +417,7 @@ const Auth = () => {
       console.log("[Auth] 🔍 User was auto-logged in, checking if they need magic link email");
       userWasAutoVerified = true;
       
-      // Show magic link modal immediately
-      setShowMagicLinkModal(true);
-      
-      // Log out the user immediately to keep them on the auth page
-      await supabase.auth.signOut();
+      // User will be automatically redirected to community via auth state change
       
       // Send custom magic link email that redirects back to /auth
       try {
