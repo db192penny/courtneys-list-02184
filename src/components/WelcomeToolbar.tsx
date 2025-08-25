@@ -65,7 +65,13 @@ export function WelcomeToolbar({ communitySlug }: WelcomeToolbarProps) {
       
       // Scroll to top on mobile to ensure welcome message is visible
       if (isMobile) {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        setTimeout(() => {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }, 100);
+        // Additional scroll attempt to ensure positioning after any late content loads
+        setTimeout(() => {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }, 500);
       }
       
       // Auto-hide after 15 seconds

@@ -418,23 +418,6 @@ const Auth = () => {
       userWasAutoVerified = true;
       
       // User will be automatically redirected to community via auth state change
-      
-      // Send custom magic link email that redirects back to /auth
-      try {
-        console.log("[Auth] 🔄 Sending magic link email");
-        await supabase.functions.invoke('send-auth-email', {
-          body: { 
-            userEmail: targetEmail,
-            communitySlug: communityName ? toSlug(communityName) : 'boca-bridges',
-            redirectTo: `${window.location.origin}/auth?verified=true&community=${communityName ? toSlug(communityName) : 'boca-bridges'}`
-          }
-        });
-        console.log("[Auth] ✅ Magic link email sent successfully");
-        
-      } catch (emailError) {
-        console.warn("[Auth] ⚠️ Magic link email failed (non-fatal):", emailError);
-        // Don't fail the signup process if email fails
-      }
     }
 
     // Send admin notification via edge function (replaces the database trigger approach)
