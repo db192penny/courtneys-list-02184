@@ -9,6 +9,7 @@ import CommunityVendorTable from "@/components/vendors/CommunityVendorTable";
 import CommunityDemoTable from "@/components/vendors/CommunityDemoTable";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserProfile } from "@/hooks/useUserProfile";
+import { useAuth } from "@/hooks/useAuth";
 import { WelcomeToolbar } from "@/components/WelcomeToolbar";
 
 function slugToName(slug: string) {
@@ -26,6 +27,7 @@ export default function Community() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { data: profile } = useUserProfile();
+  const { isAuthenticated: sessionAuthenticated } = useAuth();
   
   const communityName = useMemo(() => slugToName(slug), [slug]);
 
@@ -45,7 +47,9 @@ export default function Community() {
   }, [searchParams, communityName]);
   const pageTitle = useMemo(() => (communityName === "Boca Bridges" ? "Boca Bridges Overview" : `${communityName} Overview`), [communityName]);
   const canonical = typeof window !== "undefined" ? window.location.href : undefined;
-  const isAuthenticated = !!profile?.isAuthenticated;
+  
+  // Use session-first authentication - prioritize session state over profile query results
+  const isAuthenticated = sessionAuthenticated || !!profile?.isAuthenticated;
   const isVerified = !!profile?.isVerified;
   const showSignUpPrompt = !isAuthenticated;
 
