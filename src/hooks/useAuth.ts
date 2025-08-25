@@ -23,28 +23,47 @@ export function useAuth(): AuthState {
   });
 
   useEffect(() => {
+    let authListenerReady = false;
+    let sessionCheckComplete = false;
+    let latestAuthState: AuthState | null = null;
+
+    const updateAuthState = (newState: Omit<AuthState, 'isLoading'>, source: string) => {
+      console.log(`[useAuth] ${source}:`, { 
+        hasSession: !!newState.session, 
+        isAuthenticated: newState.isAuthenticated,
+        authListenerReady,
+        sessionCheckComplete 
+      });
+      
+      latestAuthState = { ...newState, isLoading: true };
+      
+      // Only set loading to false when both operations are complete
+      if (authListenerReady && sessionCheckComplete) {
+        console.log("[useAuth] Both operations complete, setting loading to false");
+        setAuthState({ ...newState, isLoading: false });
+      }
+    };
+
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        console.log("[useAuth] Auth state changed:", event, !!session);
-        setAuthState({
+        authListenerReady = true;
+        updateAuthState({
           user: session?.user ?? null,
           session,
           isAuthenticated: !!session,
-          isLoading: false,
-        });
+        }, `Auth state changed: ${event}`);
       }
     );
 
     // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log("[useAuth] Initial session check:", !!session);
-      setAuthState({
+      sessionCheckComplete = true;
+      updateAuthState({
         user: session?.user ?? null,
         session,
         isAuthenticated: !!session,
-        isLoading: false,
-      });
+      }, "Initial session check");
     });
 
     return () => subscription.unsubscribe();

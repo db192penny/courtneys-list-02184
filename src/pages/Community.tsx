@@ -48,8 +48,8 @@ export default function Community() {
   const pageTitle = useMemo(() => (communityName === "Boca Bridges" ? "Boca Bridges Overview" : `${communityName} Overview`), [communityName]);
   const canonical = typeof window !== "undefined" ? window.location.href : undefined;
   
-  // Use session-first authentication - prioritize session state over profile query results
-  const isAuthenticated = sessionAuthenticated || !!profile?.isAuthenticated;
+  // Use session-first authentication - simplified to prevent race conditions
+  const isAuthenticated = sessionAuthenticated;
   const isVerified = !!profile?.isVerified;
   const showSignUpPrompt = !isAuthenticated;
 
