@@ -17,6 +17,7 @@ const Header = () => {
 
   // Determine if we're on homepage to set default community context
   const isHomepage = location.pathname === "/";
+  const isAuthPage = location.pathname === "/auth";
   const signInLink = isHomepage ? "/signin?community=boca-bridges" : "/signin";
 
   const handleSignOut = async () => {
@@ -81,11 +82,11 @@ const Header = () => {
                   </div>
                 </SheetContent>
               </Sheet>
-            ) : (
+            ) : !isAuthPage ? (
               <Button asChild size="sm" className="text-sm">
                 <Link to={signInLink}>Sign in</Link>
               </Button>
-            )}
+            ) : null}
           </div>
         ) : (
           <div className="flex items-center gap-2">
@@ -100,11 +101,11 @@ const Header = () => {
                   Sign out
                 </Button>
               </div>
-            ) : (
+            ) : !isAuthPage ? (
               <Button asChild>
                 <Link to={signInLink}>Sign in</Link>
               </Button>
-            )}
+            ) : null}
           </div>
         )}
       </nav>
