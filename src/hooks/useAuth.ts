@@ -25,6 +25,7 @@ export function useAuth(): AuthState {
   useEffect(() => {
     let authListenerReady = false;
     let sessionCheckComplete = false;
+    let refreshComplete = false;
     let latestAuthState: AuthState | null = null;
 
     const updateAuthState = (newState: Omit<AuthState, 'isLoading'>, source: string) => {
@@ -32,14 +33,15 @@ export function useAuth(): AuthState {
         hasSession: !!newState.session, 
         isAuthenticated: newState.isAuthenticated,
         authListenerReady,
-        sessionCheckComplete 
+        sessionCheckComplete,
+        refreshComplete
       });
       
       latestAuthState = { ...newState, isLoading: true };
       
-      // Only set loading to false when both operations are complete
-      if (authListenerReady && sessionCheckComplete && latestAuthState) {
-        console.log("[useAuth] Both operations complete, setting loading to false with latest state:", {
+      // Only set loading to false when all operations are complete
+      if (authListenerReady && sessionCheckComplete && refreshComplete && latestAuthState) {
+        console.log("[useAuth] All operations complete, setting loading to false with latest state:", {
           hasSession: !!latestAuthState.session,
           isAuthenticated: latestAuthState.isAuthenticated
         });
@@ -47,7 +49,24 @@ export function useAuth(): AuthState {
       }
     };
 
-    // Set up auth state listener FIRST
+    // FIRST refresh session to ensure valid tokens (fixes Safari issues)
+    supabase.auth.refreshSession().then(({ data: { session }, error }) => {
+      refreshComplete = true;
+      if (error) {
+        console.warn("[useAuth] Session refresh failed (non-fatal):", error);
+      } else {
+        console.log("[useAuth] Session refreshed successfully");
+      }
+      // Trigger auth state update if we have other operations complete
+      if (latestAuthState) {
+        updateAuthState(latestAuthState, "After session refresh");
+      }
+    }).catch((error) => {
+      refreshComplete = true;
+      console.warn("[useAuth] Session refresh error (non-fatal):", error);
+    });
+
+    // Set up auth state listener SECOND
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         authListenerReady = true;
