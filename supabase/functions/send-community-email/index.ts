@@ -203,6 +203,29 @@ ${personalizedBody}
             </div>
           </div>
         `,
+        tags: [
+          {
+            name: 'campaign_type',
+            value: isApologyEmail ? 'apology_email' : 'community_update'
+          },
+          {
+            name: 'community',
+            value: communitySlug
+          },
+          {
+            name: 'email_template',
+            value: templateId || 'custom'
+          },
+          {
+            name: 'recipient_count',
+            value: recipients.length.toString()
+          }
+        ],
+        headers: {
+          'X-Entity-Ref-ID': `${communitySlug}-${Date.now()}`,
+          'X-Campaign-Name': `${communityName} Community Email`,
+          'X-Message-Source': 'courtneys-list-admin'
+        }
       });
     });
 
