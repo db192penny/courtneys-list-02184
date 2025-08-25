@@ -129,7 +129,7 @@ const handler = async (req: Request): Promise<Response> => {
         }
 
         const magicLinkUrl = authData.properties?.action_link || '';
-        const viewProvidersButton = `<a href="${magicLinkUrl}" style="background-color: #4f46e5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold; margin: 10px 0;">See Boca Bridges Providers</a>`;
+        const viewProvidersButton = `<a href="${magicLinkUrl}" style="background-color: #4f46e5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold; margin: 10px 0; text-align: center;">See Boca Bridges Providers</a>`;
         
         personalizedBody = personalizedBody.replace(/\{\{VIEW_PROVIDERS_BUTTON\}\}/g, viewProvidersButton);
       } else {
@@ -179,12 +179,12 @@ const handler = async (req: Request): Promise<Response> => {
 ${personalizedBody}
               </div>
               
-              <div style="margin-top: 20px; text-align: center;">
+              ${!isApologyEmail ? `<div style="margin-top: 20px; text-align: center;">
                 <a href="${communitySlug ? `https://courtneys-list.com/communities/${communitySlug}?welcome=true` : '#'}" 
                    style="display: inline-block; background: #4f46e5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; margin: 10px 10px;">
                   👉 Updated Provider List
                 </a>
-              </div>
+              </div>` : ''}
               
               <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e2e8f0; text-align: center;">
                 <p style="color: #718096; font-size: 14px; margin: 0;">

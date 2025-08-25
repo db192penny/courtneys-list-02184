@@ -71,12 +71,12 @@ The more we all contribute, the more valuable (and stress-free!) this list becom
     id: "apology-email",
     name: "Apology Email - Fresh Login Links",
     description: "Send apology email with fresh magic login links to community members",
-    subject: "Your Boca Bridges Access Login Issue - Fresh Links Inside",
+    subject: "Your Boca Bridges Access - Login Issue - Fresh Link Inside",
     body: `Hi Boca Bridges Neighbors,
 
-We're so sorry for the confusion with the login links!We had a bad bug (I'll blmae David :) that that caused some of you to keep going to a log-in page - you are VIP and we made you stand in line - apologies!
+We're so sorry for the confusion with the login links! We had a software bug (I'll blame David :) that caused some of you to keep going to a log-in page - you are VIP and we made you stand in line - apologies! The good news is that we now have over 60 homes signed on!
 
-We've generated a fresh  link just for you to see all the providers and rate and have fun. 
+We've generated a fresh link just for you to see all the providers and rate and have fun.
 
 {{VIEW_PROVIDERS_BUTTON}}
 
