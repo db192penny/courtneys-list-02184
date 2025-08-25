@@ -68,6 +68,29 @@ The more we all contribute, the more valuable (and stress-free!) this list becom
 💜 Courtney`
   },
   {
+    id: "apology-email",
+    name: "Apology Email - Fresh Login Links",
+    description: "Send apology email with fresh magic login links to community members",
+    subject: "⚠️ {COMMUNITY_NAME} Login Issue - Fresh Links Inside",
+    body: `Hi {COMMUNITY_NAME} Neighbors,
+
+We're so sorry for the confusion with the login links! Some folks have been having trouble accessing the {COMMUNITY_NAME} providers list.
+
+We've generated a fresh login link just for you — this should work perfectly:
+
+{{MAGIC_LINK}}
+
+Once you're in, you can see all the {COMMUNITY_NAME} service providers:
+
+{{VIEW_PROVIDERS_BUTTON}}
+
+Again, our apologies for the technical hiccup. We really appreciate your patience as we work out these kinks.
+
+💜 Courtney
+
+P.S. If you continue having issues, just reply to this email and we'll get it sorted out immediately.`
+  },
+  {
     id: "custom",
     name: "Custom Email",
     description: "Create your own custom email from scratch",
@@ -174,7 +197,8 @@ export default function EmailTemplatePanel({ communityName }: Props) {
           body: body.trim(),
           recipients,
           communityName,
-          senderName: "Courtney"
+          senderName: "Courtney",
+          templateId: selectedTemplateId
         }
       });
 
@@ -419,7 +443,7 @@ export default function EmailTemplatePanel({ communityName }: Props) {
                 className="min-h-[300px] resize-none"
               />
               <div className="text-xs text-muted-foreground">
-                Available placeholders: <code>{`{{LEADERBOARD}}`}</code> and <code>{`{{INVITE_LINK}}`}</code> will be automatically replaced for each recipient.
+                Available placeholders: <code>{`{{LEADERBOARD}}`}</code>, <code>{`{{INVITE_LINK}}`}</code>, <code>{`{{MAGIC_LINK}}`}</code>, and <code>{`{{VIEW_PROVIDERS_BUTTON}}`}</code> will be automatically replaced for each recipient.
               </div>
             </div>
           </div>

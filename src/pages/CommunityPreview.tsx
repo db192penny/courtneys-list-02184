@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import CommunityVendorTable from "@/components/vendors/CommunityVendorTable";
 import { usePreviewSession } from "@/hooks/usePreviewSession";
 import EmailManagementPanel from "@/components/preview/EmailManagementPanel";
-import ApologyEmailPanel from "@/components/preview/ApologyEmailPanel";
+
 
 function slugToName(slug: string): string {
   return slug
@@ -163,7 +163,6 @@ const CommunityPreview = () => {
             </div>
             <div className="flex gap-2">
               <EmailManagementPanel communityName={communityName} />
-              <ApologyEmailPanel communityName={communityName} />
             </div>
           </div>
           

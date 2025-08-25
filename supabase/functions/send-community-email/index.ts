@@ -33,6 +33,7 @@ interface CommunityEmailRequest {
   recipients: string[];
   communityName: string;
   senderName: string;
+  templateId?: string;
 }
 
 interface LeaderboardEntry {
@@ -54,7 +55,9 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { subject, body, recipients, communityName, senderName }: CommunityEmailRequest = await req.json();
+    const { subject, body, recipients, communityName, senderName, templateId }: CommunityEmailRequest = await req.json();
+    
+    const isApologyEmail = templateId === 'apology-email';
 
     console.log(`📧 Sending community email to ${recipients.length} recipients for ${communityName}`);
 
@@ -103,39 +106,64 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error("Failed to fetch user data for personalization");
     }
 
+    // Convert community name to slug format
+    const communitySlug = communityName.toLowerCase().replace(/\s+/g, '-');
+
     // Send personalized emails to each user
     const emailPromises = allUsers.map(async (user: any) => {
-      // Generate a unique invite token for this user to share
-      const inviteToken = crypto.randomUUID();
+      let personalizedBody = body;
       
-      // Convert community name to slug format
-      const communitySlug = communityName.toLowerCase().replace(/\s+/g, '-');
-      
-      // Create invite record in the database for tracking
-      const { error: inviteError } = await supabase
-        .from('invitations')
-        .insert({
-          invite_token: inviteToken,
-          invited_by: user.id,
-          community_name: communityName,
-          community_slug: communitySlug,
-          status: 'pending'
+      if (isApologyEmail) {
+        // Generate magic link for apology emails
+        const { data: authData, error: authError } = await supabase.auth.admin.generateLink({
+          type: 'magiclink',
+          email: user.email,
+          options: {
+            redirectTo: `https://courtneys-list.com/communities/${communitySlug}?welcome=true`
+          }
         });
-      
-      if (inviteError) {
-        console.error(`Error creating invite record for user ${user.id}:`, inviteError);
+
+        if (authError) {
+          console.error(`Failed to generate magic link for ${user.email}:`, authError);
+          throw authError;
+        }
+
+        const magicLink = authData.properties?.action_link || '';
+        const viewProvidersButton = `<a href="https://courtneys-list.com/communities/${communitySlug}?welcome=true" style="background-color: #4f46e5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold; margin: 10px 0;">See ${communityName} Providers</a>`;
+        
+        personalizedBody = personalizedBody
+          .replace(/\{\{MAGIC_LINK\}\}/g, magicLink)
+          .replace(/\{\{VIEW_PROVIDERS_BUTTON\}\}/g, viewProvidersButton);
+      } else {
+        // Generate a unique invite token for this user to share
+        const inviteToken = crypto.randomUUID();
+        
+        // Create invite record in the database for tracking
+        const { error: inviteError } = await supabase
+          .from('invitations')
+          .insert({
+            invite_token: inviteToken,
+            invited_by: user.id,
+            community_name: communityName,
+            community_slug: communitySlug,
+            status: 'pending'
+          });
+        
+        if (inviteError) {
+          console.error(`Error creating invite record for user ${user.id}:`, inviteError);
+        }
+        
+        // Generate proper custom invite link
+        const inviteLink = `https://courtneys-list.com/communities/${communitySlug}?welcome=true&invite=${inviteToken}`;
+        
+        // Generate view latest list link
+        const viewListLink = `https://courtneys-list.com/communities/${communitySlug}?welcome=true`;
+        
+        personalizedBody = personalizedBody
+          .replace('{{LEADERBOARD}}', leaderboard)
+          .replace('{{INVITE_LINK}}', inviteLink)
+          .replace('{{VIEW_LIST_LINK}}', viewListLink);
       }
-      
-      // Generate proper custom invite link
-      const inviteLink = `https://courtneys-list.com/communities/${communitySlug}?welcome=true&invite=${inviteToken}`;
-      
-      // Generate view latest list link
-      const viewListLink = `https://courtneys-list.com/communities/${communitySlug}?welcome=true`;
-      
-      const personalizedBody = body
-        .replace('{{LEADERBOARD}}', leaderboard)
-        .replace('{{INVITE_LINK}}', inviteLink)
-        .replace('{{VIEW_LIST_LINK}}', viewListLink);
 
       return resend.emails.send({
         from: `Courtney's List <noreply@courtneys-list.com>`,
