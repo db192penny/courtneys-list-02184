@@ -440,6 +440,7 @@ export type Database = {
           hoa_name: string
           household_address: string
           id: string
+          mapping_source: string | null
           normalized_address: string
           updated_at: string
         }
@@ -449,6 +450,7 @@ export type Database = {
           hoa_name: string
           household_address: string
           id?: string
+          mapping_source?: string | null
           normalized_address: string
           updated_at?: string
         }
@@ -458,6 +460,7 @@ export type Database = {
           hoa_name?: string
           household_address?: string
           id?: string
+          mapping_source?: string | null
           normalized_address?: string
           updated_at?: string
         }
