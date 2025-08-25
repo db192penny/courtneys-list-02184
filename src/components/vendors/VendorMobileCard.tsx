@@ -21,6 +21,7 @@ interface VendorMobileCardProps {
   onRate: (vendor: CommunityVendorRow) => void;
   onCosts: (vendor: CommunityVendorRow) => void;
   userHomeVendors?: Set<string>;
+  userReviews?: Map<string, { rating: number; id: string }>;
   isAuthenticated?: boolean;
   communityName?: string;
 }
@@ -33,6 +34,7 @@ export default function VendorMobileCard({
   onRate,
   onCosts,
   userHomeVendors,
+  userReviews,
   isAuthenticated = false,
   communityName,
 }: VendorMobileCardProps) {
@@ -90,7 +92,7 @@ export default function VendorMobileCard({
               onClick={() => isAuthenticated ? onRate(vendor) : window.location.href = `/auth?community=${encodeURIComponent(communityName || '')}`}
             >
               <Star className="h-3 w-3" />
-              Rate
+              {userReviews?.has(vendor.id) ? "Edit Rating" : "Rate"}
             </Button>
             {isAuthenticated && (
               <Button 

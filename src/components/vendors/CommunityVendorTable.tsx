@@ -11,6 +11,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Star, Filter, ChevronUp, ChevronDown, ArrowUpDown, Plus } from "lucide-react";
 import { CATEGORIES } from "@/data/categories";
 import { useUserHomeVendors } from "@/hooks/useUserHomeVendors";
+import { useUserReviews } from "@/hooks/useUserReviews";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 import ReviewsHover from "@/components/vendors/ReviewsHover";
@@ -85,6 +86,7 @@ export default function CommunityVendorTable({
   });
 
   const { data: userHomeVendors } = useUserHomeVendors();
+  const { data: userReviews } = useUserReviews();
   
   // Modal states
   const [rateModalOpen, setRateModalOpen] = useState(false);
@@ -214,6 +216,7 @@ export default function CommunityVendorTable({
               onRate={openRate}
               onCosts={openCosts}
               userHomeVendors={userHomeVendors}
+              userReviews={userReviews}
               isAuthenticated={isAuthenticated}
               communityName={communityName}
             />
@@ -382,15 +385,15 @@ export default function CommunityVendorTable({
                   <TableCell className="whitespace-nowrap">{showContact ? (r.contact_info ? formatUSPhoneDisplay(r.contact_info) : "—") : "Hidden"}</TableCell>
                    <TableCell className="text-right">
                      <div className="flex gap-1 justify-end">
-                       <Button 
-                         size="sm" 
-                         variant="outline" 
-                         className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700 flex items-center gap-1" 
-                         onClick={() => isAuthenticated ? openRate(r) : window.location.href = `/auth?community=${encodeURIComponent(communityName)}`}
-                       >
-                         <Star className="h-3 w-3" />
-                         Rate
-                       </Button>
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700 flex items-center gap-1" 
+                          onClick={() => isAuthenticated ? openRate(r) : window.location.href = `/auth?community=${encodeURIComponent(communityName)}`}
+                        >
+                          <Star className="h-3 w-3" />
+                          {userReviews?.has(r.id) ? "Edit Rating" : "Rate"}
+                        </Button>
                        {isAuthenticated && (
                          <Button size="sm" variant="outline" className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700" onClick={() => openCosts(r)}>+ Costs</Button>
                        )}
