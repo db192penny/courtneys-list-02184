@@ -286,7 +286,7 @@ export default function CommunityVendorTable({
                   <div className="flex items-center gap-1">
                     <Star className="h-3 w-3" />
                     <div className="flex flex-col items-start">
-                      <span>Performance Metrics</span>
+                      <span>Ratings & Reviews</span>
                       <div className="flex items-center gap-1 mt-0.5">
                         <span className="text-[10px] text-muted-foreground/80">Community & Google ratings</span>
                       </div>
