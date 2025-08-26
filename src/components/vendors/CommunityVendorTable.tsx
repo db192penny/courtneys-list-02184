@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
@@ -372,7 +372,8 @@ export default function CommunityVendorTable({
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Button size="sm" variant="outline" onClick={() => setCategory(r.category)}>
+                    <Button variant="outline" className="h-7 px-2 text-xs flex items-center gap-1" onClick={() => setCategory(r.category)}>
+                      {getCategoryIcon(r.category as any) && React.createElement(getCategoryIcon(r.category as any), { className: "h-3 w-3 mr-1" })}
                       {r.category}
                     </Button>
                   </TableCell>
