@@ -99,21 +99,6 @@ export default function MobileRateVendorModal({ open, onOpenChange, vendor, onSu
   const handleTextareaFocus = (e: React.FocusEvent<HTMLTextAreaElement>) => {
     // Prevent iOS zoom by ensuring 16px font size
     e.target.style.fontSize = '16px';
-    
-    // Prevent Safari's automatic scrolling behavior
-    e.preventDefault();
-    
-    // Keep textarea in view without jumping to footer
-    setTimeout(() => {
-      if (textareaRef.current) {
-        // Use scrollIntoView with specific options to prevent jumping
-        textareaRef.current.scrollIntoView({
-          behavior: 'smooth',
-          block: 'center', // Keep in center of viewport
-          inline: 'nearest'
-        });
-      }
-    }, 100); // Shorter delay for better responsiveness
   };
 
   const onSubmit = async () => {
@@ -251,7 +236,7 @@ export default function MobileRateVendorModal({ open, onOpenChange, vendor, onSu
         
         {vendor && (
           <ScrollArea ref={scrollAreaRef} className="flex-1 px-4 overflow-y-auto">
-            <div className="space-y-6 pb-20">
+            <div className="space-y-6 pb-4">
               <div className="grid gap-3">
                 <Label>Rating</Label>
                 <div className="flex justify-center">
@@ -270,9 +255,7 @@ export default function MobileRateVendorModal({ open, onOpenChange, vendor, onSu
                   className="min-h-[100px] resize-none"
                   style={{ 
                     fontSize: '16px',
-                    maxHeight: '120px',
-                    touchAction: 'manipulation',
-                    scrollMargin: '20px'
+                    maxHeight: '120px'
                   }}
                   rows={4}
                 />
@@ -314,7 +297,7 @@ export default function MobileRateVendorModal({ open, onOpenChange, vendor, onSu
           </ScrollArea>
         )}
         
-        <DrawerFooter className="pt-4 flex-shrink-0 bg-background border-t sticky bottom-0">
+        <DrawerFooter className="pt-4 flex-shrink-0 bg-background border-t">
           <div className="flex gap-3">
             <Button 
               variant="outline" 
