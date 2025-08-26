@@ -8,7 +8,22 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { RatingStars } from "@/components/ui/rating-stars";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Star, Filter, ChevronUp, ChevronDown, ArrowUpDown, Plus } from "lucide-react";
+import { SectionHeader } from "@/components/ui/section-header";
+import { 
+  Star, 
+  Filter, 
+  ChevronUp, 
+  ChevronDown, 
+  ArrowUpDown, 
+  Plus, 
+  Building2,
+  Users,
+  BarChart3,
+  DollarSign,
+  Phone,
+  Settings,
+  HelpCircle
+} from "lucide-react";
 import { CATEGORIES } from "@/data/categories";
 import { useUserHomeVendors } from "@/hooks/useUserHomeVendors";
 import { useUserReviews } from "@/hooks/useUserReviews";
@@ -223,42 +238,100 @@ export default function CommunityVendorTable({
           ))}
         </div>
       ) : (
-        <div className="space-y-4">
-          {category !== "all" && (
-            <div>
-              <h3 className="text-xl font-semibold text-foreground">
-                {category} Providers
-              </h3>
-            </div>
-          )}
+        <div className="space-y-6">
+          {/* Section Header */}
+          <div className="space-y-4">
+            <SectionHeader 
+              icon={Building2} 
+              title={category !== "all" ? `${category} Provider Directory` : "Provider Directory"}
+              className="mb-3"
+            />
+            {category !== "all" && (
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-semibold text-foreground">
+                  {category} Providers
+                </h3>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => window.location.href = `/submit?community=${communityName}&category=${category}`}
+                  className="flex items-center gap-2"
+                >
+                  <Plus className="h-4 w-4" />
+                  Add Provider
+                </Button>
+              </div>
+            )}
+          </div>
+          
           <div className="overflow-x-auto">
             <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead>Rank</TableHead>
-                <TableHead>Provider</TableHead>
-                <TableHead>Category</TableHead>
+              <TableRow className="border-b-2">
+                <TableHead className="text-xs font-medium text-muted-foreground">
+                  <div className="flex items-center gap-1">
+                    <BarChart3 className="h-3 w-3" />
+                    Rank
+                  </div>
+                </TableHead>
+                <TableHead className="text-xs font-medium text-muted-foreground">
+                  <div className="flex items-center gap-1">
+                    <Building2 className="h-3 w-3" />
+                    Provider Info
+                  </div>
+                </TableHead>
+                <TableHead className="text-xs font-medium text-muted-foreground">Category</TableHead>
                 <TableHead 
-                  className="whitespace-nowrap cursor-pointer hover:bg-muted/50 transition-colors select-none"
+                  className="whitespace-nowrap cursor-pointer hover:bg-muted/50 transition-colors select-none text-xs font-medium text-muted-foreground"
                   onClick={() => handleHeaderClick("homes")}
                 >
-                  <div className="flex items-center gap-2">
-                    Neighbors Using
-                    {getSortIcon("homes")}
+                  <div className="flex items-center gap-1">
+                    <Users className="h-3 w-3" />
+                    <div className="flex flex-col items-start">
+                      <span>Neighbors Using</span>
+                      <div className="flex items-center gap-1 mt-0.5">
+                        <span className="text-[10px] text-muted-foreground/80">Click to sort</span>
+                        {getSortIcon("homes")}
+                      </div>
+                    </div>
                   </div>
                 </TableHead>
                 <TableHead 
-                  className="cursor-pointer hover:bg-muted/50 transition-colors select-none"
+                  className="cursor-pointer hover:bg-muted/50 transition-colors select-none text-xs font-medium text-muted-foreground"
                   onClick={() => handleHeaderClick("hoa_rating")}
                 >
-                  <div className="flex items-center gap-2">
-                    Ratings/Reviews
-                    {getSortIcon("hoa_rating")}
+                  <div className="flex items-center gap-1">
+                    <Star className="h-3 w-3" />
+                    <div className="flex flex-col items-start">
+                      <span>Performance Metrics</span>
+                      <div className="flex items-center gap-1 mt-0.5">
+                        <span className="text-[10px] text-muted-foreground/80">Community & Google ratings</span>
+                        {getSortIcon("hoa_rating")}
+                      </div>
+                    </div>
                   </div>
                 </TableHead>
-                <TableHead>Cost</TableHead>
-                <TableHead className="whitespace-nowrap">Contact #s</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead className="text-xs font-medium text-muted-foreground">
+                  <div className="flex items-center gap-1">
+                    <DollarSign className="h-3 w-3" />
+                    <div className="flex flex-col items-start">
+                      <span>Cost Information</span>
+                      <span className="text-[10px] text-muted-foreground/80">Community averages</span>
+                    </div>
+                  </div>
+                </TableHead>
+                <TableHead className="whitespace-nowrap text-xs font-medium text-muted-foreground">
+                  <div className="flex items-center gap-1">
+                    <Phone className="h-3 w-3" />
+                    Contact Info
+                  </div>
+                </TableHead>
+                <TableHead className="text-right text-xs font-medium text-muted-foreground">
+                  <div className="flex items-center gap-1 justify-end">
+                    <Settings className="h-3 w-3" />
+                    Actions
+                  </div>
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -331,42 +404,74 @@ export default function CommunityVendorTable({
                     </div>
                   </TableCell>
                    <TableCell>
-                     <div className="space-y-4">
-                       <ReviewsHover vendorId={r.id}>
-                         <div className="flex items-center gap-2 cursor-pointer group">
-                           <span className="text-xs text-muted-foreground min-w-[70px]">{communityName}:</span>
-                           {r.hoa_rating ? (
-                             <div className="flex items-center gap-1 px-2 py-1.5 rounded-md bg-blue-50 hover:bg-blue-100 transition-colors border border-blue-200 hover:border-blue-300 min-h-[28px] underline decoration-dotted underline-offset-4">
-                               <RatingStars rating={r.hoa_rating} showValue />
-                               {r.hoa_rating_count ? <span className="text-xs text-muted-foreground">({r.hoa_rating_count})</span> : null}
-                             </div>
-                           ) : (
-                             <span 
-                               className="text-xs text-muted-foreground px-2 py-1.5 rounded-md bg-blue-50 hover:bg-blue-100 transition-colors border border-blue-200 hover:border-blue-300 min-h-[28px] flex items-center underline decoration-dotted underline-offset-4"
-                               title="Be the first to rate this provider"
-                             >
-                               No Ratings Yet
-                             </span>
-                           )}
+                     <div className="space-y-3">
+                       {/* Community Rating Section */}
+                       <div className="space-y-1">
+                         <div className="flex items-center gap-1">
+                           <Users className="h-3 w-3 text-blue-600" />
+                           <span className="text-[10px] font-medium text-blue-600 uppercase tracking-wide">Community Rating</span>
+                           <Tooltip>
+                             <TooltipTrigger asChild>
+                               <HelpCircle className="h-3 w-3 text-muted-foreground" />
+                             </TooltipTrigger>
+                             <TooltipContent>
+                               <p>Ratings from neighbors in {communityName}</p>
+                             </TooltipContent>
+                           </Tooltip>
                          </div>
-                       </ReviewsHover>
-                      {r.google_rating != null && (
-                        <GoogleReviewsHover 
-                          vendorId={r.id} 
-                          googleReviewsJson={r.google_reviews_json}
-                          googlePlaceId={r.google_place_id}
-                        >
-                          <div className="flex items-center gap-2 cursor-pointer group">
-                            <span className="text-xs text-muted-foreground min-w-[70px]">Google:</span>
-                            <div className="flex items-center gap-1 px-2 py-1.5 rounded-md bg-green-50 hover:bg-green-100 transition-colors border border-green-200 hover:border-green-300 min-h-[28px] underline decoration-dotted underline-offset-4">
-                              <RatingStars rating={r.google_rating} showValue />
-                              {r.google_rating_count ? <span className="text-xs text-muted-foreground">({r.google_rating_count})</span> : null}
-                            </div>
-                          </div>
-                        </GoogleReviewsHover>
-                      )}
-                    </div>
-                  </TableCell>
+                         <ReviewsHover vendorId={r.id}>
+                           <div className="cursor-pointer group">
+                             {r.hoa_rating ? (
+                               <div className="flex items-center gap-1 px-2 py-1.5 rounded-md bg-blue-50 hover:bg-blue-100 transition-colors border border-blue-200 hover:border-blue-300 min-h-[28px] underline decoration-dotted underline-offset-4">
+                                 <RatingStars rating={r.hoa_rating} showValue />
+                                 {r.hoa_rating_count ? <span className="text-xs text-muted-foreground">({r.hoa_rating_count})</span> : null}
+                               </div>
+                             ) : (
+                               <span 
+                                 className="text-xs text-muted-foreground px-2 py-1.5 rounded-md bg-blue-50 hover:bg-blue-100 transition-colors border border-blue-200 hover:border-blue-300 min-h-[28px] flex items-center underline decoration-dotted underline-offset-4"
+                                 title="Be the first to rate this provider"
+                               >
+                                 No Ratings Yet
+                               </span>
+                             )}
+                           </div>
+                         </ReviewsHover>
+                       </div>
+
+                       {/* Google Rating Section */}
+                       {r.google_rating != null && (
+                         <>
+                           <div className="h-px bg-border"></div>
+                           <div className="space-y-1">
+                             <div className="flex items-center gap-1">
+                               <Star className="h-3 w-3 text-green-600" />
+                               <span className="text-[10px] font-medium text-green-600 uppercase tracking-wide">Google Rating</span>
+                               <Tooltip>
+                                 <TooltipTrigger asChild>
+                                   <HelpCircle className="h-3 w-3 text-muted-foreground" />
+                                 </TooltipTrigger>
+                                 <TooltipContent>
+                                   <p>Public Google reviews and ratings</p>
+                                 </TooltipContent>
+                               </Tooltip>
+                             </div>
+                             <GoogleReviewsHover 
+                               vendorId={r.id} 
+                               googleReviewsJson={r.google_reviews_json}
+                               googlePlaceId={r.google_place_id}
+                             >
+                               <div className="cursor-pointer group">
+                                 <div className="flex items-center gap-1 px-2 py-1.5 rounded-md bg-green-50 hover:bg-green-100 transition-colors border border-green-200 hover:border-green-300 min-h-[28px] underline decoration-dotted underline-offset-4">
+                                   <RatingStars rating={r.google_rating} showValue />
+                                   {r.google_rating_count ? <span className="text-xs text-muted-foreground">({r.google_rating_count})</span> : null}
+                                 </div>
+                               </div>
+                             </GoogleReviewsHover>
+                           </div>
+                         </>
+                       )}
+                     </div>
+                   </TableCell>
                   <TableCell>
                     <CostDisplay
                       vendorId={r.id}
