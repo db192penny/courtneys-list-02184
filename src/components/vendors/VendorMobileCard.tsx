@@ -7,12 +7,14 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { SectionHeader } from "@/components/ui/section-header";
 import { formatUSPhoneDisplay } from "@/utils/phone";
+import { getCategoryIcon } from "@/utils/categoryIcons";
 import ReviewsHover from "@/components/vendors/ReviewsHover";
 import GoogleReviewsHover from "@/components/vendors/GoogleReviewsHover";
 import { CostDisplay } from "@/components/vendors/CostDisplay";
 import { MobileReviewsModal } from "@/components/vendors/MobileReviewsModal";
 import { MobileGoogleReviewsModal } from "@/components/vendors/MobileGoogleReviewsModal";
 import type { CommunityVendorRow } from "@/components/vendors/CommunityVendorTable";
+import React from "react";
 
 interface VendorMobileCardProps {
   vendor: CommunityVendorRow;
@@ -93,8 +95,9 @@ export default function VendorMobileCard({
             size="sm" 
             variant="outline" 
             onClick={() => onCategoryClick(vendor.category)}
-            className="text-xs"
+            className="text-xs flex items-center gap-1"
           >
+            {React.createElement(getCategoryIcon(vendor.category as any), { className: "h-3 w-3" })}
             {vendor.category}
           </Button>
           <div className="flex items-center gap-2 text-sm">
