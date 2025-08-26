@@ -29,6 +29,8 @@ interface RecentSession {
   session_start: string;
   duration_seconds: number | null;
   page_views: number;
+  user_name?: string;
+  user_email?: string;
 }
 
 interface RecentEvent {
@@ -80,7 +82,36 @@ export function AdminAnalytics() {
         .limit(20);
 
       if (sessionsError) throw sessionsError;
-      setRecentSessions(sessionsData || []);
+      
+      // Fetch user details for sessions with user_id
+      const sessionsWithUsers = await Promise.all(
+        (sessionsData || []).map(async (session) => {
+          if (session.user_id) {
+            try {
+              const { data: userData } = await supabase
+                .from('users')
+                .select('name, email')
+                .eq('id', session.user_id)
+                .single();
+              
+              return {
+                ...session,
+                user_name: userData?.name,
+                user_email: userData?.email
+              };
+            } catch {
+              return {
+                ...session,
+                user_name: undefined,
+                user_email: undefined
+              };
+            }
+          }
+          return session;
+        })
+      );
+      
+      setRecentSessions(sessionsWithUsers);
 
       // Fetch recent events
       const { data: eventsData, error: eventsError } = await supabase
@@ -357,10 +388,18 @@ export function AdminAnalytics() {
                           <div className="flex items-center gap-2">
                             <Badge variant="secondary">{session.device_type}</Badge>
                             <Badge variant="outline">{session.browser}</Badge>
-                            {session.user_id && <Badge>Registered</Badge>}
+                            {session.user_id && session.user_name && (
+                              <Badge className="bg-primary/10 text-primary border-primary/20">
+                                {session.user_name}
+                              </Badge>
+                            )}
+                            {session.user_id && !session.user_name && <Badge>Registered</Badge>}
                           </div>
                           <p className="text-sm text-muted-foreground mt-1">
                             {session.community} • {session.page_path} • {session.page_views} views
+                            {session.user_email && (
+                              <span className="ml-2 text-xs">• {session.user_email}</span>
+                            )}
                           </p>
                         </div>
                       </div>
