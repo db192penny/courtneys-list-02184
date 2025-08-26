@@ -25,6 +25,7 @@ import {
   HelpCircle
 } from "lucide-react";
 import { CATEGORIES } from "@/data/categories";
+import { getCategoryIcon } from "@/utils/categoryIcons";
 import { useUserHomeVendors } from "@/hooks/useUserHomeVendors";
 import { useUserReviews } from "@/hooks/useUserReviews";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -240,29 +241,20 @@ export default function CommunityVendorTable({
       ) : (
         <div className="space-y-6">
           {/* Section Header */}
-          <div className="space-y-4">
+          {category !== "all" && (
             <SectionHeader 
-              icon={Building2} 
-              title={category !== "all" ? `${category} Provider Directory` : "Provider Directory"}
+              icon={getCategoryIcon(category as any)} 
+              title={`${category} Providers`}
               className="mb-3"
             />
-            {category !== "all" && (
-              <div className="flex items-center justify-between">
-                <h3 className="text-xl font-semibold text-foreground">
-                  {category} Providers
-                </h3>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => window.location.href = `/submit?community=${communityName}&category=${category}`}
-                  className="flex items-center gap-2"
-                >
-                  <Plus className="h-4 w-4" />
-                  Add Provider
-                </Button>
-              </div>
-            )}
-          </div>
+          )}
+          {category === "all" && (
+            <SectionHeader 
+              icon={Building2} 
+              title="All Providers"
+              className="mb-3"
+            />
+          )}
           
           <div className="overflow-x-auto">
             <Table>
