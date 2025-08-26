@@ -197,7 +197,9 @@ export function MobileAddCostModal({
                 placeholder="160"
                 value={monthlyPlan}
                 onChange={(e) => setMonthlyPlan(e.target.value)}
+                onFocus={handleInputFocus}
                 className="flex-1"
+                style={{ fontSize: '16px' }}
               />
               <span className="text-sm text-muted-foreground">/ Month</span>
             </div>
@@ -210,6 +212,8 @@ export function MobileAddCostModal({
               placeholder="1"
               value={visitsPerMonth}
               onChange={(e) => setVisitsPerMonth(e.target.value)}
+              onFocus={handleInputFocus}
+              style={{ fontSize: '16px' }}
             />
           </div>
         </div>
@@ -230,7 +234,9 @@ export function MobileAddCostModal({
                 placeholder="150"
                 value={serviceCall}
                 onChange={(e) => setServiceCall(e.target.value)}
+                onFocus={handleInputFocus}
                 className="flex-1"
+                style={{ fontSize: '16px' }}
               />
               <span className="text-sm text-muted-foreground">/ Visit</span>
             </div>
@@ -245,7 +251,9 @@ export function MobileAddCostModal({
                 placeholder="400"
                 value={yearlyPlan}
                 onChange={(e) => setYearlyPlan(e.target.value)}
+                onFocus={handleInputFocus}
                 className="flex-1"
+                style={{ fontSize: '16px' }}
               />
               <span className="text-sm text-muted-foreground">/ Year</span>
             </div>
@@ -258,6 +266,8 @@ export function MobileAddCostModal({
               placeholder="2"
               value={visitsPerYear}
               onChange={(e) => setVisitsPerYear(e.target.value)}
+              onFocus={handleInputFocus}
+              style={{ fontSize: '16px' }}
             />
           </div>
         </div>
@@ -277,7 +287,9 @@ export function MobileAddCostModal({
               placeholder="125"
               value={serviceCall}
               onChange={(e) => setServiceCall(e.target.value)}
+              onFocus={handleInputFocus}
               className="flex-1"
+              style={{ fontSize: '16px' }}
             />
             <span className="text-sm text-muted-foreground">/ Visit</span>
           </div>
@@ -298,7 +310,9 @@ export function MobileAddCostModal({
               placeholder="75"
               value={hourlyRate}
               onChange={(e) => setHourlyRate(e.target.value)}
+              onFocus={handleInputFocus}
               className="flex-1"
+              style={{ fontSize: '16px' }}
             />
             <span className="text-sm text-muted-foreground">/ Hour</span>
           </div>
@@ -314,50 +328,94 @@ export function MobileAddCostModal({
     );
   };
 
+  const handleInputFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    // Prevent iOS zoom by ensuring 16px font size
+    e.target.style.fontSize = '16px';
+    
+    // Store original viewport position
+    const originalScrollY = window.scrollY;
+    
+    // Prevent any automatic scrolling
+    setTimeout(() => {
+      window.scrollTo(0, originalScrollY);
+      document.documentElement.scrollTop = originalScrollY;
+      document.body.scrollTop = originalScrollY;
+    }, 0);
+  };
+
   return (
-    <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="max-h-[85vh]">
-        <DrawerHeader className="text-left pb-4">
-          <DrawerTitle>Add Cost for {vendorName}</DrawerTitle>
-        </DrawerHeader>
-        
-        <ScrollArea className="flex-1 px-4">
-          <div className="space-y-6 pb-6">
-            {getCategoryInputs()}
-            
-            <div className="flex items-center space-x-3 p-3 bg-muted/50 rounded-lg">
-              <Checkbox
-                id="skip"
-                checked={skipForNow}
-                onCheckedChange={(checked) => setSkipForNow(checked === true)}
-                className="mt-0.5"
-              />
-              <Label htmlFor="skip" className="text-sm text-muted-foreground leading-relaxed">
-                Skip for now
-              </Label>
+    <>
+      {open && (
+        <div 
+          className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm"
+          style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}
+        >
+          <div 
+            className="fixed inset-x-0 bottom-0 z-50 bg-background border-t rounded-t-lg shadow-lg"
+            style={{ 
+              height: '85vh',
+              maxHeight: '85vh',
+              position: 'fixed',
+              touchAction: 'pan-y'
+            }}
+          >
+            <div className="flex flex-col h-full">
+              <div className="text-left p-4 pb-4 flex-shrink-0 border-b">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg font-semibold">Add Cost for {vendorName}</h2>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => onOpenChange(false)}
+                    className="p-1 h-8 w-8"
+                  >
+                    ×
+                  </Button>
+                </div>
+              </div>
+              
+              <div className="flex-1 px-4 overflow-y-auto">
+                <div className="space-y-6 pb-4">
+                  <div className="space-y-4">
+                    {getCategoryInputs()}
+                  </div>
+                  
+                  <div className="flex items-center space-x-3 p-3 bg-muted/50 rounded-lg">
+                    <Checkbox
+                      id="skip"
+                      checked={skipForNow}
+                      onCheckedChange={(checked) => setSkipForNow(checked === true)}
+                      className="mt-0.5"
+                    />
+                    <Label htmlFor="skip" className="text-sm text-muted-foreground leading-relaxed">
+                      Skip for now
+                    </Label>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-4 flex-shrink-0 bg-background border-t p-4">
+                <div className="flex gap-3">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => onOpenChange(false)}
+                    className="flex-1"
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    onClick={handleSubmit} 
+                    disabled={loading}
+                    className="flex-1"
+                  >
+                    {loading ? "Saving..." : "Save"}
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
-        </ScrollArea>
-
-        <DrawerFooter className="pt-4">
-          <div className="flex gap-3">
-            <Button 
-              variant="outline" 
-              onClick={() => onOpenChange(false)}
-              className="flex-1"
-            >
-              Cancel
-            </Button>
-            <Button 
-              onClick={handleSubmit} 
-              disabled={loading}
-              className="flex-1"
-            >
-              {loading ? "Saving..." : "Save"}
-            </Button>
-          </div>
-        </DrawerFooter>
-      </DrawerContent>
-    </Drawer>
+        </div>
+      )}
+    </>
   );
 }

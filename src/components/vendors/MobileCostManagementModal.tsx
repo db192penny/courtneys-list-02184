@@ -206,65 +206,92 @@ export default function MobileCostManagementModal({ open, onOpenChange, vendor, 
   };
 
   return (
-    <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="max-h-[80vh] h-auto">
-        <DrawerHeader className="text-left pb-4">
-          <DrawerTitle>
-            {hasExistingCosts ? "Edit Costs" : "Share Costs"} — {vendor?.name}
-          </DrawerTitle>
-        </DrawerHeader>
-        
-        {vendor && (
-          <ScrollArea className="flex-1 px-4">
-            <div className="space-y-6 pb-6">
-              <div className="grid gap-3">
-                <Label>Cost Information</Label>
-                <CostInputs category={vendor.category} value={costs} onChange={setCosts} />
+    <>
+      {open && (
+        <div 
+          className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm"
+          style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}
+        >
+          <div 
+            className="fixed inset-x-0 bottom-0 z-50 bg-background border-t rounded-t-lg shadow-lg"
+            style={{ 
+              height: '80vh',
+              maxHeight: '80vh',
+              position: 'fixed',
+              touchAction: 'pan-y'
+            }}
+          >
+            <div className="flex flex-col h-full">
+              <div className="text-left p-4 pb-4 flex-shrink-0 border-b">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg font-semibold">
+                    {hasExistingCosts ? "Edit Costs" : "Share Costs"} — {vendor?.name}
+                  </h2>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => onOpenChange(false)}
+                    className="p-1 h-8 w-8"
+                  >
+                    ×
+                  </Button>
+                </div>
               </div>
               
-              <div className="flex items-center space-x-3 p-3 bg-muted/50 rounded-lg">
-                <Checkbox
-                  id="show-name-costs"
-                  checked={showNameInCosts}
-                  onCheckedChange={(checked) => setShowNameInCosts(checked as boolean)}
-                  className="mt-0.5"
-                />
-                <Label htmlFor="show-name-costs" className="text-sm font-medium leading-relaxed">
-                  Show my name in costs
-                </Label>
-              </div>
+              {vendor && (
+                <div className="flex-1 px-4 overflow-y-auto">
+                  <div className="space-y-6 pb-4">
+                    <div className="grid gap-3">
+                      <Label>Cost Information</Label>
+                      <CostInputs category={vendor.category} value={costs} onChange={setCosts} />
+                    </div>
+                    
+                    <div className="flex items-center space-x-3 p-3 bg-muted/50 rounded-lg">
+                      <Checkbox
+                        id="show-name-costs"
+                        checked={showNameInCosts}
+                        onCheckedChange={(checked) => setShowNameInCosts(checked as boolean)}
+                        className="mt-0.5"
+                      />
+                      <Label htmlFor="show-name-costs" className="text-sm font-medium leading-relaxed">
+                        Show my name in costs
+                      </Label>
+                    </div>
 
-              <div className="p-3 bg-background border rounded-lg">
-                <CostPreview 
-                  costs={costs} 
-                  showNameInCosts={showNameInCosts} 
-                  authorLabel={authorLabel}
-                />
+                    <div className="p-3 bg-background border rounded-lg">
+                      <CostPreview 
+                        costs={costs} 
+                        showNameInCosts={showNameInCosts} 
+                        authorLabel={authorLabel}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              <div className="pt-4 flex-shrink-0 bg-background border-t p-4">
+                <div className="flex gap-3">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => onOpenChange(false)} 
+                    disabled={loading}
+                    className="flex-1"
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    onClick={onSubmit} 
+                    disabled={loading}
+                    className="flex-1"
+                  >
+                    {loading ? "Saving..." : "Save"}
+                  </Button>
+                </div>
               </div>
             </div>
-          </ScrollArea>
-        )}
-        
-        <DrawerFooter className="pt-4">
-          <div className="flex gap-3">
-            <Button 
-              variant="outline" 
-              onClick={() => onOpenChange(false)} 
-              disabled={loading}
-              className="flex-1"
-            >
-              Cancel
-            </Button>
-            <Button 
-              onClick={onSubmit} 
-              disabled={loading}
-              className="flex-1"
-            >
-              {loading ? "Saving..." : "Save"}
-            </Button>
           </div>
-        </DrawerFooter>
-      </DrawerContent>
-    </Drawer>
+        </div>
+      )}
+    </>
   );
 }
