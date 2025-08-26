@@ -295,7 +295,6 @@ export default function CommunityVendorTable({
                     <DollarSign className="h-3 w-3" />
                     <div className="flex flex-col items-start">
                       <span>Cost Information</span>
-                      <span className="text-[10px] text-muted-foreground/80">Community averages</span>
                     </div>
                   </div>
                 </TableHead>
