@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.54.0";
+import { Resend } from 'npm:resend@4.0.0';
 
 // Helper function to format community names for display
 function formatCommunityName(name: string): string {
@@ -246,25 +247,36 @@ Deno.serve(async (req) => {
       })
     }
 
-    const emailResponse = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${resendApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        from: "Courtney's List <courtney@courtneys-list.com>",
-        to: [webhookData.user.email],
-        subject: `${formatCommunityName(communityName) || 'Your Neighborhood'} Access is Ready - Unlock it Now`,
-        html: html,
-      }),
-    })
+    const resend = new Resend(resendApiKey)
 
-    const emailResult = await emailResponse.json()
+    // Prepare tracking tags and headers
+    const tags = [
+      { name: 'email-type', value: 'magic-link' },
+      { name: 'auth-flow', value: emailActionType },
+      { name: 'community', value: communityName || 'default' },
+      { name: 'call-type', value: isDirectCall ? 'direct' : 'webhook' }
+    ]
+
+    const headers = {
+      'X-Email-Type': 'magic-link',
+      'X-Auth-Action': emailActionType,
+      'X-Community': communityName || 'default',
+      'X-Call-Type': isDirectCall ? 'direct' : 'webhook',
+      'X-Campaign': 'user-authentication'
+    }
+
+    const emailResult = await resend.emails.send({
+      from: "Courtney's List <courtney@courtneys-list.com>",
+      to: [webhookData.user.email],
+      subject: `${formatCommunityName(communityName) || 'Your Neighborhood'} Access is Ready - Unlock it Now`,
+      html: html,
+      tags: tags,
+      headers: headers
+    })
     
-    if (!emailResponse.ok) {
-      console.error('❌ Resend error:', emailResult)
-      throw new Error(`Resend API error: ${JSON.stringify(emailResult)}`)
+    if (emailResult.error) {
+      console.error('❌ Resend error:', emailResult.error)
+      throw new Error(`Resend API error: ${JSON.stringify(emailResult.error)}`)
     }
 
     console.log('✅ Email sent successfully:', emailResult.id)
