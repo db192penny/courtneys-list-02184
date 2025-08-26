@@ -302,7 +302,7 @@ export default function CommunityVendorTable({
                   </div>
                 </TableHead>
                 <TableHead className="text-right text-xs font-medium text-muted-foreground">
-                  <div className="flex items-center gap-1 justify-end">
+                  <div className="flex items-center gap-1 justify-center">
                     <Settings className="h-3 w-3" />
                     Actions
                   </div>
