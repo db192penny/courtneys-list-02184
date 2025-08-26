@@ -87,32 +87,6 @@ export default function VendorMobileCard({
           </div>
         </div>
 
-        {/* Actions Section */}
-        <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
-          <SectionHeader icon={Smartphone} title="Actions" />
-          <div className="flex gap-2">
-            <Button 
-              size="sm" 
-              variant="outline"
-              className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700 flex items-center gap-1 flex-1"
-              onClick={() => isAuthenticated ? onRate(vendor) : window.location.href = `/auth?community=${encodeURIComponent(communityName || '')}`}
-            >
-              <Star className="h-3 w-3" />
-              {userReviews?.has(vendor.id) ? "Edit Rating" : "Rate Provider"}
-            </Button>
-            {isAuthenticated && (
-              <Button 
-                size="sm" 
-                variant="outline"
-                className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700 flex-1"
-                onClick={() => onCosts(vendor)}
-              >
-                Add Cost Info
-              </Button>
-            )}
-          </div>
-        </div>
-
         {/* Category and homes serviced */}
         <div className="flex items-center justify-between gap-2">
           <Button 
@@ -216,6 +190,32 @@ export default function VendorMobileCard({
             showContact={showContact}
             communityName={communityName}
           />
+        </div>
+
+        {/* Actions Section */}
+        <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
+          <SectionHeader icon={Smartphone} title="Actions" />
+          <div className="flex gap-2">
+            <Button 
+              size="sm" 
+              variant="outline"
+              className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700 flex items-center gap-1 flex-1"
+              onClick={() => isAuthenticated ? onRate(vendor) : window.location.href = `/auth?community=${encodeURIComponent(communityName || '')}`}
+            >
+              <Star className="h-3 w-3" />
+              {userReviews?.has(vendor.id) ? "Edit Rating" : "Rate Provider"}
+            </Button>
+            {isAuthenticated && (
+              <Button 
+                size="sm" 
+                variant="outline"
+                className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700 flex-1"
+                onClick={() => onCosts(vendor)}
+              >
+                Add Cost Info
+              </Button>
+            )}
+          </div>
         </div>
 
         {/* Contact Section */}
