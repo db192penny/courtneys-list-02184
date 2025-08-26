@@ -478,44 +478,44 @@ export default function CommunityVendorTable({
                         communityName={communityName}
                      />
                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex gap-2 justify-end">
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button 
-                              size="sm" 
-                              variant="outline" 
-                              className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700 flex items-center gap-1 px-3 py-2" 
-                              onClick={() => isAuthenticated ? openRate(r) : window.location.href = `/auth?community=${encodeURIComponent(communityName)}`}
-                            >
-                              <Star className="h-3 w-3" />
-                              {userReviews?.has(r.id) ? "Edit Rating" : "Rate Provider"}
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>{userReviews?.has(r.id) ? "Update your existing rating" : "Rate this provider to help neighbors"}</p>
-                          </TooltipContent>
-                        </Tooltip>
-                        {isAuthenticated && (
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button 
-                                size="sm" 
-                                variant="outline" 
-                                className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700 flex items-center gap-1 px-3 py-2" 
-                                onClick={() => openCosts(r)}
-                              >
-                                <DollarSign className="h-3 w-3" />
-                                Add Cost Info
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>Share cost information to help neighbors budget</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        )}
-                      </div>
-                    </TableCell>
+                     <TableCell className="text-right">
+                       <div className="flex gap-1 justify-end">
+                         <Tooltip>
+                           <TooltipTrigger asChild>
+                             <Button 
+                               size="sm" 
+                               variant="secondary" 
+                               className="h-7 px-2 text-xs" 
+                               onClick={() => isAuthenticated ? openRate(r) : window.location.href = `/auth?community=${encodeURIComponent(communityName)}`}
+                             >
+                               <Star className="h-3 w-3 mr-1" />
+                               Rate
+                             </Button>
+                           </TooltipTrigger>
+                           <TooltipContent>
+                             <p>{userReviews?.has(r.id) ? "Update your existing rating" : "Rate this provider to help neighbors"}</p>
+                           </TooltipContent>
+                         </Tooltip>
+                         {isAuthenticated && (
+                           <Tooltip>
+                             <TooltipTrigger asChild>
+                               <Button 
+                                 size="sm" 
+                                 variant="secondary" 
+                                 className="h-7 px-2 text-xs" 
+                                 onClick={() => openCosts(r)}
+                               >
+                                 <DollarSign className="h-3 w-3 mr-1" />
+                                 Cost
+                               </Button>
+                             </TooltipTrigger>
+                             <TooltipContent>
+                               <p>Share cost information to help neighbors budget</p>
+                             </TooltipContent>
+                           </Tooltip>
+                         )}
+                       </div>
+                     </TableCell>
                    <TableCell className="whitespace-nowrap">{showContact ? (r.contact_info ? formatUSPhoneDisplay(r.contact_info) : "—") : "Hidden"}</TableCell>
                 </TableRow>
               ))}
