@@ -70,9 +70,35 @@ export function useAnalytics() {
 
   // Initialize session
   const initializeSession = async () => {
+    // Check if we already have an active session in the last 5 minutes
+    const existingSessionKey = 'analytics_active_session';
+    const existingSession = localStorage.getItem(existingSessionKey);
+    
+    if (existingSession) {
+      try {
+        const parsedSession = JSON.parse(existingSession);
+        const sessionAge = Date.now() - parsedSession.timestamp;
+        
+        // If session is less than 5 minutes old, reuse it
+        if (sessionAge < 5 * 60 * 1000) {
+          console.log('Reusing existing analytics session:', parsedSession.sessionToken);
+          setSession({
+            id: parsedSession.id,
+            sessionToken: parsedSession.sessionToken,
+            startTime: new Date(parsedSession.startTime)
+          });
+          return;
+        }
+      } catch (e) {
+        console.warn('Failed to parse existing session:', e);
+      }
+    }
+
     const sessionToken = generateSessionToken();
     const { deviceType, browser, os } = getDeviceInfo();
     const community = getCommunity();
+    
+    console.log('Creating new analytics session for user:', user?.id || 'anonymous');
     
     try {
       const { data, error } = await supabase
@@ -104,6 +130,15 @@ export function useAnalytics() {
       };
 
       setSession(newSession);
+      
+      // Store session info to prevent duplicates
+      localStorage.setItem(existingSessionKey, JSON.stringify({
+        id: data.id,
+        sessionToken,
+        startTime: newSession.startTime.toISOString(),
+        timestamp: Date.now()
+      }));
+      
       localStorage.setItem('analytics_returning_user', 'true');
       
       // Track initial page view
@@ -179,6 +214,10 @@ export function useAnalytics() {
           duration_seconds: duration
         })
         .eq('id', session.id);
+      
+      // Clear stored session data
+      localStorage.removeItem('analytics_active_session');
+      console.log('Analytics session ended:', session.sessionToken);
     } catch (error) {
       console.warn('Session end tracking failed:', error);
     }

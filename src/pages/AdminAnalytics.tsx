@@ -37,6 +37,54 @@ interface UserActivity {
   vendor_count: number;
 }
 
+// Helper function to deduplicate sessions by user and time window
+function deduplicateUserSessions(sessions: UserActivity[]): UserActivity[] {
+  const userSessionMap = new Map<string, UserActivity[]>();
+  
+  // Group sessions by user_id
+  sessions.forEach(session => {
+    if (!session.user_id) return; // Skip null user_ids
+    
+    const userId = session.user_id;
+    if (!userSessionMap.has(userId)) {
+      userSessionMap.set(userId, []);
+    }
+    userSessionMap.get(userId)!.push(session);
+  });
+  
+  const deduplicatedSessions: UserActivity[] = [];
+  
+  // For each user, deduplicate sessions within 5-minute windows
+  userSessionMap.forEach((userSessions, userId) => {
+    // Sort by session_start time
+    userSessions.sort((a, b) => new Date(a.session_start).getTime() - new Date(b.session_start).getTime());
+    
+    const uniqueSessions: UserActivity[] = [];
+    
+    userSessions.forEach(session => {
+      const sessionTime = new Date(session.session_start).getTime();
+      
+      // Check if this session is within 5 minutes of an existing session
+      const isDuplicate = uniqueSessions.some(existing => {
+        const existingTime = new Date(existing.session_start).getTime();
+        const timeDiff = Math.abs(sessionTime - existingTime);
+        return timeDiff < 5 * 60 * 1000; // 5 minutes in milliseconds
+      });
+      
+      if (!isDuplicate) {
+        uniqueSessions.push(session);
+      } else {
+        console.log(`Filtered duplicate session for user ${session.user_name || 'Unknown'} at ${session.session_start}`);
+      }
+    });
+    
+    deduplicatedSessions.push(...uniqueSessions);
+  });
+  
+  // Sort final results by session_start descending
+  return deduplicatedSessions.sort((a, b) => new Date(b.session_start).getTime() - new Date(a.session_start).getTime());
+}
+
 
 const COLORS = ['hsl(var(--primary))', 'hsl(var(--secondary))', 'hsl(var(--accent))', 'hsl(var(--muted))'];
 
@@ -69,10 +117,13 @@ export function AdminAnalytics() {
       }
 
       // Fetch user activity data with session info and activity counts
-      // David Birnbaum's user ID to exclude
+      // David Birnbaum's user ID and email to exclude
       const adminUserId = '50c337c8-2c85-4aae-84da-26ee79f4c43b';
+      const adminEmail = 'dgb@davidbirnbaum.com';
       const twoDaysAgo = new Date();
       twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
+
+      console.log(`Fetching user sessions from ${twoDaysAgo.toISOString()}, excluding admin user ${adminEmail}`);
 
       const { data: sessionData, error: sessionError } = await supabase
         .from('user_sessions')
@@ -93,21 +144,33 @@ export function AdminAnalytics() {
 
       if (sessionError) throw sessionError;
 
+      console.log(`Raw session data: ${sessionData?.length || 0} sessions found`);
+
+      // Filter out any remaining admin sessions by email (backup filter)
+      const filteredSessions = (sessionData || []).filter(session => session.user_id !== adminUserId);
+      console.log(`After filtering admin sessions: ${filteredSessions.length} sessions remaining`);
+
       // Fetch user details and activity counts for each session
       const activitiesWithDetails = await Promise.all(
-        (sessionData || []).map(async (session) => {
+        filteredSessions.map(async (session) => {
           let userData = null;
           let activityCounts = { review_count: 0, cost_count: 0, vendor_count: 0 };
           let sessionActivityCounts = { session_review_count: 0, session_cost_count: 0, session_vendor_count: 0 };
 
           if (session.user_id) {
             try {
-              // Get user name
+              // Get user name and email for additional filtering
               const { data: user } = await supabase
                 .from('users')
-                .select('name')
+                .select('name, email')
                 .eq('id', session.user_id)
                 .single();
+              
+              // Skip admin user sessions if they somehow got through
+              if (user?.email === adminEmail) {
+                console.log(`Skipping admin user session: ${user.email}`);
+                return null;
+              }
               
               userData = user;
 
@@ -193,7 +256,15 @@ export function AdminAnalytics() {
         })
       );
 
-      setUserActivities(activitiesWithDetails);
+      // Filter out null results (admin users that were skipped)
+      const validActivities = activitiesWithDetails.filter(activity => activity !== null) as UserActivity[];
+      console.log(`Valid user activities: ${validActivities.length}`);
+
+      // Deduplicate sessions by user and time window
+      const deduplicatedActivities = deduplicateUserSessions(validActivities);
+      console.log(`After deduplication: ${deduplicatedActivities.length} unique sessions`);
+
+      setUserActivities(deduplicatedActivities);
 
       setLastUpdated(new Date());
     } catch (error) {
@@ -289,16 +360,14 @@ export function AdminAnalytics() {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Avg Events/Session</CardTitle>
+              <CardTitle className="text-sm font-medium">Unique User Sessions</CardTitle>
               <MousePointer className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
-                {summary?.total_sessions && summary?.total_events 
-                  ? Math.round(summary.total_events / summary.total_sessions * 10) / 10
-                  : 0
-                }
-              </div>
+              <div className="text-2xl font-bold">{userActivities.length}</div>
+              <p className="text-xs text-muted-foreground">
+                Deduplicated non-admin sessions
+              </p>
             </CardContent>
           </Card>
         </div>
@@ -400,9 +469,9 @@ export function AdminAnalytics() {
           {/* User Activity Table */}
           <div className="mt-8">
             <div className="mb-4">
-              <h3 className="text-lg font-semibold">Authenticated User Activity (Last 2 Days)</h3>
+              <h3 className="text-lg font-semibold">Unique User Sessions (Last 2 Days)</h3>
               <p className="text-sm text-muted-foreground">
-                Detailed view of authenticated user sessions with session actions and lifetime totals
+                Deduplicated non-admin user sessions with session actions and lifetime totals
               </p>
             </div>
             <UserActivityTable activities={userActivities} />
