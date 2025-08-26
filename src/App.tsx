@@ -31,8 +31,10 @@ import AdminCostManagement from "./pages/AdminCostManagement";
 import AdminPreviewLinks from "./pages/AdminPreviewLinks";
 import AdminPreviewUsers from "./pages/AdminPreviewUsers";
 import AdminUsers from "./pages/AdminUsers";
+import { AdminAnalytics } from "./pages/AdminAnalytics";
 import Header from "./components/Header";
 import { AdminProtectedRoute } from "./components/AdminProtectedRoute";
+import { AnalyticsTracker } from "./components/AnalyticsTracker";
 
 const queryClient = new QueryClient();
 
@@ -118,6 +120,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
           <AuthWatcher />
+          <AnalyticsTracker />
           <ConditionalHeader />
           <Routes>
           <Route path="/" element={<Navigate to="/communities/boca-bridges?welcome=true" replace />} />
@@ -138,8 +141,9 @@ const App = () => (
           <Route path="/admin/vendors/edit" element={<AdminProtectedRoute><AdminEditVendor /></AdminProtectedRoute>} />
            <Route path="/admin/costs" element={<AdminProtectedRoute><AdminCostManagement /></AdminProtectedRoute>} />
             <Route path="/admin/preview-links" element={<AdminProtectedRoute><AdminPreviewLinks /></AdminProtectedRoute>} />
-            <Route path="/admin/preview-users" element={<AdminProtectedRoute><AdminPreviewUsers /></AdminProtectedRoute>} />
-            <Route path="/admin/users" element={<AdminProtectedRoute><AdminUsers /></AdminProtectedRoute>} />
+             <Route path="/admin/preview-users" element={<AdminProtectedRoute><AdminPreviewUsers /></AdminProtectedRoute>} />
+             <Route path="/admin/users" element={<AdminProtectedRoute><AdminUsers /></AdminProtectedRoute>} />
+             <Route path="/admin/analytics" element={<AdminProtectedRoute><AdminAnalytics /></AdminProtectedRoute>} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/contact" element={<Contact />} />

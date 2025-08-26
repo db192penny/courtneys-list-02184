@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Button } from "@/components/ui/button";
+import { TrackingButton } from "@/components/analytics/TrackingButton";
 import { Checkbox } from "@/components/ui/checkbox";
 import { StarRating } from "@/components/ui/star-rating";
 import { useToast } from "@/hooks/use-toast";
@@ -303,8 +303,26 @@ export default function RateVendorModal({ open, onOpenChange, vendor, onSuccess,
               />
             </div>
             <div className="pt-2 flex justify-end gap-2">
-              <Button variant="secondary" onClick={() => onOpenChange(false)} disabled={loading}>Cancel</Button>
-              <Button onClick={onSubmit} disabled={loading}>{loading ? "Saving..." : "Save"}</Button>
+              <TrackingButton 
+                variant="secondary" 
+                onClick={() => onOpenChange(false)} 
+                disabled={loading}
+                eventName="rate_vendor_cancel"
+                vendorId={vendor.id}
+                category={vendor.category}
+              >
+                Cancel
+              </TrackingButton>
+              <TrackingButton 
+                onClick={onSubmit} 
+                disabled={loading}
+                eventName="rate_vendor_submit"
+                vendorId={vendor.id}
+                category={vendor.category}
+                metadata={{ rating, hasComments: !!comments }}
+              >
+                {loading ? "Saving..." : "Save"}
+              </TrackingButton>
             </div>
           </div>
         )}

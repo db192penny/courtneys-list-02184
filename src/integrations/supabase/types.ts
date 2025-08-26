@@ -798,6 +798,65 @@ export type Database = {
           },
         ]
       }
+      user_analytics: {
+        Row: {
+          category: string | null
+          community: string | null
+          created_at: string
+          device_type: string | null
+          element_id: string | null
+          element_text: string | null
+          event_name: string
+          event_type: string
+          id: string
+          metadata: Json | null
+          page_path: string | null
+          session_id: string | null
+          user_id: string | null
+          vendor_id: string | null
+        }
+        Insert: {
+          category?: string | null
+          community?: string | null
+          created_at?: string
+          device_type?: string | null
+          element_id?: string | null
+          element_text?: string | null
+          event_name: string
+          event_type: string
+          id?: string
+          metadata?: Json | null
+          page_path?: string | null
+          session_id?: string | null
+          user_id?: string | null
+          vendor_id?: string | null
+        }
+        Update: {
+          category?: string | null
+          community?: string | null
+          created_at?: string
+          device_type?: string | null
+          element_id?: string | null
+          element_text?: string | null
+          event_name?: string
+          event_type?: string
+          id?: string
+          metadata?: Json | null
+          page_path?: string | null
+          session_id?: string | null
+          user_id?: string | null
+          vendor_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_analytics_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "user_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_point_history: {
         Row: {
           activity_type: string
@@ -846,6 +905,81 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      user_sessions: {
+        Row: {
+          browser: string | null
+          community: string | null
+          country: string | null
+          created_at: string
+          device_type: string | null
+          duration_seconds: number | null
+          id: string
+          ip_address: string | null
+          is_bounce: boolean | null
+          is_returning_user: boolean | null
+          metadata: Json | null
+          os: string | null
+          page_path: string | null
+          page_views: number | null
+          referrer: string | null
+          session_end: string | null
+          session_start: string
+          session_token: string
+          user_id: string | null
+          utm_campaign: string | null
+          utm_medium: string | null
+          utm_source: string | null
+        }
+        Insert: {
+          browser?: string | null
+          community?: string | null
+          country?: string | null
+          created_at?: string
+          device_type?: string | null
+          duration_seconds?: number | null
+          id?: string
+          ip_address?: string | null
+          is_bounce?: boolean | null
+          is_returning_user?: boolean | null
+          metadata?: Json | null
+          os?: string | null
+          page_path?: string | null
+          page_views?: number | null
+          referrer?: string | null
+          session_end?: string | null
+          session_start?: string
+          session_token: string
+          user_id?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+        }
+        Update: {
+          browser?: string | null
+          community?: string | null
+          country?: string | null
+          created_at?: string
+          device_type?: string | null
+          duration_seconds?: number | null
+          id?: string
+          ip_address?: string | null
+          is_bounce?: boolean | null
+          is_returning_user?: boolean | null
+          metadata?: Json | null
+          os?: string | null
+          page_path?: string | null
+          page_views?: number | null
+          referrer?: string | null
+          session_end?: string | null
+          session_start?: string
+          session_token?: string
+          user_id?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
         }
         Relationships: []
       }
@@ -1200,6 +1334,18 @@ export type Database = {
           email: string
           error_message: string
           user_id: string
+        }[]
+      }
+      get_analytics_summary: {
+        Args: { _days?: number }
+        Returns: {
+          community_breakdown: Json
+          device_breakdown: Json
+          top_events: Json
+          top_pages: Json
+          total_events: number
+          total_sessions: number
+          unique_users: number
         }[]
       }
       get_community_leaderboard: {

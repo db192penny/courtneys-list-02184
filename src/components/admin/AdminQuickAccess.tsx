@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
-import { ExternalLink, Copy, Settings, Eye } from "lucide-react";
+import { ExternalLink, Copy, Settings, Eye, BarChart3, Activity } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/sonner";
 
@@ -136,6 +136,27 @@ export const AdminQuickAccess = () => {
           {loading && (
             <div className="animate-pulse bg-muted rounded h-8"></div>
           )}
+        </CardContent>
+      </Card>
+      
+      {/* Analytics Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <BarChart3 className="h-5 w-5" />
+            Analytics Dashboard
+          </CardTitle>
+          <CardDescription>
+            View user behavior, sessions, and engagement metrics
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button asChild className="w-full">
+            <Link to="/admin/analytics">
+              <Activity className="mr-2 h-4 w-4" />
+              View Analytics
+            </Link>
+          </Button>
         </CardContent>
       </Card>
     </div>
