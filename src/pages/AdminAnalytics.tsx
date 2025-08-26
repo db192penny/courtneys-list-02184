@@ -6,8 +6,9 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
 import { supabase } from '@/integrations/supabase/client';
-import { Users, Eye, MousePointer, Smartphone, Monitor, RefreshCw } from 'lucide-react';
+import { Users, Eye, MousePointer, RefreshCw } from 'lucide-react';
 import SEO from '@/components/SEO';
+import { UserActivityTable } from '@/components/admin/UserActivityTable';
 
 interface AnalyticsSummary {
   total_sessions: number;
@@ -19,29 +20,20 @@ interface AnalyticsSummary {
   community_breakdown: any[];
 }
 
-interface RecentSession {
+interface UserActivity {
   id: string;
   user_id: string | null;
+  user_name?: string;
   device_type: string;
   browser: string;
-  community: string;
-  page_path: string;
   session_start: string;
   duration_seconds: number | null;
-  page_views: number;
-  user_name?: string;
-  user_email?: string;
+  is_returning_user: boolean;
+  review_count: number;
+  cost_count: number;
+  vendor_count: number;
 }
 
-interface RecentEvent {
-  id: string;
-  event_type: string;
-  event_name: string;
-  page_path: string;
-  element_text: string | null;
-  community: string;
-  created_at: string;
-}
 
 const COLORS = ['hsl(var(--primary))', 'hsl(var(--secondary))', 'hsl(var(--accent))', 'hsl(var(--muted))'];
 
@@ -49,8 +41,7 @@ export function AdminAnalytics() {
   const [timeRange, setTimeRange] = useState('30');
   const [loading, setLoading] = useState(true);
   const [summary, setSummary] = useState<AnalyticsSummary | null>(null);
-  const [recentSessions, setRecentSessions] = useState<RecentSession[]>([]);
-  const [recentEvents, setRecentEvents] = useState<RecentEvent[]>([]);
+  const [userActivities, setUserActivities] = useState<UserActivity[]>([]);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
 
   const fetchAnalytics = async () => {
@@ -74,54 +65,83 @@ export function AdminAnalytics() {
         });
       }
 
-      // Fetch recent sessions
-      const { data: sessionsData, error: sessionsError } = await supabase
+      // Fetch user activity data with session info and activity counts
+      const { data: sessionData, error: sessionError } = await supabase
         .from('user_sessions')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(20);
+        .select(`
+          id,
+          user_id,
+          device_type,
+          browser,
+          session_start,
+          duration_seconds,
+          is_returning_user
+        `)
+        .order('session_start', { ascending: false })
+        .limit(30);
 
-      if (sessionsError) throw sessionsError;
-      
-      // Fetch user details for sessions with user_id
-      const sessionsWithUsers = await Promise.all(
-        (sessionsData || []).map(async (session) => {
+      if (sessionError) throw sessionError;
+
+      // Fetch user details and activity counts for each session
+      const activitiesWithDetails = await Promise.all(
+        (sessionData || []).map(async (session) => {
+          let userData = null;
+          let activityCounts = { review_count: 0, cost_count: 0, vendor_count: 0 };
+
           if (session.user_id) {
             try {
-              const { data: userData } = await supabase
+              // Get user name
+              const { data: user } = await supabase
                 .from('users')
-                .select('name, email')
+                .select('name')
                 .eq('id', session.user_id)
                 .single();
               
-              return {
-                ...session,
-                user_name: userData?.name,
-                user_email: userData?.email
+              userData = user;
+
+              // Get activity counts for this user (lifetime totals)
+              const [reviewsResult, costsResult, vendorsResult] = await Promise.all([
+                supabase
+                  .from('reviews')
+                  .select('id', { count: 'exact', head: true })
+                  .eq('user_id', session.user_id),
+                supabase
+                  .from('costs')
+                  .select('id', { count: 'exact', head: true })
+                  .eq('created_by', session.user_id),
+                supabase
+                  .from('vendors')
+                  .select('id', { count: 'exact', head: true })
+                  .eq('created_by', session.user_id)
+              ]);
+
+              activityCounts = {
+                review_count: reviewsResult.count || 0,
+                cost_count: costsResult.count || 0,
+                vendor_count: vendorsResult.count || 0
               };
-            } catch {
-              return {
-                ...session,
-                user_name: undefined,
-                user_email: undefined
-              };
+            } catch (error) {
+              console.warn('Failed to fetch user details:', error);
             }
           }
-          return session;
+
+          return {
+            id: session.id,
+            user_id: session.user_id,
+            user_name: userData?.name,
+            device_type: session.device_type,
+            browser: session.browser,
+            session_start: session.session_start,
+            duration_seconds: session.duration_seconds,
+            is_returning_user: session.is_returning_user || false,
+            review_count: activityCounts.review_count,
+            cost_count: activityCounts.cost_count,
+            vendor_count: activityCounts.vendor_count
+          };
         })
       );
-      
-      setRecentSessions(sessionsWithUsers);
 
-      // Fetch recent events
-      const { data: eventsData, error: eventsError } = await supabase
-        .from('user_analytics')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(50);
-
-      if (eventsError) throw eventsError;
-      setRecentEvents(eventsData || []);
+      setUserActivities(activitiesWithDetails);
 
       setLastUpdated(new Date());
     } catch (error) {
@@ -135,16 +155,6 @@ export function AdminAnalytics() {
     fetchAnalytics();
   }, [timeRange]);
 
-  const formatDuration = (seconds: number | null) => {
-    if (!seconds) return 'N/A';
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes}m ${remainingSeconds}s`;
-  };
-
-  const formatTime = (timestamp: string) => {
-    return new Date(timestamp).toLocaleString();
-  };
 
   if (loading) {
     return (
@@ -244,8 +254,6 @@ export function AdminAnalytics() {
         <Tabs defaultValue="overview" className="space-y-6">
           <TabsList>
             <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="events">Events</TabsTrigger>
-            <TabsTrigger value="sessions">Sessions</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
@@ -335,84 +343,19 @@ export function AdminAnalytics() {
                   </ResponsiveContainer>
                 </CardContent>
               </Card>
+          </div>
+
+          {/* User Activity Table */}
+          <div className="mt-8">
+            <div className="mb-4">
+              <h3 className="text-lg font-semibold">Recent User Activity</h3>
+              <p className="text-sm text-muted-foreground">
+                Detailed view of user sessions with lifetime activity counts
+              </p>
             </div>
-          </TabsContent>
-
-          <TabsContent value="events" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent Events</CardTitle>
-                <CardDescription>Latest user actions and interactions</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {recentEvents.slice(0, 20).map((event) => (
-                    <div key={event.id} className="flex items-center justify-between p-3 border rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <Badge variant="outline">{event.event_type}</Badge>
-                        <div>
-                          <p className="font-medium">{event.event_name}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {event.page_path} • {event.community}
-                            {event.element_text && ` • "${event.element_text}"`}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        {formatTime(event.created_at)}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="sessions" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent Sessions</CardTitle>
-                <CardDescription>Latest user sessions and activity</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {recentSessions.slice(0, 15).map((session) => (
-                    <div key={session.id} className="flex items-center justify-between p-3 border rounded-lg">
-                      <div className="flex items-center gap-3">
-                        {session.device_type === 'Mobile' ? (
-                          <Smartphone className="h-4 w-4 text-muted-foreground" />
-                        ) : (
-                          <Monitor className="h-4 w-4 text-muted-foreground" />
-                        )}
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <Badge variant="secondary">{session.device_type}</Badge>
-                            <Badge variant="outline">{session.browser}</Badge>
-                            {session.user_id && session.user_name && (
-                              <Badge className="bg-primary/10 text-primary border-primary/20">
-                                {session.user_name}
-                              </Badge>
-                            )}
-                            {session.user_id && !session.user_name && <Badge>Registered</Badge>}
-                          </div>
-                          <p className="text-sm text-muted-foreground mt-1">
-                            {session.community} • {session.page_path} • {session.page_views} views
-                            {session.user_email && (
-                              <span className="ml-2 text-xs">• {session.user_email}</span>
-                            )}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="text-right text-sm text-muted-foreground">
-                        <p>{formatTime(session.session_start)}</p>
-                        <p>Duration: {formatDuration(session.duration_seconds)}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+            <UserActivityTable activities={userActivities} />
+          </div>
+        </TabsContent>
         </Tabs>
       </div>
     </div>
