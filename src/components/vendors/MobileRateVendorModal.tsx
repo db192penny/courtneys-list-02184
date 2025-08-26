@@ -100,28 +100,19 @@ export default function MobileRateVendorModal({ open, onOpenChange, vendor, onSu
     // Prevent iOS zoom by ensuring 16px font size
     e.target.style.fontSize = '16px';
     
-    // Prevent default focus behavior that causes scrolling
-    e.preventDefault();
+    // Store original viewport position
+    const originalScrollY = window.scrollY;
     
-    // Manually focus without scrolling
-    const target = e.target as HTMLTextAreaElement;
-    target.focus({ preventScroll: true });
-    
-    // Lock the body scroll when textarea is focused
-    document.body.style.position = 'fixed';
-    document.body.style.top = `-${window.scrollY}px`;
-    document.body.style.width = '100%';
+    // Prevent any automatic scrolling
+    setTimeout(() => {
+      window.scrollTo(0, originalScrollY);
+      document.documentElement.scrollTop = originalScrollY;
+      document.body.scrollTop = originalScrollY;
+    }, 0);
   };
 
   const handleTextareaBlur = () => {
-    // Restore body scroll when textarea loses focus
-    const scrollY = document.body.style.top;
-    document.body.style.position = '';
-    document.body.style.top = '';
-    document.body.style.width = '';
-    if (scrollY) {
-      window.scrollTo(0, parseInt(scrollY || '0') * -1);
-    }
+    // No special handling needed for blur
   };
 
   const onSubmit = async () => {
