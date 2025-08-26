@@ -37,7 +37,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     const emailResponse = await resend.emails.send({
       from: "Courtney's List <noreply@courtneys-list.com>",
-      to: ["db@fivefourventures.com"],
+      to: ["db@fivefourventures.com", "clkramer@gmail.com"],
       subject: `New Signup: ${userName} - ${community}`,
       html: `
         <h2>New User Signup</h2>
