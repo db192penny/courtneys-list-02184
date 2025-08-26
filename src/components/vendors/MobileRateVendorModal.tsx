@@ -99,6 +99,29 @@ export default function MobileRateVendorModal({ open, onOpenChange, vendor, onSu
   const handleTextareaFocus = (e: React.FocusEvent<HTMLTextAreaElement>) => {
     // Prevent iOS zoom by ensuring 16px font size
     e.target.style.fontSize = '16px';
+    
+    // Prevent default focus behavior that causes scrolling
+    e.preventDefault();
+    
+    // Manually focus without scrolling
+    const target = e.target as HTMLTextAreaElement;
+    target.focus({ preventScroll: true });
+    
+    // Lock the body scroll when textarea is focused
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${window.scrollY}px`;
+    document.body.style.width = '100%';
+  };
+
+  const handleTextareaBlur = () => {
+    // Restore body scroll when textarea loses focus
+    const scrollY = document.body.style.top;
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.width = '';
+    if (scrollY) {
+      window.scrollTo(0, parseInt(scrollY || '0') * -1);
+    }
   };
 
   const onSubmit = async () => {
@@ -268,6 +291,7 @@ export default function MobileRateVendorModal({ open, onOpenChange, vendor, onSu
                   value={comments} 
                   onChange={(e) => setComments(e.currentTarget.value)} 
                   onFocus={handleTextareaFocus}
+                  onBlur={handleTextareaBlur}
                   placeholder="Any helpful insights — pricing, professionalism, customer service, responsiveness — the more detailed the better for your neighbors."
                   className="min-h-[100px] resize-none"
                   style={{ 
