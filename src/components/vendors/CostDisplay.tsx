@@ -10,6 +10,9 @@ import { EditMarketPriceModal } from "./EditMarketPriceModal";
 import CostsHover from "./CostsHover";
 import { MobileCostsModal } from "./MobileCostsModal";
 
+// Feature flag to control Area Average visibility (set to true to restore later)
+const SHOW_AREA_AVERAGE = false;
+
 type CostDisplayProps = {
   vendorId: string;
   vendorName: string;
@@ -126,113 +129,115 @@ export function CostDisplay({
         </div>
 
         {/* Area Average Price Line */}
-        <div className="flex items-center gap-1">
-          <span className="text-xs text-muted-foreground min-w-[70px]">Area Average:</span>
-          {isMobile ? (
-            <Dialog>
-              <DialogTrigger asChild>
-                <div className="px-2 py-1.5 rounded-md bg-orange-50 hover:bg-orange-100 transition-colors border border-orange-200 hover:border-orange-300 min-h-[28px] flex items-center group cursor-pointer">
-                  {marketPrice ? (
-                    <div className="flex items-center gap-1">
-                      <span className="text-xs font-medium underline decoration-dotted underline-offset-4">{marketPrice}</span>
-                      <Info className="h-3 w-3 text-muted-foreground" />
-                      {isAdmin && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-auto p-0 text-muted-foreground hover:text-foreground"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setShowEditMarket(true);
-                          }}
-                        >
-                          <Pencil className="h-3 w-3" />
-                        </Button>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-1">
-                      <span className="text-xs font-medium text-muted-foreground underline decoration-dotted underline-offset-4">—</span>
-                      <Info className="h-3 w-3 text-muted-foreground" />
-                      {isAdmin && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-auto p-0 text-muted-foreground hover:text-foreground"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setShowEditMarket(true);
-                          }}
-                        >
-                          <Pencil className="h-3 w-3" />
-                        </Button>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </DialogTrigger>
-              <DialogContent className="max-w-sm">
-                <DialogHeader>
-                  <DialogTitle>Area Average Calculation</DialogTitle>
-                </DialogHeader>
-                <div className="mt-4 space-y-2">
-                  <p className="text-sm text-muted-foreground">
+        {SHOW_AREA_AVERAGE && (
+          <div className="flex items-center gap-1">
+            <span className="text-xs text-muted-foreground min-w-[70px]">Area Average:</span>
+            {isMobile ? (
+              <Dialog>
+                <DialogTrigger asChild>
+                  <div className="px-2 py-1.5 rounded-md bg-orange-50 hover:bg-orange-100 transition-colors border border-orange-200 hover:border-orange-300 min-h-[28px] flex items-center group cursor-pointer">
+                    {marketPrice ? (
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs font-medium underline decoration-dotted underline-offset-4">{marketPrice}</span>
+                        <Info className="h-3 w-3 text-muted-foreground" />
+                        {isAdmin && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-auto p-0 text-muted-foreground hover:text-foreground"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setShowEditMarket(true);
+                            }}
+                          >
+                            <Pencil className="h-3 w-3" />
+                          </Button>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs font-medium text-muted-foreground underline decoration-dotted underline-offset-4">—</span>
+                        <Info className="h-3 w-3 text-muted-foreground" />
+                        {isAdmin && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-auto p-0 text-muted-foreground hover:text-foreground"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setShowEditMarket(true);
+                            }}
+                          >
+                            <Pencil className="h-3 w-3" />
+                          </Button>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </DialogTrigger>
+                <DialogContent className="max-w-sm">
+                  <DialogHeader>
+                    <DialogTitle>Area Average Calculation</DialogTitle>
+                  </DialogHeader>
+                  <div className="mt-4 space-y-2">
+                    <p className="text-sm text-muted-foreground">
+                      Average cost for similar services in your area, based on industry pricing data, home prices, and data from HomeAdvisor.
+                    </p>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            ) : (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="px-2 py-1.5 rounded-md bg-orange-50 hover:bg-orange-100 transition-colors border border-orange-200 hover:border-orange-300 min-h-[28px] flex items-center group cursor-pointer">
+                    {marketPrice ? (
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs font-medium underline decoration-dotted underline-offset-4">{marketPrice}</span>
+                        <Info className="h-3 w-3 text-muted-foreground" />
+                        {isAdmin && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-auto p-0 text-muted-foreground hover:text-foreground"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setShowEditMarket(true);
+                            }}
+                          >
+                            <Pencil className="h-3 w-3" />
+                          </Button>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs font-medium text-muted-foreground underline decoration-dotted underline-offset-4">—</span>
+                        <Info className="h-3 w-3 text-muted-foreground" />
+                        {isAdmin && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-auto p-0 text-muted-foreground hover:text-foreground"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setShowEditMarket(true);
+                            }}
+                          >
+                            <Pencil className="h-3 w-3" />
+                          </Button>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="text-sm">
                     Average cost for similar services in your area, based on industry pricing data, home prices, and data from HomeAdvisor.
                   </p>
-                </div>
-              </DialogContent>
-            </Dialog>
-          ) : (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="px-2 py-1.5 rounded-md bg-orange-50 hover:bg-orange-100 transition-colors border border-orange-200 hover:border-orange-300 min-h-[28px] flex items-center group cursor-pointer">
-                  {marketPrice ? (
-                    <div className="flex items-center gap-1">
-                      <span className="text-xs font-medium underline decoration-dotted underline-offset-4">{marketPrice}</span>
-                      <Info className="h-3 w-3 text-muted-foreground" />
-                      {isAdmin && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-auto p-0 text-muted-foreground hover:text-foreground"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setShowEditMarket(true);
-                          }}
-                        >
-                          <Pencil className="h-3 w-3" />
-                        </Button>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-1">
-                      <span className="text-xs font-medium text-muted-foreground underline decoration-dotted underline-offset-4">—</span>
-                      <Info className="h-3 w-3 text-muted-foreground" />
-                      {isAdmin && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-auto p-0 text-muted-foreground hover:text-foreground"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setShowEditMarket(true);
-                          }}
-                        >
-                          <Pencil className="h-3 w-3" />
-                        </Button>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p className="text-sm">
-                  Average cost for similar services in your area, based on industry pricing data, home prices, and data from HomeAdvisor.
-                </p>
-              </TooltipContent>
-            </Tooltip>
-          )}
-        </div>
+                </TooltipContent>
+              </Tooltip>
+            )}
+          </div>
+        )}
 
         {/* Modals */}
         {showEditMarket && (
