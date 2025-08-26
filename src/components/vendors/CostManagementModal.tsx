@@ -153,7 +153,45 @@ export default function CostManagementModal({ open, onOpenChange, vendor, onSucc
         return;
       }
 
-      // Insert cost rows for this household
+      // Get existing costs for this user/vendor combination to handle deletions
+      const { data: existingCosts } = await supabase
+        .from("costs")
+        .select("id, cost_kind")
+        .eq("vendor_id", vendor.id)
+        .eq("created_by", userId)
+        .is("deleted_at", null);
+
+      // Identify which cost kinds have been cleared (were in existing but now null/empty)
+      const currentCostKinds = new Set((costs || []).filter(c => c.amount != null).map(c => c.cost_kind));
+      const clearedCosts = (existingCosts || []).filter(existing => 
+        !currentCostKinds.has(existing.cost_kind as any)
+      );
+
+      // Soft delete cleared costs
+      if (clearedCosts.length > 0) {
+        console.log("[CostManagementModal] Soft deleting cleared costs:", clearedCosts);
+        const { error: deleteErr } = await supabase
+          .from("costs")
+          .update({
+            deleted_at: new Date().toISOString(),
+            deleted_by: userId,
+          })
+          .in("id", clearedCosts.map(c => c.id));
+
+        if (deleteErr) {
+          console.error("[CostManagementModal] soft delete error", deleteErr);
+          toast({
+            title: "Error updating cost information",
+            description: "Please try again.",
+            variant: "destructive",
+          });
+          return;
+        } else {
+          console.log("[CostManagementModal] Costs soft deleted successfully");
+        }
+      }
+
+      // Insert/update cost rows for this household
       const payloads = (costs || []).filter(c => c.amount != null).map((c) => ({
         vendor_id: vendor.id,
         amount: c.amount as number,
@@ -165,6 +203,8 @@ export default function CostManagementModal({ open, onOpenChange, vendor, onSucc
         household_address,
         created_by: userId,
         anonymous: !showNameInCosts,
+        deleted_at: null, // Ensure we're not soft-deleted when upserting
+        deleted_by: null,
       }));
 
       if (payloads.length > 0) {
