@@ -131,7 +131,7 @@ export default function EmailTemplatePanel({ communityName }: Props) {
         email: user.email,
         address: user.address,
         display: `${user.name.split(' ')[0]} ${user.name.split(' ').slice(-1)[0]?.charAt(0) || ''}. - ${user.address.split(',')[0]}`
-      }));
+      })).sort((a, b) => a.name.localeCompare(b.name));
 
       return communityUsers;
     },
