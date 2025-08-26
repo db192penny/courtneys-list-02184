@@ -11,6 +11,9 @@ interface UserActivity {
   session_start: string;
   duration_seconds: number | null;
   is_returning_user: boolean;
+  session_review_count: number;
+  session_cost_count: number;
+  session_vendor_count: number;
   review_count: number;
   cost_count: number;
   vendor_count: number;
@@ -93,15 +96,15 @@ export function UserActivityTable({ activities }: UserActivityTableProps) {
                   <div className="text-sm space-y-1">
                     <div className="flex gap-2">
                       <span className="text-muted-foreground">Reviews:</span>
-                      <span className="font-medium">{activity.review_count}</span>
+                      <span className="font-medium">{activity.session_review_count} ({activity.review_count} total)</span>
                     </div>
                     <div className="flex gap-2">
                       <span className="text-muted-foreground">Costs:</span>
-                      <span className="font-medium">{activity.cost_count}</span>
+                      <span className="font-medium">{activity.session_cost_count} ({activity.cost_count} total)</span>
                     </div>
                     <div className="flex gap-2">
                       <span className="text-muted-foreground">Vendors:</span>
-                      <span className="font-medium">{activity.vendor_count}</span>
+                      <span className="font-medium">{activity.session_vendor_count} ({activity.vendor_count} total)</span>
                     </div>
                   </div>
                 </TableCell>

@@ -29,6 +29,9 @@ interface UserActivity {
   session_start: string;
   duration_seconds: number | null;
   is_returning_user: boolean;
+  session_review_count: number;
+  session_cost_count: number;
+  session_vendor_count: number;
   review_count: number;
   cost_count: number;
   vendor_count: number;
@@ -66,6 +69,11 @@ export function AdminAnalytics() {
       }
 
       // Fetch user activity data with session info and activity counts
+      // David Birnbaum's user ID to exclude
+      const adminUserId = '50c337c8-2c85-4aae-84da-26ee79f4c43b';
+      const twoDaysAgo = new Date();
+      twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
+
       const { data: sessionData, error: sessionError } = await supabase
         .from('user_sessions')
         .select(`
@@ -74,11 +82,14 @@ export function AdminAnalytics() {
           device_type,
           browser,
           session_start,
+          session_end,
           duration_seconds,
           is_returning_user
         `)
-        .order('session_start', { ascending: false })
-        .limit(30);
+        .not('user_id', 'is', null)
+        .neq('user_id', adminUserId)
+        .gte('session_start', twoDaysAgo.toISOString())
+        .order('session_start', { ascending: false });
 
       if (sessionError) throw sessionError;
 
@@ -87,6 +98,7 @@ export function AdminAnalytics() {
         (sessionData || []).map(async (session) => {
           let userData = null;
           let activityCounts = { review_count: 0, cost_count: 0, vendor_count: 0 };
+          let sessionActivityCounts = { session_review_count: 0, session_cost_count: 0, session_vendor_count: 0 };
 
           if (session.user_id) {
             try {
@@ -99,8 +111,20 @@ export function AdminAnalytics() {
               
               userData = user;
 
-              // Get activity counts for this user (lifetime totals)
-              const [reviewsResult, costsResult, vendorsResult] = await Promise.all([
+              // Get session time boundaries
+              const sessionStart = new Date(session.session_start);
+              const sessionEnd = session.session_end ? new Date(session.session_end) : new Date();
+
+              // Get activity counts for this user (lifetime totals and session-specific)
+              const [
+                reviewsResult, 
+                costsResult, 
+                vendorsResult,
+                sessionReviewsResult,
+                sessionCostsResult,
+                sessionVendorsResult
+              ] = await Promise.all([
+                // Lifetime totals
                 supabase
                   .from('reviews')
                   .select('id', { count: 'exact', head: true })
@@ -112,13 +136,38 @@ export function AdminAnalytics() {
                 supabase
                   .from('vendors')
                   .select('id', { count: 'exact', head: true })
+                  .eq('created_by', session.user_id),
+                // Session-specific counts
+                supabase
+                  .from('reviews')
+                  .select('id', { count: 'exact', head: true })
+                  .eq('user_id', session.user_id)
+                  .gte('created_at', sessionStart.toISOString())
+                  .lte('created_at', sessionEnd.toISOString()),
+                supabase
+                  .from('costs')
+                  .select('id', { count: 'exact', head: true })
                   .eq('created_by', session.user_id)
+                  .gte('created_at', sessionStart.toISOString())
+                  .lte('created_at', sessionEnd.toISOString()),
+                supabase
+                  .from('vendors')
+                  .select('id', { count: 'exact', head: true })
+                  .eq('created_by', session.user_id)
+                  .gte('created_at', sessionStart.toISOString())
+                  .lte('created_at', sessionEnd.toISOString())
               ]);
 
               activityCounts = {
                 review_count: reviewsResult.count || 0,
                 cost_count: costsResult.count || 0,
                 vendor_count: vendorsResult.count || 0
+              };
+
+              sessionActivityCounts = {
+                session_review_count: sessionReviewsResult.count || 0,
+                session_cost_count: sessionCostsResult.count || 0,
+                session_vendor_count: sessionVendorsResult.count || 0
               };
             } catch (error) {
               console.warn('Failed to fetch user details:', error);
@@ -134,6 +183,9 @@ export function AdminAnalytics() {
             session_start: session.session_start,
             duration_seconds: session.duration_seconds,
             is_returning_user: session.is_returning_user || false,
+            session_review_count: sessionActivityCounts.session_review_count,
+            session_cost_count: sessionActivityCounts.session_cost_count,
+            session_vendor_count: sessionActivityCounts.session_vendor_count,
             review_count: activityCounts.review_count,
             cost_count: activityCounts.cost_count,
             vendor_count: activityCounts.vendor_count
@@ -348,9 +400,9 @@ export function AdminAnalytics() {
           {/* User Activity Table */}
           <div className="mt-8">
             <div className="mb-4">
-              <h3 className="text-lg font-semibold">Recent User Activity</h3>
+              <h3 className="text-lg font-semibold">Authenticated User Activity (Last 2 Days)</h3>
               <p className="text-sm text-muted-foreground">
-                Detailed view of user sessions with lifetime activity counts
+                Detailed view of authenticated user sessions with session actions and lifetime totals
               </p>
             </div>
             <UserActivityTable activities={userActivities} />
