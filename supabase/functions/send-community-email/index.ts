@@ -119,7 +119,7 @@ const handler = async (req: Request): Promise<Response> => {
           type: 'magiclink',
           email: user.email,
           options: {
-            redirectTo: `https://courtneys-list.com/communities/${communitySlug}?welcome=true`
+            redirectTo: `https://courtneys-list.com/signin`
           }
         });
 
@@ -129,7 +129,7 @@ const handler = async (req: Request): Promise<Response> => {
         }
 
         const magicLinkUrl = authData.properties?.action_link || '';
-        const viewProvidersButton = `<a href="${magicLinkUrl}" style="background-color: #4f46e5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold; margin: 10px 0; text-align: center;">See Boca Bridges Providers</a>`;
+        const viewProvidersButton = `<a href="${magicLinkUrl}" style="background-color: #4f46e5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold; margin: 10px 0; text-align: center;">Sign in to See Providers</a>`;
         
         personalizedBody = personalizedBody.replace(/\{\{VIEW_PROVIDERS_BUTTON\}\}/g, viewProvidersButton);
       } else {
