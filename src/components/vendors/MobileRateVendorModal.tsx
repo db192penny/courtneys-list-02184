@@ -248,116 +248,123 @@ export default function MobileRateVendorModal({ open, onOpenChange, vendor, onSu
   };
 
   return (
-    <Drawer 
-      open={open} 
-      onOpenChange={onOpenChange} 
-      dismissible={false}
-      shouldScaleBackground={false}
-    >
-      <DrawerContent 
-        className="max-h-[calc(100vh-60px)] min-h-[60vh] h-auto flex flex-col focus:outline-none" 
-        style={{ touchAction: 'pan-y' }}
-        onPointerDownOutside={(e) => e.preventDefault()}
-        onInteractOutside={(e) => e.preventDefault()}
-      >
-        <DrawerHeader className="text-left pb-4 flex-shrink-0 border-b">
-          <DrawerTitle className="flex items-center justify-between">
-            <span>Rate Vendor — {vendor?.name}</span>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={() => onOpenChange(false)}
-              className="p-1 h-6 w-6"
-            >
-              ×
-            </Button>
-          </DrawerTitle>
-        </DrawerHeader>
+    <>
+      {open && (
+        <div 
+          className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm"
+          style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}
+        >
+          <div 
+            className="fixed inset-x-0 bottom-0 z-50 bg-background border-t rounded-t-lg shadow-lg"
+            style={{ 
+              height: '85vh',
+              maxHeight: '85vh',
+              position: 'fixed',
+              touchAction: 'pan-y'
+            }}
+          >
+            <div className="flex flex-col h-full">
+              <div className="text-left p-4 pb-4 flex-shrink-0 border-b">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg font-semibold">Rate Vendor — {vendor?.name}</h2>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => onOpenChange(false)}
+                    className="p-1 h-8 w-8"
+                  >
+                    ×
+                  </Button>
+                </div>
+              </div>
         
-        {vendor && (
-          <ScrollArea ref={scrollAreaRef} className="flex-1 px-4 overflow-y-auto">
-            <div className="space-y-6 pb-4">
-              <div className="grid gap-3">
-                <Label>Rating</Label>
-                <div className="flex justify-center">
-                  <StarRating value={rating} onChange={setRating} size="lg" />
+              {vendor && (
+                <div className="flex-1 px-4 overflow-y-auto">
+                  <div className="space-y-6 pb-4">
+                    <div className="grid gap-3">
+                      <Label>Rating</Label>
+                      <div className="flex justify-center">
+                        <StarRating value={rating} onChange={setRating} size="lg" />
+                      </div>
+                    </div>
+                    
+                    <div className="grid gap-3">
+                      <Label>Comments (Additional Color)</Label>
+                      <Textarea 
+                        ref={textareaRef}
+                        value={comments} 
+                        onChange={(e) => setComments(e.currentTarget.value)} 
+                        onFocus={handleTextareaFocus}
+                        onBlur={handleTextareaBlur}
+                        placeholder="Any helpful insights — pricing, professionalism, customer service, responsiveness — the more detailed the better for your neighbors."
+                        className="min-h-[100px] resize-none"
+                        style={{ 
+                          fontSize: '16px',
+                          maxHeight: '120px'
+                        }}
+                        rows={4}
+                      />
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <div className="flex items-center space-x-3 p-3 bg-muted/50 rounded-lg">
+                        <Checkbox 
+                          checked={useForHome} 
+                          onCheckedChange={(v) => setUseForHome(!!v)}
+                          className="mt-0.5" 
+                        />
+                        <label className="text-sm font-medium leading-relaxed">
+                          Do you currently use this vendor for your home?
+                        </label>
+                      </div>
+                      
+                      <div className="flex items-center space-x-3 p-3 bg-muted/50 rounded-lg">
+                        <Checkbox 
+                          checked={showNameInReview} 
+                          onCheckedChange={(v) => setShowNameInReview(!!v)}
+                          className="mt-0.5"
+                        />
+                        <label className="text-sm font-medium leading-relaxed">
+                          Show My Name in Review
+                        </label>
+                      </div>
+                      
+                      <div className="p-3 bg-background border rounded-lg">
+                        <ReviewPreview 
+                          rating={rating}
+                          showName={showNameInReview}
+                          userName={userData?.name}
+                          streetName={userData?.streetName ? extractStreetName(userData.streetName) : undefined}
+                        />
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
-              
-              <div className="grid gap-3">
-                <Label>Comments (Additional Color)</Label>
-                <Textarea 
-                  ref={textareaRef}
-                  value={comments} 
-                  onChange={(e) => setComments(e.currentTarget.value)} 
-                  onFocus={handleTextareaFocus}
-                  onBlur={handleTextareaBlur}
-                  placeholder="Any helpful insights — pricing, professionalism, customer service, responsiveness — the more detailed the better for your neighbors."
-                  className="min-h-[100px] resize-none"
-                  style={{ 
-                    fontSize: '16px',
-                    maxHeight: '120px'
-                  }}
-                  rows={4}
-                />
-              </div>
-              
-              <div className="space-y-4">
-                <div className="flex items-center space-x-3 p-3 bg-muted/50 rounded-lg">
-                  <Checkbox 
-                    checked={useForHome} 
-                    onCheckedChange={(v) => setUseForHome(!!v)}
-                    className="mt-0.5" 
-                  />
-                  <label className="text-sm font-medium leading-relaxed">
-                    Do you currently use this vendor for your home?
-                  </label>
-                </div>
-                
-                <div className="flex items-center space-x-3 p-3 bg-muted/50 rounded-lg">
-                  <Checkbox 
-                    checked={showNameInReview} 
-                    onCheckedChange={(v) => setShowNameInReview(!!v)}
-                    className="mt-0.5"
-                  />
-                  <label className="text-sm font-medium leading-relaxed">
-                    Show My Name in Review
-                  </label>
-                </div>
-                
-                <div className="p-3 bg-background border rounded-lg">
-                  <ReviewPreview 
-                    rating={rating}
-                    showName={showNameInReview}
-                    userName={userData?.name}
-                    streetName={userData?.streetName ? extractStreetName(userData.streetName) : undefined}
-                  />
+              )}
+        
+              <div className="pt-4 flex-shrink-0 bg-background border-t p-4">
+                <div className="flex gap-3">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => onOpenChange(false)} 
+                    disabled={loading}
+                    className="flex-1"
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    onClick={onSubmit} 
+                    disabled={loading}
+                    className="flex-1"
+                  >
+                    {loading ? "Saving..." : "Save"}
+                  </Button>
                 </div>
               </div>
             </div>
-          </ScrollArea>
-        )}
-        
-        <DrawerFooter className="pt-4 flex-shrink-0 bg-background border-t">
-          <div className="flex gap-3">
-            <Button 
-              variant="outline" 
-              onClick={() => onOpenChange(false)} 
-              disabled={loading}
-              className="flex-1"
-            >
-              Cancel
-            </Button>
-            <Button 
-              onClick={onSubmit} 
-              disabled={loading}
-              className="flex-1"
-            >
-              {loading ? "Saving..." : "Save"}
-            </Button>
           </div>
-        </DrawerFooter>
-      </DrawerContent>
-    </Drawer>
+        </div>
+      )}
+    </>
   );
 }
