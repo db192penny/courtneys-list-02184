@@ -122,7 +122,7 @@ export function CostDisplay({
               {communityPrice ? (
                 <span className="text-xs font-medium underline decoration-dotted underline-offset-4">{communityPrice}</span>
               ) : (
-                <span className="text-xs text-muted-foreground underline decoration-dotted underline-offset-4">TBD</span>
+                <span className="text-xs text-muted-foreground underline decoration-dotted underline-offset-4">Share your cost</span>
               )}
             </div>
           )}
