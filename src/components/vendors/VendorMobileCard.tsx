@@ -1,10 +1,11 @@
-import { Star, Info, ChevronRight } from "lucide-react";
+import { Star, Info, ChevronRight, Smartphone, DollarSign, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { RatingStars } from "@/components/ui/rating-stars";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { SectionHeader } from "@/components/ui/section-header";
 import { formatUSPhoneDisplay } from "@/utils/phone";
 import ReviewsHover from "@/components/vendors/ReviewsHover";
 import GoogleReviewsHover from "@/components/vendors/GoogleReviewsHover";
@@ -84,24 +85,29 @@ export default function VendorMobileCard({
               </Tooltip>
             </div>
           </div>
-          <div className="flex gap-1 shrink-0">
+        </div>
+
+        {/* Actions Section */}
+        <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
+          <SectionHeader icon={Smartphone} title="Actions" />
+          <div className="flex gap-2">
             <Button 
               size="sm" 
               variant="outline"
-              className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700 flex items-center gap-1"
+              className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700 flex items-center gap-1 flex-1"
               onClick={() => isAuthenticated ? onRate(vendor) : window.location.href = `/auth?community=${encodeURIComponent(communityName || '')}`}
             >
               <Star className="h-3 w-3" />
-              {userReviews?.has(vendor.id) ? "Edit Rating" : "Rate"}
+              {userReviews?.has(vendor.id) ? "Edit Rating" : "Rate Provider"}
             </Button>
             {isAuthenticated && (
               <Button 
                 size="sm" 
                 variant="outline"
-                className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700"
+                className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700 flex-1"
                 onClick={() => onCosts(vendor)}
               >
-                + Costs
+                Add Cost Info
               </Button>
             )}
           </div>
@@ -127,50 +133,26 @@ export default function VendorMobileCard({
           </div>
         </div>
 
-        {/* Ratings */}
-        <div className="space-y-2">
-          <Dialog>
-            <DialogTrigger asChild>
-              <div className="flex items-center justify-between p-2 rounded-md bg-blue-50 hover:bg-blue-100 transition-colors border border-blue-200 cursor-pointer group">
-                <span className="text-sm font-medium text-muted-foreground underline">{communityName}</span>
-                <div className="flex items-center gap-1">
-                  {vendor.hoa_rating ? (
-                    <>
-                      <div className="underline">
-                        <RatingStars rating={vendor.hoa_rating} showValue />
-                      </div>
-                      {vendor.hoa_rating_count && (
-                        <span className="text-xs text-muted-foreground">({vendor.hoa_rating_count})</span>
-                      )}
-                    </>
-                  ) : (
-                    <span className="text-xs text-muted-foreground underline">No ratings yet</span>
-                  )}
-                  <ChevronRight className="h-3 w-3 text-muted-foreground" />
-                </div>
-              </div>
-            </DialogTrigger>
-            <DialogContent className="max-w-sm max-h-[80vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>{communityName} Reviews</DialogTitle>
-              </DialogHeader>
-              <div className="mt-4">
-                <MobileReviewsModal vendorId={vendor.id} />
-              </div>
-            </DialogContent>
-          </Dialog>
-
-          {vendor.google_rating != null && (
+        {/* Ratings & Reviews Section */}
+        <div>
+          <SectionHeader icon={Star} title="Ratings & Reviews" />
+          <div className="space-y-2">
             <Dialog>
               <DialogTrigger asChild>
-                <div className="flex items-center justify-between p-2 rounded-md bg-green-50 hover:bg-green-100 transition-colors border border-green-200 cursor-pointer group">
-                  <span className="text-sm font-medium text-muted-foreground underline">Google</span>
+                <div className="flex items-center justify-between p-2 rounded-md bg-blue-50 hover:bg-blue-100 transition-colors border border-blue-200 cursor-pointer group">
+                  <span className="text-sm font-medium text-muted-foreground underline">{communityName}</span>
                   <div className="flex items-center gap-1">
-                    <div className="underline">
-                      <RatingStars rating={vendor.google_rating} showValue />
-                    </div>
-                    {vendor.google_rating_count && (
-                      <span className="text-xs text-muted-foreground">({vendor.google_rating_count})</span>
+                    {vendor.hoa_rating ? (
+                      <>
+                        <div className="underline">
+                          <RatingStars rating={vendor.hoa_rating} showValue />
+                        </div>
+                        {vendor.hoa_rating_count && (
+                          <span className="text-xs text-muted-foreground">({vendor.hoa_rating_count})</span>
+                        )}
+                      </>
+                    ) : (
+                      <span className="text-xs text-muted-foreground underline">No ratings yet</span>
                     )}
                     <ChevronRight className="h-3 w-3 text-muted-foreground" />
                   </div>
@@ -178,22 +160,50 @@ export default function VendorMobileCard({
               </DialogTrigger>
               <DialogContent className="max-w-sm max-h-[80vh] overflow-y-auto">
                 <DialogHeader>
-                  <DialogTitle>Google Reviews</DialogTitle>
+                  <DialogTitle>{communityName} Reviews</DialogTitle>
                 </DialogHeader>
                 <div className="mt-4">
-                  <MobileGoogleReviewsModal 
-                    vendorId={vendor.id} 
-                    googleReviewsJson={vendor.google_reviews_json}
-                    googlePlaceId={vendor.google_place_id}
-                  />
+                  <MobileReviewsModal vendorId={vendor.id} />
                 </div>
               </DialogContent>
             </Dialog>
-          )}
+
+            {vendor.google_rating != null && (
+              <Dialog>
+                <DialogTrigger asChild>
+                  <div className="flex items-center justify-between p-2 rounded-md bg-green-50 hover:bg-green-100 transition-colors border border-green-200 cursor-pointer group">
+                    <span className="text-sm font-medium text-muted-foreground underline">Google</span>
+                    <div className="flex items-center gap-1">
+                      <div className="underline">
+                        <RatingStars rating={vendor.google_rating} showValue />
+                      </div>
+                      {vendor.google_rating_count && (
+                        <span className="text-xs text-muted-foreground">({vendor.google_rating_count})</span>
+                      )}
+                      <ChevronRight className="h-3 w-3 text-muted-foreground" />
+                    </div>
+                  </div>
+                </DialogTrigger>
+                <DialogContent className="max-w-sm max-h-[80vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>Google Reviews</DialogTitle>
+                  </DialogHeader>
+                  <div className="mt-4">
+                    <MobileGoogleReviewsModal 
+                      vendorId={vendor.id} 
+                      googleReviewsJson={vendor.google_reviews_json}
+                      googlePlaceId={vendor.google_place_id}
+                    />
+                  </div>
+                </DialogContent>
+              </Dialog>
+            )}
+          </div>
         </div>
 
-        {/* Cost and contact info */}
-        <div className="space-y-3 pt-2 border-t">
+        {/* Cost Information Section */}
+        <div className="bg-gray-50 border border-gray-200 rounded-md p-3">
+          <SectionHeader icon={DollarSign} title="Cost Information" />
           <CostDisplay
             vendorId={vendor.id}
             vendorName={vendor.name}
@@ -206,8 +216,13 @@ export default function VendorMobileCard({
             showContact={showContact}
             communityName={communityName}
           />
+        </div>
+
+        {/* Contact Section */}
+        <div className="bg-purple-50 border border-purple-200 rounded-md p-3">
+          <SectionHeader icon={Phone} title="Contact" />
           <div className="text-sm">
-            <span className="text-muted-foreground">Contact: </span>
+            <span className="text-muted-foreground">Phone: </span>
             <span className="font-medium">
               {showContact ? (vendor.contact_info ? formatUSPhoneDisplay(vendor.contact_info) : "—") : "Hidden"}
             </span>
