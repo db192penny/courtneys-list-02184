@@ -22,7 +22,8 @@ import {
   DollarSign,
   Phone,
   Settings,
-  HelpCircle
+  HelpCircle,
+  Pencil
 } from "lucide-react";
 import { CATEGORIES } from "@/data/categories";
 import { getCategoryIcon } from "@/utils/categoryIcons";
@@ -468,44 +469,53 @@ export default function CommunityVendorTable({
                         communityName={communityName}
                      />
                    </TableCell>
-                     <TableCell className="text-right">
-                       <div className="flex gap-2 justify-end">
-                         <Tooltip>
-                           <TooltipTrigger asChild>
-                             <Button 
-                               size="sm" 
-                               variant="outline" 
-                               className="h-8 px-3 text-sm bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700" 
-                               onClick={() => isAuthenticated ? openRate(r) : window.location.href = `/auth?community=${encodeURIComponent(communityName)}`}
-                             >
-                               <Star className="h-3 w-3 mr-1" />
-                               Rate Provider
-                             </Button>
-                           </TooltipTrigger>
-                           <TooltipContent>
-                             <p>{userReviews?.has(r.id) ? "Update your existing rating" : "Rate this provider to help neighbors"}</p>
-                           </TooltipContent>
-                         </Tooltip>
-                         {isAuthenticated && (
-                           <Tooltip>
-                             <TooltipTrigger asChild>
-                               <Button 
-                                 size="sm" 
-                                 variant="outline" 
-                                 className="h-8 px-3 text-sm bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700" 
-                                 onClick={() => openCosts(r)}
-                               >
-                                 <DollarSign className="h-3 w-3 mr-1" />
-                                 Add Cost Info
-                               </Button>
-                             </TooltipTrigger>
-                             <TooltipContent>
-                               <p>Share cost information to help neighbors budget</p>
-                             </TooltipContent>
-                           </Tooltip>
-                         )}
-                       </div>
-                     </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex gap-1 justify-end">
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button 
+                                size="sm" 
+                                variant="outline" 
+                                className="h-7 px-2 text-xs bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700" 
+                                onClick={() => isAuthenticated ? openRate(r) : window.location.href = `/auth?community=${encodeURIComponent(communityName)}`}
+                              >
+                                {userReviews?.has(r.id) ? (
+                                  <>
+                                    <Pencil className="h-3 w-3 mr-0.5" />
+                                    Edit Rating
+                                  </>
+                                ) : (
+                                  <>
+                                    <Star className="h-3 w-3 mr-0.5" />
+                                    Rate
+                                  </>
+                                )}
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>{userReviews?.has(r.id) ? "Update your existing rating" : "Rate this provider to help neighbors"}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                          {isAuthenticated && (
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button 
+                                  size="sm" 
+                                  variant="outline" 
+                                  className="h-7 px-2 text-xs bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700" 
+                                  onClick={() => openCosts(r)}
+                                >
+                                  <Plus className="h-3 w-3 mr-0.5" />
+                                  Costs
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Share cost information to help neighbors budget</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          )}
+                        </div>
+                      </TableCell>
                    <TableCell className="whitespace-nowrap">{showContact ? (r.contact_info ? formatUSPhoneDisplay(r.contact_info) : "—") : "Hidden"}</TableCell>
                 </TableRow>
               ))}
