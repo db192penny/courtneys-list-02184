@@ -452,21 +452,25 @@ export default function CommunityVendorTable({
                        )}
                      </div>
                    </TableCell>
-                   <TableCell>
-                     <CostDisplay
-                       vendorId={r.id}
-                       vendorName={r.name}
-                       category={r.category}
-                       communityAmount={r.community_amount}
-                       communityUnit={r.community_unit}
-                       communitySampleSize={r.community_sample_size}
+                    <TableCell>
+                      <CostDisplay
+                        vendorId={r.id}
+                        vendorName={r.name}
+                        category={r.category}
+                        communityAmount={r.community_amount}
+                        communityUnit={r.community_unit}
+                        communitySampleSize={r.community_sample_size}
                         marketAmount={r.market_amount}
                         marketUnit={r.market_unit}
                         showContact={!!showContact}
                         isAuthenticated={isAuthenticated}
                         communityName={communityName}
-                     />
-                   </TableCell>
+                        onOpenCostModal={() => {
+                          setSelectedVendor(r);
+                          setCostModalOpen(true);
+                        }}
+                      />
+                    </TableCell>
                       <TableCell className="text-right">
                         <div className="flex gap-1 justify-end">
                           <Tooltip>

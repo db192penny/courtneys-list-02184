@@ -25,6 +25,7 @@ type CostDisplayProps = {
   showContact: boolean;
   isAuthenticated?: boolean;
   communityName?: string;
+  onOpenCostModal?: () => void;
 };
 
 const formatUnit = (unit?: string) => {
@@ -55,7 +56,8 @@ export function CostDisplay({
   marketUnit,
   showContact,
   isAuthenticated,
-  communityName
+  communityName,
+  onOpenCostModal
 }: CostDisplayProps) {
   const { data: isAdmin } = useIsAdmin();
   const { data: profile } = useUserProfile();
@@ -118,11 +120,14 @@ export function CostDisplay({
               </CostsHover>
             )
           ) : (
-            <div className="px-2 py-1.5 rounded-md bg-blue-50 hover:bg-blue-100 transition-colors border border-blue-200 hover:border-blue-300 min-h-[28px] flex items-center group cursor-pointer">
+            <div 
+              className="px-2 py-1.5 rounded-md bg-blue-50 hover:bg-blue-100 transition-colors border border-blue-200 hover:border-blue-300 min-h-[28px] flex items-center group cursor-pointer"
+              onClick={onOpenCostModal}
+            >
               {communityPrice ? (
                 <span className="text-xs font-medium underline decoration-dotted underline-offset-4">{communityPrice}</span>
               ) : (
-                <span className="text-xs text-muted-foreground underline decoration-dotted underline-offset-4">Share your cost</span>
+                <span className="text-xs text-muted-foreground underline decoration-dotted underline-offset-4">Share cost info</span>
               )}
             </div>
           )}

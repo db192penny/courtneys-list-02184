@@ -192,6 +192,7 @@ export default function VendorMobileCard({
             marketUnit={vendor.market_unit}
             showContact={showContact}
             communityName={communityName}
+            onOpenCostModal={() => onCosts(vendor)}
           />
         </div>
 
