@@ -270,6 +270,8 @@ Deno.serve(async (req) => {
       to: [webhookData.user.email],
       subject: `${formatCommunityName(communityName) || 'Your Neighborhood'} Access is Ready - Unlock it Now`,
       html: html,
+      trackClicks: true,
+      trackOpens: true,
       tags: tags,
       headers: headers
     })
