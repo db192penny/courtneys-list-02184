@@ -225,13 +225,30 @@ export default function MobileRateVendorModal({ open, onOpenChange, vendor, onSu
   };
 
   return (
-    <Drawer open={open} onOpenChange={onOpenChange} data-vaul-no-drag>
+    <Drawer 
+      open={open} 
+      onOpenChange={onOpenChange} 
+      dismissible={false}
+      shouldScaleBackground={false}
+    >
       <DrawerContent 
-        className="max-h-[calc(100vh-60px)] min-h-[60vh] h-auto flex flex-col" 
-        style={{ touchAction: 'manipulation' }}
+        className="max-h-[calc(100vh-60px)] min-h-[60vh] h-auto flex flex-col focus:outline-none" 
+        style={{ touchAction: 'pan-y' }}
+        onPointerDownOutside={(e) => e.preventDefault()}
+        onInteractOutside={(e) => e.preventDefault()}
       >
-        <DrawerHeader className="text-left pb-4 flex-shrink-0">
-          <DrawerTitle>Rate Vendor — {vendor?.name}</DrawerTitle>
+        <DrawerHeader className="text-left pb-4 flex-shrink-0 border-b">
+          <DrawerTitle className="flex items-center justify-between">
+            <span>Rate Vendor — {vendor?.name}</span>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => onOpenChange(false)}
+              className="p-1 h-6 w-6"
+            >
+              ×
+            </Button>
+          </DrawerTitle>
         </DrawerHeader>
         
         {vendor && (
