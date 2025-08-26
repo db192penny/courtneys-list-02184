@@ -100,22 +100,20 @@ export default function MobileRateVendorModal({ open, onOpenChange, vendor, onSu
     // Prevent iOS zoom by ensuring 16px font size
     e.target.style.fontSize = '16px';
     
-    // Enhanced scroll handling for mobile keyboard
+    // Prevent Safari's automatic scrolling behavior
+    e.preventDefault();
+    
+    // Keep textarea in view without jumping to footer
     setTimeout(() => {
-      if (scrollAreaRef.current && textareaRef.current) {
-        const textarea = textareaRef.current;
-        const scrollContainer = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
-        
-        if (scrollContainer) {
-          // Scroll to ensure textarea is visible with more bottom padding for footer
-          const scrollTop = textarea.offsetTop - 60; // More space for footer
-          scrollContainer.scrollTo({
-            top: scrollTop,
-            behavior: 'smooth'
-          });
-        }
+      if (textareaRef.current) {
+        // Use scrollIntoView with specific options to prevent jumping
+        textareaRef.current.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center', // Keep in center of viewport
+          inline: 'nearest'
+        });
       }
-    }, 300); // Longer delay for iOS keyboard animation
+    }, 100); // Shorter delay for better responsiveness
   };
 
   const onSubmit = async () => {
