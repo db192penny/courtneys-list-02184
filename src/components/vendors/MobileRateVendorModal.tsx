@@ -100,27 +100,22 @@ export default function MobileRateVendorModal({ open, onOpenChange, vendor, onSu
     // Prevent iOS zoom by ensuring 16px font size
     e.target.style.fontSize = '16px';
     
-    // Smooth scroll to keep textarea in view within the drawer
+    // Enhanced scroll handling for mobile keyboard
     setTimeout(() => {
       if (scrollAreaRef.current && textareaRef.current) {
         const textarea = textareaRef.current;
         const scrollContainer = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
         
         if (scrollContainer) {
-          const textareaRect = textarea.getBoundingClientRect();
-          const containerRect = scrollContainer.getBoundingClientRect();
-          
-          // Only scroll if textarea is not fully visible
-          if (textareaRect.bottom > containerRect.bottom || textareaRect.top < containerRect.top) {
-            textarea.scrollIntoView({ 
-              block: 'nearest', 
-              behavior: 'smooth',
-              inline: 'nearest'
-            });
-          }
+          // Scroll to ensure textarea is visible with more bottom padding for footer
+          const scrollTop = textarea.offsetTop - 60; // More space for footer
+          scrollContainer.scrollTo({
+            top: scrollTop,
+            behavior: 'smooth'
+          });
         }
       }
-    }, 150);
+    }, 300); // Longer delay for iOS keyboard animation
   };
 
   const onSubmit = async () => {
@@ -247,9 +242,9 @@ export default function MobileRateVendorModal({ open, onOpenChange, vendor, onSu
   };
 
   return (
-    <Drawer open={open} onOpenChange={onOpenChange}>
+    <Drawer open={open} onOpenChange={onOpenChange} data-vaul-no-drag>
       <DrawerContent 
-        className="max-h-[85vh] min-h-[50vh] h-auto" 
+        className="max-h-[calc(100vh-60px)] min-h-[60vh] h-auto flex flex-col" 
         style={{ touchAction: 'manipulation' }}
       >
         <DrawerHeader className="text-left pb-4 flex-shrink-0">
@@ -258,7 +253,7 @@ export default function MobileRateVendorModal({ open, onOpenChange, vendor, onSu
         
         {vendor && (
           <ScrollArea ref={scrollAreaRef} className="flex-1 px-4 overflow-y-auto">
-            <div className="space-y-6 pb-6">
+            <div className="space-y-6 pb-20">
               <div className="grid gap-3">
                 <Label>Rating</Label>
                 <div className="flex justify-center">
@@ -321,7 +316,7 @@ export default function MobileRateVendorModal({ open, onOpenChange, vendor, onSu
           </ScrollArea>
         )}
         
-        <DrawerFooter className="pt-4 flex-shrink-0 bg-background border-t">
+        <DrawerFooter className="pt-4 flex-shrink-0 bg-background border-t sticky bottom-0">
           <div className="flex gap-3">
             <Button 
               variant="outline" 
