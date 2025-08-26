@@ -273,31 +273,21 @@ export default function CommunityVendorTable({
                   </div>
                 </TableHead>
                 <TableHead className="text-xs font-medium text-muted-foreground">Category</TableHead>
-                <TableHead 
-                  className="whitespace-nowrap cursor-pointer hover:bg-muted/50 transition-colors select-none text-xs font-medium text-muted-foreground"
-                  onClick={() => handleHeaderClick("homes")}
-                >
+                <TableHead className="whitespace-nowrap text-xs font-medium text-muted-foreground">
                   <div className="flex items-center gap-1">
                     <Users className="h-3 w-3" />
                     <div className="flex flex-col items-start">
                       <span>Neighbors Using</span>
-                      <div className="flex items-center gap-1 mt-0.5">
-                        {getSortIcon("homes")}
-                      </div>
                     </div>
                   </div>
                 </TableHead>
-                <TableHead 
-                  className="cursor-pointer hover:bg-muted/50 transition-colors select-none text-xs font-medium text-muted-foreground"
-                  onClick={() => handleHeaderClick("hoa_rating")}
-                >
+                <TableHead className="text-xs font-medium text-muted-foreground">
                   <div className="flex items-center gap-1">
                     <Star className="h-3 w-3" />
                     <div className="flex flex-col items-start">
                       <span>Performance Metrics</span>
                       <div className="flex items-center gap-1 mt-0.5">
                         <span className="text-[10px] text-muted-foreground/80">Community & Google ratings</span>
-                        {getSortIcon("hoa_rating")}
                       </div>
                     </div>
                   </div>
@@ -479,17 +469,17 @@ export default function CommunityVendorTable({
                      />
                    </TableCell>
                      <TableCell className="text-right">
-                       <div className="flex gap-1 justify-end">
+                       <div className="flex gap-2 justify-end">
                          <Tooltip>
                            <TooltipTrigger asChild>
                              <Button 
                                size="sm" 
-                               variant="secondary" 
-                               className="h-7 px-2 text-xs" 
+                               variant="outline" 
+                               className="h-8 px-3 text-sm bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700" 
                                onClick={() => isAuthenticated ? openRate(r) : window.location.href = `/auth?community=${encodeURIComponent(communityName)}`}
                              >
                                <Star className="h-3 w-3 mr-1" />
-                               Rate
+                               Rate Provider
                              </Button>
                            </TooltipTrigger>
                            <TooltipContent>
@@ -501,12 +491,12 @@ export default function CommunityVendorTable({
                              <TooltipTrigger asChild>
                                <Button 
                                  size="sm" 
-                                 variant="secondary" 
-                                 className="h-7 px-2 text-xs" 
+                                 variant="outline" 
+                                 className="h-8 px-3 text-sm bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700" 
                                  onClick={() => openCosts(r)}
                                >
                                  <DollarSign className="h-3 w-3 mr-1" />
-                                 Cost
+                                 Add Cost Info
                                </Button>
                              </TooltipTrigger>
                              <TooltipContent>
