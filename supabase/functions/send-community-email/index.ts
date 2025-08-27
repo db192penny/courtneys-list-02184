@@ -180,9 +180,9 @@ ${personalizedBody}
               </div>
               
               ${!isApologyEmail ? `<div style="margin-top: 20px; text-align: center;">
-                <a href="${communitySlug ? `https://courtneys-list.com/communities/${communitySlug}?welcome=true` : '#'}" 
+                <a href="https://courtneys-list.com/signin" 
                    style="display: inline-block; background: #4f46e5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; margin: 10px 10px;">
-                  👉 Updated Provider List
+                  Sign in to See Providers
                 </a>
               </div>` : ''}
               
