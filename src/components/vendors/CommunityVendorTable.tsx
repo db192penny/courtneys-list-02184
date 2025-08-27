@@ -29,6 +29,7 @@ import { CATEGORIES } from "@/data/categories";
 import { getCategoryIcon } from "@/utils/categoryIcons";
 import { useUserHomeVendors } from "@/hooks/useUserHomeVendors";
 import { useUserReviews } from "@/hooks/useUserReviews";
+import { useUserCosts } from "@/hooks/useUserCosts";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 import ReviewsHover from "@/components/vendors/ReviewsHover";
@@ -104,6 +105,7 @@ export default function CommunityVendorTable({
 
   const { data: userHomeVendors } = useUserHomeVendors();
   const { data: userReviews } = useUserReviews();
+  const userCosts = useUserCosts();
   
   // Modal states
   const [rateModalOpen, setRateModalOpen] = useState(false);
@@ -233,7 +235,7 @@ export default function CommunityVendorTable({
               onRate={openRate}
               onCosts={openCosts}
               userHomeVendors={userHomeVendors}
-              userReviews={userReviews}
+              userCosts={userCosts.data}
               isAuthenticated={isAuthenticated}
               communityName={communityName}
             />
@@ -497,7 +499,7 @@ export default function CommunityVendorTable({
                               <p>{userReviews?.has(r.id) ? "Update your existing rating" : "Rate this provider to help neighbors"}</p>
                             </TooltipContent>
                           </Tooltip>
-                          {isAuthenticated && (
+                           {isAuthenticated && (
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <Button 
@@ -506,12 +508,21 @@ export default function CommunityVendorTable({
                                   className="h-7 px-2 text-xs bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700" 
                                   onClick={() => openCosts(r)}
                                 >
-                                  <Plus className="h-3 w-3 mr-0.5" />
-                                  Costs
+                                  {userCosts.data?.has(r.id) ? (
+                                    <>
+                                      <Pencil className="h-3 w-3 mr-0.5" />
+                                      Edit Cost
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Plus className="h-3 w-3 mr-0.5" />
+                                      Costs
+                                    </>
+                                  )}
                                 </Button>
                               </TooltipTrigger>
                               <TooltipContent>
-                                <p>Share cost information to help neighbors budget</p>
+                                <p>{userCosts.data?.has(r.id) ? "Update your cost information" : "Share cost information to help neighbors budget"}</p>
                               </TooltipContent>
                             </Tooltip>
                           )}

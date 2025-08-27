@@ -8,6 +8,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { SectionHeader } from "@/components/ui/section-header";
 import { formatUSPhoneDisplay } from "@/utils/phone";
 import { getCategoryIcon } from "@/utils/categoryIcons";
+import { useUserReviews } from "@/hooks/useUserReviews";
+import { useUserCosts } from "@/hooks/useUserCosts";
 import ReviewsHover from "@/components/vendors/ReviewsHover";
 import GoogleReviewsHover from "@/components/vendors/GoogleReviewsHover";
 import { CostDisplay } from "@/components/vendors/CostDisplay";
@@ -25,6 +27,7 @@ interface VendorMobileCardProps {
   onCosts: (vendor: CommunityVendorRow) => void;
   userHomeVendors?: Set<string>;
   userReviews?: Map<string, { rating: number; id: string }>;
+  userCosts?: Map<string, boolean>;
   isAuthenticated?: boolean;
   communityName?: string;
 }
@@ -38,6 +41,7 @@ export default function VendorMobileCard({
   onCosts,
   userHomeVendors,
   userReviews,
+  userCosts,
   isAuthenticated = false,
   communityName,
 }: VendorMobileCardProps) {
@@ -216,7 +220,7 @@ export default function VendorMobileCard({
                 className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700 flex-1"
                 onClick={() => onCosts(vendor)}
               >
-                Add Cost Info
+                {userCosts?.has(vendor.id) ? "Edit Cost Info" : "Add Cost Info"}
               </Button>
             )}
           </div>
