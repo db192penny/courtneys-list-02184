@@ -35,6 +35,7 @@ import { AdminAnalytics } from "./pages/AdminAnalytics";
 import Header from "./components/Header";
 import { AdminProtectedRoute } from "./components/AdminProtectedRoute";
 import { AnalyticsTracker } from "./components/AnalyticsTracker";
+import { useActivityTimeout } from "./hooks/useActivityTimeout";
 
 const queryClient = new QueryClient();
 
@@ -113,6 +114,12 @@ function ConditionalHeader() {
   return isPreviewRoute ? null : <Header />;
 }
 
+function ActivityTimeoutManager() {
+  const { isAuthenticated } = useAuth();
+  useActivityTimeout(isAuthenticated);
+  return null;
+}
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -121,6 +128,7 @@ const App = () => (
       <BrowserRouter>
           <AuthWatcher />
           <AnalyticsTracker />
+          <ActivityTimeoutManager />
           <ConditionalHeader />
           <Routes>
           <Route path="/" element={<Navigate to="/communities/boca-bridges?welcome=true" replace />} />
