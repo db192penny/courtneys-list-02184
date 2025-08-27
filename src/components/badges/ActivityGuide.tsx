@@ -1,6 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { TrackingButton } from "@/components/analytics/TrackingButton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Lightbulb, ArrowRight, Copy, Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -181,34 +180,15 @@ export default function ActivityGuide() {
                 </div>
                 <p className="text-sm text-muted-foreground">{activity.description}</p>
               </div>
-              {activity.type === "invite_neighbor" ? (
-                <TrackingButton 
-                  eventName="invite_button_click"
-                  elementId="invite-neighbor-activity"
-                  metadata={{ 
-                    location: "activity_guide",
-                    activity_type: activity.type,
-                    points: activity.points
-                  }}
-                  onClick={activity.action}
-                  size="sm"
-                  variant="outline"
-                  className="ml-4 flex items-center gap-1 bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700"
-                >
-                  {activity.buttonText}
-                  <ArrowRight className="w-3 h-3" />
-                </TrackingButton>
-              ) : (
-                <Button 
-                  onClick={activity.action}
-                  size="sm"
-                  variant="outline"
-                  className="ml-4 flex items-center gap-1 bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700"
-                >
-                  {activity.buttonText}
-                  <ArrowRight className="w-3 h-3" />
-                </Button>
-              )}
+              <Button 
+                onClick={activity.action}
+                size="sm"
+                variant="outline"
+                className="ml-4 flex items-center gap-1 bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700"
+              >
+                {activity.buttonText}
+                <ArrowRight className="w-3 h-3" />
+              </Button>
             </div>
           ))}
         </CardContent>

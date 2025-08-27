@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { Resend } from "npm:resend@4.0.0";
+import { Resend } from "npm:resend@2.0.0";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
@@ -119,7 +119,7 @@ const handler = async (req: Request): Promise<Response> => {
           type: 'magiclink',
           email: user.email,
           options: {
-            redirectTo: `https://courtneys-list.com/signin`
+            redirectTo: `https://courtneys-list.com/communities/${communitySlug}?welcome=true`
           }
         });
 
@@ -129,7 +129,7 @@ const handler = async (req: Request): Promise<Response> => {
         }
 
         const magicLinkUrl = authData.properties?.action_link || '';
-        const viewProvidersButton = `<a href="${magicLinkUrl}" style="background-color: #4f46e5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold; margin: 10px 0; text-align: center;">Sign in to See Providers</a>`;
+        const viewProvidersButton = `<a href="${magicLinkUrl}" style="background-color: #4f46e5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold; margin: 10px 0; text-align: center;">See Boca Bridges Providers</a>`;
         
         personalizedBody = personalizedBody.replace(/\{\{VIEW_PROVIDERS_BUTTON\}\}/g, viewProvidersButton);
       } else {
@@ -180,9 +180,9 @@ ${personalizedBody}
               </div>
               
               ${!isApologyEmail ? `<div style="margin-top: 20px; text-align: center;">
-                <a href="https://courtneys-list.com/signin" 
+                <a href="${communitySlug ? `https://courtneys-list.com/communities/${communitySlug}?welcome=true` : '#'}" 
                    style="display: inline-block; background: #4f46e5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; margin: 10px 10px;">
-                  Sign in to See Providers
+                  👉 Updated Provider List
                 </a>
               </div>` : ''}
               
@@ -203,8 +203,6 @@ ${personalizedBody}
             </div>
           </div>
         `,
-        trackClicks: true,
-        trackOpens: true,
         tags: [
           {
             name: 'campaign_type',
