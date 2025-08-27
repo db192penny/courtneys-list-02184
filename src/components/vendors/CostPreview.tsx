@@ -36,7 +36,7 @@ export default function CostPreview({ costs, showNameInCosts, authorLabel }: Pro
           <h4 className="text-sm font-medium text-muted-foreground">Cost Preview</h4>
           <div className="space-y-1">
             {validCosts.map((cost, index) => (
-              <div key={index} className="text-sm">
+              <div key={index} className="text-sm space-y-1">
                 <div className="flex items-center gap-2">
                   <div className="font-medium">
                     {formatCost(cost.amount as number, cost.unit, cost.period)}
@@ -54,6 +54,11 @@ export default function CostPreview({ costs, showNameInCosts, authorLabel }: Pro
                     })()}
                   </Badge>
                 </div>
+                {cost.notes && (
+                  <div className="text-xs text-muted-foreground pl-2">
+                    {cost.notes}
+                  </div>
+                )}
               </div>
             ))}
           </div>

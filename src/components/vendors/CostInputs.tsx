@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 export type CostEntry = {
   cost_kind: "monthly_plan" | "yearly_plan" | "service_call" | "hourly";
@@ -8,6 +9,7 @@ export type CostEntry = {
   period?: string | null; // e.g., monthly, yearly
   unit?: string | null;   // e.g., month, year, visit, hour
   quantity?: number | null; // e.g., visits per month/year
+  notes?: string | null;  // additional details/comments
 };
 
 export function buildDefaultCosts(category?: string): CostEntry[] {
@@ -16,36 +18,36 @@ export function buildDefaultCosts(category?: string): CostEntry[] {
   // Pool/Landscaping/Pest Control: Maintenance Plan with visits
   if (c === "pool" || c === "pool service" || c === "landscaping" || c === "pest control") {
     return [
-      { cost_kind: "monthly_plan", amount: null, period: "monthly", unit: "month", quantity: null },
+      { cost_kind: "monthly_plan", amount: null, period: "monthly", unit: "month", quantity: null, notes: null },
     ];
   }
   
   // HVAC: Service Call + Yearly Maintenance Plan
   if (c === "hvac") {
     return [
-      { cost_kind: "service_call", amount: null, unit: "visit" },
-      { cost_kind: "yearly_plan", amount: null, period: "yearly", unit: "year", quantity: null },
+      { cost_kind: "service_call", amount: null, unit: "visit", notes: null },
+      { cost_kind: "yearly_plan", amount: null, period: "yearly", unit: "year", quantity: null, notes: null },
     ];
   }
   
   // Plumbing/Electrical/Pet Grooming/House Cleaning/Mobile Tire Repair/Appliance Repair: Service Call only
   if (c === "plumbing" || c === "electrical" || c === "pet grooming" || c === "house cleaning" || c === "mobile tire repair" || c === "appliance repair") {
     return [
-      { cost_kind: "service_call", amount: null, unit: "visit" },
+      { cost_kind: "service_call", amount: null, unit: "visit", notes: null },
     ];
   }
   
   // Handyman: Hourly Rate
   if (c === "handyman") {
     return [
-      { cost_kind: "hourly", amount: null, unit: "hour" },
+      { cost_kind: "hourly", amount: null, unit: "hour", notes: null },
     ];
   }
   
   // Power Washing: Per visit with yearly quantity
   if (c === "power washing") {
     return [
-      { cost_kind: "service_call", amount: null, unit: "visit", quantity: null },
+      { cost_kind: "service_call", amount: null, unit: "visit", quantity: null, notes: null },
     ];
   }
   
@@ -56,7 +58,7 @@ export function buildDefaultCosts(category?: string): CostEntry[] {
   
   // Default: monthly plan
   return [
-    { cost_kind: "monthly_plan", amount: null, period: "monthly", unit: "month" },
+    { cost_kind: "monthly_plan", amount: null, period: "monthly", unit: "month", notes: null },
   ];
 }
 
@@ -157,6 +159,24 @@ export default function CostInputs({
   return (
     <div className="grid gap-4">
       {sections}
+      {/* Comments field for all categories */}
+      {(category && category.toLowerCase() !== "roofing" && category.toLowerCase() !== "general contractor") && (
+        <div className="grid gap-2">
+          <Label>Comments (Optional)</Label>
+          <Textarea
+            placeholder="Share additional details about pricing for neighbors..."
+            value={entries[0]?.notes ?? ""}
+            onChange={(e) => {
+              // Update all entries with the same notes
+              setEntries((prev) => {
+                const next = prev.map(entry => ({ ...entry, notes: e.target.value || null }));
+                onChange(next);
+                return next;
+              });
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 }

@@ -57,6 +57,7 @@ export default function PreviewCostManagementModal({ open, onOpenChange, vendor,
               period: cost.period,
               unit: cost.unit,
               quantity: cost.quantity ? Number(cost.quantity) : null,
+              notes: cost.notes,
             }));
             setCosts(mappedCosts);
             setShowNameInCosts(!existingCosts[0].anonymous);
@@ -116,7 +117,7 @@ export default function PreviewCostManagementModal({ open, onOpenChange, vendor,
         unit: cost.unit,
         period: cost.period,
         quantity: cost.quantity ? Number(cost.quantity) : null,
-        notes: null,
+        notes: cost.notes || null,
         anonymous: !showNameInCosts,
       }));
 

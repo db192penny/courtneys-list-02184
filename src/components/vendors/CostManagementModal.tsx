@@ -69,7 +69,7 @@ export default function CostManagementModal({ open, onOpenChange, vendor, onSucc
         // Prefill latest costs for this vendor limited to current user's household (RLS enforces it)
         const { data: costRows } = await supabase
           .from("costs")
-          .select("amount, period, unit, quantity, cost_kind, created_at, anonymous")
+          .select("amount, period, unit, quantity, cost_kind, notes, created_at, anonymous")
           .eq("vendor_id", vendor.id)
           .order("created_at", { ascending: false });
 
@@ -99,6 +99,7 @@ export default function CostManagementModal({ open, onOpenChange, vendor, onSucc
                   period: (hit.period as any) ?? c.period,
                   unit: (hit.unit as any) ?? c.unit,
                   quantity: (hit.quantity as number | undefined) ?? c.quantity,
+                  notes: (hit.notes as string | undefined) ?? c.notes,
                 }
               : c;
           });
@@ -112,6 +113,7 @@ export default function CostManagementModal({ open, onOpenChange, vendor, onSucc
                 period: row.period ?? undefined,
                 unit: row.unit ?? undefined,
                 quantity: (row.quantity as number | undefined) ?? undefined,
+                notes: (row.notes as string | undefined) ?? undefined,
               } as CostEntry);
             }
           });
@@ -200,6 +202,7 @@ export default function CostManagementModal({ open, onOpenChange, vendor, onSucc
         unit: c.unit ?? undefined,
         quantity: c.quantity ?? undefined,
         cost_kind: c.cost_kind,
+        notes: c.notes || null,
         household_address,
         created_by: userId,
         anonymous: !showNameInCosts,

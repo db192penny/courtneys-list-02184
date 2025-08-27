@@ -72,6 +72,7 @@ export default function PreviewCostsHover({ vendorId, children }: Props) {
             unit,
             period,
             cost_kind,
+            notes,
             created_at,
             anonymous,
             users!inner(name, street_name, show_name_public)
@@ -102,6 +103,7 @@ export default function PreviewCostsHover({ vendorId, children }: Props) {
               unit: cost.unit,
               period: cost.period,
               cost_kind: cost.cost_kind,
+              notes: cost.notes,
               created_at: cost.created_at,
               author_label: authorLabel,
               type: 'real'
@@ -145,6 +147,7 @@ export default function PreviewCostsHover({ vendorId, children }: Props) {
         unit: cost.unit,
         period: cost.period,
         cost_kind: cost.cost_kind,
+        notes: cost.notes,
         created_at: cost.created_at,
         author_label: getAuthorLabel(cost, sessionsMap.get(cost.session_id)),
         type: 'preview'
@@ -192,6 +195,11 @@ export default function PreviewCostsHover({ vendorId, children }: Props) {
                     {new Date(cost.created_at).toLocaleDateString()}
                   </div>
                 </div>
+                {cost.notes && (
+                  <div className="mt-2 text-xs text-muted-foreground">
+                    {cost.notes}
+                  </div>
+                )}
               </div>
             ))}
           </div>

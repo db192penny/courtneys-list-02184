@@ -15,6 +15,7 @@ type CostData = {
   unit: string | null;
   period: string | null;
   cost_kind: string | null;
+  notes: string | null;
   created_at: string;
   author_label: string;
 };
@@ -99,6 +100,11 @@ export default function CostsHover({ vendorId, children }: Props) {
                       {new Date(cost.created_at).toLocaleDateString()}
                     </div>
                   </div>
+                  {cost.notes && (
+                    <div className="mt-2 text-xs text-muted-foreground">
+                      {cost.notes}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
