@@ -19,6 +19,7 @@ interface MagicLinkEmailProps {
   redirect_to: string
   token_hash: string
   token: string
+  userEmail: string
 }
 
 export const MagicLinkEmail = ({
@@ -30,6 +31,7 @@ export const MagicLinkEmail = ({
   email_action_type,
   redirect_to,
   token_hash,
+  userEmail,
 }: MagicLinkEmailProps) => {
   const firstName = name ? name.split(' ')[0] : 'there'
   const neighborhoodName = communityName || 'Your Neighborhood'
@@ -77,7 +79,7 @@ export const MagicLinkEmail = ({
           
           <Text style={unsubscribe}>
             <Link
-              href={`https://courtneys-list.com/unsubscribe?email=${encodeURIComponent(name)}`}
+              href={`https://courtneys-list.com/unsubscribe?email=${encodeURIComponent(userEmail)}`}
               target="_blank"
               style={{ color: '#ccc', textDecoration: 'underline' }}
             >
