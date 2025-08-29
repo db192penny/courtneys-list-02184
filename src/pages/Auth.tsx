@@ -33,17 +33,6 @@ const Auth = () => {
 
   const hasMagicLink = window.location.hash.includes('access_token=');
 
-  const [inviteCode, setInviteCode] = useState<string | undefined>();
-
-  useEffect(() => {
-    // Check URL params first, then localStorage
-    const urlCode = params.get("invite")?.trim();
-    const storedCode = localStorage.getItem("invite_code")?.trim();
-    const code = urlCode || storedCode || undefined;
-    
-    console.log("[Auth] Invite code detection:", { urlCode, storedCode, final: code });
-    setInviteCode(code);
-  }, [params]);
 
   const communityName = useMemo(() => {
     const urlCommunity = params.get("community") || "";
@@ -469,8 +458,8 @@ const Auth = () => {
     // Get invite code synchronously to avoid timing issues
     const urlInvite = params.get("invite")?.trim();
     const storedInvite = localStorage.getItem("invite_code")?.trim();
-    const currentInviteCode = urlInvite || storedInvite || undefined;
-    console.log("[Auth] Invite code at submission:", currentInviteCode);
+    const inviteCode = urlInvite || storedInvite || undefined;
+    console.log("[Auth] Invite code at submission:", inviteCode);
 
     // Store user data in metadata for the trigger to use
     const metaData = {
@@ -478,7 +467,7 @@ const Auth = () => {
       address: address.trim(),
       street_name: extractStreetName(address.trim()),
       signup_source: communityName ? `community:${toSlug(communityName)}` : null,
-      pending_invite_code: currentInviteCode || null,
+      pending_invite_code: inviteCode || null,
     };
 
     console.log("[Auth] 📝 Creating auth user with metadata for trigger:", metaData);
@@ -545,15 +534,6 @@ const Auth = () => {
 
     console.log("[Auth] ✅ Auth user created, profile will be created automatically via database trigger");
 
-    // TEST: Try to redeem a known good invite code
-    const testCode = "WELCOME2024"; // Use an actual code from your database
-    console.log("[Auth] TEST: Attempting redemption with hardcoded code:", testCode);
-    const { data: testData, error: testError } = await supabase.rpc("redeem_invite_code", {
-      _code: testCode,
-      _invited_user_id: userId,
-    });
-    console.log("[Auth] TEST: Redemption result:", { testData, testError });
-
     // Check if user was auto-verified (community signups)
     let userWasAutoVerified = false;
     if (authData.session?.user) {
@@ -582,21 +562,16 @@ const Auth = () => {
     }
 
     // Handle invite code redemption if present
-    console.log('[Auth] Invite code from URL:', params.get("invite"));
-    console.log('[Auth] Invite code from localStorage:', localStorage.getItem("invite_code"));
-    console.log('[Auth] Final currentInviteCode value:', currentInviteCode);
-    console.log('[Auth] About to check if currentInviteCode exists:', !!currentInviteCode);
-    
-    if (currentInviteCode) {
-      console.log('[Auth] About to attempt redemption with code:', currentInviteCode);
+    if (inviteCode) {
+      console.log('[Auth] About to attempt redemption with code:', inviteCode);
       try {
         console.log("[Auth] 🎫 Calling redeem_invite_code RPC with:", { 
-          code: currentInviteCode, 
+          code: inviteCode, 
           userId: userId 
         });
         
         const { data: redemptionData, error: redeemErr } = await supabase.rpc("redeem_invite_code", {
-          _code: currentInviteCode,
+          _code: inviteCode,
           _invited_user_id: userId,
         });
         
