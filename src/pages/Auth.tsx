@@ -486,6 +486,10 @@ const Auth = () => {
     }
 
     // Handle invite code redemption if present
+    console.log('[Auth] Invite code from URL:', params.get("invite"));
+    console.log('[Auth] Invite code from localStorage:', localStorage.getItem("invite_code"));
+    console.log('[Auth] Final inviteCode value:', inviteCode);
+    
     if (inviteCode) {
       try {
         console.log("[Auth] 🎫 Redeeming invite code:", inviteCode);
@@ -493,6 +497,8 @@ const Auth = () => {
           _code: inviteCode,
           _invited_user_id: userId,
         });
+        
+        console.log('[Auth] Redemption response:', redemptionData);
         
         if (redeemErr) {
           console.warn("[Auth] ⚠️ redeem_invite_code error (non-fatal):", redeemErr);
