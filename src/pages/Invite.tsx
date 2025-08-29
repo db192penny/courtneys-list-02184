@@ -12,11 +12,7 @@ const Invite = () => {
 
   useEffect(() => {
     if (!tokenSafe) {
-      toast({
-        title: "Invalid invite link",
-        description: "No invite code provided.",
-        variant: "destructive",
-      });
+      console.warn("[Invite] No token provided, redirecting to home");
       navigate("/");
       return;
     }
@@ -32,12 +28,7 @@ const Invite = () => {
         .single();
 
       if (inviteError || !inviteData) {
-        console.error("[Invite] Code not found:", inviteError);
-        toast({
-          title: "Invalid invite code",
-          description: "This invite code doesn't exist. Please request a new invite.",
-          variant: "destructive",
-        });
+        console.warn("[Invite] Code not found:", inviteError?.message || "No data");
         navigate("/");
         return;
       }
@@ -46,27 +37,19 @@ const Invite = () => {
 
       // Check if expired
       if (new Date(invite.expires_at) < new Date()) {
-        toast({
-          title: "Expired invite",
-          description: "This invite has expired. Please request a new invite.",
-          variant: "destructive",
-        });
+        console.warn("[Invite] Code expired");
         navigate("/");
         return;
       }
 
       // Check if uses exceeded
       if (invite.uses_count >= invite.max_uses) {
-        toast({
-          title: "Invite limit reached",
-          description: "This invite has reached its usage limit. Please request a new invite.",
-          variant: "destructive",
-        });
+        console.warn("[Invite] Code usage limit reached");
         navigate("/");
         return;
       }
 
-      // Get inviter name
+      // Get inviter name and community info for proper redirect
       const { data: userData } = await supabase
         .from("users")
         .select("name")
@@ -79,17 +62,14 @@ const Invite = () => {
       localStorage.setItem("invite_code", tokenSafe);
       localStorage.setItem("inviter_name", inviterName);
       
-      toast({
-        title: `Welcome! ${inviterName} invited you`,
-        description: "Continue to create your account and join the community.",
-      });
-
+      console.log("[Invite] Valid code, redirecting to auth");
+      
       // Redirect directly to auth with invite code
       navigate(`/auth?invite=${encodeURIComponent(tokenSafe)}`);
     };
 
     validateAndRedirect();
-  }, [tokenSafe, toast, navigate]);
+  }, [tokenSafe, navigate]);
 
   // Show loading while redirecting
   return (
