@@ -102,7 +102,7 @@ function AuthWatcher() {
         navigate("/communities/boca-bridges", { replace: true });
       }
     }
-  }, [isAuthenticated, isLoading, navigate, location.pathname, location.hash, location.search]);
+  }, [isAuthenticated, isLoading, navigate, location.pathname]);
   
   return null;
 }
