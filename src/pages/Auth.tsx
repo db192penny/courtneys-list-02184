@@ -494,16 +494,23 @@ const Auth = () => {
     console.log('[Auth] Invite code from URL:', params.get("invite"));
     console.log('[Auth] Invite code from localStorage:', localStorage.getItem("invite_code"));
     console.log('[Auth] Final inviteCode value:', inviteCode);
+    console.log('[Auth] About to check if inviteCode exists:', !!inviteCode);
     
     if (inviteCode) {
+      console.log('[Auth] About to attempt redemption with code:', inviteCode);
       try {
-        console.log("[Auth] 🎫 Redeeming invite code:", inviteCode);
+        console.log("[Auth] 🎫 Calling redeem_invite_code RPC with:", { 
+          code: inviteCode, 
+          userId: userId 
+        });
+        
         const { data: redemptionData, error: redeemErr } = await supabase.rpc("redeem_invite_code", {
           _code: inviteCode,
           _invited_user_id: userId,
         });
         
         console.log('[Auth] Redemption response:', redemptionData);
+        console.log('[Auth] Redemption error:', redeemErr);
         
         if (redeemErr) {
           console.warn("[Auth] ⚠️ redeem_invite_code error (non-fatal):", redeemErr);
