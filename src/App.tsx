@@ -14,7 +14,7 @@ import Admin from "./pages/Admin";
 import Auth from "./pages/Auth";
 import SignIn from "./pages/SignIn";
 import Invite from "./pages/Invite";
-import Profile from "./pages/Profile"; // Added
+import Profile from "./pages/Profile";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import Contact from "./pages/Contact";
@@ -87,18 +87,9 @@ function AuthWatcher() {
     // Don't redirect while auth is still loading
     if (isLoading) return;
     
-    console.log('AuthWatcher: checking redirect', { 
-      isAuthenticated, 
-      pathname: location.pathname, 
-      search: location.search, 
-      hash: location.hash,
-      fullLocation: window.location.href 
-    });
-    
     if (isAuthenticated) {
       // Only redirect from /signin - let /auth page handle magic link users
       if (location.pathname === "/signin") {
-        console.log('AuthWatcher: redirecting authenticated user from signin');
         navigate("/communities/boca-bridges", { replace: true });
       }
     }
@@ -134,12 +125,12 @@ const App = () => (
           <Route path="/" element={<Navigate to="/communities/boca-bridges?welcome=true" replace />} />
           <Route path="/signin" element={<SignIn />} />
           <Route path="/auth" element={<Auth />} />
-          <Route path="/auth/signup" element={<Auth />} /> {/* Alias to Auth */}
+          <Route path="/auth/signup" element={<Auth />} />
           <Route path="/invite/:token" element={<Invite />} />
           <Route path="/dashboard" element={<ProtectedRoute><Navigate to="/communities/boca-bridges" replace /></ProtectedRoute>} />
           <Route path="/submit" element={<ProtectedRoute><SubmitVendor /></ProtectedRoute>} />
           
-          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} /> {/* New route */}
+          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path="/household/preview" element={<HouseholdPreview />} />
           <Route path="/household" element={<ProtectedRoute><Household /></ProtectedRoute>} />
           <Route path="/admin" element={<Admin />} />
@@ -158,7 +149,6 @@ const App = () => (
           <Route path="/communities/:slug" element={<Community />} />
           <Route path="/communities/request" element={<CommunityRequest />} />
           <Route path="/community-preview/:slug" element={<CommunityPreview />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
