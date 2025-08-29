@@ -33,11 +33,16 @@ const Auth = () => {
 
   const hasMagicLink = window.location.hash.includes('access_token=');
 
-  const inviteCode = useMemo(() => {
+  const [inviteCode, setInviteCode] = useState<string | undefined>();
+
+  useEffect(() => {
     // Check URL params first, then localStorage
-    const urlInvite = params.get("invite") || "";
-    const storedInvite = localStorage.getItem("invite_code") || "";
-    return urlInvite.trim() || storedInvite.trim();
+    const urlCode = params.get("invite")?.trim();
+    const storedCode = localStorage.getItem("invite_code")?.trim();
+    const code = urlCode || storedCode || undefined;
+    
+    console.log("[Auth] Invite code detection:", { urlCode, storedCode, final: code });
+    setInviteCode(code);
   }, [params]);
 
   const communityName = useMemo(() => {
