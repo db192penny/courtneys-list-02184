@@ -85,7 +85,7 @@ export default function ActivityGuide() {
       const inviteCode = Math.random().toString(36).substring(2, 10).toUpperCase();
       
       const { error } = await supabase
-        .from("invite_codes" as any)
+        .from("invite_codes")
         .insert({ 
           user_id: userId,
           code: inviteCode,
