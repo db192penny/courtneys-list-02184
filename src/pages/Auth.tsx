@@ -270,6 +270,10 @@ const Auth = () => {
               if (data?.session && !error) {
                 console.log('[Auth] Session established successfully');
                 window.history.replaceState(null, '', window.location.pathname);
+                
+                // Check for pending invite redemption BEFORE finalizing onboarding
+                await checkAndRedeemPendingInvite(data.session.user.id);
+                
                 await finalizeOnboarding(data.session.user.id, data.session.user.email);
                 return;
               }
@@ -293,6 +297,77 @@ const Auth = () => {
     
     return () => { mounted = false; };
   }, [finalizeOnboarding, toast]);
+
+  const checkAndRedeemPendingInvite = async (userId: string) => {
+    try {
+      console.log('[Auth] Checking for pending invite redemption for user:', userId);
+      
+      // Get user's pending invite code
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('pending_invite_code')
+        .eq('id', userId)
+        .single();
+      
+      if (userError || !userData?.pending_invite_code) {
+        console.log('[Auth] No pending invite code found');
+        return;
+      }
+      
+      const pendingCode = userData.pending_invite_code;
+      console.log('[Auth] Found pending invite code:', pendingCode);
+      
+      // Attempt redemption using existing RPC function
+      const { data: redemptionData, error: redeemErr } = await supabase.rpc("redeem_invite_code", {
+        _code: pendingCode,
+        _invited_user_id: userId,
+      });
+      
+      if (redeemErr) {
+        console.warn("[Auth] Pending invite redemption failed:", redeemErr);
+        return;
+      }
+      
+      if (redemptionData?.[0]?.success) {
+        const result = redemptionData[0];
+        console.log("[Auth] ✅ Pending invite redeemed successfully:", result);
+        
+        // Clear pending invite code
+        await supabase
+          .from('users')
+          .update({ pending_invite_code: null })
+          .eq('id', userId);
+        
+        // Show success message
+        toast({
+          title: "Welcome! Invite redeemed",
+          description: `${result.inviter_name} earned ${result.points_awarded} points for inviting you!`,
+        });
+        
+        // Trigger success email using existing logic
+        try {
+          const detectedCommunityName = communityName || 'Boca Bridges';
+          const detectedCommunitySlug = communityName ? toSlug(communityName) : 'boca-bridges';
+          
+          await supabase.functions.invoke('send-invite-success-email', {
+            body: {
+              inviterId: result.inviter_id,
+              inviterName: result.inviter_name,
+              inviterEmail: result.inviter_email,
+              invitedName: name.trim(),
+              communityName: detectedCommunityName,
+              communitySlug: detectedCommunitySlug
+            }
+          });
+          console.log("[Auth] ✅ Invite success email sent");
+        } catch (emailError) {
+          console.warn('[Auth] Invite success email failed:', emailError);
+        }
+      }
+    } catch (error) {
+      console.warn('[Auth] Error checking pending invite:', error);
+    }
+  };
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -397,6 +472,7 @@ const Auth = () => {
       address: address.trim(),
       street_name: extractStreetName(address.trim()),
       signup_source: communityName ? `community:${toSlug(communityName)}` : null,
+      pending_invite_code: inviteCode || null,
     };
 
     console.log("[Auth] 📝 Creating auth user with metadata for trigger:", metaData);

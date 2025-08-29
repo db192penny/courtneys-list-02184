@@ -1113,6 +1113,7 @@ export type Database = {
           is_anonymous: boolean | null
           is_verified: boolean | null
           name: string | null
+          pending_invite_code: string | null
           points: number | null
           show_name_public: boolean | null
           signup_source: string | null
@@ -1132,6 +1133,7 @@ export type Database = {
           is_anonymous?: boolean | null
           is_verified?: boolean | null
           name?: string | null
+          pending_invite_code?: string | null
           points?: number | null
           show_name_public?: boolean | null
           signup_source?: string | null
@@ -1151,6 +1153,7 @@ export type Database = {
           is_anonymous?: boolean | null
           is_verified?: boolean | null
           name?: string | null
+          pending_invite_code?: string | null
           points?: number | null
           show_name_public?: boolean | null
           signup_source?: string | null
