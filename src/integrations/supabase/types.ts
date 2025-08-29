@@ -584,7 +584,7 @@ export type Database = {
           invite_code: string | null
           invited_user_id: string | null
           inviter_id: string | null
-          points_awarded: boolean | null
+          points_awarded: number | null
           redeemed_at: string | null
         }
         Insert: {
@@ -592,7 +592,7 @@ export type Database = {
           invite_code?: string | null
           invited_user_id?: string | null
           inviter_id?: string | null
-          points_awarded?: boolean | null
+          points_awarded?: number | null
           redeemed_at?: string | null
         }
         Update: {
@@ -600,7 +600,7 @@ export type Database = {
           invite_code?: string | null
           invited_user_id?: string | null
           inviter_id?: string | null
-          points_awarded?: boolean | null
+          points_awarded?: number | null
           redeemed_at?: string | null
         }
         Relationships: [
