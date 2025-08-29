@@ -13,6 +13,7 @@ const activityTypeLabels = {
   review_submission: "Rated a Vendor", 
   rate_vendor: "Rated a Vendor",
   invite_neighbor: "Invited a Neighbor",
+  successful_invite: "Successful Invite",
   cost_submission: "Shared Cost Information",
   system_correction: "System Correction",
   validation_warning: "Validation Warning"
@@ -24,6 +25,7 @@ const activityTypeIcons = {
   review_submission: "⭐",
   rate_vendor: "⭐",
   invite_neighbor: "👥",
+  successful_invite: "✅",
   cost_submission: "💰",
   system_correction: "🔧",
   validation_warning: "⚠️"
