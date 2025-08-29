@@ -41,6 +41,14 @@ const Auth = () => {
     return urlCommunity;
   }, [params]);
 
+  // Check for magic link in URL immediately on component mount
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash && hash.includes('access_token=')) {
+      setIsProcessingMagicLink(true);
+    }
+  }, []);
+
   const isVerifiedMagicLink = useMemo(() => {
     return params.get("verified") === "true";
   }, [params]);
@@ -517,9 +525,12 @@ const Auth = () => {
 
   if (isProcessingMagicLink) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
+      <main className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Signing you in...</p>
+        </div>
+      </main>
     );
   }
 
