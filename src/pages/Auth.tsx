@@ -545,6 +545,15 @@ const Auth = () => {
 
     console.log("[Auth] ✅ Auth user created, profile will be created automatically via database trigger");
 
+    // TEST: Try to redeem a known good invite code
+    const testCode = "WELCOME2024"; // Use an actual code from your database
+    console.log("[Auth] TEST: Attempting redemption with hardcoded code:", testCode);
+    const { data: testData, error: testError } = await supabase.rpc("redeem_invite_code", {
+      _code: testCode,
+      _invited_user_id: userId,
+    });
+    console.log("[Auth] TEST: Redemption result:", { testData, testError });
+
     // Check if user was auto-verified (community signups)
     let userWasAutoVerified = false;
     if (authData.session?.user) {
