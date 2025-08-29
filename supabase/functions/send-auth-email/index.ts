@@ -235,12 +235,9 @@ Deno.serve(async (req) => {
       </html>
     `
 
-    console.log('📤 Sending email directly via Resend API...')
+    console.log('📤 Sending email via Resend...')
     
     const resendApiKey = Deno.env.get('RESEND_API_KEY')
-    console.log('🔑 RESEND_API_KEY exists:', !!resendApiKey)
-    console.log('🔑 RESEND_API_KEY length:', resendApiKey?.length || 0)
-    
     if (!resendApiKey) {
       console.error('❌ RESEND_API_KEY not found')
       return new Response(JSON.stringify({ error: 'Email service not configured' }), {
@@ -249,69 +246,47 @@ Deno.serve(async (req) => {
       })
     }
 
-    const emailPayload = {
-      from: "Courtney's List <courtney@courtneys-list.com>",
-      to: [webhookData.user.email],
-      subject: `${formatCommunityName(communityName) || 'Your Neighborhood'} Access is Ready - Unlock it Now`,
-      html: html,
-      tags: [
-        { name: 'category', value: 'authentication' },
-        { name: 'type', value: 'magic-link' },
-        { name: 'community', value: formatCommunityName(communityName) || 'Default' },
-        { name: 'email_action_type', value: emailActionType }
-      ]
-    }
-    
-    console.log('📧 Email payload:', {
-      from: emailPayload.from,
-      to: emailPayload.to,
-      subject: emailPayload.subject,
-      tagsCount: emailPayload.tags.length,
-      htmlLength: html.length
-    })
-
-    const emailResponse = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${resendApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(emailPayload),
-    })
-
-    console.log('📬 Resend API response status:', emailResponse.status)
-    console.log('📬 Resend API response ok:', emailResponse.ok)
-    
-    let emailResult
     try {
-      emailResult = await emailResponse.json()
-      console.log('📬 Resend full response:', emailResult)
-    } catch (parseError) {
-      console.error('❌ Failed to parse Resend response as JSON:', parseError.message)
-      const responseText = await emailResponse.text()
-      console.error('❌ Raw response text:', responseText)
-      throw new Error(`Failed to parse Resend response: ${responseText}`)
-    }
-    
-    if (!emailResponse.ok) {
-      console.error('❌ Resend API error - Status:', emailResponse.status)
-      console.error('❌ Resend API error - Body:', emailResult)
-      throw new Error(`Resend API error (${emailResponse.status}): ${JSON.stringify(emailResult)}`)
-    }
+      const emailResponse = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${resendApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          from: "Courtney's List <courtney@courtneys-list.com>",
+          to: [webhookData.user.email],
+          subject: `${formatCommunityName(communityName) || 'Your Neighborhood'} Access is Ready - Unlock it Now`,
+          html: html,
+          tags: [
+            { name: 'category', value: 'authentication' },
+            { name: 'type', value: 'magic-link' },
+            { name: 'community', value: formatCommunityName(communityName) || 'Default' },
+            { name: 'email_action_type', value: emailActionType }
+          ]
+        }),
+      })
 
-    console.log('✅ Email sent successfully to Resend. ID:', emailResult.id)
-    
-    // Validate we got a proper email ID
-    if (!emailResult.id) {
-      console.error('❌ No email ID returned from Resend')
-      console.error('❌ Full Resend response for debugging:', emailResult)
-      throw new Error('Resend did not return an email ID')
-    }
+      const emailResult = await emailResponse.json()
+      
+      if (!emailResponse.ok) {
+        console.error('❌ Resend error:', emailResult)
+        throw new Error(`Resend API error: ${emailResult.message || 'Unknown error'}`)
+      }
 
-    return new Response(JSON.stringify({ success: true, emailId: emailResult.id }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json', ...corsHeaders },
-    })
+      console.log('✅ Email sent successfully. ID:', emailResult.id)
+
+      return new Response(JSON.stringify({ success: true, emailId: emailResult.id }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders },
+      })
+    } catch (error) {
+      console.error('❌ Email sending failed:', error.message)
+      return new Response(JSON.stringify({ error: 'Failed to send email' }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders },
+      })
+    }
     
   } catch (error) {
     console.error('💥 Error in send-auth-email function:', error.message)
