@@ -262,13 +262,13 @@ Deno.serve(async (req) => {
       ]
     }
     
-    console.log('📧 Email payload being sent:', JSON.stringify({
+    console.log('📧 Email payload:', {
       from: emailPayload.from,
       to: emailPayload.to,
       subject: emailPayload.subject,
-      tags: emailPayload.tags,
+      tagsCount: emailPayload.tags.length,
       htmlLength: html.length
-    }))
+    })
 
     const emailResponse = await fetch('https://api.resend.com/emails', {
       method: 'POST',
@@ -280,22 +280,22 @@ Deno.serve(async (req) => {
     })
 
     console.log('📬 Resend API response status:', emailResponse.status)
-    console.log('📬 Resend API response headers:', JSON.stringify(Object.fromEntries(emailResponse.headers.entries())))
+    console.log('📬 Resend API response ok:', emailResponse.ok)
     
     let emailResult
     try {
       emailResult = await emailResponse.json()
-      console.log('📬 Resend full response body:', JSON.stringify(emailResult))
+      console.log('📬 Resend full response:', emailResult)
     } catch (parseError) {
+      console.error('❌ Failed to parse Resend response as JSON:', parseError.message)
       const responseText = await emailResponse.text()
-      console.error('❌ Failed to parse Resend response as JSON:', parseError)
       console.error('❌ Raw response text:', responseText)
       throw new Error(`Failed to parse Resend response: ${responseText}`)
     }
     
     if (!emailResponse.ok) {
       console.error('❌ Resend API error - Status:', emailResponse.status)
-      console.error('❌ Resend API error - Body:', JSON.stringify(emailResult))
+      console.error('❌ Resend API error - Body:', emailResult)
       throw new Error(`Resend API error (${emailResponse.status}): ${JSON.stringify(emailResult)}`)
     }
 
@@ -304,7 +304,7 @@ Deno.serve(async (req) => {
     // Validate we got a proper email ID
     if (!emailResult.id) {
       console.error('❌ No email ID returned from Resend')
-      console.error('❌ Full Resend response for debugging:', JSON.stringify(emailResult))
+      console.error('❌ Full Resend response for debugging:', emailResult)
       throw new Error('Resend did not return an email ID')
     }
 
