@@ -81,20 +81,24 @@ export default function ActivityGuide() {
         }
       }
       
+      // Generate a random 8-character code
+      const inviteCode = Math.random().toString(36).substring(2, 10).toUpperCase();
+      
       const { error } = await supabase
-        .from("invitations")
+        .from("invite_codes")
         .insert({ 
-          invite_token: token, 
-          invited_by: userId,
-          community_slug: communitySlug,
-          community_name: communityName 
+          user_id: userId,
+          code: inviteCode,
+          uses_count: 0,
+          max_uses: 10,
+          points_awarded: 10
         });
       
       if (error) throw error;
       
       const link = communitySlug 
-        ? `${window.location.origin}/communities/${communitySlug}?invite=${token}&welcome=true`
-        : `${window.location.origin}/invite/${token}`;
+        ? `${window.location.origin}/communities/${communitySlug}?invite=${inviteCode}&welcome=true`
+        : `${window.location.origin}/invite/${inviteCode}`;
       setInviteLink(link);
       
       // Try to copy automatically
