@@ -365,6 +365,33 @@ export type Database = {
           },
         ]
       }
+      email_tracking: {
+        Row: {
+          action: string | null
+          email_type: string | null
+          id: string
+          recipient_email: string | null
+          tracked_at: string | null
+          tracking_id: string
+        }
+        Insert: {
+          action?: string | null
+          email_type?: string | null
+          id?: string
+          recipient_email?: string | null
+          tracked_at?: string | null
+          tracking_id: string
+        }
+        Update: {
+          action?: string | null
+          email_type?: string | null
+          id?: string
+          recipient_email?: string | null
+          tracked_at?: string | null
+          tracking_id?: string
+        }
+        Relationships: []
+      }
       hoa_admins: {
         Row: {
           hoa_name: string
@@ -466,7 +493,7 @@ export type Database = {
         }
         Relationships: []
       }
-      invitations: {
+      invitations_legacy: {
         Row: {
           accepted_at: string | null
           community_name: string | null
@@ -504,6 +531,96 @@ export type Database = {
           {
             foreignKeyName: "invitations_invited_by_fkey"
             columns: ["invited_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invite_codes: {
+        Row: {
+          code: string
+          created_at: string | null
+          expires_at: string | null
+          id: string
+          max_uses: number | null
+          points_awarded: number | null
+          user_id: string
+          uses_count: number | null
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          max_uses?: number | null
+          points_awarded?: number | null
+          user_id: string
+          uses_count?: number | null
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          max_uses?: number | null
+          points_awarded?: number | null
+          user_id?: string
+          uses_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invite_codes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invite_redemptions: {
+        Row: {
+          id: string
+          invite_code: string | null
+          invited_user_id: string | null
+          inviter_id: string | null
+          points_awarded: boolean | null
+          redeemed_at: string | null
+        }
+        Insert: {
+          id?: string
+          invite_code?: string | null
+          invited_user_id?: string | null
+          inviter_id?: string | null
+          points_awarded?: boolean | null
+          redeemed_at?: string | null
+        }
+        Update: {
+          id?: string
+          invite_code?: string | null
+          invited_user_id?: string | null
+          inviter_id?: string | null
+          points_awarded?: boolean | null
+          redeemed_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invite_redemptions_invite_code_fkey"
+            columns: ["invite_code"]
+            isOneToOne: false
+            referencedRelation: "invite_codes"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "invite_redemptions_invited_user_id_fkey"
+            columns: ["invited_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invite_redemptions_inviter_id_fkey"
+            columns: ["inviter_id"]
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
@@ -1473,6 +1590,15 @@ export type Database = {
       normalize_address: {
         Args: { _addr: string }
         Returns: string
+      }
+      redeem_invite_code: {
+        Args: { _code: string; _invited_user_id: string }
+        Returns: {
+          inviter_email: string
+          inviter_name: string
+          points_awarded: number
+          success: boolean
+        }[]
       }
       reject_address_change_request: {
         Args: {

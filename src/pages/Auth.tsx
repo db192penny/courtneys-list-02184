@@ -33,9 +33,11 @@ const Auth = () => {
 
   const hasMagicLink = window.location.hash.includes('access_token=');
 
-  const inviteToken = useMemo(() => {
-    const q = params.get("invite") || "";
-    return q.trim();
+  const inviteCode = useMemo(() => {
+    // Check URL params first, then localStorage
+    const urlInvite = params.get("invite") || "";
+    const storedInvite = localStorage.getItem("invite_code") || "";
+    return urlInvite.trim() || storedInvite.trim();
   }, [params]);
 
   const communityName = useMemo(() => {
@@ -69,30 +71,12 @@ const Auth = () => {
   };
 
   useEffect(() => {
-    // Only pre-fill email if there's a valid invite token context
-    if (inviteToken && !email) {
-      // Validate invite token and get email from it
-      const validateAndSetEmail = async () => {
-        try {
-          const { data } = await supabase.rpc("validate_invite", { _token: inviteToken });
-          // Handle the response structure - data is an array from the RPC
-          const inviteData = Array.isArray(data) && data.length > 0 ? data[0] : null;
-          if (inviteData && inviteData.invited_email) {
-            setEmail(inviteData.invited_email);
-          }
-        } catch (error) {
-          console.warn("Could not validate invite token:", error);
-        }
-      };
-      validateAndSetEmail();
-    }
-
     // Pre-fill address from URL params only (no localStorage)
     const addrParam = (params.get("address") || "").trim();
     if (!address && addrParam) {
       setAddress(addrParam);
     }
-  }, [email, address, params, inviteToken]);
+  }, [email, address, params]);
 
   const finalizeOnboarding = useCallback(async (userId: string, userEmail: string | null) => {
     console.log("[Auth] 🚀 Starting finalizeOnboarding for user:", userId);
@@ -501,20 +485,34 @@ const Auth = () => {
       // Don't fail the signup process if admin notification fails
     }
 
-    // Handle invite token acceptance if present
-    if (inviteToken) {
+    // Handle invite code redemption if present
+    if (inviteCode) {
       try {
-        const { error: markErr } = await supabase.rpc("mark_invite_accepted", {
-          _token: inviteToken,
-          _user_id: userId,
+        console.log("[Auth] 🎫 Redeeming invite code:", inviteCode);
+        const { data: redemptionData, error: redeemErr } = await supabase.rpc("redeem_invite_code", {
+          _code: inviteCode,
+          _invited_user_id: userId,
         });
-        if (markErr) {
-          console.warn("[Auth] ⚠️ mark_invite_accepted error (non-fatal):", markErr);
-        } else {
-          console.log("[Auth] ✅ Invite token marked as accepted");
+        
+        if (redeemErr) {
+          console.warn("[Auth] ⚠️ redeem_invite_code error (non-fatal):", redeemErr);
+        } else if (redemptionData && redemptionData.length > 0) {
+          const result = redemptionData[0];
+          if (result.success) {
+            console.log("[Auth] ✅ Invite code redeemed successfully:", result);
+            toast({
+              title: "Invite redeemed!",
+              description: `${result.inviter_name} earned ${result.points_awarded} points for inviting you!`,
+            });
+            // Clean up stored invite code
+            localStorage.removeItem("invite_code");
+            localStorage.removeItem("inviter_name");
+          } else {
+            console.warn("[Auth] ⚠️ Invite redemption failed:", result);
+          }
         }
       } catch (inviteErr) {
-        console.warn("[Auth] ⚠️ Invite acceptance error (non-fatal):", inviteErr);
+        console.warn("[Auth] ⚠️ Invite redemption error (non-fatal):", inviteErr);
       }
     }
     
