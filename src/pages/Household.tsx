@@ -215,7 +215,7 @@ export default function Household() {
       setIsInviting(true);
       // Generate a random 8-character code
       const inviteCode = Math.random().toString(36).substring(2, 10).toUpperCase();
-      const { error } = await supabase.from("invite_codes" as any).insert({ 
+      const { error } = await supabase.from("invite_codes").insert({ 
         user_id: userId,
         code: inviteCode,
         uses_count: 0,
