@@ -9,6 +9,11 @@ export type AuthState = {
   isLoading: boolean;
 };
 
+/**
+ * Session-first authentication hook that only checks Supabase auth state
+ * This ensures that users with valid sessions are always considered authenticated,
+ * regardless of database profile query results
+ */
 export function useAuth(): AuthState {
   const [authState, setAuthState] = useState<AuthState>({
     user: null,
@@ -26,6 +31,7 @@ export function useAuth(): AuthState {
     const updateAuthState = (newState: Omit<AuthState, 'isLoading'>) => {
       latestAuthState = { ...newState, isLoading: true };
       
+      // Only set loading to false when all operations are complete
       if (authListenerReady && sessionCheckComplete && refreshComplete && latestAuthState) {
         setAuthState({ ...latestAuthState, isLoading: false });
       }
@@ -67,4 +73,5 @@ export function useAuth(): AuthState {
   }, []);
 
   return authState;
+}
 }
