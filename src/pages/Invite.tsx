@@ -1,120 +1,103 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-
-type InviteInfo = {
-  invite_id: string | null;
-  invited_email: string | null;
-  status: string | null;
-  accepted: boolean | null;
-  created_at: string | null;
-  community_slug: string | null;
-  community_name: string | null;
-};
 
 const Invite = () => {
   const { token } = useParams<{ token: string }>();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const [inviteInfo, setInviteInfo] = useState<InviteInfo | null>(null);
-
-  const maskedEmail = (email?: string | null) => {
-    if (!email) return "your email";
-    const [user, domain] = email.split("@");
-    if (!user || !domain) return email;
-    const visible = user.slice(0, 2);
-    return `${visible}${"*".repeat(Math.max(user.length - 2, 1))}@${domain}`;
-  };
 
   const tokenSafe = useMemo(() => token?.trim() || "", [token]);
 
   useEffect(() => {
-    if (!tokenSafe) return;
-    const validate = async () => {
-      console.log("[Invite] Validating token:", tokenSafe);
-      const { data, error } = await supabase.rpc("validate_invite", { _token: tokenSafe });
-      if (error) {
-        toast({
-          title: "Invite validation failed",
-          description: "We couldn't validate this invite link. Please request a new invite.",
-          variant: "destructive",
-        });
-        console.error("[Invite] validate_invite error:", error);
-        return;
-      }
-      const info = (data?.[0] || null) as unknown as InviteInfo | null;
-      if (!info || !info.invite_id) {
-        toast({
-          title: "Invalid invite",
-          description: "This invite link is invalid or has expired.",
-          variant: "destructive",
-        });
-        return;
-      }
-      
-      setInviteInfo(info);
-      
-      if (info.accepted) {
-        toast({
-          title: "Invite already used",
-          description: "This invite has already been accepted. Try logging in.",
-        });
-      } else {
-        toast({
-          title: "You're invited!",
-          description: "Continue to create your account.",
-        });
-      }
-      // Store token for use during signup
-      localStorage.setItem("invite_token", tokenSafe);
-    };
-    validate();
-  }, [tokenSafe, toast]);
-
-  const handleContinue = () => {
-    // Prefer passing token via query, also keep localStorage fallback
-    let authUrl = `/auth?invite=${encodeURIComponent(tokenSafe)}`;
-    if (inviteInfo?.community_slug) {
-      authUrl += `&community=${encodeURIComponent(inviteInfo.community_slug)}`;
+    if (!tokenSafe) {
+      toast({
+        title: "Invalid invite link",
+        description: "No invite code provided.",
+        variant: "destructive",
+      });
+      navigate("/");
+      return;
     }
-    navigate(authUrl);
-  };
 
+    const validateAndRedirect = async () => {
+      console.log("[Invite] Validating code:", tokenSafe);
+      
+      // Query the invite_codes table
+      const { data: inviteData, error: inviteError } = await supabase
+        .from("invite_codes" as any)
+        .select("id, code, user_id, expires_at, max_uses, uses_count")
+        .eq("code", tokenSafe)
+        .single();
+
+      if (inviteError || !inviteData) {
+        console.error("[Invite] Code not found:", inviteError);
+        toast({
+          title: "Invalid invite code",
+          description: "This invite code doesn't exist. Please request a new invite.",
+          variant: "destructive",
+        });
+        navigate("/");
+        return;
+      }
+
+      const invite = inviteData as any;
+
+      // Check if expired
+      if (new Date(invite.expires_at) < new Date()) {
+        toast({
+          title: "Expired invite",
+          description: "This invite has expired. Please request a new invite.",
+          variant: "destructive",
+        });
+        navigate("/");
+        return;
+      }
+
+      // Check if uses exceeded
+      if (invite.uses_count >= invite.max_uses) {
+        toast({
+          title: "Invite limit reached",
+          description: "This invite has reached its usage limit. Please request a new invite.",
+          variant: "destructive",
+        });
+        navigate("/");
+        return;
+      }
+
+      // Get inviter name
+      const { data: userData } = await supabase
+        .from("users")
+        .select("name")
+        .eq("id", invite.user_id)
+        .single();
+
+      const inviterName = userData?.name || "Your neighbor";
+      
+      // Store invite info for signup
+      localStorage.setItem("invite_code", tokenSafe);
+      localStorage.setItem("inviter_name", inviterName);
+      
+      toast({
+        title: `Welcome! ${inviterName} invited you`,
+        description: "Continue to create your account and join the community.",
+      });
+
+      // Redirect directly to auth with invite code
+      navigate(`/auth?invite=${encodeURIComponent(tokenSafe)}`);
+    };
+
+    validateAndRedirect();
+  }, [tokenSafe, toast, navigate]);
+
+  // Show loading while redirecting
   return (
-    <main className="min-h-screen bg-background">
-      <section className="container max-w-xl py-10">
-        <Card>
-          <CardHeader>
-            <CardTitle>Invitation</CardTitle>
-            <CardDescription>
-              {inviteInfo?.community_name 
-                ? `Join Courtney's List — ${inviteInfo.community_name} Private Community Recommendations for Service Providers.`
-                : "Join Courtney's List — private community recommendations."
-              }
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center gap-2">
-              <Badge variant="secondary">Invite-only</Badge>
-              <span className="text-sm text-muted-foreground">Secure access</span>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              If this link was emailed to you, continue to sign up using {maskedEmail(localStorage.getItem("invite_email"))}.
-            </p>
-            <div className="flex gap-3">
-              <Button onClick={handleContinue}>Continue to Sign Up</Button>
-              <Button variant="secondary" onClick={() => navigate("/signin")}>Sign In</Button>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Having trouble? You can request a new invite from the admin.
-            </p>
-          </CardContent>
-        </Card>
-      </section>
+    <main className="min-h-screen bg-background flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+        <p className="text-muted-foreground">Validating your invite...</p>
+      </div>
     </main>
   );
 };
