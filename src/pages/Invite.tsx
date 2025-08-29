@@ -2,6 +2,7 @@ import { useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { toSlug } from "@/utils/slug";
 
 const Invite = () => {
   const { token } = useParams<{ token: string }>();
@@ -52,20 +53,34 @@ const Invite = () => {
       // Get inviter name and community info for proper redirect
       const { data: userData } = await supabase
         .from("users")
-        .select("name")
+        .select("name, address")
         .eq("id", invite.user_id)
         .single();
 
       const inviterName = userData?.name || "Your neighbor";
       
+      // Look up inviter's community
+      let communitySlug = "boca-bridges"; // Default fallback
+      if (userData?.address) {
+        const { data: hoaData } = await supabase
+          .from("household_hoa")
+          .select("hoa_name")
+          .eq("normalized_address", userData.address.toLowerCase().trim())
+          .single();
+        
+        if (hoaData?.hoa_name) {
+          communitySlug = toSlug(hoaData.hoa_name);
+        }
+      }
+      
       // Store invite info for signup
       localStorage.setItem("invite_code", tokenSafe);
       localStorage.setItem("inviter_name", inviterName);
       
-      console.log("[Invite] Valid code, redirecting to auth");
+      console.log("[Invite] Valid code, redirecting to community:", communitySlug);
       
-      // Redirect directly to auth with invite code
-      navigate(`/auth?invite=${encodeURIComponent(tokenSafe)}`);
+      // Redirect to community page with welcome flag
+      navigate(`/communities/${communitySlug}?welcome=true`);
     };
 
     validateAndRedirect();
