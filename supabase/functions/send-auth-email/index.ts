@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.54.0";
+import { Resend } from "npm:resend@2.0.0";
 
 // Helper function to format community names for display
 function formatCommunityName(name: string): string {
@@ -237,55 +238,39 @@ Deno.serve(async (req) => {
 
     console.log('📤 Sending email via Resend...')
     
-    const resendApiKey = Deno.env.get('RESEND_API_KEY')
-    if (!resendApiKey) {
-      console.error('❌ RESEND_API_KEY not found')
-      return new Response(JSON.stringify({ error: 'Email service not configured' }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json', ...corsHeaders }
-      })
-    }
-
+    // Send email using Resend
     try {
-      const emailResponse = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${resendApiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          from: "Courtney's List <courtney@courtneys-list.com>",
-          to: [webhookData.user.email],
-          subject: `${formatCommunityName(communityName) || 'Your Neighborhood'} Access is Ready - Unlock it Now`,
-          html: html,
-          tags: [
-            { name: 'category', value: 'authentication' },
-            { name: 'type', value: 'magic-link' },
-            { name: 'community', value: formatCommunityName(communityName) || 'Default' },
-            { name: 'email_action_type', value: emailActionType }
-          ]
-        }),
-      })
-
-      const emailResult = await emailResponse.json()
-      
-      if (!emailResponse.ok) {
-        console.error('❌ Resend error:', emailResult)
-        throw new Error(`Resend API error: ${emailResult.message || 'Unknown error'}`)
+      const resendApiKey = Deno.env.get('RESEND_API_KEY');
+      if (!resendApiKey) {
+        throw new Error('RESEND_API_KEY not configured');
       }
 
-      console.log('✅ Email sent successfully. ID:', emailResult.id)
+      const resend = new Resend(resendApiKey);
+      
+      const { data, error } = await resend.emails.send({
+        from: "Courtney's List <courtney@courtneys-list.com>",
+        to: webhookData.user.email,
+        subject: `${formatCommunityName(communityName) || 'Your Neighborhood'} Access is Ready - Unlock it Now`,
+        html: html
+      });
 
-      return new Response(JSON.stringify({ success: true, emailId: emailResult.id }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json', ...corsHeaders },
-      })
+      if (error) {
+        console.error('Resend error:', error);
+        throw new Error(`Failed to send email: ${error.message}`);
+      }
+
+      console.log('Email sent successfully:', data?.id);
+      
+      return new Response(
+        JSON.stringify({ success: true, emailId: data?.id }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     } catch (error) {
-      console.error('❌ Email sending failed:', error.message)
-      return new Response(JSON.stringify({ error: 'Failed to send email' }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json', ...corsHeaders },
-      })
+      console.error('Send error:', error);
+      return new Response(
+        JSON.stringify({ error: error.message }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
     
   } catch (error) {
