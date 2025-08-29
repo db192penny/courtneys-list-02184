@@ -1595,6 +1595,7 @@ export type Database = {
         Args: { _code: string; _invited_user_id: string }
         Returns: {
           inviter_email: string
+          inviter_id: string
           inviter_name: string
           points_awarded: number
           success: boolean

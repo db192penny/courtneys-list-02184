@@ -512,23 +512,45 @@ const Auth = () => {
         console.log('[Auth] Redemption response:', redemptionData);
         console.log('[Auth] Redemption error:', redeemErr);
         
-        if (redeemErr) {
-          console.warn("[Auth] ⚠️ redeem_invite_code error (non-fatal):", redeemErr);
-        } else if (redemptionData && redemptionData.length > 0) {
-          const result = redemptionData[0];
-          if (result.success) {
-            console.log("[Auth] ✅ Invite code redeemed successfully:", result);
-            toast({
-              title: "Invite redeemed!",
-              description: `${result.inviter_name} earned ${result.points_awarded} points for inviting you!`,
-            });
-            // Clean up stored invite code
-            localStorage.removeItem("invite_code");
-            localStorage.removeItem("inviter_name");
-          } else {
-            console.warn("[Auth] ⚠️ Invite redemption failed:", result);
-          }
-        }
+         if (redeemErr) {
+           console.warn("[Auth] ⚠️ redeem_invite_code error (non-fatal):", redeemErr);
+         } else if (redemptionData && redemptionData.length > 0) {
+           const result = redemptionData[0];
+           if (result.success) {
+             console.log("[Auth] ✅ Invite code redeemed successfully:", result);
+             toast({
+               title: "Invite redeemed!",
+               description: `${result.inviter_name} earned ${result.points_awarded} points for inviting you!`,
+             });
+             
+              // Trigger invite success email notification
+              try {
+                // Determine community name from URL params or default to Boca Bridges
+                const detectedCommunityName = communityName || 'Boca Bridges';
+                const detectedCommunitySlug = communityName ? toSlug(communityName) : 'boca-bridges';
+                
+                await supabase.functions.invoke('send-invite-success-email', {
+                  body: {
+                    inviterId: result.inviter_id,
+                    inviterName: result.inviter_name,
+                    inviterEmail: result.inviter_email,
+                    invitedName: name.trim(),
+                    communityName: detectedCommunityName,
+                    communitySlug: detectedCommunitySlug
+                  }
+                });
+                console.log("[Auth] ✅ Invite success email triggered");
+              } catch (emailError) {
+                console.warn('[Auth] ⚠️ Invite success email failed:', emailError);
+              }
+             
+             // Clean up stored invite code
+             localStorage.removeItem("invite_code");
+             localStorage.removeItem("inviter_name");
+           } else {
+             console.warn("[Auth] ⚠️ Invite redemption failed:", result);
+           }
+         }
       } catch (inviteErr) {
         console.warn("[Auth] ⚠️ Invite redemption error (non-fatal):", inviteErr);
       }
