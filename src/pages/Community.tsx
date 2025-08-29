@@ -35,9 +35,9 @@ export default function Community() {
   useEffect(() => {
     if (communityName && communityName !== "Community") {
       localStorage.setItem('selected_community', communityName);
-      console.log("Community: Stored community context:", communityName);
     }
   }, [communityName]);
+
   const pageTitle = useMemo(() => (communityName === "Boca Bridges" ? "Boca Bridges Overview" : `${communityName} Overview`), [communityName]);
   const canonical = typeof window !== "undefined" ? window.location.href : undefined;
   
@@ -89,6 +89,7 @@ export default function Community() {
   const e164Phone = phoneDigits ? (phoneDigits.length === 10 ? `+1${phoneDigits}` : `+${phoneDigits}`) : null;
   const homesCount = (asset as any)?.total_homes ?? 500;
   const homesLabel = typeof homesCount === "number" ? homesCount.toLocaleString() : "500";
+
   return (
     <main className="min-h-screen bg-background">
       <SEO
@@ -140,7 +141,6 @@ export default function Community() {
           </div>
         </header>
 
-
         {showSignUpPrompt && (
           <div className="flex flex-col gap-2 sm:gap-3">
             <Button 
@@ -159,7 +159,6 @@ export default function Community() {
             </p>
           </div>
         )}
-
 
         {isLoading && <div className="text-sm text-muted-foreground">Loading providers…</div>}
         {error && <div className="text-sm text-muted-foreground">Unable to load providers.</div>}
@@ -182,9 +181,7 @@ export default function Community() {
             />
           </div>
         )}
-
       </section>
-
     </main>
   );
 }
