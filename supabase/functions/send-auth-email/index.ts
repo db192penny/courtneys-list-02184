@@ -235,14 +235,14 @@ Deno.serve(async (req) => {
       </html>
     `
 
-    console.log('📤 Sending email via Resend...')
+    console.log('📤 Sending email directly via Resend API...')
     
     const resendApiKey = Deno.env.get('RESEND_API_KEY')
     if (!resendApiKey) {
       console.error('❌ RESEND_API_KEY not found')
       return new Response(JSON.stringify({ error: 'Email service not configured' }), {
         status: 500,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json', ...corsHeaders }
       })
     }
 
@@ -257,17 +257,32 @@ Deno.serve(async (req) => {
         to: [webhookData.user.email],
         subject: `${formatCommunityName(communityName) || 'Your Neighborhood'} Access is Ready - Unlock it Now`,
         html: html,
+        tags: [
+          { name: 'category', value: 'authentication' },
+          { name: 'type', value: 'magic-link' },
+          { name: 'community', value: formatCommunityName(communityName) || 'Default' },
+          { name: 'email_action_type', value: emailActionType }
+        ]
       }),
     })
 
     const emailResult = await emailResponse.json()
     
+    console.log('📬 Resend API response status:', emailResponse.status)
+    console.log('📬 Resend API response body:', emailResult)
+    
     if (!emailResponse.ok) {
-      console.error('❌ Resend error:', emailResult)
+      console.error('❌ Resend API error:', emailResult)
       throw new Error(`Resend API error: ${JSON.stringify(emailResult)}`)
     }
 
-    console.log('✅ Email sent successfully:', emailResult.id)
+    console.log('✅ Email sent successfully to Resend. ID:', emailResult.id)
+    
+    // Validate we got a proper email ID
+    if (!emailResult.id) {
+      console.error('❌ No email ID returned from Resend')
+      throw new Error('Resend did not return an email ID')
+    }
 
     return new Response(JSON.stringify({ success: true, emailId: emailResult.id }), {
       status: 200,
