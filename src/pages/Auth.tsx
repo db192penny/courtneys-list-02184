@@ -31,6 +31,8 @@ const Auth = () => {
   const navigate = useNavigate();
   const [params] = useSearchParams();
 
+  const hasMagicLink = window.location.hash.includes('access_token=');
+
   const inviteToken = useMemo(() => {
     const q = params.get("invite") || "";
     return q.trim();
@@ -523,18 +525,14 @@ const Auth = () => {
 
   const canonical = typeof window !== "undefined" ? window.location.href : undefined;
 
-  if (isProcessingMagicLink) {
-    return (
-      <main className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-muted-foreground">Signing you in...</p>
-        </div>
-      </main>
-    );
-  }
-
-  return (
+  return hasMagicLink ? (
+    <main className="min-h-screen bg-background flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+        <p className="mt-4 text-muted-foreground">Signing you in...</p>
+      </div>
+    </main>
+  ) : (
     <main className="min-h-screen bg-background">
       <SEO
         title={communityName ? `Join ${communityName.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}` : "Join Courtney's List"}
