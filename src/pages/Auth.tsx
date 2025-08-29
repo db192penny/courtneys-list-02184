@@ -244,68 +244,52 @@ const Auth = () => {
 
   // Process magic link hash fragments
   useEffect(() => {
+    let mounted = true;
+    
     const processHashFragment = async () => {
       const hash = window.location.hash;
-      console.log('[Auth] Checking hash fragment:', hash);
       
       if (hash && hash.includes('access_token=')) {
-        console.log('[Auth] Magic link hash fragment detected');
+        console.log('[Auth] Magic link detected, processing...');
         
-        // Extract tokens from hash
-        const hashParams = new URLSearchParams(hash.substring(1));
-        const accessToken = hashParams.get('access_token');
-        const refreshToken = hashParams.get('refresh_token');
-        
-        if (accessToken && refreshToken) {
-          console.log('[Auth] Processing magic link tokens');
+        // Wait for Supabase to be ready and retry if needed
+        let retries = 0;
+        while (retries < 10 && mounted) {
+          const hashParams = new URLSearchParams(hash.substring(1));
+          const accessToken = hashParams.get('access_token');
+          const refreshToken = hashParams.get('refresh_token');
           
-          try {
-            // Set session using the tokens
-            const { data: { session }, error } = await supabase.auth.setSession({
-              access_token: accessToken,
-              refresh_token: refreshToken
-            });
-            
-            if (error) {
-              console.error('[Auth] Hash fragment session error:', error);
-              toast({
-                title: "Authentication Error",
-                description: "Unable to process magic link. Please try again.",
-                variant: "destructive"
+          if (accessToken && refreshToken) {
+            try {
+              const { data, error } = await supabase.auth.setSession({
+                access_token: accessToken,
+                refresh_token: refreshToken
               });
-              return;
-            }
-            
-            if (session?.user) {
-              console.log('[Auth] Hash fragment session established successfully');
               
-              // Clean the URL hash
-              window.history.replaceState(null, '', window.location.pathname + window.location.search);
-              
-              // Trigger finalization with the user data
-              await finalizeOnboarding(session.user.id, session.user.email ?? null);
+              if (data?.session && !error) {
+                console.log('[Auth] Session established successfully');
+                window.history.replaceState(null, '', window.location.pathname);
+                await finalizeOnboarding(data.session.user.id, data.session.user.email);
+                return;
+              }
+            } catch (err) {
+              console.error('[Auth] Attempt failed:', err);
             }
-          } catch (error) {
-            console.error('[Auth] Error processing magic link:', error);
-            toast({
-              title: "Error",
-              description: "Failed to process sign-in link. Please try again.",
-              variant: "destructive"
-            });
           }
+          
+          // Wait 500ms and retry
+          await new Promise(resolve => setTimeout(resolve, 500));
+          retries++;
         }
+        
+        console.error('[Auth] Failed to process magic link after 10 attempts');
       }
     };
-
-    // Process immediately
-    processHashFragment();
     
-    // Also listen for hash changes
-    window.addEventListener('hashchange', processHashFragment);
+    // Give Supabase 1 second to initialize before processing
+    setTimeout(processHashFragment, 1000);
     
-    return () => {
-      window.removeEventListener('hashchange', processHashFragment);
-    };
+    return () => { mounted = false; };
   }, [finalizeOnboarding, toast]);
 
   const onSubmit = async (e: FormEvent) => {
