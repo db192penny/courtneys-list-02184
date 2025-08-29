@@ -33,13 +33,11 @@ const Auth = () => {
 
   const hasMagicLink = window.location.hash.includes('access_token=');
 
-
   const communityName = useMemo(() => {
     const urlCommunity = params.get("community") || "";
     return urlCommunity;
   }, [params]);
 
-  // Check for magic link in URL immediately on component mount
   useEffect(() => {
     const hash = window.location.hash;
     if (hash && hash.includes('access_token=')) {
@@ -52,11 +50,9 @@ const Auth = () => {
   }, [params]);
 
   const handleBack = () => {
-    // Try to go back in history first
     if (window.history.length > 1) {
       navigate(-1);
     } else {
-      // Fallback to community page or home
       const fallbackUrl = communityName 
         ? `/communities/${toSlug(communityName)}`
         : "/communities/boca-bridges";
@@ -65,7 +61,6 @@ const Auth = () => {
   };
 
   useEffect(() => {
-    // Pre-fill address from URL params only (no localStorage)
     const addrParam = (params.get("address") || "").trim();
     if (!address && addrParam) {
       setAddress(addrParam);
@@ -73,92 +68,54 @@ const Auth = () => {
   }, [email, address, params]);
 
   const finalizeOnboarding = useCallback(async (userId: string, userEmail: string | null) => {
-    console.log("[Auth] 🚀 Starting finalizeOnboarding for user:", userId);
-    
     let destination = "/communities/boca-bridges?welcome=true";
     
     try {
-      // Community detection with enhanced error handling
-      console.log("[Auth] 🔍 Starting community detection for user:", userId);
-      
-      // PRIORITY 0: Check URL params for community context first
       if (communityName) {
         destination = `/communities/${toSlug(communityName)}?welcome=true`;
-        console.log("[Auth] ✅ Community detected from URL params, redirecting to:", destination);
       } else {
-        // PRIORITY 1: Check signup_source for community affiliation
         const { data: userData, error: userErr } = await supabase
           .from("users")
           .select("address, signup_source")
           .eq("id", userId)
           .maybeSingle();
 
-        if (userErr) {
-          console.warn("[Auth] ⚠️ User lookup error:", userErr);
-          throw userErr;
-        }
+        if (!userErr && userData) {
+          if (userData?.signup_source && userData.signup_source.startsWith("community:")) {
+            const communityFromSignup = userData.signup_source.replace("community:", "");
+            destination = `/communities/${toSlug(communityFromSignup)}?welcome=true`;
+          } else if (userData?.address && userData.address !== "Address Not Provided") {
+            const { data: normalizedAddr } = await supabase.rpc("normalize_address", { _addr: userData.address });
+            
+            const { data: mapping } = await supabase
+              .from("household_hoa")
+              .select("hoa_name, created_at, household_address")
+              .eq("household_address", normalizedAddr)
+              .order("created_at", { ascending: false })
+              .limit(1)
+              .maybeSingle();
 
-        console.log("[Auth] 📍 User data retrieved:", { 
-          address: userData?.address, 
-          signup_source: userData?.signup_source 
-        });
-
-        // Check if user signed up from a community page
-        if (userData?.signup_source && userData.signup_source.startsWith("community:")) {
-          const communityFromSignup = userData.signup_source.replace("community:", "");
-          destination = `/communities/${toSlug(communityFromSignup)}?welcome=true`;
-          console.log("[Auth] ✅ Community detected from signup_source, redirecting to:", destination);
-        } else if (userData?.address && userData.address !== "Address Not Provided") {
-          // PRIORITY 2: Fall back to address-based detection
-          console.log("[Auth] 🔍 No community signup_source, checking address-based detection");
-          
-          // Use the RPC function to get the normalized address first
-          const { data: normalizedAddr } = await supabase.rpc("normalize_address", { _addr: userData.address });
-          console.log("[Auth] 🔍 Normalized address:", normalizedAddr);
-          
-          const { data: mapping, error: mapErr } = await supabase
-            .from("household_hoa")
-            .select("hoa_name, created_at, household_address")
-            .eq("household_address", normalizedAddr)
-            .order("created_at", { ascending: false })
-            .limit(1)
-            .maybeSingle();
-
-          if (mapErr) {
-            console.warn("[Auth] ⚠️ household_hoa lookup error (non-fatal):", mapErr);
-          }
-
-          console.log("[Auth] 🏘️ HOA mapping found:", mapping);
-
-          const hoaName = mapping?.hoa_name || "";
-          if (hoaName) {
-            destination = `/communities/${toSlug(hoaName)}?welcome=true`;
-            console.log("[Auth] ✅ Community detected via address, redirecting to:", destination);
-          } else {
-            console.log("[Auth] ⚠️ No HOA mapping found, trying RPC fallback");
-            // try RPC as additional fallback if available
-            try {
-              const { data: hoaRes } = await supabase.rpc("get_my_hoa");
-              const rpcHoa = (hoaRes?.[0]?.hoa_name as string | undefined) || "";
-              console.log("[Auth] 🔧 RPC result:", rpcHoa);
-              if (rpcHoa) {
-                destination = `/communities/${toSlug(rpcHoa)}?welcome=true`;
-                console.log("[Auth] ✅ Community detected via RPC, redirecting to:", destination);
+            const hoaName = mapping?.hoa_name || "";
+            if (hoaName) {
+              destination = `/communities/${toSlug(hoaName)}?welcome=true`;
+            } else {
+              try {
+                const { data: hoaRes } = await supabase.rpc("get_my_hoa");
+                const rpcHoa = (hoaRes?.[0]?.hoa_name as string | undefined) || "";
+                if (rpcHoa) {
+                  destination = `/communities/${toSlug(rpcHoa)}?welcome=true`;
+                }
+              } catch (e) {
+                // Silent fallback
               }
-            } catch (e) {
-              console.warn("[Auth] ⚠️ get_my_hoa failed (non-fatal):", e);
             }
           }
         }
       }
 
-      // Navigate with success notification
       const cleanDestination = destination.split('#')[0];
-      console.log("[Auth] 🎯 Navigating to final destination:", cleanDestination);
       
-      // Show success modal for successful onboarding
       if (destination !== "/communities/boca-bridges?welcome=true") {
-        // Extract community name from destination for personalized message
         const communityMatch = destination.match(/\/communities\/(.+)/);
         const communityForDisplay = communityMatch 
           ? communityMatch[1].replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
@@ -167,7 +124,6 @@ const Auth = () => {
         setDetectedCommunity(communityForDisplay);
         setShowSuccessModal(true);
         
-        // Delay navigation to show the modal
         setTimeout(() => {
           navigate(cleanDestination, { replace: true });
         }, 100);
@@ -177,53 +133,29 @@ const Auth = () => {
       navigate(cleanDestination, { replace: true });
       
     } catch (e) {
-      console.error("[Auth] ❌ finalizeOnboarding failed with error:", e);
-      
-      // Show user-friendly error message
       toast({ 
         title: "Navigation Issue", 
         description: "We're completing your signup. Please wait a moment.", 
         variant: "destructive" 
       });
       
-      // Always ensure the user can access the app
       navigate("/communities/boca-bridges?welcome=true", { replace: true });
     }
   }, [navigate, toast, communityName]);
 
-  // Handle authentication state changes - simplified magic link flow
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
-        console.log('[Auth] onAuthStateChange: User authenticated', {
-          justSignedUp,
-          isVerifiedMagicLink,
-          event: _event
-        });
-        
-        // Redirect authenticated users to their community
         if (isVerifiedMagicLink || session?.user) {
-          console.log('[Auth] Proceeding with finalization - not a fresh signup or verified magic link');
           setTimeout(() => finalizeOnboarding(session.user!.id, session.user!.email ?? null), 0);
-        } else {
-          console.log('[Auth] Skipping finalization - user just signed up, waiting for magic link');
         }
       }
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
-        console.log('[Auth] getSession: User already authenticated', {
-          justSignedUp,
-          isVerifiedMagicLink
-        });
-        
-        // Redirect authenticated users to their community
         if (isVerifiedMagicLink || session?.user) {
-          console.log('[Auth] Proceeding with finalization - existing session or verified magic link');
           finalizeOnboarding(session.user.id, session.user.email ?? null);
-        } else {
-          console.log('[Auth] Skipping finalization - user just signed up, waiting for magic link');
         }
       }
     });
@@ -231,7 +163,6 @@ const Auth = () => {
     return () => subscription.unsubscribe();
   }, [finalizeOnboarding, isVerifiedMagicLink, justSignedUp]);
 
-  // Process magic link hash fragments
   useEffect(() => {
     let mounted = true;
     
@@ -240,9 +171,7 @@ const Auth = () => {
       
       if (hash && hash.includes('access_token=')) {
         setIsProcessingMagicLink(true);
-        console.log('[Auth] Magic link detected, processing...');
         
-        // Wait for Supabase to be ready and retry if needed
         let retries = 0;
         while (retries < 10 && mounted) {
           const hashParams = new URLSearchParams(hash.substring(1));
@@ -257,111 +186,31 @@ const Auth = () => {
               });
               
               if (data?.session && !error) {
-                console.log('[Auth] Session established successfully');
                 window.history.replaceState(null, '', window.location.pathname);
-                
-                // Check for pending invite redemption BEFORE finalizing onboarding
-                await checkAndRedeemPendingInvite(data.session.user.id);
-                
                 await finalizeOnboarding(data.session.user.id, data.session.user.email);
                 return;
               }
             } catch (err) {
-              console.error('[Auth] Attempt failed:', err);
+              // Silent retry
             }
           }
           
-          // Wait 500ms and retry
           await new Promise(resolve => setTimeout(resolve, 500));
           retries++;
         }
         
-        console.error('[Auth] Failed to process magic link after 10 attempts');
         setIsProcessingMagicLink(false);
       }
     };
     
-    // Give Supabase 1 second to initialize before processing
-    setTimeout(processHashFragment, 1000);
+    // Increased timeout for better reliability
+    setTimeout(processHashFragment, 2000);
     
     return () => { mounted = false; };
   }, [finalizeOnboarding, toast]);
 
-  const checkAndRedeemPendingInvite = async (userId: string) => {
-    try {
-      console.log('[Auth] Checking for pending invite redemption for user:', userId);
-      
-      // Get user's pending invite code
-      const { data: userData, error: userError } = await supabase
-        .from('users')
-        .select('pending_invite_code')
-        .eq('id', userId)
-        .single();
-      
-      if (userError || !userData?.pending_invite_code) {
-        console.log('[Auth] No pending invite code found');
-        return;
-      }
-      
-      const pendingCode = userData.pending_invite_code;
-      console.log('[Auth] Found pending invite code:', pendingCode);
-      
-      // Attempt redemption using existing RPC function
-      const { data: redemptionData, error: redeemErr } = await supabase.rpc("redeem_invite_code", {
-        _code: pendingCode,
-        _invited_user_id: userId,
-      });
-      
-      if (redeemErr) {
-        console.warn("[Auth] Pending invite redemption failed:", redeemErr);
-        return;
-      }
-      
-      if (redemptionData?.[0]?.success) {
-        const result = redemptionData[0];
-        console.log("[Auth] ✅ Pending invite redeemed successfully:", result);
-        
-        // Clear pending invite code
-        await supabase
-          .from('users')
-          .update({ pending_invite_code: null })
-          .eq('id', userId);
-        
-        // Show success message
-        toast({
-          title: "Welcome! Invite redeemed",
-          description: `${result.inviter_name} earned ${result.points_awarded} points for inviting you!`,
-        });
-        
-        // Trigger success email using existing logic
-        try {
-          const detectedCommunityName = communityName || 'Boca Bridges';
-          const detectedCommunitySlug = communityName ? toSlug(communityName) : 'boca-bridges';
-          
-          await supabase.functions.invoke('send-invite-success-email', {
-            body: {
-              inviterId: result.inviter_id,
-              inviterName: result.inviter_name,
-              inviterEmail: result.inviter_email,
-              invitedName: name.trim(),
-              communityName: detectedCommunityName,
-              communitySlug: detectedCommunitySlug
-            }
-          });
-          console.log("[Auth] ✅ Invite success email sent");
-        } catch (emailError) {
-          console.warn('[Auth] Invite success email failed:', emailError);
-        }
-      }
-    } catch (error) {
-      console.warn('[Auth] Error checking pending invite:', error);
-    }
-  };
-
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    
-    console.log('[Auth] Starting signup process');
 
     if (resident === "no") {
       toast({ title: "Residents only", description: "Currently, access is restricted to residents only.", variant: "destructive" });
@@ -396,15 +245,10 @@ const Auth = () => {
       setErrors({});
     }
 
-    // Clean up localStorage immediately (no more dependency on it)
     localStorage.removeItem("prefill_address");
     localStorage.removeItem("selected_community");
     
-    console.log("[Auth] 🚀 Starting user creation process");
-
-    // First, check if email already exists and get its status
     const targetEmail = email.trim().toLowerCase();
-    console.log("[Auth] 🔍 Checking email status for:", targetEmail);
     
     try {
       const { data: emailStatus, error: statusError } = await supabase.rpc("get_email_status", {
@@ -412,7 +256,6 @@ const Auth = () => {
       });
 
       if (statusError) {
-        console.error("[Auth] get_email_status error:", statusError);
         toast({ 
           title: "Account check failed", 
           description: "Unable to verify email status. Please try again.", 
@@ -421,9 +264,6 @@ const Auth = () => {
         return;
       }
 
-      console.log("[Auth] 📊 Email status result:", emailStatus);
-
-      // Handle different email statuses
       if (emailStatus === "approved") {
         toast({
           title: "Account already exists",
@@ -431,7 +271,6 @@ const Auth = () => {
           variant: "destructive",
         });
         
-        // Redirect to sign in page with context
         const signInUrl = communityName 
           ? `/signin?community=${toSlug(communityName)}` 
           : "/signin";
@@ -446,33 +285,17 @@ const Auth = () => {
         return;
       }
       
-      // If we get here, emailStatus is "not_found" and we can proceed with signup
-      console.log("[Auth] ✅ Email available, proceeding with signup");
-      
     } catch (emailCheckError) {
-      console.error("[Auth] Email check failed:", emailCheckError);
       // Continue with signup attempt if email check fails
-      console.log("[Auth] ⚠️ Email check failed, attempting signup anyway");
     }
 
-    // Get invite code synchronously to avoid timing issues
-    const urlInvite = params.get("invite")?.trim();
-    const storedInvite = localStorage.getItem("invite_code")?.trim();
-    const inviteCode = urlInvite || storedInvite || undefined;
-    console.log("[Auth] Invite code at submission:", inviteCode);
-
-    // Store user data in metadata for the trigger to use
     const metaData = {
       name: name.trim(),
       address: address.trim(),
       street_name: extractStreetName(address.trim()),
       signup_source: communityName ? `community:${toSlug(communityName)}` : null,
-      pending_invite_code: inviteCode || null,
     };
 
-    console.log("[Auth] 📝 Creating auth user with metadata for trigger:", metaData);
-
-    // Generate a temporary password the user never sees
     const tempPassword = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 
     const redirectUrl = `${window.location.origin}/auth`;
@@ -481,18 +304,14 @@ const Auth = () => {
       password: tempPassword,
       options: { 
         emailRedirectTo: redirectUrl,
-        data: metaData // Pass metadata during signup so trigger has access
+        data: metaData
       },
     });
 
     if (signUpError) {
-      console.error("[Auth] signup error:", signUpError);
-      
-      // Handle specific error types with user-friendly messages
       let errorTitle = "Could not create account";
       let errorDescription = signUpError.message;
       
-      // Check for common error patterns and provide actionable guidance
       if (signUpError.message.includes("User already registered") || 
           signUpError.message.includes("already been taken") ||
           signUpError.message.includes("already exists") ||
@@ -501,7 +320,6 @@ const Auth = () => {
         errorTitle = "Email already registered";
         errorDescription = "This email is already registered. Please sign in instead or contact support if you think this is an error.";
         
-        // Show sign in button in toast or redirect
         setTimeout(() => {
           const signInUrl = communityName 
             ? `/signin?community=${toSlug(communityName)}` 
@@ -527,25 +345,11 @@ const Auth = () => {
 
     const userId = authData.user?.id;
     if (!userId) {
-      console.error("[Auth] No user ID returned from signUp");
       toast({ title: "Signup failed", description: "Could not create user account", variant: "destructive" });
       return;
     }
 
-    console.log("[Auth] ✅ Auth user created, profile will be created automatically via database trigger");
-
-    // Check if user was auto-verified (community signups)
-    let userWasAutoVerified = false;
-    if (authData.session?.user) {
-      console.log("[Auth] 🔍 User was auto-logged in, checking if they need magic link email");
-      userWasAutoVerified = true;
-      
-      // User will be automatically redirected to community via auth state change
-    }
-
-    // Send admin notification via edge function (replaces the database trigger approach)
     try {
-      console.log("[Auth] 📧 Sending admin notification");
       await supabase.functions.invoke('send-admin-notification', {
         body: {
           userEmail: targetEmail,
@@ -555,76 +359,11 @@ const Auth = () => {
           signupSource: communityName ? `community:${toSlug(communityName)}` : 'direct'
         }
       });
-      console.log("[Auth] ✅ Admin notification sent successfully");
     } catch (adminNotificationError) {
-      console.warn("[Auth] ⚠️ Admin notification failed (non-fatal):", adminNotificationError);
       // Don't fail the signup process if admin notification fails
     }
-
-    // Handle invite code redemption if present
-    if (inviteCode) {
-      console.log('[Auth] About to attempt redemption with code:', inviteCode);
-      try {
-        console.log("[Auth] 🎫 Calling redeem_invite_code RPC with:", { 
-          code: inviteCode, 
-          userId: userId 
-        });
-        
-        const { data: redemptionData, error: redeemErr } = await supabase.rpc("redeem_invite_code", {
-          _code: inviteCode,
-          _invited_user_id: userId,
-        });
-        
-        console.log('[Auth] Redemption response:', redemptionData);
-        console.log('[Auth] Redemption error:', redeemErr);
-        
-         if (redeemErr) {
-           console.warn("[Auth] ⚠️ redeem_invite_code error (non-fatal):", redeemErr);
-         } else if (redemptionData && redemptionData.length > 0) {
-           const result = redemptionData[0];
-           if (result.success) {
-             console.log("[Auth] ✅ Invite code redeemed successfully:", result);
-             toast({
-               title: "Invite redeemed!",
-               description: `${result.inviter_name} earned ${result.points_awarded} points for inviting you!`,
-             });
-             
-              // Trigger invite success email notification
-              try {
-                // Determine community name from URL params or default to Boca Bridges
-                const detectedCommunityName = communityName || 'Boca Bridges';
-                const detectedCommunitySlug = communityName ? toSlug(communityName) : 'boca-bridges';
-                
-                await supabase.functions.invoke('send-invite-success-email', {
-                  body: {
-                    inviterId: result.inviter_id,
-                    inviterName: result.inviter_name,
-                    inviterEmail: result.inviter_email,
-                    invitedName: name.trim(),
-                    communityName: detectedCommunityName,
-                    communitySlug: detectedCommunitySlug
-                  }
-                });
-                console.log("[Auth] ✅ Invite success email triggered");
-              } catch (emailError) {
-                console.warn('[Auth] ⚠️ Invite success email failed:', emailError);
-              }
-             
-             // Clean up stored invite code
-             localStorage.removeItem("invite_code");
-             localStorage.removeItem("inviter_name");
-           } else {
-             console.warn("[Auth] ⚠️ Invite redemption failed:", result);
-           }
-         }
-      } catch (inviteErr) {
-        console.warn("[Auth] ⚠️ Invite redemption error (non-fatal):", inviteErr);
-      }
-    }
     
-    // Success: Show magic link modal for ALL signups (both auto-verified and regular)
     setShowMagicLinkModal(true);
-    console.log("[Auth] ✅ Auth signup completed successfully - profile will be created by trigger");
   };
 
   const canonical = typeof window !== "undefined" ? window.location.href : undefined;
@@ -661,7 +400,6 @@ const Auth = () => {
                 </Button>
               </div>
               
-              {/* Highlighted Invite-Only Test Family Message */}
               <div className="flex items-start gap-3 p-4 bg-yellow-50 dark:bg-yellow-950/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
                 <Crown className="h-5 w-5 text-yellow-600 dark:text-yellow-400 mt-0.5 flex-shrink-0" />
                 <div className="space-y-1">
@@ -755,7 +493,6 @@ const Auth = () => {
               </form>
             </CardContent>
 
-            {/* TEMPORARY FALLBACK UI */}
             {resident === "no" && (
               <CardFooter className="pt-0">
                 <p className="text-sm text-muted-foreground">
@@ -770,12 +507,10 @@ const Auth = () => {
           </div>
         </section>
 
-      {/* Magic Link Sent Modal */}
       <Dialog open={showMagicLinkModal} onOpenChange={(open) => {
         setShowMagicLinkModal(open);
         if (!open) {
           setJustSignedUp(false);
-          console.log('[Auth] Resetting justSignedUp = false (modal closed)');
         }
       }}>
         <DialogContent className="sm:max-w-md">
@@ -806,7 +541,6 @@ const Auth = () => {
               <Button onClick={() => {
                 setShowMagicLinkModal(false);
                 setJustSignedUp(false);
-                console.log('[Auth] Resetting justSignedUp = false (modal dismissed)');
               }} className="w-full">
                 Got It!
               </Button>
@@ -815,7 +549,6 @@ const Auth = () => {
                 onClick={() => {
                   setShowMagicLinkModal(false);
                   setJustSignedUp(false);
-                  console.log('[Auth] Resending magic link and resetting justSignedUp = false');
                   onSubmit(new Event('submit') as any);
                 }}
                 className="w-full"
@@ -827,7 +560,6 @@ const Auth = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Success Modal */}
       <AlertDialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
         <AlertDialogContent className="max-w-md">
           <AlertDialogHeader className="text-center space-y-4">
