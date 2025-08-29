@@ -242,6 +242,72 @@ const Auth = () => {
     return () => subscription.unsubscribe();
   }, [finalizeOnboarding, isVerifiedMagicLink, justSignedUp]);
 
+  // Process magic link hash fragments
+  useEffect(() => {
+    const processHashFragment = async () => {
+      const hash = window.location.hash;
+      console.log('[Auth] Checking hash fragment:', hash);
+      
+      if (hash && hash.includes('access_token=')) {
+        console.log('[Auth] Magic link hash fragment detected');
+        
+        // Extract tokens from hash
+        const hashParams = new URLSearchParams(hash.substring(1));
+        const accessToken = hashParams.get('access_token');
+        const refreshToken = hashParams.get('refresh_token');
+        
+        if (accessToken && refreshToken) {
+          console.log('[Auth] Processing magic link tokens');
+          
+          try {
+            // Set session using the tokens
+            const { data: { session }, error } = await supabase.auth.setSession({
+              access_token: accessToken,
+              refresh_token: refreshToken
+            });
+            
+            if (error) {
+              console.error('[Auth] Hash fragment session error:', error);
+              toast({
+                title: "Authentication Error",
+                description: "Unable to process magic link. Please try again.",
+                variant: "destructive"
+              });
+              return;
+            }
+            
+            if (session?.user) {
+              console.log('[Auth] Hash fragment session established successfully');
+              
+              // Clean the URL hash
+              window.history.replaceState(null, '', window.location.pathname + window.location.search);
+              
+              // Trigger finalization with the user data
+              await finalizeOnboarding(session.user.id, session.user.email ?? null);
+            }
+          } catch (error) {
+            console.error('[Auth] Error processing magic link:', error);
+            toast({
+              title: "Error",
+              description: "Failed to process sign-in link. Please try again.",
+              variant: "destructive"
+            });
+          }
+        }
+      }
+    };
+
+    // Process immediately
+    processHashFragment();
+    
+    // Also listen for hash changes
+    window.addEventListener('hashchange', processHashFragment);
+    
+    return () => {
+      window.removeEventListener('hashchange', processHashFragment);
+    };
+  }, [finalizeOnboarding, toast]);
+
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     
