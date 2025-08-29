@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ExternalLink, Plus, Rocket } from "lucide-react";
 import { Link } from "react-router-dom";
 import HomeVendorsTable from "@/components/vendors/HomeVendorsTable";
+
 // Minimal types
 type Vendor = {
   id: string;
@@ -52,7 +53,6 @@ export default function Household() {
   const [costVendorId, setCostVendorId] = useState<string | null>(null);
   const [amount, setAmount] = useState<string>("");
   const [currency, setCurrency] = useState<string>("USD");
-  const [isInviting, setIsInviting] = useState<boolean>(false);
 
   const [points, setPoints] = useState<number>(0);
   const [approved, setApproved] = useState<boolean | null>(null);
@@ -150,7 +150,6 @@ export default function Household() {
     return () => { cancelled = true; };
   }, []);
 
-
   const openAddCost = (vendorId: string) => {
     setCostVendorId(vendorId);
     setAmount("");
@@ -176,7 +175,7 @@ export default function Household() {
       household_address: address,
       amount: value,
       currency: curr,
-      cost_kind: 'one_time', // Add default cost_kind for unique constraint
+      cost_kind: 'one_time',
       created_by: userId,
     } as const;
 
@@ -209,46 +208,18 @@ export default function Household() {
     }
   };
 
-  const generateInvite = async () => {
-    if (!userId) return;
-    try {
-      setIsInviting(true);
-      // Generate a random 8-character code
-      const inviteCode = Math.random().toString(36).substring(2, 10).toUpperCase();
-      const { error } = await supabase.from("invite_codes" as any).insert({ 
-        user_id: userId,
-        code: inviteCode,
-        uses_count: 0,
-        max_uses: 10,
-        points_awarded: 10
-      });
-      if (error) throw error;
-      const communitySlug = hoaName ? hoaName.toLowerCase().replace(/\s+/g, '-') : null;
-      const link = communitySlug 
-        ? `${window.location.origin}/communities/${communitySlug}?invite=${inviteCode}&welcome=true`
-        : `${window.location.origin}/invite/${inviteCode}`;
-      await navigator.clipboard.writeText(link);
-      toast({ title: "Invite link copied", description: "Share it with your neighbor." });
-    } catch (e: any) {
-      console.error("[Household] invite error:", e);
-      toast({ title: "Could not create invite", description: e?.message ?? "Unknown error", variant: "destructive" });
-    } finally {
-      setIsInviting(false);
-    }
-  };
-
   return (
     <main className="min-h-screen bg-background">
         <SEO
           title="Your Home — Courtney's List"
-          description="All your household’s trusted vendors, costs, and ratings — organized in one place."
+          description="All your household's trusted vendors, costs, and ratings — organized in one place."
           canonical={canonical}
         />
 
       <section className="container py-10 space-y-6">
         <header className="space-y-2">
           <h1 className="text-3xl font-semibold tracking-tight">Your Home</h1>
-          <p className="text-muted-foreground">All your household’s trusted vendors, costs, and ratings — organized in one place.</p>
+          <p className="text-muted-foreground">All your household's trusted vendors, costs, and ratings — organized in one place.</p>
         </header>
 
         {approved === false && (
@@ -261,7 +232,6 @@ export default function Household() {
           <Card className="md:col-span-2">
             <CardHeader className="flex flex-row items-center justify-between gap-3">
               <CardTitle className="text-base">Household Overview</CardTitle>
-              
             </CardHeader>
             <CardContent className="space-y-2 text-sm text-muted-foreground">
               <div><span className="text-foreground font-medium">Address:</span> <span>{address || "—"}</span> <Link to="/profile" className="ml-2 text-xs underline text-muted-foreground hover:text-foreground">Edit in Profile</Link></div>
@@ -314,14 +284,7 @@ export default function Household() {
                     const stat = stats[v.id];
                     const yc = yourCosts[v.id];
                     const showAvg = approved === false
-                      ? (
-                        <div className="flex items-center gap-2">
-                          <span>Locked — pending HOA approval</span>
-                          <Button size="sm" variant="secondary" onClick={generateInvite}>
-                            Invite spouse
-                          </Button>
-                        </div>
-                      )
+                      ? "Locked — pending HOA approval"
                       : (stat && (stat.sample_size ?? 0) >= 3 ? formatCurrency(stat.avg_amount) : "—");
                     const last = v.updated_at || v.created_at || null;
                     const lastStr = last ? new Date(last).toLocaleDateString() : "—";
