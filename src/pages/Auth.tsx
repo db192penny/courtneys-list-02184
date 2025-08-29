@@ -26,6 +26,7 @@ const Auth = () => {
   const [showMagicLinkModal, setShowMagicLinkModal] = useState(false);
   const [detectedCommunity, setDetectedCommunity] = useState<string>("");
   const [justSignedUp, setJustSignedUp] = useState(false);
+  const [isProcessingMagicLink, setIsProcessingMagicLink] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
   const [params] = useSearchParams();
@@ -250,6 +251,7 @@ const Auth = () => {
       const hash = window.location.hash;
       
       if (hash && hash.includes('access_token=')) {
+        setIsProcessingMagicLink(true);
         console.log('[Auth] Magic link detected, processing...');
         
         // Wait for Supabase to be ready and retry if needed
@@ -283,6 +285,7 @@ const Auth = () => {
         }
         
         console.error('[Auth] Failed to process magic link after 10 attempts');
+        setIsProcessingMagicLink(false);
       }
     };
     
@@ -511,6 +514,14 @@ const Auth = () => {
   };
 
   const canonical = typeof window !== "undefined" ? window.location.href : undefined;
+
+  if (isProcessingMagicLink) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-background">
