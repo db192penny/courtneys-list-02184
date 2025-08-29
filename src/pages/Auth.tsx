@@ -466,13 +466,19 @@ const Auth = () => {
       console.log("[Auth] ⚠️ Email check failed, attempting signup anyway");
     }
 
+    // Get invite code synchronously to avoid timing issues
+    const urlInvite = params.get("invite")?.trim();
+    const storedInvite = localStorage.getItem("invite_code")?.trim();
+    const currentInviteCode = urlInvite || storedInvite || undefined;
+    console.log("[Auth] Invite code at submission:", currentInviteCode);
+
     // Store user data in metadata for the trigger to use
     const metaData = {
       name: name.trim(),
       address: address.trim(),
       street_name: extractStreetName(address.trim()),
       signup_source: communityName ? `community:${toSlug(communityName)}` : null,
-      pending_invite_code: inviteCode || null,
+      pending_invite_code: currentInviteCode || null,
     };
 
     console.log("[Auth] 📝 Creating auth user with metadata for trigger:", metaData);
@@ -569,19 +575,19 @@ const Auth = () => {
     // Handle invite code redemption if present
     console.log('[Auth] Invite code from URL:', params.get("invite"));
     console.log('[Auth] Invite code from localStorage:', localStorage.getItem("invite_code"));
-    console.log('[Auth] Final inviteCode value:', inviteCode);
-    console.log('[Auth] About to check if inviteCode exists:', !!inviteCode);
+    console.log('[Auth] Final currentInviteCode value:', currentInviteCode);
+    console.log('[Auth] About to check if currentInviteCode exists:', !!currentInviteCode);
     
-    if (inviteCode) {
-      console.log('[Auth] About to attempt redemption with code:', inviteCode);
+    if (currentInviteCode) {
+      console.log('[Auth] About to attempt redemption with code:', currentInviteCode);
       try {
         console.log("[Auth] 🎫 Calling redeem_invite_code RPC with:", { 
-          code: inviteCode, 
+          code: currentInviteCode, 
           userId: userId 
         });
         
         const { data: redemptionData, error: redeemErr } = await supabase.rpc("redeem_invite_code", {
-          _code: inviteCode,
+          _code: currentInviteCode,
           _invited_user_id: userId,
         });
         
