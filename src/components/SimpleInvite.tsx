@@ -33,12 +33,17 @@ export function SimpleInvite() {
       // Generate simple random code
       const code = Math.random().toString(36).substring(2, 10).toUpperCase();
 
-      // Insert directly using SQL since TypeScript doesn't know about our new table yet
-      const { data, error } = await supabase
-        .rpc('create_simple_invite', {
-          p_code: code,
-          p_inviter_id: user.id
-        });
+      // Use raw SQL to insert since TypeScript doesn't know about our table
+      const { error } = await supabase.rpc('sql' as any, {
+        query: `
+          INSERT INTO simple_invites (code, inviter_id)
+          VALUES ('${code}', '${user.id}')
+        `
+      }).catch(() => {
+        // If 'sql' RPC doesn't exist, try alternative approach
+        return supabase.from('simple_invites' as any)
+          .insert({ code, inviter_id: user.id });
+      });
 
       if (error) throw error;
 
