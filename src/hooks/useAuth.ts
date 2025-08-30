@@ -80,10 +80,10 @@ export function useAuth(): AuthState {
           // Now check for the session
           const { data: { session } } = await supabase.auth.getSession();
           
-          // Ensure minimum loader time for better UX (2 seconds total)
+          // Ensure minimum loader time for better UX (3 seconds total)
           const elapsed = Date.now() - startTime;
-          if (elapsed < 2000) {
-            await new Promise(resolve => setTimeout(resolve, 2000 - elapsed));
+          if (elapsed < 3000) {
+            await new Promise(resolve => setTimeout(resolve, 3000 - elapsed));
           }
           
           if (mountedRef.current) {
