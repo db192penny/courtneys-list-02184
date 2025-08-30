@@ -99,6 +99,19 @@ export function useActivityTimeout(isAuthenticated: boolean) {
       return;
     }
 
+    // Check if this is a magic link or welcome flow
+    const urlHasTokens = window.location.hash.includes('access_token');
+    const isWelcomeFlow = window.location.search.includes('welcome=true');
+    const isMagicLinkProcessing = urlHasTokens || isWelcomeFlow;
+
+    if (isMagicLinkProcessing) {
+      console.log('[ActivityTimeout] Detected magic link/welcome flow, skipping timeout setup');
+      // Set current time as last activity for magic link users
+      localStorage.setItem(STORAGE_KEY, Date.now().toString());
+      // Don't set up activity monitoring yet
+      return;
+    }
+
     console.log('[ActivityTimeout] Setting up activity monitoring');
 
     // Activity events to monitor
@@ -125,8 +138,22 @@ export function useActivityTimeout(isAuthenticated: boolean) {
       const timeSinceActivity = Date.now() - lastActivityTime;
       
       if (timeSinceActivity >= TIMEOUT_DURATION) {
-        // User has been inactive too long, logout immediately
-        handleLogout();
+        // Before logging out, check if this might be a returning user with a valid session
+        // Give them a grace period if they have a valid auth session
+        console.log('[ActivityTimeout] User appears inactive, checking for valid session...');
+        
+        supabase.auth.getSession().then(({ data: { session } }) => {
+          if (session) {
+            // User has a valid session, reset their activity timer instead of logging out
+            console.log('[ActivityTimeout] Valid session found, resetting activity timer');
+            localStorage.setItem(STORAGE_KEY, Date.now().toString());
+            resetActivityTimer();
+          } else {
+            // No valid session, proceed with logout
+            console.log('[ActivityTimeout] No valid session, logging out');
+            handleLogout();
+          }
+        });
         return;
       } else {
         // Set timer for remaining time
@@ -143,6 +170,7 @@ export function useActivityTimeout(isAuthenticated: boolean) {
       }
     } else {
       // No previous activity, start fresh timer
+      console.log('[ActivityTimeout] No previous activity found, starting fresh timer');
       resetActivityTimer();
     }
 
