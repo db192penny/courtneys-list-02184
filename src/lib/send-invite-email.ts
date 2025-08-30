@@ -1,4 +1,4 @@
-typescriptimport { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 
 export async function sendInviteNotification(inviterId: string) {
   try {

@@ -3,10 +3,10 @@ import { Loader2 } from "lucide-react";
 
 export function MagicLinkLoader() {
   const marketingMessages = [
+    "Finding you a reliable landscaper that doesn't ghost you",
     "Running background checks faster than your neighbor runs rumor checks",
     "Debugging your HOA problems, one contractor at a time",
     "Optimizing your sanity with reliable service providers",
-    "Finding you a reliable landscaper that doesn't ghost you",
     "Loading community insights..."
   ];
   
