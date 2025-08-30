@@ -16,6 +16,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescript
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Info, Crown, PartyPopper, ArrowLeft, Mail, AlertTriangle } from "lucide-react";
 import { handleSignupInvite } from '@/lib/handle-signup-invite';
+import { MagicLinkLoader } from "@/components/MagicLinkLoader";
 
 const Auth = () => {
   const [name, setName] = useState("");
@@ -27,7 +28,6 @@ const Auth = () => {
   const [showMagicLinkModal, setShowMagicLinkModal] = useState(false);
   const [detectedCommunity, setDetectedCommunity] = useState<string>("");
   const [justSignedUp, setJustSignedUp] = useState(false);
-  const [isProcessingMagicLink, setIsProcessingMagicLink] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
   const [params] = useSearchParams();
@@ -39,12 +39,6 @@ const Auth = () => {
     return urlCommunity;
   }, [params]);
 
-  useEffect(() => {
-    const hash = window.location.hash;
-    if (hash && hash.includes('access_token=')) {
-      setIsProcessingMagicLink(true);
-    }
-  }, []);
 
   const isVerifiedMagicLink = useMemo(() => {
     return params.get("verified") === "true";
@@ -169,51 +163,6 @@ const Auth = () => {
     return () => subscription.unsubscribe();
   }, [finalizeOnboarding, isVerifiedMagicLink, justSignedUp]);
 
-  useEffect(() => {
-    let mounted = true;
-    
-    const processHashFragment = async () => {
-      const hash = window.location.hash;
-      
-      if (hash && hash.includes('access_token=')) {
-        setIsProcessingMagicLink(true);
-        
-        let retries = 0;
-        while (retries < 10 && mounted) {
-          const hashParams = new URLSearchParams(hash.substring(1));
-          const accessToken = hashParams.get('access_token');
-          const refreshToken = hashParams.get('refresh_token');
-          
-          if (accessToken && refreshToken) {
-            try {
-              const { data, error } = await supabase.auth.setSession({
-                access_token: accessToken,
-                refresh_token: refreshToken
-              });
-              
-              if (data?.session && !error) {
-                window.history.replaceState(null, '', window.location.pathname);
-                await finalizeOnboarding(data.session.user.id, data.session.user.email);
-                return;
-              }
-            } catch (err) {
-              // Silent retry
-            }
-          }
-          
-          await new Promise(resolve => setTimeout(resolve, 500));
-          retries++;
-        }
-        
-        setIsProcessingMagicLink(false);
-      }
-    };
-    
-    // Increased timeout for better reliability
-    setTimeout(processHashFragment, 2000);
-    
-    return () => { mounted = false; };
-  }, [finalizeOnboarding, toast]);
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -375,12 +324,7 @@ const Auth = () => {
   const canonical = typeof window !== "undefined" ? window.location.href : undefined;
 
   return hasMagicLink ? (
-    <main className="min-h-screen bg-background flex items-center justify-center">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-        <p className="mt-4 text-muted-foreground">Signing you in...</p>
-      </div>
-    </main>
+    <MagicLinkLoader />
   ) : (
     <main className="min-h-screen bg-background">
       <SEO
