@@ -57,7 +57,7 @@ export function SimpleInvite() {
 
       // Simple URL - includes inviter ID for processing
       const baseUrl = window.location.origin;
-      const url = `${baseUrl}/community?invite=${code}&inviter=${user.id}`;
+      const url = `${baseUrl}/communities/boca-bridges?invite=${code}&inviter=${user.id}`;
       setInviteUrl(url);
 
       toast({ 
