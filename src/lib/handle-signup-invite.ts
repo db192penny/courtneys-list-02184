@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { sendInviteNotification } from './send-invite-email';
 
 export async function handleSignupInvite(userId: string) {
   try {
@@ -69,6 +70,9 @@ export async function handleSignupInvite(userId: string) {
       .eq('id', userId);
 
     console.log('Invite processed successfully!');
+    
+    // Send email notification to inviter
+    await sendInviteNotification(inviterId);
     
     // Clean up
     localStorage.removeItem('pending_invite_code');
