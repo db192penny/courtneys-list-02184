@@ -2,29 +2,20 @@ import { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 
 export function MagicLinkLoader() {
-  const messages = [
-    "Finding landscapers who won't ghost you...",
-    "Locating painters who actually show up...",
-    "Discovering plumbers who answer their phones...",
-    "Vetting vendors so you don't have to...",
-    "Connecting you with neighbors who've been there...",
-    "Loading trusted reviews from real Boca residents...",
-    "No fake reviews here, just your neighbors' experiences...",
-    "Because your neighbor's opinion matters more than Yelp..."
+  const marketingMessages = [
+    "Running background checks faster than your neighbor runs rumor checks",
+    "Debugging your HOA problems, one contractor at a time",
+    "Optimizing your sanity with reliable service providers",
+    "Finding you a reliable landscaper that doesn't ghost you",
+    "Loading community insights..."
   ];
   
-  const [currentMessage, setCurrentMessage] = useState(messages[0]);
-  const [messageIndex, setMessageIndex] = useState(0);
+  const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
   
   useEffect(() => {
-    // Change message every 300ms for a dynamic feel
     const interval = setInterval(() => {
-      setMessageIndex(prev => {
-        const nextIndex = (prev + 1) % messages.length;
-        setCurrentMessage(messages[nextIndex]);
-        return nextIndex;
-      });
-    }, 300);
+      setCurrentMessageIndex((prev) => (prev + 1) % marketingMessages.length);
+    }, 2500); // Change message every 2.5 seconds
     
     return () => clearInterval(interval);
   }, []);
@@ -42,7 +33,7 @@ export function MagicLinkLoader() {
         
         {/* Dynamic Message */}
         <p className="text-lg text-foreground font-medium animate-pulse max-w-md">
-          {currentMessage}
+          {marketingMessages[currentMessageIndex]}
         </p>
         
         {/* Subtle subtext */}
