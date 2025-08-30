@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { sendInviteNotification } from './send-invite-email';
 
 
 
@@ -31,6 +32,9 @@ export async function processInviteCode(userId: string, inviteCode: string, invi
         pending_invite_code: null // Clear the used code
       })
       .eq('id', inviterId);
+
+    // Send invite notification email
+    await sendInviteNotification(inviterId);
 
 
 
