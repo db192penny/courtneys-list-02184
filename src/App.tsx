@@ -108,8 +108,9 @@ function ConditionalHeader() {
 }
 
 function ActivityTimeoutManager() {
-  const { isAuthenticated } = useAuth();
-  useActivityTimeout(isAuthenticated);
+  const { isAuthenticated, isProcessingMagicLink } = useAuth();
+  // Only activate timeout when authenticated AND not processing magic link
+  useActivityTimeout(isAuthenticated && !isProcessingMagicLink);
   return null;
 }
 
