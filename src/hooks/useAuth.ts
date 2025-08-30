@@ -22,7 +22,7 @@ export function useAuth(): AuthState {
     return {
       user: null,
       session: null,
-      isAuthenticated: hasTokens,
+      isAuthenticated: false,
       isLoading: true,
       isProcessingMagicLink: hasTokens,
     };
@@ -30,6 +30,7 @@ export function useAuth(): AuthState {
   
   const mountedRef = useRef(true);
   const initializedRef = useRef(false);
+  const processingRef = useRef(false);
   
   useEffect(() => {
     mountedRef.current = true;
@@ -39,58 +40,40 @@ export function useAuth(): AuthState {
     
     const initAuth = async () => {
       try {
+        // Check if we have magic link tokens in the URL
         const hasTokens = 
           window.location.hash.includes('access_token') || 
           window.location.search.includes('access_token');
         
-        if (hasTokens) {
-          console.log('[useAuth] Processing magic link...');
+        if (hasTokens && !processingRef.current) {
+          processingRef.current = true;
+          console.log('[useAuth] Magic link detected, showing loader...');
           
-          // CRITICAL FIX: Extract and process tokens manually
+          // Keep the loader visible for minimum 3 seconds
           const startTime = Date.now();
           
-          // Give Supabase a moment to initialize
-          await new Promise(resolve => setTimeout(resolve, 500));
+          // Let Supabase handle the tokens automatically
+          // Just wait and check for the session
+          let session = null;
+          let attempts = 0;
+          const maxAttempts = 30; // 30 * 100ms = 3 seconds max
           
-          // Extract tokens from URL
-          console.log('[useAuth] Current URL hash:', window.location.hash);
-          const hashParams = new URLSearchParams(window.location.hash.substring(1));
-          const accessToken = hashParams.get('access_token');
-          const refreshToken = hashParams.get('refresh_token');
-          
-          console.log('[useAuth] Found tokens:', { 
-            hasAccess: !!accessToken, 
-            hasRefresh: !!refreshToken,
-            accessLength: accessToken?.length,
-            refreshLength: refreshToken?.length
-          });
-          
-          if (accessToken && refreshToken) {
-            console.log('[useAuth] Setting session with tokens...');
+          while (attempts < maxAttempts && !session) {
+            const { data } = await supabase.auth.getSession();
+            session = data.session;
             
-            // Manually set the session with the tokens
-            const { data, error } = await supabase.auth.setSession({
-              access_token: accessToken,
-              refresh_token: refreshToken
-            });
-            
-            if (error) {
-              console.error('[useAuth] Failed to set session:', error);
-              // Clear the URL to prevent retry
-              window.history.replaceState(null, '', window.location.pathname + window.location.search);
-            } else if (data?.session) {
-              console.log('[useAuth] Session set successfully');
-              // Clear the URL after successful processing
-              window.history.replaceState(null, '', window.location.pathname + window.location.search);
+            if (!session) {
+              await new Promise(resolve => setTimeout(resolve, 100));
+              attempts++;
+            } else {
+              console.log('[useAuth] Session established:', session.user?.email);
             }
           }
-          
-          // Now check for the session
-          const { data: { session } } = await supabase.auth.getSession();
           
           // Ensure minimum loader time for better UX (3 seconds total)
           const elapsed = Date.now() - startTime;
           if (elapsed < 3000) {
+            console.log(`[useAuth] Waiting ${3000 - elapsed}ms more for UX...`);
             await new Promise(resolve => setTimeout(resolve, 3000 - elapsed));
           }
           
@@ -103,6 +86,8 @@ export function useAuth(): AuthState {
               isProcessingMagicLink: false,
             });
           }
+          
+          processingRef.current = false;
           return;
         }
         
@@ -139,6 +124,13 @@ export function useAuth(): AuthState {
         if (!mountedRef.current) return;
         
         console.log('[useAuth] Auth event:', event, session?.user?.email);
+        
+        // Don't update state if we're processing a magic link
+        // Let the initAuth function handle it
+        if (processingRef.current) {
+          console.log('[useAuth] Ignoring auth event during magic link processing');
+          return;
+        }
         
         setAuthState({
           user: session?.user ?? null,
