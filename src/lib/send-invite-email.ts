@@ -4,23 +4,23 @@ export async function sendInviteNotification(inviterId: string) {
   console.log('[sendInviteNotification] Starting with inviterId:', inviterId);
   
   try {
-    // Get inviter's basic info only - no complex lookups
+    // Get inviter's basic info - cast to any to bypass TypeScript
     const { data: inviter, error: fetchError } = await supabase
       .from('users' as any)
       .select('email, name, points')
       .eq('id', inviterId)
-      .single();
+      .single() as any;
 
     console.log('[sendInviteNotification] Inviter data:', inviter);
     
-    if (fetchError || !inviter?.email) {
+    if (fetchError || !inviter || !inviter.email) {
       console.error('[sendInviteNotification] No inviter found or no email:', fetchError);
       return;
     }
 
     console.log('[sendInviteNotification] Sending email to:', inviter.email);
 
-    // Call the simple send-email function we created
+    // Call the simple send-email function
     const { data, error } = await supabase.functions.invoke('send-email', {
       body: {
         to: inviter.email,
