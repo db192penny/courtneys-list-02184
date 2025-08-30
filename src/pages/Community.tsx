@@ -38,6 +38,18 @@ export default function Community() {
     }
   }, [communityName]);
 
+  // Handle invite codes from URL
+  useEffect(() => {
+    const inviteCode = searchParams.get('invite');
+    const inviterId = searchParams.get('inviter');
+    
+    if (inviteCode && inviterId) {
+      // Store both for after signup
+      localStorage.setItem('pending_invite_code', inviteCode);
+      localStorage.setItem('pending_inviter_id', inviterId);
+    }
+  }, [searchParams]);
+
   const pageTitle = useMemo(() => (communityName === "Boca Bridges" ? "Boca Bridges Overview" : `${communityName} Overview`), [communityName]);
   const canonical = typeof window !== "undefined" ? window.location.href : undefined;
   
@@ -146,13 +158,17 @@ export default function Community() {
         {showSignUpPrompt && (
           <div className="flex flex-col gap-2 sm:gap-3">
             <Button 
+              className="bg-[#4A90E2] hover:bg-[#357ABD]"
               onClick={() => {
-                const url = `/auth?community=${encodeURIComponent(communityName)}`;
-                navigate(url);
+                const inviteCode = localStorage.getItem('pending_invite_code');
+                const inviterId = localStorage.getItem('pending_inviter_id');
+                
+                if (inviteCode && inviterId) {
+                  navigate(`/auth?community=${communityName}&invite=${inviteCode}&inviter=${inviterId}`);
+                } else {
+                  navigate(`/auth?community=${communityName}`);
+                }
               }}
-              size="sm"
-              variant="outline"
-              className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700 w-auto py-2 text-sm"
             >
               Request Access
             </Button>
