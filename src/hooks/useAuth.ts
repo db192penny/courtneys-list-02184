@@ -27,16 +27,16 @@ export function useAuth(): AuthState {
       isProcessingMagicLink: hasTokens,
     };
   });
-
+  
   const mountedRef = useRef(true);
   const initializedRef = useRef(false);
-
+  
   useEffect(() => {
     mountedRef.current = true;
     
     if (initializedRef.current) return;
     initializedRef.current = true;
-
+    
     const initAuth = async () => {
       try {
         const hasTokens = 
@@ -46,29 +46,44 @@ export function useAuth(): AuthState {
         if (hasTokens) {
           console.log('[useAuth] Processing magic link...');
           
-          // OPTIMIZED: Shorter delay but with minimum UX time
+          // CRITICAL FIX: Extract and process tokens manually
           const startTime = Date.now();
-          await new Promise(resolve => setTimeout(resolve, 200)); // Reduced to 200ms
           
-          // Check session repeatedly until ready (up to 3 seconds total)
-          let session = null;
-          let attempts = 0;
-          const maxAttempts = 15; // 15 * 200ms = 3 seconds max
+          // Give Supabase a moment to initialize
+          await new Promise(resolve => setTimeout(resolve, 500));
           
-          while (attempts < maxAttempts && !session) {
-            const { data } = await supabase.auth.getSession();
-            session = data.session;
+          // Extract tokens from URL
+          const hashParams = new URLSearchParams(window.location.hash.substring(1));
+          const accessToken = hashParams.get('access_token');
+          const refreshToken = hashParams.get('refresh_token');
+          
+          if (accessToken && refreshToken) {
+            console.log('[useAuth] Setting session with tokens...');
             
-            if (!session) {
-              await new Promise(resolve => setTimeout(resolve, 200));
-              attempts++;
+            // Manually set the session with the tokens
+            const { data, error } = await supabase.auth.setSession({
+              access_token: accessToken,
+              refresh_token: refreshToken
+            });
+            
+            if (error) {
+              console.error('[useAuth] Failed to set session:', error);
+              // Clear the URL to prevent retry
+              window.history.replaceState(null, '', window.location.pathname + window.location.search);
+            } else if (data?.session) {
+              console.log('[useAuth] Session set successfully');
+              // Clear the URL after successful processing
+              window.history.replaceState(null, '', window.location.pathname + window.location.search);
             }
           }
           
-          // Ensure minimum loader time for UX (400ms total minimum)
+          // Now check for the session
+          const { data: { session } } = await supabase.auth.getSession();
+          
+          // Ensure minimum loader time for better UX (2 seconds total)
           const elapsed = Date.now() - startTime;
-          if (elapsed < 400) {
-            await new Promise(resolve => setTimeout(resolve, 400 - elapsed));
+          if (elapsed < 2000) {
+            await new Promise(resolve => setTimeout(resolve, 2000 - elapsed));
           }
           
           if (mountedRef.current) {
@@ -80,7 +95,7 @@ export function useAuth(): AuthState {
               isProcessingMagicLink: false,
             });
           }
-          return; // Skip the regular session check
+          return;
         }
         
         // Regular auth check for non-magic-link scenarios
@@ -108,9 +123,9 @@ export function useAuth(): AuthState {
         }
       }
     };
-
+    
     initAuth();
-
+    
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         if (!mountedRef.current) return;
@@ -126,12 +141,12 @@ export function useAuth(): AuthState {
         });
       }
     );
-
+    
     return () => {
       mountedRef.current = false;
       subscription.unsubscribe();
     };
   }, []);
-
+  
   return authState;
 }
