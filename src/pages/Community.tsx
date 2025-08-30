@@ -1,7 +1,7 @@
 import { useMemo, useEffect } from "react";
-import { useParams, useNavigate, useSearchParams, Link } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { Plus, Eye } from "lucide-react";
+import { Plus } from "lucide-react";
 import SEO from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import VendorCard from "@/components/vendors/VendorCard";
@@ -130,12 +130,6 @@ export default function Community() {
             
             {/* Action Buttons */}
             <div className="flex gap-2">
-              <Button asChild variant="outline" size="sm" className="shrink-0">
-                <Link to="/mockup-preview">
-                  <Eye className="h-4 w-4 mr-2" />
-                  View Design Mockup
-                </Link>
-              </Button>
               <Button
                 onClick={() => navigate(`/submit?community=${encodeURIComponent(communityName)}`)}
                 variant="outline"
