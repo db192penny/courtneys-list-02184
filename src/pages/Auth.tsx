@@ -15,6 +15,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Info, Crown, PartyPopper, ArrowLeft, Mail, AlertTriangle } from "lucide-react";
+import { handleSignupInvite } from '@/lib/handle-signup-invite';
 
 const Auth = () => {
   const [name, setName] = useState("");
@@ -69,6 +70,11 @@ const Auth = () => {
 
   const finalizeOnboarding = useCallback(async (userId: string, userEmail: string | null) => {
     let destination = "/communities/boca-bridges?welcome=true";
+    
+    // Handle signup invite processing
+    if (userId) {
+      handleSignupInvite(userId);
+    }
     
     try {
       if (communityName) {
