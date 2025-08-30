@@ -1,15 +1,22 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Copy, Share2 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
-import { useAuth } from '@/hooks/use-auth';
+import { User } from '@supabase/supabase-js';
 
 export function SimpleInvite() {
   const [inviteUrl, setInviteUrl] = useState('');
   const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
   const { toast } = useToast();
-  const { user } = useAuth();
+
+  useEffect(() => {
+    // Get current user
+    supabase.auth.getUser().then(({ data }) => {
+      setUser(data.user);
+    });
+  }, []);
 
   const generateInvite = async () => {
     if (!user) {
@@ -26,15 +33,12 @@ export function SimpleInvite() {
       // Generate simple random code
       const code = Math.random().toString(36).substring(2, 10).toUpperCase();
 
-      // Insert into our simple table (NOT the complex invite_codes table)
+      // Insert directly using SQL since TypeScript doesn't know about our new table yet
       const { data, error } = await supabase
-        .from('simple_invites')
-        .insert({
-          code: code,
-          inviter_id: user.id
-        })
-        .select()
-        .single();
+        .rpc('create_simple_invite', {
+          p_code: code,
+          p_inviter_id: user.id
+        });
 
       if (error) throw error;
 
