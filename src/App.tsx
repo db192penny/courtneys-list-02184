@@ -32,6 +32,7 @@ import AdminPreviewLinks from "./pages/AdminPreviewLinks";
 import AdminPreviewUsers from "./pages/AdminPreviewUsers";
 import AdminUsers from "./pages/AdminUsers";
 import { AdminAnalytics } from "./pages/AdminAnalytics";
+import MockupPreview from "./pages/MockupPreview";
 import Header from "./components/Header";
 import { AdminProtectedRoute } from "./components/AdminProtectedRoute";
 import { AnalyticsTracker } from "./components/AnalyticsTracker";
@@ -149,6 +150,7 @@ const App = () => (
           <Route path="/communities/:slug" element={<Community />} />
           <Route path="/communities/request" element={<CommunityRequest />} />
           <Route path="/community-preview/:slug" element={<CommunityPreview />} />
+          <Route path="/mockup-preview" element={<MockupPreview />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
