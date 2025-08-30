@@ -37,3 +37,6 @@ verify_jwt = false
 
 [functions.populate-preview-data]
 verify_jwt = false
+
+[functions.send-email]
+verify_jwt = false
