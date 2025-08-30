@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { MagicLinkLoader } from "@/components/MagicLinkLoader";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Dashboard from "./pages/Dashboard";
@@ -112,47 +113,62 @@ function ActivityTimeoutManager() {
   return null;
 }
 
+function AppContent() {
+  const { isProcessingMagicLink } = useAuth();
+  
+  // Show the loader while processing magic link
+  if (isProcessingMagicLink) {
+    return <MagicLinkLoader />;
+  }
+
+  return (
+    <>
+      <AuthWatcher />
+      <AnalyticsTracker />
+      <ActivityTimeoutManager />
+      <ConditionalHeader />
+      <Routes>
+        <Route path="/" element={<Navigate to="/communities/boca-bridges?welcome=true" replace />} />
+        <Route path="/signin" element={<SignIn />} />
+        <Route path="/auth" element={<Auth />} />
+        <Route path="/auth/signup" element={<Auth />} />
+        <Route path="/invite/:token" element={<Invite />} />
+        <Route path="/dashboard" element={<ProtectedRoute><Navigate to="/communities/boca-bridges" replace /></ProtectedRoute>} />
+        <Route path="/submit" element={<ProtectedRoute><SubmitVendor /></ProtectedRoute>} />
+        
+        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+        <Route path="/household/preview" element={<HouseholdPreview />} />
+        <Route path="/household" element={<ProtectedRoute><Household /></ProtectedRoute>} />
+        <Route path="/admin" element={<Admin />} />
+        <Route path="/admin/badges" element={<AdminProtectedRoute><AdminBadges /></AdminProtectedRoute>} />
+        <Route path="/admin/vendors/seed" element={<AdminProtectedRoute><AdminVendorSeed /></AdminProtectedRoute>} />
+        <Route path="/admin/vendors/manage" element={<AdminProtectedRoute><AdminVendorManagement /></AdminProtectedRoute>} />
+        <Route path="/admin/vendors/edit" element={<AdminProtectedRoute><AdminEditVendor /></AdminProtectedRoute>} />
+        <Route path="/admin/costs" element={<AdminProtectedRoute><AdminCostManagement /></AdminProtectedRoute>} />
+        <Route path="/admin/preview-links" element={<AdminProtectedRoute><AdminPreviewLinks /></AdminProtectedRoute>} />
+        <Route path="/admin/preview-users" element={<AdminProtectedRoute><AdminPreviewUsers /></AdminProtectedRoute>} />
+        <Route path="/admin/users" element={<AdminProtectedRoute><AdminUsers /></AdminProtectedRoute>} />
+        <Route path="/admin/analytics" element={<AdminProtectedRoute><AdminAnalytics /></AdminProtectedRoute>} />
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/communities/:slug" element={<Community />} />
+        <Route path="/communities/request" element={<CommunityRequest />} />
+        <Route path="/community-preview/:slug" element={<CommunityPreview />} />
+        <Route path="/mockup-preview" element={<MockupPreview />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </>
+  );
+}
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
       <Sonner />
       <BrowserRouter>
-          <AuthWatcher />
-          <AnalyticsTracker />
-          <ActivityTimeoutManager />
-          <ConditionalHeader />
-          <Routes>
-          <Route path="/" element={<Navigate to="/communities/boca-bridges?welcome=true" replace />} />
-          <Route path="/signin" element={<SignIn />} />
-          <Route path="/auth" element={<Auth />} />
-          <Route path="/auth/signup" element={<Auth />} />
-          <Route path="/invite/:token" element={<Invite />} />
-          <Route path="/dashboard" element={<ProtectedRoute><Navigate to="/communities/boca-bridges" replace /></ProtectedRoute>} />
-          <Route path="/submit" element={<ProtectedRoute><SubmitVendor /></ProtectedRoute>} />
-          
-          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-          <Route path="/household/preview" element={<HouseholdPreview />} />
-          <Route path="/household" element={<ProtectedRoute><Household /></ProtectedRoute>} />
-          <Route path="/admin" element={<Admin />} />
-          <Route path="/admin/badges" element={<AdminProtectedRoute><AdminBadges /></AdminProtectedRoute>} />
-          <Route path="/admin/vendors/seed" element={<AdminProtectedRoute><AdminVendorSeed /></AdminProtectedRoute>} />
-          <Route path="/admin/vendors/manage" element={<AdminProtectedRoute><AdminVendorManagement /></AdminProtectedRoute>} />
-          <Route path="/admin/vendors/edit" element={<AdminProtectedRoute><AdminEditVendor /></AdminProtectedRoute>} />
-           <Route path="/admin/costs" element={<AdminProtectedRoute><AdminCostManagement /></AdminProtectedRoute>} />
-            <Route path="/admin/preview-links" element={<AdminProtectedRoute><AdminPreviewLinks /></AdminProtectedRoute>} />
-             <Route path="/admin/preview-users" element={<AdminProtectedRoute><AdminPreviewUsers /></AdminProtectedRoute>} />
-             <Route path="/admin/users" element={<AdminProtectedRoute><AdminUsers /></AdminProtectedRoute>} />
-             <Route path="/admin/analytics" element={<AdminProtectedRoute><AdminAnalytics /></AdminProtectedRoute>} />
-          <Route path="/privacy" element={<Privacy />} />
-          <Route path="/terms" element={<Terms />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/communities/:slug" element={<Community />} />
-          <Route path="/communities/request" element={<CommunityRequest />} />
-          <Route path="/community-preview/:slug" element={<CommunityPreview />} />
-          <Route path="/mockup-preview" element={<MockupPreview />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <AppContent />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
