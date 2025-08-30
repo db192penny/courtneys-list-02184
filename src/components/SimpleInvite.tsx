@@ -1,13 +1,115 @@
-import React from 'react';
+import { useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { Button } from '@/components/ui/button';
+import { Copy, Share2 } from 'lucide-react';
+import { useToast } from '@/components/ui/use-toast';
+import { useAuth } from '@/hooks/use-auth';
 
-interface SimpleInviteProps {
-  
-}
+export function SimpleInvite() {
+  const [inviteUrl, setInviteUrl] = useState('');
+  const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
+  const { user } = useAuth();
 
-export const SimpleInvite: React.FC<SimpleInviteProps> = () => {
+  const generateInvite = async () => {
+    if (!user) {
+      toast({ 
+        title: 'Please log in first', 
+        variant: 'destructive' 
+      });
+      return;
+    }
+
+    setLoading(true);
+    
+    try {
+      // Generate simple random code
+      const code = Math.random().toString(36).substring(2, 10).toUpperCase();
+
+      // Insert into our simple table (NOT the complex invite_codes table)
+      const { data, error } = await supabase
+        .from('simple_invites')
+        .insert({
+          code: code,
+          inviter_id: user.id
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Simple URL - just community page with code
+      const baseUrl = window.location.origin;
+      const url = `${baseUrl}/community?invite=${code}`;
+      setInviteUrl(url);
+
+      toast({ 
+        title: 'Invite link generated!',
+        description: 'Share this with your neighbors' 
+      });
+    } catch (error) {
+      console.error('Error:', error);
+      toast({ 
+        title: 'Failed to generate invite', 
+        variant: 'destructive' 
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const copyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(inviteUrl);
+      toast({ title: 'Copied to clipboard!' });
+    } catch (error) {
+      toast({ 
+        title: 'Failed to copy', 
+        variant: 'destructive' 
+      });
+    }
+  };
+
   return (
-    <div>
-      {/* Your invite component code here */}
+    <div className="p-6 border rounded-lg bg-white shadow-sm">
+      <h3 className="text-lg font-semibold mb-4">Invite Neighbors</h3>
+      
+      {!inviteUrl ? (
+        <Button 
+          onClick={generateInvite} 
+          disabled={loading}
+          className="w-full sm:w-auto"
+        >
+          <Share2 className="w-4 h-4 mr-2" />
+          {loading ? 'Generating...' : 'Generate Invite Link'}
+        </Button>
+      ) : (
+        <div className="space-y-3">
+          <div className="flex gap-2 items-center">
+            <input 
+              value={inviteUrl} 
+              readOnly 
+              className="flex-1 px-3 py-2 border rounded-md text-sm bg-gray-50"
+              onClick={(e) => e.currentTarget.select()}
+            />
+            <Button 
+              onClick={copyLink} 
+              size="sm"
+              variant="outline"
+            >
+              <Copy className="w-4 h-4" />
+            </Button>
+          </div>
+          <Button 
+            onClick={generateInvite} 
+            variant="outline" 
+            size="sm"
+            className="w-full sm:w-auto"
+          >
+            Generate New Link
+          </Button>
+        </div>
+      )}
     </div>
   );
-};
+}
