@@ -53,9 +53,17 @@ export function useAuth(): AuthState {
           await new Promise(resolve => setTimeout(resolve, 500));
           
           // Extract tokens from URL
+          console.log('[useAuth] Current URL hash:', window.location.hash);
           const hashParams = new URLSearchParams(window.location.hash.substring(1));
           const accessToken = hashParams.get('access_token');
           const refreshToken = hashParams.get('refresh_token');
+          
+          console.log('[useAuth] Found tokens:', { 
+            hasAccess: !!accessToken, 
+            hasRefresh: !!refreshToken,
+            accessLength: accessToken?.length,
+            refreshLength: refreshToken?.length
+          });
           
           if (accessToken && refreshToken) {
             console.log('[useAuth] Setting session with tokens...');
