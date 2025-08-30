@@ -50,6 +50,16 @@ export async function handleSignupInvite(userId: string) {
       })
       .eq('id', inviterId);
 
+    // Log the point transaction for history
+    await supabase
+      .from('user_point_history')
+      .insert({
+        user_id: inviterId,
+        points_earned: 10,
+        activity_type: 'successful_invite',
+        description: `Invited user successfully`
+      });
+
     // Update invited_by for new user
     await supabase
       .from('users')
