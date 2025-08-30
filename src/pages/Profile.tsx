@@ -17,6 +17,7 @@ import PointHistoryTable from "@/components/badges/PointHistoryTable";
 import ActivityGuide from "@/components/badges/ActivityGuide";
 import BadgeLevelChart from "@/components/badges/BadgeLevelChart";
 import AddressChangeRequestModal from "@/components/profile/AddressChangeRequestModal";
+import { SimpleInvite } from "@/components/SimpleInvite";
 
 
 const Profile = () => {
@@ -174,6 +175,7 @@ useEffect(() => {
         {/* Activity Insights Section */}
         <div className="mt-8 space-y-6">
           <ActivityGuide />
+          <SimpleInvite />
           <BadgeLevelChart currentPoints={points} />
         </div>
         
