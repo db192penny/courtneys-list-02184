@@ -50,7 +50,7 @@ export async function handleSignupInvite(userId: string) {
     // Get inviter info using database function (bypasses RLS)
     console.log('💰 [handleSignupInvite] Fetching inviter info via database function...');
     const { data: inviterData, error: inviterError } = await supabase
-      .rpc('get_inviter_info' as any, { p_inviter_id: inviterId });
+      .rpc('get_inviter_info' as any, { inviter_id: inviterId }); // Fixed: changed from p_inviter_id to inviter_id
 
     let inviterEmail: string | undefined;
     let inviterName: string | undefined;
