@@ -63,15 +63,17 @@ const Auth = () => {
   }, [email, address, params]);
 
   const finalizeOnboarding = useCallback(async (userId: string, userEmail: string | null) => {
+    console.log('🎯 [finalizeOnboarding] CALLED with userId:', userId, 'userEmail:', userEmail);
     let destination = "/communities/boca-bridges?welcome=true";
     
     // Handle signup invite processing
     if (userId) {
+      console.log('🎯 [finalizeOnboarding] About to call handleSignupInvite');
       try {
         await handleSignupInvite(userId);
-        console.log('[Auth] Invite processing completed');
+        console.log('🎯 [finalizeOnboarding] Invite processing completed');
       } catch (error) {
-        console.error('[Auth] Error processing invite:', error);
+        console.error('🎯 [finalizeOnboarding] Error processing invite:', error);
       }
     }
     
@@ -149,8 +151,12 @@ const Auth = () => {
   }, [navigate, toast, communityName]);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('🔄 [Auth Debug] Event:', event, 'User:', session?.user?.email);
+      console.log('🔄 [Auth Debug] Session exists:', !!session, 'isVerifiedMagicLink:', isVerifiedMagicLink);
+      
       if (session?.user) {
+        console.log('🔄 [Auth Debug] About to call finalizeOnboarding for user:', session.user.id);
         if (isVerifiedMagicLink || session?.user) {
           setTimeout(() => finalizeOnboarding(session.user!.id, session.user!.email ?? null), 0);
         }
@@ -158,7 +164,9 @@ const Auth = () => {
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('🔄 [Auth Debug] Initial session check:', !!session, 'User:', session?.user?.email);
       if (session?.user) {
+        console.log('🔄 [Auth Debug] Calling finalizeOnboarding from initial session check');
         if (isVerifiedMagicLink || session?.user) {
           finalizeOnboarding(session.user.id, session.user.email ?? null);
         }
