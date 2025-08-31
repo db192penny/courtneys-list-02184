@@ -21,7 +21,7 @@ export async function handleSignupInvite(userId: string) {
 
     console.log('✅ [handleSignupInvite] All invite data present, processing...');
 
-    // First, just check if invite exists and is valid
+    // Check invite validity
     console.log('🔍 [handleSignupInvite] Checking invite validity...');
     const { data: invite } = await supabase
       .from('simple_invites' as any)
@@ -47,20 +47,22 @@ export async function handleSignupInvite(userId: string) {
       })
       .eq('id', (invite as any).id);
 
-    // Now try a separate query for inviter info using raw SQL
-    console.log('💰 [handleSignupInvite] Fetching inviter info via SQL...');
-    const { data: inviterData, error: inviterError } = await supabase.rpc('get_inviter_info' as any, {
-      inviter_id: inviterId
-    });
+    // Get inviter info using database function (bypasses RLS)
+    console.log('💰 [handleSignupInvite] Fetching inviter info via database function...');
+    const { data: inviterData, error: inviterError } = await supabase
+      .rpc('get_inviter_info' as any, { p_inviter_id: inviterId });
 
-    let inviterEmail = inviterData?.email;
-    let inviterName = inviterData?.name;
-    let inviterPoints = inviterData?.points || 0;
+    let inviterEmail: string | undefined;
+    let inviterName: string | undefined;
+    let inviterPoints = 0;
 
-    if (inviterError) {
-      console.log('⚠️ [handleSignupInvite] Could not fetch inviter info, continuing without email');
+    if (!inviterError && inviterData && inviterData.length > 0) {
+      inviterEmail = inviterData[0].email;
+      inviterName = inviterData[0].name;
+      inviterPoints = inviterData[0].points || 0;
+      console.log('📧 [handleSignupInvite] Got inviter info via function:', { email: inviterEmail, name: inviterName });
     } else {
-      console.log('📧 [handleSignupInvite] Got inviter info:', { email: inviterEmail, name: inviterName });
+      console.log('⚠️ [handleSignupInvite] Could not fetch inviter info:', inviterError);
     }
 
     // Award 10 points to inviter
@@ -72,7 +74,7 @@ export async function handleSignupInvite(userId: string) {
       })
       .eq('id', inviterId);
 
-    // Log the point transaction for history
+    // Log the point transaction
     console.log('📝 [handleSignupInvite] Logging point transaction...');
     await supabase
       .from('user_point_history')
@@ -100,8 +102,7 @@ export async function handleSignupInvite(userId: string) {
       await sendInviteNotification(inviterId, inviterEmail, inviterName);
       console.log('✅📧 [handleSignupInvite] Email sent');
     } else {
-      console.log('⚠️📧 [handleSignupInvite] No email available - but check email_queue table!');
-      // The trigger you created will handle it via email_queue
+      console.log('⚠️📧 [handleSignupInvite] No email available - check email_queue table');
     }
     
     // Clean up
