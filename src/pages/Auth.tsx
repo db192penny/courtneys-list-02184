@@ -152,8 +152,18 @@ const Auth = () => {
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('🔄 [Auth Debug] Event:', event, 'User:', session?.user?.email);
+      console.log('🔄 [Auth State Change] Event:', event, 'Session:', session?.user?.email);
       console.log('🔄 [Auth Debug] Session exists:', !!session, 'isVerifiedMagicLink:', isVerifiedMagicLink);
+      
+      // Check localStorage invite data
+      console.log('📦 [Auth] Current localStorage:', {
+        invite_code: localStorage.getItem('pending_invite_code'),
+        inviter_id: localStorage.getItem('pending_inviter_id')
+      });
+      
+      if (event === 'SIGNED_IN') {
+        console.log('✅ [Auth] SIGNED_IN event detected');
+      }
       
       if (session?.user) {
         console.log('🔄 [Auth Debug] About to call finalizeOnboarding for user:', session.user.id);
