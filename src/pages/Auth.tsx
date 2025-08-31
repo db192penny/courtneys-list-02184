@@ -67,7 +67,12 @@ const Auth = () => {
     
     // Handle signup invite processing
     if (userId) {
-      handleSignupInvite(userId);
+      try {
+        await handleSignupInvite(userId);
+        console.log('[Auth] Invite processing completed');
+      } catch (error) {
+        console.error('[Auth] Error processing invite:', error);
+      }
     }
     
     try {
