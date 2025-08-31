@@ -47,11 +47,11 @@ export async function handleSignupInvite(userId: string) {
       })
       .eq('id', (invite as any).id);
 
-    // Get inviter's current points
-    console.log('💰 [handleSignupInvite] Fetching inviter current points...');
+    // Get inviter's current points, email, and name (all in one query to avoid RLS issues)
+    console.log('💰 [handleSignupInvite] Fetching inviter data...');
     const { data: inviter } = await supabase
       .from('users')
-      .select('points')
+      .select('points, email, name')
       .eq('id', inviterId)
       .single();
 
@@ -86,9 +86,10 @@ export async function handleSignupInvite(userId: string) {
 
     console.log('🎉 [handleSignupInvite] Invite processed successfully!');
     
-    // Send email notification to inviter
+    // Send email notification to inviter - pass email and name directly to avoid RLS issues
     console.log('🚨📧 [handleSignupInvite] ABOUT TO CALL sendInviteNotification with inviterId:', inviterId);
-    await sendInviteNotification(inviterId);
+    console.log('📧 [handleSignupInvite] Inviter email:', inviter?.email, 'name:', inviter?.name);
+    await sendInviteNotification(inviterId, inviter?.email, inviter?.name);
     console.log('✅📧 [handleSignupInvite] sendInviteNotification completed');
     
     // Clean up
