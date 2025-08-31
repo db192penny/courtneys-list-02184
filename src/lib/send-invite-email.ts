@@ -1,40 +1,40 @@
 import { supabase } from '@/integrations/supabase/client';
 
 export async function sendInviteNotification(inviterId: string) {
-  console.log('[sendInviteNotification] START with inviterId:', inviterId);
+  console.log('[sendInviteNotification] Starting with inviterId:', inviterId);
   
   try {
-    // Simplified - just get email, skip points
     const { data: inviter, error } = await supabase
       .from('users' as any)
-      .select('email, name')  // Removed 'points'
+      .select('email, name')
       .eq('id', inviterId)
       .single() as any;
 
-    console.log('[sendInviteNotification] Query result:', { inviter, error });
-
     if (!inviter?.email) {
-      console.error('[sendInviteNotification] No email found');
+      console.error('[sendInviteNotification] No inviter email found');
       return;
     }
 
-    console.log('[sendInviteNotification] Sending to:', inviter.email);
+    console.log('[sendInviteNotification] Calling send-invite-success-email for:', inviter.email);
 
-    const { data, error: emailError } = await supabase.functions.invoke('send-email', {
+    // Use the existing send-invite-success-email function
+    const { data, error: emailError } = await supabase.functions.invoke('send-invite-success-email', {
       body: {
-        to: inviter.email,
-        subject: 'Your invite was accepted! 🎉',
-        html: `<div style="max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif;">
-          <h2>Congratulations!</h2>
-          <p>Hi ${inviter.name || 'Neighbor'},</p>
-          <p>Someone just joined using your invite! You earned 10 points.</p>
-        </div>`,
-        text: 'Someone joined using your invite! You earned 10 points.'
+        inviterId: inviterId,
+        inviterName: inviter.name || 'Neighbor',
+        inviterEmail: inviter.email,
+        invitedName: 'New Member',
+        communityName: 'Boca Bridges',
+        communitySlug: 'boca-bridges'
       }
     });
-    console.log('[sendInviteNotification] Email result:', { data, emailError });
-    
+
+    if (emailError) {
+      console.error('[sendInviteNotification] Email error:', emailError);
+    } else {
+      console.log('[sendInviteNotification] Email sent successfully');
+    }
   } catch (error) {
-    console.error('[sendInviteNotification] Error:', error);
+    console.error('[sendInviteNotification] Unexpected error:', error);
   }
 }
