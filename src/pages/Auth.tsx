@@ -169,11 +169,9 @@ const Auth = () => {
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       console.log('🔄 [Auth Debug] Initial session check:', !!session, 'User:', session?.user?.email);
-      if (session?.user) {
-        console.log('🔄 [Auth Debug] Calling finalizeOnboarding from initial session check');
-        if (isVerifiedMagicLink || session?.user) {
-          finalizeOnboarding(session.user.id, session.user.email ?? null);
-        }
+      if (session?.user && isVerifiedMagicLink) {
+        console.log('🔄 [Auth Debug] Calling finalizeOnboarding from initial session check (verified magic link)');
+        finalizeOnboarding(session.user.id, session.user.email ?? null);
       }
     });
 
