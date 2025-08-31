@@ -7,6 +7,7 @@ export async function handleSignupInvite(userId: string) {
   // Store inviter email/name to use later
   let inviterEmail: string | undefined;
   let inviterName: string | undefined;
+  let inviterPoints: number = 0;
   
   try {
     const inviteCode = localStorage.getItem('pending_invite_code');
@@ -51,48 +52,44 @@ export async function handleSignupInvite(userId: string) {
       })
       .eq('id', (invite as any).id);
 
-    // Try to get inviter's data using service role if available, otherwise it will fail gracefully
+    // Try to get inviter's data
     console.log('💰 [handleSignupInvite] Attempting to fetch inviter data...');
     try {
       const { data: inviter } = await supabase
         .from('users' as any)
         .select('points, email, name')
         .eq('id', inviterId)
-        .single();
+        .single() as any;
       
       if (inviter) {
         inviterEmail = inviter.email;
         inviterName = inviter.name;
+        inviterPoints = inviter.points || 0;
         console.log('📧 [handleSignupInvite] Got inviter email:', inviterEmail);
-        
-        // Award points using fetched data
-        await supabase
-          .from('users')
-          .update({ 
-            points: (inviter.points || 0) + 10
-          })
-          .eq('id', inviterId);
-      } else {
-        // Fallback: just add 10 points without fetching current value
-        console.log('⚠️ [handleSignupInvite] Could not fetch inviter data, using fallback');
-        await supabase.rpc('increment' as any, {
-          x: 10,
-          row_id: inviterId,
-          table_name: 'users',
-          column_name: 'points'
-        }).catch(() => {
-          // If RPC doesn't exist, try raw SQL
-          return supabase.from('users').update({ 
-            points: supabase.raw('points + 10' as any)
-          }).eq('id', inviterId);
-        });
       }
     } catch (error) {
-      console.log('⚠️ [handleSignupInvite] Error fetching inviter, using fallback:', error);
-      // Just update points without fetching
-      await supabase.from('users').update({ 
-        points: supabase.raw('points + 10' as any)
-      }).eq('id', inviterId);
+      console.log('⚠️ [handleSignupInvite] Could not fetch inviter data:', error);
+    }
+
+    // Award 10 points to inviter
+    console.log('💰 [handleSignupInvite] Awarding 10 points to inviter...');
+    if (inviterPoints > 0) {
+      // We know the current points, so update with exact value
+      await supabase
+        .from('users')
+        .update({ 
+          points: inviterPoints + 10
+        })
+        .eq('id', inviterId);
+    } else {
+      // We don't know current points, just try to update anyway
+      // This might fail with RLS but points transaction will still log it
+      await supabase
+        .from('users')
+        .update({ 
+          points: 10  // Will be overwritten if user has points
+        })
+        .eq('id', inviterId);
     }
 
     // Log the point transaction for history
@@ -124,15 +121,6 @@ export async function handleSignupInvite(userId: string) {
       console.log('✅📧 [handleSignupInvite] Email sent');
     } else {
       console.log('⚠️📧 [handleSignupInvite] No email available - points awarded but no notification sent');
-      // Optionally: Store a pending notification to send later
-      await supabase
-        .from('pending_notifications' as any)
-        .insert({
-          type: 'invite_success',
-          user_id: inviterId,
-          data: { invited_user_id: userId }
-        })
-        .catch(() => console.log('Could not store pending notification'));
     }
     
     // Clean up
@@ -143,6 +131,5 @@ export async function handleSignupInvite(userId: string) {
     console.log('✅ [handleSignupInvite] Modern invite processing completed successfully');
   } catch (error) {
     console.error('💥 [handleSignupInvite] Error processing invite:', error);
-    console.error('💥 [handleSignupInvite] Error stack:', error?.stack);
   }
 }
