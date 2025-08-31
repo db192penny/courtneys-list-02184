@@ -14,7 +14,7 @@ import SubmitVendor from "./pages/SubmitVendor";
 import Admin from "./pages/Admin";
 import Auth from "./pages/Auth";
 import SignIn from "./pages/SignIn";
-import Invite from "./pages/Invite";
+
 import Profile from "./pages/Profile";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
@@ -133,7 +133,7 @@ function AppContent() {
         <Route path="/signin" element={<SignIn />} />
         <Route path="/auth" element={<Auth />} />
         <Route path="/auth/signup" element={<Auth />} />
-        <Route path="/invite/:token" element={<Invite />} />
+        
         <Route path="/dashboard" element={<ProtectedRoute><Navigate to="/communities/boca-bridges" replace /></ProtectedRoute>} />
         <Route path="/submit" element={<ProtectedRoute><SubmitVendor /></ProtectedRoute>} />
         

@@ -81,17 +81,14 @@ export default function ActivityGuide() {
         }
       }
       
-      // Generate a random 8-character code
+      // Generate a random 8-character code and use simple_invites table
       const inviteCode = Math.random().toString(36).substring(2, 10).toUpperCase();
       
       const { error } = await supabase
-        .from("invite_codes" as any)
+        .from("simple_invites")
         .insert({ 
-          user_id: userId,
           code: inviteCode,
-          uses_count: 0,
-          max_uses: 10,
-          points_awarded: 10
+          inviter_id: userId
         });
       
       if (error) throw error;
