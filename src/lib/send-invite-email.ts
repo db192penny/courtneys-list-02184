@@ -20,25 +20,19 @@ export async function sendInviteNotification(inviterId: string) {
 
     console.log('[sendInviteNotification] Sending to:', inviter.email);
 
-    // Test mode - just log for now
-    console.log('=================================');
-    console.log('EMAIL WOULD BE SENT:');
-    console.log('To:', inviter.email);
-    console.log('Name:', inviter.name || 'Neighbor');
-    console.log('=================================');
-    
-    // Later, uncomment this to actually send:
-    /*
     const { data, error: emailError } = await supabase.functions.invoke('send-email', {
       body: {
         to: inviter.email,
         subject: 'Your invite was accepted! 🎉',
-        html: '<p>Someone joined using your invite! You earned 10 points.</p>',
+        html: `<div style="max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif;">
+          <h2>Congratulations!</h2>
+          <p>Hi ${inviter.name || 'Neighbor'},</p>
+          <p>Someone just joined using your invite! You earned 10 points.</p>
+        </div>`,
         text: 'Someone joined using your invite! You earned 10 points.'
       }
     });
     console.log('[sendInviteNotification] Email result:', { data, emailError });
-    */
     
   } catch (error) {
     console.error('[sendInviteNotification] Error:', error);
