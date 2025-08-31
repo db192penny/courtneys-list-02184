@@ -21,20 +21,32 @@ export async function handleSignupInvite(userId: string) {
 
     console.log('✅ [handleSignupInvite] All invite data present, processing...');
 
-    // Check the simple_invites table
-    console.log('🔍 [handleSignupInvite] Checking simple_invites table...');
-    const { data: invite } = await supabase
+    // Check the simple_invites table AND get inviter data in same query to avoid RLS
+    console.log('🔍 [handleSignupInvite] Checking invite and fetching inviter data...');
+    const { data: inviteData } = await supabase
       .from('simple_invites' as any)
-      .select('*')
+      .select(`
+        *,
+        inviter:users!simple_invites_inviter_id_fkey(
+          id,
+          email,
+          name,
+          points
+        )
+      `)
       .eq('code', inviteCode)
       .eq('inviter_id', inviterId)
       .is('used_by', null)
       .single();
 
-    if (!invite) {
+    if (!inviteData) {
       console.log('❌ [handleSignupInvite] Invite not found or already used');
       return;
     }
+
+    // Extract inviter info from the joined query
+    const inviterInfo = (inviteData as any).inviter;
+    console.log('📧 [handleSignupInvite] Inviter info from join:', inviterInfo);
 
     console.log('✅ [handleSignupInvite] Valid invite found, marking as used...');
 
@@ -45,22 +57,14 @@ export async function handleSignupInvite(userId: string) {
         used_by: userId,
         used_at: new Date().toISOString()
       })
-      .eq('id', (invite as any).id);
-
-    // Get inviter's current points, email, and name (all in one query to avoid RLS issues)
-    console.log('💰 [handleSignupInvite] Fetching inviter data...');
-    const { data: inviter } = await supabase
-      .from('users')
-      .select('points, email, name')
-      .eq('id', inviterId)
-      .single();
+      .eq('id', (inviteData as any).id);
 
     // Award 10 points to inviter
     console.log('💰 [handleSignupInvite] Awarding 10 points to inviter...');
     await supabase
       .from('users')
       .update({ 
-        points: (inviter?.points || 0) + 10
+        points: (inviterInfo?.points || 0) + 10
       })
       .eq('id', inviterId);
 
@@ -86,11 +90,19 @@ export async function handleSignupInvite(userId: string) {
 
     console.log('🎉 [handleSignupInvite] Invite processed successfully!');
     
-    // Send email notification to inviter - pass email and name directly to avoid RLS issues
-    console.log('🚨📧 [handleSignupInvite] ABOUT TO CALL sendInviteNotification with inviterId:', inviterId);
-    console.log('📧 [handleSignupInvite] Inviter email:', inviter?.email, 'name:', inviter?.name);
-    await sendInviteNotification(inviterId, inviter?.email, inviter?.name);
-    console.log('✅📧 [handleSignupInvite] sendInviteNotification completed');
+    // Send email notification to inviter - use data from join query
+    console.log('🚨📧 [handleSignupInvite] ABOUT TO CALL sendInviteNotification');
+    console.log('📧 [handleSignupInvite] Using inviter data:', {
+      email: inviterInfo?.email,
+      name: inviterInfo?.name
+    });
+    
+    if (inviterInfo?.email) {
+      await sendInviteNotification(inviterId, inviterInfo.email, inviterInfo.name);
+      console.log('✅📧 [handleSignupInvite] sendInviteNotification completed');
+    } else {
+      console.error('❌📧 [handleSignupInvite] No inviter email available - cannot send notification');
+    }
     
     // Clean up
     console.log('🧹 [handleSignupInvite] Cleaning up localStorage...');
