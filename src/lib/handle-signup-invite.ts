@@ -4,11 +4,6 @@ import { sendInviteNotification } from './send-invite-email';
 export async function handleSignupInvite(userId: string) {
   console.log('🔗 [handleSignupInvite] Starting modern invite processing for user:', userId);
   
-  // Store inviter email/name to use later
-  let inviterEmail: string | undefined;
-  let inviterName: string | undefined;
-  let inviterPoints: number = 0;
-  
   try {
     const inviteCode = localStorage.getItem('pending_invite_code');
     const inviterId = localStorage.getItem('pending_inviter_id');
@@ -26,8 +21,8 @@ export async function handleSignupInvite(userId: string) {
 
     console.log('✅ [handleSignupInvite] All invite data present, processing...');
 
-    // Check the simple_invites table
-    console.log('🔍 [handleSignupInvite] Checking simple_invites table...');
+    // First, just check if invite exists and is valid
+    console.log('🔍 [handleSignupInvite] Checking invite validity...');
     const { data: invite } = await supabase
       .from('simple_invites' as any)
       .select('*')
@@ -52,45 +47,30 @@ export async function handleSignupInvite(userId: string) {
       })
       .eq('id', (invite as any).id);
 
-    // Try to get inviter's data
-    console.log('💰 [handleSignupInvite] Attempting to fetch inviter data...');
-    try {
-      const { data: inviter } = await supabase
-        .from('users' as any)
-        .select('points, email, name')
-        .eq('id', inviterId)
-        .single() as any;
-      
-      if (inviter) {
-        inviterEmail = inviter.email;
-        inviterName = inviter.name;
-        inviterPoints = inviter.points || 0;
-        console.log('📧 [handleSignupInvite] Got inviter email:', inviterEmail);
-      }
-    } catch (error) {
-      console.log('⚠️ [handleSignupInvite] Could not fetch inviter data:', error);
+    // Now try a separate query for inviter info using raw SQL
+    console.log('💰 [handleSignupInvite] Fetching inviter info via SQL...');
+    const { data: inviterData, error: inviterError } = await supabase.rpc('get_inviter_info' as any, {
+      inviter_id: inviterId
+    });
+
+    let inviterEmail = inviterData?.email;
+    let inviterName = inviterData?.name;
+    let inviterPoints = inviterData?.points || 0;
+
+    if (inviterError) {
+      console.log('⚠️ [handleSignupInvite] Could not fetch inviter info, continuing without email');
+    } else {
+      console.log('📧 [handleSignupInvite] Got inviter info:', { email: inviterEmail, name: inviterName });
     }
 
     // Award 10 points to inviter
     console.log('💰 [handleSignupInvite] Awarding 10 points to inviter...');
-    if (inviterPoints > 0) {
-      // We know the current points, so update with exact value
-      await supabase
-        .from('users')
-        .update({ 
-          points: inviterPoints + 10
-        })
-        .eq('id', inviterId);
-    } else {
-      // We don't know current points, just try to update anyway
-      // This might fail with RLS but points transaction will still log it
-      await supabase
-        .from('users')
-        .update({ 
-          points: 10  // Will be overwritten if user has points
-        })
-        .eq('id', inviterId);
-    }
+    await supabase
+      .from('users')
+      .update({ 
+        points: inviterPoints + 10
+      })
+      .eq('id', inviterId);
 
     // Log the point transaction for history
     console.log('📝 [handleSignupInvite] Logging point transaction...');
@@ -120,7 +100,8 @@ export async function handleSignupInvite(userId: string) {
       await sendInviteNotification(inviterId, inviterEmail, inviterName);
       console.log('✅📧 [handleSignupInvite] Email sent');
     } else {
-      console.log('⚠️📧 [handleSignupInvite] No email available - points awarded but no notification sent');
+      console.log('⚠️📧 [handleSignupInvite] No email available - but check email_queue table!');
+      // The trigger you created will handle it via email_queue
     }
     
     // Clean up
