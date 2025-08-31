@@ -151,9 +151,8 @@ const Auth = () => {
   }, [navigate, toast, communityName]);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log('🔄 [Auth State Change] Event:', event, 'Session:', session?.user?.email);
-      console.log('🔄 [Auth Debug] Session exists:', !!session, 'isVerifiedMagicLink:', isVerifiedMagicLink);
       
       // Check localStorage invite data
       console.log('📦 [Auth] Current localStorage:', {
@@ -161,15 +160,10 @@ const Auth = () => {
         inviter_id: localStorage.getItem('pending_inviter_id')
       });
       
-      if (event === 'SIGNED_IN') {
-        console.log('✅ [Auth] SIGNED_IN event detected');
-      }
-      
-      if (session?.user) {
-        console.log('🔄 [Auth Debug] About to call finalizeOnboarding for user:', session.user.id);
-        if (isVerifiedMagicLink || session?.user) {
-          setTimeout(() => finalizeOnboarding(session.user!.id, session.user!.email ?? null), 0);
-        }
+      if (event === 'SIGNED_IN' && session?.user?.id) {
+        console.log('✅ [Auth] SIGNED_IN event detected - calling finalizeOnboarding');
+        // This is what was missing - call finalizeOnboarding after signup
+        await finalizeOnboarding(session.user.id, session.user.email);
       }
     });
 
