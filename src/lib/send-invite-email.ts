@@ -4,19 +4,22 @@ export async function sendInviteNotification(inviterId: string) {
   console.log('[sendInviteNotification] Starting with inviterId:', inviterId);
   
   try {
+    // Fixed query - removed 'as any' that was causing 406 errors
     const { data: inviter, error } = await supabase
-      .from('users' as any)
+      .from('users')
       .select('email, name')
       .eq('id', inviterId)
-      .single() as any;
-
-    if (!inviter?.email) {
-      console.error('[sendInviteNotification] No inviter email found');
+      .single();
+    
+    console.log('[sendInviteNotification] Query result:', { inviter, error });
+    
+    if (error || !inviter?.email) {
+      console.error('[sendInviteNotification] No inviter found or no email:', error);
       return;
     }
-
+    
     console.log('[sendInviteNotification] Calling send-invite-success-email for:', inviter.email);
-
+    
     // Use the existing send-invite-success-email function
     const { data, error: emailError } = await supabase.functions.invoke('send-invite-success-email', {
       body: {
@@ -28,7 +31,7 @@ export async function sendInviteNotification(inviterId: string) {
         communitySlug: 'boca-bridges'
       }
     });
-
+    
     if (emailError) {
       console.error('[sendInviteNotification] Email error:', emailError);
     } else {
