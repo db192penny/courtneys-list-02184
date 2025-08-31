@@ -127,7 +127,14 @@ const AdminUsers = () => {
     try {
       if (action === "delete") {
         const confirmed = confirm("This will permanently delete the user and all their data. Continue?");
-        if (!confirmed) return;
+        if (!confirmed) {
+          setLoadingAction(prev => {
+            const next = { ...prev };
+            delete next[userId];
+            return next;
+          });
+          return;
+        }
 
         const { error } = await supabase.rpc("admin_soft_delete_user", {
           _user_id: userId,
@@ -138,7 +145,14 @@ const AdminUsers = () => {
         toast({ title: "User deleted", description: "User and their data have been completely removed." });
       } else if (action === "cleanup") {
         const confirmed = confirm("This will permanently remove this orphaned user from the system. Continue?");
-        if (!confirmed) return;
+        if (!confirmed) {
+          setLoadingAction(prev => {
+            const next = { ...prev };
+            delete next[userId];
+            return next;
+          });
+          return;
+        }
 
         const { error } = await supabase.rpc("admin_cleanup_orphaned_user", {
           _user_id: userId
