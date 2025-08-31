@@ -1,53 +1,46 @@
 import { supabase } from '@/integrations/supabase/client';
 
 export async function sendInviteNotification(inviterId: string) {
-  console.log('🚨🚨🚨 [EMAIL] sendInviteNotification ACTUALLY CALLED with:', inviterId);
-  console.log('[sendInviteNotification] Starting with inviterId:', inviterId);
+  console.log('[sendInviteNotification] START with inviterId:', inviterId);
   
   try {
-    // Get inviter's basic info - cast to any to bypass TypeScript
-    const { data: inviter, error: fetchError } = await supabase
+    // Simplified - just get email, skip points
+    const { data: inviter, error } = await supabase
       .from('users' as any)
-      .select('email, name, points')
+      .select('email, name')  // Removed 'points'
       .eq('id', inviterId)
       .single() as any;
 
-    console.log('[sendInviteNotification] Inviter data:', inviter);
-    
-    if (fetchError || !inviter || !inviter.email) {
-      console.error('[sendInviteNotification] No inviter found or no email:', fetchError);
+    console.log('[sendInviteNotification] Query result:', { inviter, error });
+
+    if (!inviter?.email) {
+      console.error('[sendInviteNotification] No email found');
       return;
     }
 
-    console.log('[sendInviteNotification] Sending email to:', inviter.email);
+    console.log('[sendInviteNotification] Sending to:', inviter.email);
 
-    // Call the simple send-email function
-    const { data, error } = await supabase.functions.invoke('send-email', {
+    // Test mode - just log for now
+    console.log('=================================');
+    console.log('EMAIL WOULD BE SENT:');
+    console.log('To:', inviter.email);
+    console.log('Name:', inviter.name || 'Neighbor');
+    console.log('=================================');
+    
+    // Later, uncomment this to actually send:
+    /*
+    const { data, error: emailError } = await supabase.functions.invoke('send-email', {
       body: {
         to: inviter.email,
         subject: 'Your invite was accepted! 🎉',
-        html: `
-          <div style="max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif;">
-            <h2>Congratulations!</h2>
-            <p>Hi ${inviter.name || 'Neighbor'},</p>
-            <p>Someone just joined Courtney's List using your invite link!</p>
-            <p>You've earned <strong>10 points</strong> for helping grow our community.</p>
-            <p>Your total points: <strong>${inviter.points || 0}</strong></p>
-            <br>
-            <p>Keep inviting neighbors!</p>
-            <p>Best regards,<br>The Courtney's List Team</p>
-          </div>
-        `,
-        text: `Hi ${inviter.name || 'Neighbor'}, someone joined using your invite! You earned 10 points. Total points: ${inviter.points || 0}.`
+        html: '<p>Someone joined using your invite! You earned 10 points.</p>',
+        text: 'Someone joined using your invite! You earned 10 points.'
       }
     });
-
-    if (error) {
-      console.error('[sendInviteNotification] Email error:', error);
-    } else {
-      console.log('[sendInviteNotification] Email sent successfully');
-    }
+    console.log('[sendInviteNotification] Email result:', { data, emailError });
+    */
+    
   } catch (error) {
-    console.error('[sendInviteNotification] Unexpected error:', error);
+    console.error('[sendInviteNotification] Error:', error);
   }
 }
