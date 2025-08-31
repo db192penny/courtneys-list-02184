@@ -87,8 +87,9 @@ export async function handleSignupInvite(userId: string) {
     console.log('🎉 [handleSignupInvite] Invite processed successfully!');
     
     // Send email notification to inviter
-    console.log('📧 [handleSignupInvite] Calling sendInviteNotification...');
+    console.log('🚨📧 [handleSignupInvite] ABOUT TO CALL sendInviteNotification with inviterId:', inviterId);
     await sendInviteNotification(inviterId);
+    console.log('✅📧 [handleSignupInvite] sendInviteNotification completed');
     
     // Clean up
     console.log('🧹 [handleSignupInvite] Cleaning up localStorage...');

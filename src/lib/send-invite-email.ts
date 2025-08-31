@@ -1,6 +1,7 @@
 import { supabase } from '@/integrations/supabase/client';
 
 export async function sendInviteNotification(inviterId: string) {
+  console.log('🚨🚨🚨 [EMAIL] sendInviteNotification ACTUALLY CALLED with:', inviterId);
   console.log('[sendInviteNotification] Starting with inviterId:', inviterId);
   
   try {
