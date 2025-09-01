@@ -9,6 +9,7 @@ import { RatingStars } from "@/components/ui/rating-stars";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { SectionHeader } from "@/components/ui/section-header";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { 
   Star, 
   Filter, 
@@ -70,6 +71,10 @@ const getSorts = (communityName: string) => [
   { key: "hoa_rating", label: `${communityName} Rating` },
   { key: "google_rating", label: "Google Rating" },
 ] as const;
+
+// Popular categories to show as tabs
+const POPULAR_CATEGORIES = ["Pool", "Landscaping", "HVAC", "Plumbing", "House Cleaning", "Pest Control"] as const;
+const OTHER_CATEGORIES = CATEGORIES.filter(cat => !POPULAR_CATEGORIES.includes(cat as any));
 
 export default function CommunityVendorTable({
   communityName,
@@ -137,68 +142,153 @@ export default function CommunityVendorTable({
 
   return (
     <TooltipProvider>
-    <div className="space-y-4">
-      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:gap-6">
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground flex items-center gap-2 justify-between">
-              <span className="flex items-center gap-2">
-                <Filter className="h-4 w-4" />
-                Filter by Category
-              </span>
-              <button
-                onClick={() => refetch()}
-                disabled={isFetching}
-                className="text-sm text-primary hover:text-primary/80 underline-offset-4 hover:underline sm:hidden"
-              >
-                {isFetching ? "Loading..." : "Refresh"}
-              </button>
-            </label>
-            <div className="w-full sm:w-52 relative">
-              <Select value={category} onValueChange={setCategory}>
-                <SelectTrigger className="bg-background border-2 border-primary hover:border-primary/80 focus:border-primary transition-colors shadow-sm">
-                  <SelectValue placeholder="All Categories" />
-                </SelectTrigger>
-                <SelectContent className="bg-background border-2">
-                  <SelectItem value="all">All Categories</SelectItem>
-                  {CATEGORIES.map((c) => (
-                    <SelectItem key={c} value={c}>{c}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+    <div className="space-y-6">
+      {/* Enhanced Filter Bar for Desktop */}
+      {!isMobile ? (
+        <div className="space-y-4">
+          {/* Category Tabs */}
+          <div className="border-b border-border">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold text-foreground">Service Providers</h2>
+              <div className="flex items-center gap-3">
+                {/* Sort Dropdown */}
+                <div className="flex items-center gap-2">
+                  <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground">Sort by:</span>
+                  <Select value={sortBy} onValueChange={(v) => setSortBy(v as any)}>
+                    <SelectTrigger className="w-40 h-8 text-sm">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {SORTS.map((s) => (
+                        <SelectItem key={s.key} value={s.key}>{s.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                {/* Refresh Button */}
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => refetch()} 
+                  disabled={isFetching}
+                  className="text-xs"
+                >
+                  {isFetching ? "Loading..." : "Refresh"}
+                </Button>
+              </div>
             </div>
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground flex items-center gap-2">
-              <ArrowUpDown className="h-4 w-4" />
-              Sort by
-            </label>
-            <div className="w-full sm:w-56">
-              <Select value={sortBy} onValueChange={(v) => setSortBy(v as any)}>
-                <SelectTrigger className="bg-background border-2 border-muted hover:border-primary/20 focus:border-primary transition-colors">
-                  <SelectValue placeholder="Neighbors Using" />
-                </SelectTrigger>
-                <SelectContent className="bg-background border-2">
-                  {SORTS.map((s) => (
-                    <SelectItem key={s.key} value={s.key}>{s.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            
+            {/* Tab Navigation */}
+            <Tabs value={category} onValueChange={setCategory} className="w-full">
+              <TabsList className="grid w-full grid-cols-8 h-auto p-1 bg-muted/30">
+                <TabsTrigger 
+                  value="all" 
+                  className="flex items-center gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm text-xs px-3 py-2"
+                >
+                  <Building2 className="h-4 w-4" />
+                  All
+                </TabsTrigger>
+                {POPULAR_CATEGORIES.map((cat) => {
+                  const CategoryIcon = getCategoryIcon(cat);
+                  return (
+                    <TabsTrigger 
+                      key={cat}
+                      value={cat}
+                      className="flex items-center gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm text-xs px-3 py-2"
+                    >
+                      <CategoryIcon className="h-4 w-4" />
+                      <span className="hidden sm:inline">{cat}</span>
+                    </TabsTrigger>
+                  );
+                })}
+                {/* More dropdown for other categories */}
+                <div className="flex items-center">
+                  <Select value={OTHER_CATEGORIES.includes(category as any) ? category : "more"} onValueChange={setCategory}>
+                    <SelectTrigger className="w-full h-8 border-0 bg-transparent hover:bg-muted focus:ring-0 text-xs">
+                      <SelectValue placeholder="More..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {OTHER_CATEGORIES.map((cat) => (
+                        <SelectItem key={cat} value={cat}>
+                          <div className="flex items-center gap-2">
+                            {React.createElement(getCategoryIcon(cat), { className: "h-4 w-4" })}
+                            {cat}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </TabsList>
+            </Tabs>
           </div>
         </div>
-        <div className="hidden sm:flex items-end">
-          <Button 
-            variant="secondary" 
-            onClick={() => refetch()} 
-            disabled={isFetching}
-            className="w-full sm:w-auto flex items-center gap-2"
-          >
-            <Filter className="h-4 w-4" />
-            {isFetching ? "Loading..." : "Refresh"}
-          </Button>
+      ) : (
+        /* Mobile Filter Controls */
+        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:gap-6">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground flex items-center gap-2 justify-between">
+                <span className="flex items-center gap-2">
+                  <Filter className="h-4 w-4" />
+                  Filter by Category
+                </span>
+                <button
+                  onClick={() => refetch()}
+                  disabled={isFetching}
+                  className="text-sm text-primary hover:text-primary/80 underline-offset-4 hover:underline sm:hidden"
+                >
+                  {isFetching ? "Loading..." : "Refresh"}
+                </button>
+              </label>
+              <div className="w-full sm:w-52 relative">
+                <Select value={category} onValueChange={setCategory}>
+                  <SelectTrigger className="bg-background border-2 border-primary hover:border-primary/80 focus:border-primary transition-colors shadow-sm">
+                    <SelectValue placeholder="All Categories" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-background border-2">
+                    <SelectItem value="all">All Categories</SelectItem>
+                    {CATEGORIES.map((c) => (
+                      <SelectItem key={c} value={c}>{c}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground flex items-center gap-2">
+                <ArrowUpDown className="h-4 w-4" />
+                Sort by
+              </label>
+              <div className="w-full sm:w-56">
+                <Select value={sortBy} onValueChange={(v) => setSortBy(v as any)}>
+                  <SelectTrigger className="bg-background border-2 border-muted hover:border-primary/20 focus:border-primary transition-colors">
+                    <SelectValue placeholder="Neighbors Using" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-background border-2">
+                    {SORTS.map((s) => (
+                      <SelectItem key={s.key} value={s.key}>{s.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+          <div className="hidden sm:flex items-end">
+            <Button 
+              variant="secondary" 
+              onClick={() => refetch()} 
+              disabled={isFetching}
+              className="w-full sm:w-auto flex items-center gap-2"
+            >
+              <Filter className="h-4 w-4" />
+              {isFetching ? "Loading..." : "Refresh"}
+            </Button>
+          </div>
         </div>
-      </div>
+      )}
 
       {isMobile ? (
         <div className="space-y-3">
@@ -242,23 +332,7 @@ export default function CommunityVendorTable({
           ))}
         </div>
       ) : (
-        <div className="space-y-6">
-          {/* Section Header */}
-          {category !== "all" && (
-            <SectionHeader 
-              icon={getCategoryIcon(category as any)} 
-              title={`${category} Providers`}
-              className="mb-3"
-            />
-          )}
-          {category === "all" && (
-            <SectionHeader 
-              icon={Building2} 
-              title="All Providers"
-              className="mb-3"
-            />
-          )}
-          
+        <div className="space-y-4">
           <div className="overflow-x-auto">
             <Table>
             <TableHeader>
