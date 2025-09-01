@@ -211,10 +211,10 @@ export default function CommunityVendorTable({
                 >
                   <div className="flex items-center w-full">
                     <Select 
-                      value={OTHER_CATEGORIES.includes(category as any) ? category : ""} 
+                      value={OTHER_CATEGORIES.includes(category as any) ? category : undefined} 
                       onValueChange={setCategory}
                     >
-                      <SelectTrigger className="w-full h-full border-0 bg-transparent hover:bg-muted focus:ring-0 text-sm flex items-center gap-2 data-[state=open]:bg-muted">
+                      <SelectTrigger className="w-full h-full border-0 bg-transparent focus:ring-0 text-sm flex items-center gap-2 [&[data-state=open]]:bg-transparent hover:bg-transparent data-[state=active]:hover:bg-primary data-[state=active]:hover:text-primary-foreground">
                         {OTHER_CATEGORIES.includes(category as any) ? (
                           <>
                             {React.createElement(getCategoryIcon(category as any), { className: "h-4 w-4" })}
@@ -230,7 +230,7 @@ export default function CommunityVendorTable({
                       </SelectTrigger>
                       <SelectContent className="z-50 bg-background border shadow-md">
                         {OTHER_CATEGORIES.map((cat) => (
-                          <SelectItem key={cat} value={cat} className="hover:bg-muted">
+                          <SelectItem key={cat} value={cat} className="hover:bg-muted cursor-pointer">
                             <div className="flex items-center gap-2">
                               {React.createElement(getCategoryIcon(cat), { className: "h-4 w-4" })}
                               {cat}
