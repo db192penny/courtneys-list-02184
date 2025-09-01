@@ -186,54 +186,60 @@ export default function CommunityVendorTable({
                 <TabsTrigger 
                   value="all" 
                   className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium text-sm px-3 py-2 transition-all"
+                  onClick={() => setCategory("all")}
                 >
-                  <Building2 className="h-4 w-4" />
-                  All Categories
-                </TabsTrigger>
-                {POPULAR_CATEGORIES.map((cat) => {
-                  const CategoryIcon = getCategoryIcon(cat);
-                  return (
-                    <TabsTrigger 
-                      key={cat}
-                      value={cat}
-                      className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium text-sm px-3 py-2 transition-all"
-                    >
-                      <CategoryIcon className="h-4 w-4" />
-                      <span className="hidden sm:inline">{cat}</span>
-                    </TabsTrigger>
-                  );
-                })}
-                {/* More Categories Tab with Dropdown */}
-                <TabsTrigger 
-                  value="more" 
-                  className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium text-sm px-3 py-2 transition-all"
-                  onClick={() => {
-                    if (!OTHER_CATEGORIES.includes(category as any)) {
-                      setCategory(OTHER_CATEGORIES[0]);
-                    }
-                  }}
-                >
-                  <Settings className="h-4 w-4" />
-                  <span className="hidden sm:inline">More Categories</span>
-                  <Select 
-                    value={OTHER_CATEGORIES.includes(category as any) ? category : OTHER_CATEGORIES[0]} 
-                    onValueChange={setCategory}
-                  >
-                    <SelectTrigger className="w-4 h-4 border-0 bg-transparent focus:ring-0 p-0 ml-auto">
-                      <ChevronDown className="h-3 w-3" />
-                    </SelectTrigger>
-                    <SelectContent className="z-50 bg-background border shadow-md">
-                      {OTHER_CATEGORIES.map((cat) => (
-                        <SelectItem key={cat} value={cat} className="hover:bg-muted cursor-pointer">
-                          <div className="flex items-center gap-2">
-                            {React.createElement(getCategoryIcon(cat), { className: "h-4 w-4" })}
-                            {cat}
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </TabsTrigger>
+                   <Building2 className="h-4 w-4" />
+                   All Categories
+                 </TabsTrigger>
+                 {POPULAR_CATEGORIES.map((cat) => {
+                   const CategoryIcon = getCategoryIcon(cat);
+                   return (
+                     <TabsTrigger 
+                       key={cat}
+                       value={cat}
+                       className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium text-sm px-3 py-2 transition-all"
+                       onClick={() => setCategory(cat)}
+                     >
+                       <CategoryIcon className="h-4 w-4" />
+                       <span className="hidden sm:inline">{cat}</span>
+                     </TabsTrigger>
+                   );
+                 })}
+                 {/* More Categories Tab with Dropdown */}
+                 <TabsTrigger 
+                   value="more" 
+                   className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium text-sm px-3 py-2 transition-all"
+                 >
+                   {OTHER_CATEGORIES.includes(category as any) ? (
+                     <>
+                       {React.createElement(getCategoryIcon(category as any), { className: "h-4 w-4" })}
+                       <span className="hidden sm:inline">{category}</span>
+                     </>
+                   ) : (
+                     <>
+                       <Settings className="h-4 w-4" />
+                       <span className="hidden sm:inline">More Categories</span>
+                     </>
+                   )}
+                   <Select 
+                     value={OTHER_CATEGORIES.includes(category as any) ? category : OTHER_CATEGORIES[0]} 
+                     onValueChange={setCategory}
+                   >
+                     <SelectTrigger className="w-4 h-4 border-0 bg-transparent focus:ring-0 p-0 ml-auto">
+                       <ChevronDown className="h-3 w-3" />
+                     </SelectTrigger>
+                     <SelectContent className="z-50 bg-background border shadow-md">
+                       {OTHER_CATEGORIES.map((cat) => (
+                         <SelectItem key={cat} value={cat} className="hover:bg-muted cursor-pointer">
+                           <div className="flex items-center gap-2">
+                             {React.createElement(getCategoryIcon(cat), { className: "h-4 w-4" })}
+                             {cat}
+                           </div>
+                         </SelectItem>
+                       ))}
+                     </SelectContent>
+                   </Select>
+                 </TabsTrigger>
               </TabsList>
             </Tabs>
           </div>
