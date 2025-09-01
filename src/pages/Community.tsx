@@ -142,6 +142,24 @@ export default function Community() {
             
             {/* Action Buttons */}
             <div className="flex gap-2">
+              {showSignUpPrompt && (
+                <Button
+                  onClick={() => {
+                    const inviteCode = localStorage.getItem('pending_invite_code');
+                    const inviterId = localStorage.getItem('pending_inviter_id');
+                    
+                    if (inviteCode && inviterId) {
+                      navigate(`/auth?community=${communityName}&invite=${inviteCode}&inviter=${inviterId}`);
+                    } else {
+                      navigate(`/auth?community=${communityName}`);
+                    }
+                  }}
+                  size="sm"
+                  className="shrink-0 bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700"
+                >
+                  Request Access
+                </Button>
+              )}
               <Button
                 onClick={() => navigate(`/submit?community=${encodeURIComponent(communityName)}`)}
                 variant="outline"
@@ -157,21 +175,6 @@ export default function Community() {
 
         {showSignUpPrompt && (
           <div className="flex flex-col gap-2 sm:gap-3">
-            <Button 
-              className="bg-[#4A90E2] hover:bg-[#357ABD]"
-              onClick={() => {
-                const inviteCode = localStorage.getItem('pending_invite_code');
-                const inviterId = localStorage.getItem('pending_inviter_id');
-                
-                if (inviteCode && inviterId) {
-                  navigate(`/auth?community=${communityName}&invite=${inviteCode}&inviter=${inviterId}`);
-                } else {
-                  navigate(`/auth?community=${communityName}`);
-                }
-              }}
-            >
-              Request Access
-            </Button>
             <p className="text-sm text-muted-foreground">
               Rate vendors, share costs, and read detailed neighbor reviews—verified neighbors only.
             </p>
