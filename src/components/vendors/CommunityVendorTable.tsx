@@ -156,7 +156,7 @@ export default function CommunityVendorTable({
                   <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
                   <span className="text-sm text-muted-foreground">Sort by:</span>
                   <Select value={sortBy} onValueChange={(v) => setSortBy(v as any)}>
-                    <SelectTrigger className="w-40 h-8 text-sm">
+                    <SelectTrigger className="w-40 h-8 text-sm border-2 border-primary bg-primary/5 hover:bg-primary/10 focus:border-primary transition-colors">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -166,17 +166,6 @@ export default function CommunityVendorTable({
                     </SelectContent>
                   </Select>
                 </div>
-                
-                {/* Refresh Button */}
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => refetch()} 
-                  disabled={isFetching}
-                  className="text-xs"
-                >
-                  {isFetching ? "Loading..." : "Refresh"}
-                </Button>
               </div>
             </div>
             
@@ -257,13 +246,6 @@ export default function CommunityVendorTable({
                   <Filter className="h-4 w-4" />
                   Filter by Category
                 </span>
-                <button
-                  onClick={() => refetch()}
-                  disabled={isFetching}
-                  className="text-sm text-primary hover:text-primary/80 underline-offset-4 hover:underline sm:hidden"
-                >
-                  {isFetching ? "Loading..." : "Refresh"}
-                </button>
               </label>
               <div className="w-full sm:w-52 relative">
                 <Select value={category} onValueChange={setCategory}>
@@ -286,7 +268,7 @@ export default function CommunityVendorTable({
               </label>
               <div className="w-full sm:w-56">
                 <Select value={sortBy} onValueChange={(v) => setSortBy(v as any)}>
-                  <SelectTrigger className="bg-background border-2 border-muted hover:border-primary/20 focus:border-primary transition-colors">
+                  <SelectTrigger className="bg-background border-2 border-primary bg-primary/5 hover:bg-primary/10 focus:border-primary transition-colors">
                     <SelectValue placeholder="Neighbors Using" />
                   </SelectTrigger>
                   <SelectContent className="bg-background border-2">
@@ -297,17 +279,6 @@ export default function CommunityVendorTable({
                 </Select>
               </div>
             </div>
-          </div>
-          <div className="hidden sm:flex items-end">
-            <Button 
-              variant="secondary" 
-              onClick={() => refetch()} 
-              disabled={isFetching}
-              className="w-full sm:w-auto flex items-center gap-2"
-            >
-              <Filter className="h-4 w-4" />
-              {isFetching ? "Loading..." : "Refresh"}
-            </Button>
           </div>
         </div>
       )}
