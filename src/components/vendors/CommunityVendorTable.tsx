@@ -205,41 +205,44 @@ export default function CommunityVendorTable({
                      </TabsTrigger>
                    );
                  })}
-                 {/* More Categories Tab with Dropdown */}
-                 <TabsTrigger 
-                   value="more" 
-                   className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium text-sm px-3 py-2 transition-all"
-                 >
-                   {OTHER_CATEGORIES.includes(category as any) ? (
-                     <>
-                       {React.createElement(getCategoryIcon(category as any), { className: "h-4 w-4" })}
-                       <span className="hidden sm:inline">{category}</span>
-                     </>
-                   ) : (
-                     <>
-                       <Settings className="h-4 w-4" />
-                       <span className="hidden sm:inline">More Categories</span>
-                     </>
-                   )}
-                   <Select 
-                     value={OTHER_CATEGORIES.includes(category as any) ? category : OTHER_CATEGORIES[0]} 
-                     onValueChange={setCategory}
-                   >
-                     <SelectTrigger className="w-4 h-4 border-0 bg-transparent focus:ring-0 p-0 ml-auto">
-                       <ChevronDown className="h-3 w-3" />
-                     </SelectTrigger>
-                     <SelectContent className="z-50 bg-background border shadow-md">
-                       {OTHER_CATEGORIES.map((cat) => (
-                         <SelectItem key={cat} value={cat} className="hover:bg-muted cursor-pointer">
-                           <div className="flex items-center gap-2">
-                             {React.createElement(getCategoryIcon(cat), { className: "h-4 w-4" })}
-                             {cat}
-                           </div>
-                         </SelectItem>
-                       ))}
-                     </SelectContent>
-                   </Select>
-                 </TabsTrigger>
+                  {/* More Categories Tab with Dropdown */}
+                  <TabsTrigger 
+                    value="more" 
+                    className="relative flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium text-sm px-3 py-2 transition-all"
+                  >
+                    <div className="flex items-center gap-2 pointer-events-none">
+                      {OTHER_CATEGORIES.includes(category as any) ? (
+                        <>
+                          {React.createElement(getCategoryIcon(category as any), { className: "h-4 w-4" })}
+                          <span className="hidden sm:inline">{category}</span>
+                        </>
+                      ) : (
+                        <>
+                          <Settings className="h-4 w-4" />
+                          <span className="hidden sm:inline">More Categories</span>
+                        </>
+                      )}
+                      <ChevronDown className="h-4 w-4" />
+                    </div>
+                    <Select 
+                      value={OTHER_CATEGORIES.includes(category as any) ? category : OTHER_CATEGORIES[0]} 
+                      onValueChange={setCategory}
+                    >
+                      <SelectTrigger className="absolute inset-0 h-full w-full border-0 bg-transparent focus:ring-0 p-0 opacity-0">
+                        <span className="sr-only">Select category</span>
+                      </SelectTrigger>
+                      <SelectContent className="z-50 bg-background border shadow-md">
+                        {OTHER_CATEGORIES.map((cat) => (
+                          <SelectItem key={cat} value={cat} className="hover:bg-muted cursor-pointer">
+                            <div className="flex items-center gap-2">
+                              {React.createElement(getCategoryIcon(cat), { className: "h-4 w-4" })}
+                              {cat}
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </TabsTrigger>
               </TabsList>
             </Tabs>
           </div>
