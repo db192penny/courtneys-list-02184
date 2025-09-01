@@ -117,13 +117,13 @@ export function AdminAnalytics() {
       }
 
       // Fetch user activity data with session info and activity counts
-      // David Birnbaum's user ID and email to exclude
+      // David Birnbaum's user ID and emails to exclude
       const adminUserId = '50c337c8-2c85-4aae-84da-26ee79f4c43b';
-      const adminEmail = 'db@fivefourventures.com';
+      const adminEmails = ['db@fivefourventures.com', 'davebirnbaum@gmail.com'];
       const twoDaysAgo = new Date();
       twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
 
-      console.log(`Fetching user sessions from ${twoDaysAgo.toISOString()}, excluding admin user ${adminEmail}`);
+      console.log(`Fetching user sessions from ${twoDaysAgo.toISOString()}, excluding admin emails: ${adminEmails.join(', ')}`);
 
       const { data: sessionData, error: sessionError } = await supabase
         .from('user_sessions')
@@ -167,7 +167,7 @@ export function AdminAnalytics() {
                 .single();
               
               // Skip admin user sessions if they somehow got through
-              if (user?.email === adminEmail) {
+              if (user?.email && adminEmails.includes(user.email)) {
                 console.log(`Skipping admin user session: ${user.email}`);
                 return null;
               }
