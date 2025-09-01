@@ -206,19 +206,31 @@ export default function CommunityVendorTable({
                 {/* More Categories Tab with Dropdown */}
                 <TabsTrigger 
                   value={OTHER_CATEGORIES.includes(category as any) ? category : "more"} 
-                  className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium text-sm px-3 py-2 transition-all relative"
+                  className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium text-sm px-3 py-2 transition-all"
                   asChild
                 >
-                  <div className="flex items-center">
-                    <Select value={OTHER_CATEGORIES.includes(category as any) ? category : "more"} onValueChange={setCategory}>
-                      <SelectTrigger className="w-full h-full border-0 bg-transparent hover:bg-muted focus:ring-0 text-sm flex items-center gap-2">
-                        <Settings className="h-4 w-4" />
-                        <span>More Categories</span>
-                        <ChevronDown className="h-4 w-4" />
+                  <div className="flex items-center w-full">
+                    <Select 
+                      value={OTHER_CATEGORIES.includes(category as any) ? category : ""} 
+                      onValueChange={setCategory}
+                    >
+                      <SelectTrigger className="w-full h-full border-0 bg-transparent hover:bg-muted focus:ring-0 text-sm flex items-center gap-2 data-[state=open]:bg-muted">
+                        {OTHER_CATEGORIES.includes(category as any) ? (
+                          <>
+                            {React.createElement(getCategoryIcon(category as any), { className: "h-4 w-4" })}
+                            <span className="hidden sm:inline">{category}</span>
+                          </>
+                        ) : (
+                          <>
+                            <Settings className="h-4 w-4" />
+                            <span className="hidden sm:inline">More Categories</span>
+                          </>
+                        )}
+                        <ChevronDown className="h-4 w-4 ml-auto" />
                       </SelectTrigger>
-                      <SelectContent className="z-50">
+                      <SelectContent className="z-50 bg-background border shadow-md">
                         {OTHER_CATEGORIES.map((cat) => (
-                          <SelectItem key={cat} value={cat}>
+                          <SelectItem key={cat} value={cat} className="hover:bg-muted">
                             <div className="flex items-center gap-2">
                               {React.createElement(getCategoryIcon(cat), { className: "h-4 w-4" })}
                               {cat}
