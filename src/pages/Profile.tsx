@@ -174,8 +174,8 @@ useEffect(() => {
         
         {/* Activity Insights Section */}
         <div className="mt-8 space-y-6">
-          <ActivityGuide />
           <SimpleInvite />
+          <ActivityGuide />
           <BadgeLevelChart currentPoints={points} />
         </div>
         
