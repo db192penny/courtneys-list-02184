@@ -72,8 +72,8 @@ const getSorts = (communityName: string) => [
   { key: "google_rating", label: "Google Rating" },
 ] as const;
 
-// Popular categories to show as tabs
-const POPULAR_CATEGORIES = ["Pool", "Landscaping", "HVAC", "Plumbing", "House Cleaning", "Pest Control"] as const;
+// Popular categories to show as tabs (exactly 4 for 6-tab layout)
+const POPULAR_CATEGORIES = ["Pool", "Landscaping", "HVAC", "Plumbing"] as const;
 const OTHER_CATEGORIES = CATEGORIES.filter(cat => !POPULAR_CATEGORIES.includes(cat as any));
 
 export default function CommunityVendorTable({
@@ -182,13 +182,13 @@ export default function CommunityVendorTable({
             
             {/* Tab Navigation */}
             <Tabs value={category} onValueChange={setCategory} className="w-full">
-              <TabsList className="grid w-full grid-cols-8 h-auto p-1 bg-muted/30">
+              <TabsList className="grid w-full grid-cols-6 h-auto p-1 bg-muted/30">
                 <TabsTrigger 
                   value="all" 
-                  className="flex items-center gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm text-xs px-3 py-2"
+                  className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium text-sm px-3 py-2 transition-all"
                 >
                   <Building2 className="h-4 w-4" />
-                  All
+                  All Categories
                 </TabsTrigger>
                 {POPULAR_CATEGORIES.map((cat) => {
                   const CategoryIcon = getCategoryIcon(cat);
@@ -196,31 +196,39 @@ export default function CommunityVendorTable({
                     <TabsTrigger 
                       key={cat}
                       value={cat}
-                      className="flex items-center gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm text-xs px-3 py-2"
+                      className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium text-sm px-3 py-2 transition-all"
                     >
                       <CategoryIcon className="h-4 w-4" />
                       <span className="hidden sm:inline">{cat}</span>
                     </TabsTrigger>
                   );
                 })}
-                {/* More dropdown for other categories */}
-                <div className="flex items-center">
-                  <Select value={OTHER_CATEGORIES.includes(category as any) ? category : "more"} onValueChange={setCategory}>
-                    <SelectTrigger className="w-full h-8 border-0 bg-transparent hover:bg-muted focus:ring-0 text-xs">
-                      <SelectValue placeholder="More..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {OTHER_CATEGORIES.map((cat) => (
-                        <SelectItem key={cat} value={cat}>
-                          <div className="flex items-center gap-2">
-                            {React.createElement(getCategoryIcon(cat), { className: "h-4 w-4" })}
-                            {cat}
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                {/* More Categories Tab with Dropdown */}
+                <TabsTrigger 
+                  value={OTHER_CATEGORIES.includes(category as any) ? category : "more"} 
+                  className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium text-sm px-3 py-2 transition-all relative"
+                  asChild
+                >
+                  <div className="flex items-center">
+                    <Select value={OTHER_CATEGORIES.includes(category as any) ? category : "more"} onValueChange={setCategory}>
+                      <SelectTrigger className="w-full h-full border-0 bg-transparent hover:bg-muted focus:ring-0 text-sm flex items-center gap-2">
+                        <Settings className="h-4 w-4" />
+                        <span>More Categories</span>
+                        <ChevronDown className="h-4 w-4" />
+                      </SelectTrigger>
+                      <SelectContent className="z-50">
+                        {OTHER_CATEGORIES.map((cat) => (
+                          <SelectItem key={cat} value={cat}>
+                            <div className="flex items-center gap-2">
+                              {React.createElement(getCategoryIcon(cat), { className: "h-4 w-4" })}
+                              {cat}
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </TabsTrigger>
               </TabsList>
             </Tabs>
           </div>
