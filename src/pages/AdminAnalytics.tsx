@@ -119,7 +119,7 @@ export function AdminAnalytics() {
       // Fetch user activity data with session info and activity counts
       // David Birnbaum's user ID and email to exclude
       const adminUserId = '50c337c8-2c85-4aae-84da-26ee79f4c43b';
-      const adminEmail = 'dgb@davidbirnbaum.com';
+      const adminEmail = 'db@fivefourventures.com';
       const twoDaysAgo = new Date();
       twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
 
