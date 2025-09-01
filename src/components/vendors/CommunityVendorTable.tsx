@@ -181,7 +181,7 @@ export default function CommunityVendorTable({
             </div>
             
             {/* Tab Navigation */}
-            <Tabs value={category} onValueChange={setCategory} className="w-full">
+            <Tabs value={POPULAR_CATEGORIES.includes(category as any) || category === "all" ? category : "more"} className="w-full">
               <TabsList className="grid w-full grid-cols-6 h-auto p-1 bg-muted/30">
                 <TabsTrigger 
                   value="all" 
@@ -205,17 +205,22 @@ export default function CommunityVendorTable({
                 })}
                 {/* More Categories Tab with Dropdown */}
                 <TabsTrigger 
-                  value={OTHER_CATEGORIES.includes(category as any) ? category : "more"} 
+                  value="more" 
                   className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium text-sm px-3 py-2 transition-all"
                   asChild
                 >
                   <div className="flex items-center w-full">
                     <Select 
-                      value={OTHER_CATEGORIES.includes(category as any) ? category : undefined} 
+                      value={category} 
                       onValueChange={setCategory}
                     >
                       <SelectTrigger className="w-full h-full border-0 bg-transparent focus:ring-0 text-sm flex items-center gap-2 [&[data-state=open]]:bg-transparent hover:bg-transparent data-[state=active]:hover:bg-primary data-[state=active]:hover:text-primary-foreground">
                         {OTHER_CATEGORIES.includes(category as any) ? (
+                          <>
+                            {React.createElement(getCategoryIcon(category as any), { className: "h-4 w-4" })}
+                            <span className="hidden sm:inline">{category}</span>
+                          </>
+                        ) : POPULAR_CATEGORIES.includes(category as any) ? (
                           <>
                             {React.createElement(getCategoryIcon(category as any), { className: "h-4 w-4" })}
                             <span className="hidden sm:inline">{category}</span>
