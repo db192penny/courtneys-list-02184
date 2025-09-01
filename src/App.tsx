@@ -116,10 +116,25 @@ function ActivityTimeoutManager() {
 
 function AppContent() {
   const { isProcessingMagicLink } = useAuth();
+  const location = useLocation();
+  
+  // Extract community name from URL path
+  const getCommunityName = () => {
+    const path = location.pathname;
+    const communityMatch = path.match(/^\/communities\/([^/?]+)/);
+    if (communityMatch) {
+      const slug = communityMatch[1];
+      // Convert slug to display name (e.g., "boca-bridges" -> "Boca Bridges")
+      return slug.split('-').map(word => 
+        word.charAt(0).toUpperCase() + word.slice(1)
+      ).join(' ');
+    }
+    return undefined;
+  };
   
   // Show the loader while processing magic link
   if (isProcessingMagicLink) {
-    return <MagicLinkLoader />;
+    return <MagicLinkLoader communityName={getCommunityName()} />;
   }
 
   return (

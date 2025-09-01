@@ -1,7 +1,11 @@
 import { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 
-export function MagicLinkLoader() {
+interface MagicLinkLoaderProps {
+  communityName?: string;
+}
+
+export function MagicLinkLoader({ communityName }: MagicLinkLoaderProps = {}) {
   const marketingMessages = [
     "Finding you a reliable landscaper that doesn't ghost you",
     "Running background checks faster than your neighbor runs rumor checks",
@@ -25,7 +29,7 @@ export function MagicLinkLoader() {
       <div className="text-center space-y-6 p-8">
         {/* Logo or Brand Name */}
         <h1 className="text-3xl font-bold text-primary mb-8">
-          Courtney's List
+          {communityName ? `Hi ${communityName}!` : "Courtney's List"}
         </h1>
         
         {/* Spinner */}
