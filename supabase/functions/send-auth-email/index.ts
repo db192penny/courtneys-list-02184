@@ -1,11 +1,19 @@
-// Force redeployment to pick up RESEND_API_KEY - updated 2025-09-02
+// Force redeployment with better error handling - updated 2025-09-02 16:30
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.54.0";
 import { Resend } from "npm:resend@2.0.0";
+
+// Debug environment variables
+console.log('🔧 Environment check on startup:');
+console.log('- SUPABASE_URL:', !!Deno.env.get("SUPABASE_URL"));
+console.log('- SUPABASE_SERVICE_ROLE_KEY:', !!Deno.env.get("SUPABASE_SERVICE_ROLE_KEY"));
+console.log('- RESEND_API_KEY:', !!Deno.env.get("RESEND_API_KEY"));
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 
 if (!RESEND_API_KEY) {
-  console.error("RESEND_API_KEY not configured");
+  console.error("❌ CRITICAL: RESEND_API_KEY not found in environment!");
+} else {
+  console.log("✅ RESEND_API_KEY found, length:", RESEND_API_KEY.length);
 }
 
 const resend = RESEND_API_KEY ? new Resend(RESEND_API_KEY) : null;
