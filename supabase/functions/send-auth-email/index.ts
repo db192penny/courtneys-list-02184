@@ -1,5 +1,14 @@
+// Force redeployment to pick up RESEND_API_KEY - updated 2025-09-02
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.54.0";
 import { Resend } from "npm:resend@2.0.0";
+
+const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+
+if (!RESEND_API_KEY) {
+  console.error("RESEND_API_KEY not configured");
+}
+
+const resend = RESEND_API_KEY ? new Resend(RESEND_API_KEY) : null;
 
 // Helper function to format community names for display
 function formatCommunityName(name: string): string {
@@ -238,16 +247,18 @@ Deno.serve(async (req) => {
 
     console.log('📤 Sending email via Resend...')
     
+    // Check RESEND_API_KEY early
+    if (!RESEND_API_KEY) {
+      console.error("RESEND_API_KEY not configured");
+      return new Response(
+        JSON.stringify({ error: "RESEND_API_KEY not configured" }),
+        { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+    
     // Send email using Resend
     try {
-      const resendApiKey = Deno.env.get('RESEND_API_KEY');
-      if (!resendApiKey) {
-        throw new Error('RESEND_API_KEY not configured');
-      }
-
-      const resend = new Resend(resendApiKey);
-      
-      const { data, error } = await resend.emails.send({
+      const { data, error } = await resend!.emails.send({
         from: "Courtney's List <courtney@courtneys-list.com>",
         to: webhookData.user.email,
         subject: `${formatCommunityName(communityName) || 'Your Neighborhood'} Access is Ready - Unlock it Now`,
