@@ -138,7 +138,7 @@ const handler = async (req: Request): Promise<Response> => {
         }
 
         const magicLinkUrl = authData.properties?.action_link || '';
-        const viewProvidersButton = `<a href="${magicLinkUrl}" style="background-color: #4f46e5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold; margin: 10px 0; text-align: center;">${isApologyEmail ? 'See Boca Bridges Providers' : 'Click here to log in and leave a review →'}</a>`;
+        const viewProvidersButton = `<a href="${magicLinkUrl}" style="background-color: #4f46e5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold; margin: 10px 0; text-align: center;">${isApologyEmail ? 'See Boca Bridges Providers' : 'Click here to leave a service provider review'}</a>`;
         
         personalizedBody = personalizedBody.replace(/\{\{VIEW_PROVIDERS_BUTTON\}\}/g, viewProvidersButton);
       } else {

@@ -98,7 +98,7 @@ Thanks again for signing up for Courtney's List — a project I started to make 
 Quick update: the login issues some people had are now fixed ✅. Already, 80+ homes have joined, and reviews are starting to come in on plumbers, landscapers, AC techs, and more.
 
 I have a small favor to ask:
-👉 Would you log in and leave one quick review?
+👉 Could you please leave a review for one of your service providers?
 
 {{VIEW_PROVIDERS_BUTTON}}
 
