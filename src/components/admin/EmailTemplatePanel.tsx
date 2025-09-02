@@ -87,6 +87,31 @@ Again, our apologies for the technical hiccup. We really appreciate your patienc
 P.S Reach out to me on Whatsapp with any feedback or other categories you would want to see`
   },
   {
+    id: "community-update-rosella",
+    name: "Community Update - Review Request",
+    description: "Personal request from David on Rosella Rd for community reviews",
+    subject: "A small favor from your neighbor on Rosella Rd",
+    body: `Hi [FirstName],
+
+Thanks again for signing up for Courtney's List — a project I started to make it easier for all of us to find trusted service providers in Boca Bridges. My hope is that it grows into a resource we build together as neighbors.
+
+Quick update: the login issues some people had are now fixed ✅. Already, 80+ homes have joined, and reviews are starting to come in on plumbers, landscapers, AC techs, and more.
+
+I have a small favor to ask:
+👉 Would you log in and leave one quick review?
+
+{{VIEW_PROVIDERS_BUTTON}}
+
+It takes less than a minute, and even a single review makes a difference for neighbors trying to choose the right providers.
+
+Together, we can make this something really useful for Boca Bridges — saving time, money, and stress for everyone.
+
+Thanks so much for helping,
+David (Rosella Rd — with Courtney + our two boys, 13 & 14)
+
+P.S. Have a category you'd like added (grill cleaning, roofers, pavers)? Just hit reply — I'd love your input. Any feedback helps make this better for all of us.`
+  },
+  {
     id: "custom",
     name: "Custom Email",
     description: "Create your own custom email from scratch",

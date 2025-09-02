@@ -58,6 +58,7 @@ const handler = async (req: Request): Promise<Response> => {
     const { subject, body, recipients, communityName, senderName, templateId }: CommunityEmailRequest = await req.json();
     
     const isApologyEmail = templateId === 'apology-email';
+    const isCommunityUpdateRosella = templateId === 'community-update-rosella';
 
     console.log(`📧 Sending community email to ${recipients.length} recipients for ${communityName}`);
 
@@ -113,8 +114,14 @@ const handler = async (req: Request): Promise<Response> => {
     const emailPromises = allUsers.map(async (user: any) => {
       let personalizedBody = body;
       
-      if (isApologyEmail) {
-        // Generate magic link for apology emails
+      // Replace [FirstName] placeholder with actual first name for community update email
+      if (isCommunityUpdateRosella) {
+        const firstName = user.name ? user.name.split(' ')[0] : 'Neighbor';
+        personalizedBody = personalizedBody.replace(/\[FirstName\]/g, firstName);
+      }
+      
+      if (isApologyEmail || isCommunityUpdateRosella) {
+        // Generate magic link for apology emails and community update
         const { data: authData, error: authError } = await supabase.auth.admin.generateLink({
           type: 'magiclink',
           email: user.email,
@@ -129,7 +136,7 @@ const handler = async (req: Request): Promise<Response> => {
         }
 
         const magicLinkUrl = authData.properties?.action_link || '';
-        const viewProvidersButton = `<a href="${magicLinkUrl}" style="background-color: #4f46e5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold; margin: 10px 0; text-align: center;">See Boca Bridges Providers</a>`;
+        const viewProvidersButton = `<a href="${magicLinkUrl}" style="background-color: #4f46e5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold; margin: 10px 0; text-align: center;">${isApologyEmail ? 'See Boca Bridges Providers' : 'Click here to log in and leave a review →'}</a>`;
         
         personalizedBody = personalizedBody.replace(/\{\{VIEW_PROVIDERS_BUTTON\}\}/g, viewProvidersButton);
       } else {
@@ -163,10 +170,18 @@ const handler = async (req: Request): Promise<Response> => {
           .replace('{{VIEW_LIST_LINK}}', viewListLink);
       }
 
+      // Determine sender email based on template
+      const fromEmail = isCommunityUpdateRosella 
+        ? `David from Courtney's List <david@courtneys-list.com>`
+        : `Courtney's List <noreply@courtneys-list.com>`;
+      
+      const replyTo = isCommunityUpdateRosella ? 'david@courtneys-list.com' : undefined;
+
       return resend.emails.send({
-        from: `Courtney's List <noreply@courtneys-list.com>`,
+        from: fromEmail,
         to: [user.email],
         subject: subject,
+        replyTo: replyTo,
         html: `
           <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; line-height: 1.6;">
             <div style="background: #4f46e5; color: white; padding: 20px; border-radius: 8px 8px 0 0; text-align: center;">
@@ -179,7 +194,7 @@ const handler = async (req: Request): Promise<Response> => {
 ${personalizedBody}
               </div>
               
-              ${!isApologyEmail ? `<div style="margin-top: 20px; text-align: center;">
+              ${!isApologyEmail && !isCommunityUpdateRosella ? `<div style="margin-top: 20px; text-align: center;">
                 <a href="https://courtneys-list.com/signin" 
                    style="display: inline-block; background: #4f46e5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; margin: 10px 10px;">
                   Sign in to See Providers
@@ -206,7 +221,7 @@ ${personalizedBody}
         tags: [
           {
             name: 'campaign_type',
-            value: isApologyEmail ? 'apology_email' : 'community_update'
+            value: isApologyEmail ? 'apology_email' : isCommunityUpdateRosella ? 'community_update_rosella' : 'community_update'
           },
           {
             name: 'community',
