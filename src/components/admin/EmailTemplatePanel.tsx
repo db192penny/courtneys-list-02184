@@ -90,7 +90,7 @@ P.S Reach out to me on Whatsapp with any feedback or other categories you would 
     id: "community-update-rosella",
     name: "Community Update - Review Request",
     description: "Personal request from David on Rosella Rd for community reviews",
-    subject: "A small favor from your neighbor on Rosella Rd",
+    subject: "A small favor from your Boca Bridges neighbor on Rosella Rd",
     body: `Hi [FirstName],
 
 Thanks again for signing up for Courtney's List — a project I started to make it easier for all of us to find trusted service providers in Boca Bridges. My hope is that it grows into a resource we build together as neighbors.
