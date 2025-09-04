@@ -202,16 +202,10 @@ export default function CommunityVendorTable({
                         value="more" 
                         className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium text-sm px-3 py-2 transition-all cursor-pointer"
                       >
-                        {OTHER_CATEGORIES.includes(category as any) ? (
-                          <>
-                            {React.createElement(getCategoryIcon(category as any), { className: "h-4 w-4" })}
-                            <span className="hidden sm:inline">{category}</span>
-                          </>
-                        ) : (
-                          <>
-                            <Settings className="h-4 w-4" />
-                            <span className="hidden sm:inline">More Categories</span>
-                          </>
+                        <Settings className="h-4 w-4" />
+                        <span className="hidden sm:inline">More Categories</span>
+                        {OTHER_CATEGORIES.includes(category as any) && (
+                          <div className="w-2 h-2 bg-primary rounded-full ml-1" />
                         )}
                         <ChevronDown className="h-4 w-4" />
                       </TabsTrigger>
