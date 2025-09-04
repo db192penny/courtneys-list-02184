@@ -17,6 +17,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Info, Crown, PartyPopper, ArrowLeft, Mail, AlertTriangle } from "lucide-react";
 import { handleSignupInvite } from '@/lib/handle-signup-invite';
 import { MagicLinkLoader } from "@/components/MagicLinkLoader";
+import { WelcomeBackModal } from "@/components/WelcomeBackModal";
 
 const Auth = () => {
   const [name, setName] = useState("");
@@ -26,6 +27,7 @@ const Auth = () => {
   const [errors, setErrors] = useState<{ name?: boolean; email?: boolean; address?: boolean; resident?: boolean }>({});
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showMagicLinkModal, setShowMagicLinkModal] = useState(false);
+  const [showWelcomeBackModal, setShowWelcomeBackModal] = useState(false);
   const [detectedCommunity, setDetectedCommunity] = useState<string>("");
   const [justSignedUp, setJustSignedUp] = useState(false);
   const { toast } = useToast();
@@ -235,16 +237,24 @@ const Auth = () => {
       }
 
       if (emailStatus === "approved") {
-        toast({
-          title: "Account already exists",
-          description: "An account with this email is already active. Please sign in instead.",
-          variant: "destructive",
+        // Send magic link automatically for existing user
+        const redirectUrl = `${window.location.origin}/auth`;
+        const { error: signInError } = await supabase.auth.signInWithOtp({
+          email: targetEmail,
+          options: { emailRedirectTo: redirectUrl }
         });
-        
-        const signInUrl = communityName 
-          ? `/signin?community=${toSlug(communityName)}` 
-          : "/signin";
-        navigate(signInUrl);
+
+        if (signInError) {
+          console.error("[Auth] Welcome back magic link error", signInError);
+          toast({
+            title: "Error sending magic link",
+            description: signInError.message,
+            variant: "destructive",
+          });
+        } else {
+          // Show welcome back modal instead of toast + redirect
+          setShowWelcomeBackModal(true);
+        }
         return;
       } else if (emailStatus === "pending") {
         toast({
@@ -553,6 +563,13 @@ const Auth = () => {
           </AlertDialogAction>
         </AlertDialogContent>
       </AlertDialog>
+
+      <WelcomeBackModal 
+        open={showWelcomeBackModal} 
+        onOpenChange={setShowWelcomeBackModal}
+        email={email}
+        communityName={communityName}
+      />
     </main>
   );
 };
