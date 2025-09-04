@@ -236,9 +236,11 @@ const Auth = () => {
         return;
       }
 
-      if (emailStatus === "approved") {
+        if (emailStatus === "approved") {
         // Send magic link automatically for existing user
-        const redirectUrl = `${window.location.origin}/auth`;
+        const communitySlug = communityName ? toSlug(communityName) : 'boca-bridges';
+        const redirectUrl = `${window.location.origin}/communities/${communitySlug}?welcome=true`;
+        
         const { error: signInError } = await supabase.auth.signInWithOtp({
           email: targetEmail,
           options: { emailRedirectTo: redirectUrl }
