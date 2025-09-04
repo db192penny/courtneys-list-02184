@@ -5,11 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import SEO from "@/components/SEO";
+import { WelcomeBackModal } from "@/components/WelcomeBackModal";
 import { toast } from "@/hooks/use-toast";
 import { toSlug } from "@/utils/slug";
-import { Mail, AlertTriangle, ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 
 const SignIn = () => {
   const [searchParams] = useSearchParams();
@@ -19,7 +19,7 @@ const SignIn = () => {
   const [resendLoading, setResendLoading] = useState(false);
   const [status, setStatus] = useState<"idle" | "approved" | "pending" | "not_found" | "error">("idle");
   const [message, setMessage] = useState("");
-  const [showMagicLinkModal, setShowMagicLinkModal] = useState(false);
+  const [showWelcomeBackModal, setShowWelcomeBackModal] = useState(false);
   const [modalShown, setModalShown] = useState(false);
 
   const community = searchParams.get("community");
@@ -106,9 +106,9 @@ const SignIn = () => {
         
         // Prevent double modal display
         if (!modalShown) {
-          console.log("[SignIn] Showing magic link modal");
+          console.log("[SignIn] Showing welcome back modal");
           setModalShown(true);
-          setShowMagicLinkModal(true);
+          setShowWelcomeBackModal(true);
         }
       } else if (statusResult === "not_found") {
         setStatus("not_found");
@@ -187,55 +187,20 @@ const SignIn = () => {
         </Card>
       </section>
 
-      {/* Magic Link Sent Modal */}
-      <Dialog open={showMagicLinkModal} onOpenChange={setShowMagicLinkModal}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-lg">
-              <Mail className="h-5 w-5 text-green-600" />
-              Magic Link Sent!
-            </DialogTitle>
-            <DialogDescription className="text-center pt-2">
-              We've sent a magic link to <strong>{email}</strong>
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="space-y-4 py-4">
-            <div className="flex items-start gap-3 p-4 bg-yellow-50 dark:bg-yellow-950/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
-              <AlertTriangle className="h-5 w-5 text-yellow-600 mt-0.5 flex-shrink-0" />
-              <div>
-                <p className="font-semibold text-yellow-800 dark:text-yellow-200">
-                  Don't forget to check your spam folder!
-                </p>
-                <p className="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
-                  Magic links sometimes end up in spam or junk mail folders.
-                </p>
-              </div>
-            </div>
-            
-            
-            <div className="flex flex-col gap-2 pt-2">
-              <Button 
-                onClick={() => {
-                  console.log("[SignIn] Got it clicked, closing modal");
-                  setShowMagicLinkModal(false);
-                }} 
-                className="w-full"
-              >
-                Got It!
-              </Button>
-              <Button 
-                variant="outline" 
-                onClick={resendMagicLink}
-                disabled={resendLoading}
-                className="w-full"
-              >
-                {resendLoading ? "Resending..." : "Resend Magic Link"}
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <WelcomeBackModal
+        open={showWelcomeBackModal}
+        onOpenChange={(open) => {
+          setShowWelcomeBackModal(open);
+          if (!open) {
+            // Navigate to check-email page when modal is dismissed
+            const params = new URLSearchParams({ email });
+            if (community) params.set("community", community);
+            navigate(`/check-email?${params.toString()}`);
+          }
+        }}
+        email={email}
+        communityName={communityName || undefined}
+      />
     </main>
   );
 };

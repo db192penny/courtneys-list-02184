@@ -14,6 +14,7 @@ import SubmitVendor from "./pages/SubmitVendor";
 import Admin from "./pages/Admin";
 import Auth from "./pages/Auth";
 import SignIn from "./pages/SignIn";
+import CheckEmail from "./pages/CheckEmail";
 
 import Profile from "./pages/Profile";
 import Privacy from "./pages/Privacy";
@@ -146,6 +147,7 @@ function AppContent() {
       <Routes>
         <Route path="/" element={<Navigate to="/communities/boca-bridges?welcome=true" replace />} />
         <Route path="/signin" element={<SignIn />} />
+        <Route path="/check-email" element={<CheckEmail />} />
         <Route path="/auth" element={<Auth />} />
         <Route path="/auth/signup" element={<Auth />} />
         
