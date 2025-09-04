@@ -4,6 +4,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Button } from "@/components/ui/button";
 import { Mail, ArrowLeft, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { toSlug } from "@/utils/slug";
 
 interface WelcomeBackModalProps {
   open: boolean;
@@ -15,20 +16,23 @@ interface WelcomeBackModalProps {
 export function WelcomeBackModal({ open, onOpenChange, email, communityName }: WelcomeBackModalProps) {
   const [isResending, setIsResending] = useState(false);
   const { toast } = useToast();
-
+  
   const resendMagicLink = async () => {
     if (!email) return;
-
+    
     setIsResending(true);
     console.log("[WelcomeBackModal] Resending magic link for:", email);
-
+    
     try {
-      const redirectUrl = `${window.location.origin}/auth`;
+      // FIX: Redirect directly to community page instead of /auth
+      const communitySlug = communityName ? toSlug(communityName) : 'boca-bridges';
+      const redirectUrl = `${window.location.origin}/communities/${communitySlug}?welcome=true`;
+      
       const { error: signInError } = await supabase.auth.signInWithOtp({
         email,
         options: { emailRedirectTo: redirectUrl }
       });
-
+      
       if (signInError) {
         console.error("[WelcomeBackModal] resend signInWithOtp error", signInError);
         toast({ 
@@ -46,7 +50,7 @@ export function WelcomeBackModal({ open, onOpenChange, email, communityName }: W
       setIsResending(false);
     }
   };
-
+  
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
