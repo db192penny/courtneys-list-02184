@@ -203,10 +203,12 @@ export default function CommunityVendorTable({
                         className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium text-sm px-3 py-2 transition-all cursor-pointer"
                       >
                         <Settings className="h-4 w-4" />
-                        <span className="hidden sm:inline">More Categories</span>
-                        {OTHER_CATEGORIES.includes(category as any) && (
-                          <div className="w-2 h-2 bg-primary rounded-full ml-1" />
-                        )}
+                        <span className="hidden sm:inline max-w-40 truncate">
+                          {OTHER_CATEGORIES.includes(category as any) 
+                            ? `More Categories (${category})`
+                            : "More Categories"
+                          }
+                        </span>
                         <ChevronDown className="h-4 w-4" />
                       </TabsTrigger>
                     </DropdownMenuTrigger>
