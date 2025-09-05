@@ -200,7 +200,7 @@ export default function CommunityVendorTable({
                     <DropdownMenuTrigger asChild>
                       <TabsTrigger 
                         value="more" 
-                        className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium text-sm px-3 py-2 transition-all cursor-pointer w-48 ml-2"
+                        className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium text-sm px-3 py-2 transition-all cursor-pointer w-38 ml-1"
                       >
                         <Settings className="h-4 w-4 flex-shrink-0" />
                         <span className="hidden sm:inline truncate">
