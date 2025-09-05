@@ -73,8 +73,8 @@ const getSorts = (communityName: string) => [
   { key: "google_rating", label: "Google Rating" },
 ] as const;
 
-// Popular categories to show as tabs (exactly 4 for 6-tab layout)
-const POPULAR_CATEGORIES = ["Pool", "Landscaping", "HVAC", "Plumbing"] as const;
+// Popular categories to show as tabs (exactly 4 for 5-tab layout with All Categories)
+const POPULAR_CATEGORIES = ["Pool", "HVAC", "Landscaping", "Pest Control"] as const;
 const OTHER_CATEGORIES = CATEGORIES.filter(cat => !POPULAR_CATEGORIES.includes(cat as any));
 
 export default function CommunityVendorTable({
