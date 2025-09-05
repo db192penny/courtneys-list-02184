@@ -118,6 +118,14 @@ export default function CommunityVendorTable({
   const [costModalOpen, setCostModalOpen] = useState(false);
   const [selectedVendor, setSelectedVendor] = useState<{ id: string; name: string; category: string } | null>(null);
 
+  // Helper function to generate dynamic title based on category
+  const getDynamicTitle = (category: string) => {
+    if (category === 'all') {
+      return 'All Service Providers';
+    }
+    return `${category} Providers`;
+  };
+
   const openRate = (row: CommunityVendorRow) => {
     setSelectedVendor({ id: row.id, name: row.name, category: row.category });
     setRateModalOpen(true);
@@ -150,7 +158,7 @@ export default function CommunityVendorTable({
           {/* Category Tabs */}
           <div className="border-b border-border">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-foreground">Service Providers</h2>
+              <h2 className="text-xl font-semibold text-foreground">{getDynamicTitle(category)}</h2>
               <div className="flex items-center gap-3">
                 {/* Sort Dropdown */}
                 <div className="flex items-center gap-2">
