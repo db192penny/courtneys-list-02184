@@ -175,7 +175,7 @@ export default function CommunityVendorTable({
               <TabsList className="flex w-full h-auto p-1 bg-muted/30">
                 <TabsTrigger 
                   value="all" 
-                  className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium text-sm px-3 py-2 transition-all flex-shrink-0"
+                  className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium text-sm px-3 py-2 transition-all flex-1"
                   onClick={() => setCategory("all")}
                 >
                    <Building2 className="h-4 w-4" />
@@ -187,7 +187,7 @@ export default function CommunityVendorTable({
                      <TabsTrigger 
                        key={cat}
                        value={cat}
-                       className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium text-sm px-3 py-2 transition-all flex-shrink-0"
+                       className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium text-sm px-3 py-2 transition-all flex-1"
                        onClick={() => setCategory(cat)}
                      >
                        <CategoryIcon className="h-4 w-4" />
@@ -200,7 +200,7 @@ export default function CommunityVendorTable({
                     <DropdownMenuTrigger asChild>
                       <TabsTrigger 
                         value="more" 
-                        className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium text-sm px-3 py-2 transition-all cursor-pointer flex-1 min-w-0"
+                        className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium text-sm px-3 py-2 transition-all cursor-pointer w-48 ml-2"
                       >
                         <Settings className="h-4 w-4 flex-shrink-0" />
                         <span className="hidden sm:inline truncate">
