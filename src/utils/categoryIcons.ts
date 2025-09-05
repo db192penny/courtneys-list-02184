@@ -23,6 +23,7 @@ export const categoryIconMap: Record<Category, LucideIcon> = {
   "Landscaping": Trees,
   "Pest Control": Bug,
   "Power Washing": ShowerHead,
+  "Car Wash & Detail": Car,
   "Handyman": Hammer,
   "Pet Grooming": Heart,
   "House Cleaning": Sparkles,

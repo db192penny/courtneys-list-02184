@@ -44,8 +44,8 @@ export function buildDefaultCosts(category?: string): CostEntry[] {
     ];
   }
   
-  // Power Washing: Per visit with yearly quantity
-  if (c === "power washing") {
+  // Power Washing/Car Wash & Detail: Per visit with yearly quantity
+  if (c === "power washing" || c === "car wash & detail") {
     return [
       { cost_kind: "service_call", amount: null, unit: "visit", quantity: null, notes: null },
     ];
@@ -136,12 +136,12 @@ export default function CostInputs({
             />
             <span className="text-sm text-muted-foreground">{unitDisplay}</span>
           </div>
-          {/* Show visits quantity for Pool/Landscaping/Pest Control monthly plans, HVAC yearly plans, and Power Washing */}
+          {/* Show visits quantity for Pool/Landscaping/Pest Control monthly plans, HVAC yearly plans, and Power Washing/Car Wash & Detail */}
           {((entry.cost_kind === "monthly_plan" && (c === "pool" || c === "pool service" || c === "landscaping" || c === "pest control")) ||
             (entry.cost_kind === "yearly_plan" && c === "hvac") ||
-            (entry.cost_kind === "service_call" && c === "power washing")) && (
+            (entry.cost_kind === "service_call" && (c === "power washing" || c === "car wash & detail"))) && (
             <div className="grid gap-2">
-              <Label># of Visits: {entry.cost_kind === "monthly_plan" ? "visits per Month" : entry.cost_kind === "service_call" && c === "power washing" ? "visits per Year" : "visits per Year"}</Label>
+              <Label># of Visits: {entry.cost_kind === "monthly_plan" ? "visits per Month" : entry.cost_kind === "service_call" && (c === "power washing" || c === "car wash & detail") ? "visits per Year" : "visits per Year"}</Label>
               <Input
                 type="number"
                 inputMode="numeric"
