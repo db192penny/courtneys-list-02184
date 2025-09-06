@@ -78,7 +78,7 @@ export function SimpleInvite() {
       if (copySuccess) {
         toast({ 
           title: '📋 Invite Link Copied!',
-          description: 'Earn 10 points when your neighbor joins! Boost your raffle chances and leaderboard position.' 
+          description: 'Earn 10 points when your neighbor joins! That\'s halfway to your free Starbucks! ☕' 
         });
       } else {
         // Show modal if copy failed
@@ -102,7 +102,7 @@ export function SimpleInvite() {
       setTimeout(() => setCopied(false), 2000);
       toast({ 
         title: '📋 Invite Link Copied!',
-        description: 'Earn 10 points when your neighbor joins! Boost your raffle chances and leaderboard position.' 
+        description: 'Earn 10 points when your neighbor joins! That\'s halfway to your free Starbucks! ☕' 
       });
     }
   };
