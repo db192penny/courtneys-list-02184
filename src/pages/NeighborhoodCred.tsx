@@ -108,7 +108,7 @@ const NeighborhoodCred = () => {
                   <div className="text-2xl">☕</div>
                   <div>
                     <h3 className="font-semibold">Coffee on Courtney</h3>
-                    <p className="text-sm text-muted-foreground">$15 Starbucks Gift Card at 20 points</p>
+                    <p className="text-sm text-muted-foreground">$10 Starbucks Gift Card at 20 points</p>
                   </div>
                 </div>
                 {points >= 20 ? (
@@ -127,7 +127,7 @@ const NeighborhoodCred = () => {
               
               {points < 20 && (
                 <div className="text-sm text-muted-foreground">
-                  Quick path: {pointsToStarbucks <= 15 ? `${Math.ceil(pointsToStarbucks / 5)} more reviews` : "3 reviews + invite 1 neighbor"}
+                  Quick path: 1 invite (10 pts) + 1 review (5 pts) + join bonus (5 pts) = 20 points!
                 </div>
               )}
             </div>
