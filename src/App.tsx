@@ -16,7 +16,8 @@ import Auth from "./pages/Auth";
 import SignIn from "./pages/SignIn";
 import CheckEmail from "./pages/CheckEmail";
 
-import Profile from "./pages/Profile";
+import NeighborhoodCred from "./pages/NeighborhoodCred";
+import Settings from "./pages/Settings";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import Contact from "./pages/Contact";
@@ -154,7 +155,13 @@ function AppContent() {
         <Route path="/dashboard" element={<ProtectedRoute><Navigate to="/communities/boca-bridges" replace /></ProtectedRoute>} />
         <Route path="/submit" element={<ProtectedRoute><SubmitVendor /></ProtectedRoute>} />
         
-        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+        {/* NEW: Neighborhood Cred and Settings routes */}
+        <Route path="/neighborhood-cred" element={<ProtectedRoute><NeighborhoodCred /></ProtectedRoute>} />
+        <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+        
+        {/* OLD: Profile route redirect to Neighborhood Cred */}
+        <Route path="/profile" element={<ProtectedRoute><Navigate to="/neighborhood-cred" replace /></ProtectedRoute>} />
+        
         <Route path="/household/preview" element={<HouseholdPreview />} />
         <Route path="/household" element={<ProtectedRoute><Household /></ProtectedRoute>} />
         <Route path="/admin" element={<Admin />} />
@@ -183,8 +190,26 @@ function AppContent() {
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner />
+      {/* Configure Toaster to be prominent (top center) */}
+      <Toaster 
+        toastOptions={{
+          duration: 5000,
+          style: {
+            background: 'white',
+            border: '1px solid #e2e8f0',
+            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)'
+          }
+        }}
+      />
+      <Sonner 
+        position="top-center"
+        toastOptions={{
+          style: {
+            background: 'white',
+            border: '1px solid #e2e8f0',
+          }
+        }}
+      />
       <BrowserRouter>
         <AppContent />
       </BrowserRouter>
