@@ -342,7 +342,10 @@ const SubmitVendor = () => {
         }
       }
 
-      toast({ title: "Saved!", description: "Your changes have been saved." });
+      toast({ 
+        title: "🎉 Review Added!", 
+        description: "You earned 5 points! Monthly raffle entry confirmed for $200 service prize." 
+      });
       navigate("/dashboard");
       return;
     }
@@ -481,8 +484,8 @@ const SubmitVendor = () => {
 
     // DB trigger will mark the user as verified and increment submission count
     toast({
-      title: "Vendor submitted!",
-      description: "Thanks for contributing. Your full access should be unlocked now.",
+      title: "🎉 Provider Submitted!",
+      description: "You earned 5 points! Thanks for contributing - your full access should be unlocked now.",
     });
 
     // Navigate to dashboard (full access will reflect after trigger)
@@ -492,8 +495,8 @@ const SubmitVendor = () => {
   return (
     <main className="min-h-screen bg-background">
       <SEO
-        title="Courtney’s List | Submit Vendor"
-        description="Submit a local provider recommendation to unlock full access to Courtney’s List."
+        title="Courtney's List | Submit Vendor"
+        description="Submit a local provider recommendation to unlock full access to Courtney's List."
         canonical={canonical}
       />
       <section className="container py-10 max-w-2xl">
