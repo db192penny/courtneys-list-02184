@@ -77,8 +77,8 @@ export function SimpleInvite() {
       const copySuccess = await copyToClipboard(url);
       if (copySuccess) {
         toast({ 
-          title: 'Invite link copied!',
-          description: 'Share it with your neighbor.' 
+          title: '📋 Invite Link Copied!',
+          description: 'Earn 10 points when your neighbor joins! Boost your raffle chances and leaderboard position.' 
         });
       } else {
         // Show modal if copy failed
@@ -101,8 +101,8 @@ export function SimpleInvite() {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
       toast({ 
-        title: 'Invite link copied!',
-        description: 'Share it with your neighbor.' 
+        title: '📋 Invite Link Copied!',
+        description: 'Earn 10 points when your neighbor joins! Boost your raffle chances and leaderboard position.' 
       });
     }
   };
