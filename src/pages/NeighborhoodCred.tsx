@@ -4,7 +4,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { useBadgeLevels, getUserCurrentBadge, getUserNextBadge } from "@/hooks/useBadgeLevels";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import UserBadge from "@/components/badges/UserBadge";
@@ -14,7 +13,7 @@ import PointHistoryTable from "@/components/badges/PointHistoryTable";
 import ActivityGuide from "@/components/badges/ActivityGuide";
 import BadgeLevelChart from "@/components/badges/BadgeLevelChart";
 import { SimpleInvite } from "@/components/SimpleInvite";
-import { Gift, Trophy, Users, Star } from "lucide-react";
+import { Gift, Trophy } from "lucide-react";
 
 const NeighborhoodCred = () => {
   const [loading, setLoading] = useState(true);
