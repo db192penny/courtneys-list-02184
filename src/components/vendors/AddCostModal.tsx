@@ -161,8 +161,8 @@ export function AddCostModal({
       if (error) throw error;
 
       toast({
-        title: "Cost added successfully",
-        description: `Added cost information for ${vendorName}`
+        title: "💰 Cost Added!",
+        description: "You earned 5 points! You're getting closer to your free Starbucks card! ☕"
       });
 
       // Refresh the vendor stats query
