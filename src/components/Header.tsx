@@ -37,7 +37,8 @@ const Header = () => {
 
   const navigationItems = authed ? [
     { to: "/communities/boca-bridges", label: "Boca Bridges Overview" },
-    { to: "/profile", label: "Your Profile" },
+    { to: "/neighborhood-cred", label: "Neighborhood Cred" },
+    { to: "/settings", label: "Settings" },
     ...(isAdmin ? [{ to: "/admin", label: "Admin" }] : []),
   ] : [];
 
