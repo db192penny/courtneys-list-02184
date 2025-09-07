@@ -1,4 +1,3 @@
-
 import { useEffect, useMemo, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
@@ -243,7 +242,10 @@ export default function RateVendorModal({ open, onOpenChange, vendor, onSuccess,
         predicate: (query) => query.queryKey[0] === "community-stats" 
       });
       
-      toast({ title: "Saved", description: "Thanks for contributing!" });
+      toast({ 
+        title: "🎉 Review Added!", 
+        description: "You earned 5 points! Raffle entry confirmed for $200 service prize." 
+      });
       onOpenChange(false);
       onSuccess?.();
     } catch (e: any) {
