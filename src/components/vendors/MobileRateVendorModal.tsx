@@ -29,6 +29,7 @@ export default function MobileRateVendorModal({ open, onOpenChange, vendor, onSu
   const [comments, setComments] = useState<string>("");
   const [showNameInReview, setShowNameInReview] = useState<boolean>(true);
   const [useForHome, setUseForHome] = useState<boolean>(true);
+  const [currentUserPoints, setCurrentUserPoints] = useState<number>(0);
   const [loading, setLoading] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -56,12 +57,17 @@ export default function MobileRateVendorModal({ open, onOpenChange, vendor, onSu
           return;
         }
 
-        // Get user's current show_name_public setting
+        // Get user's current show_name_public setting and points
         const { data: userProfile } = await supabase
           .from("users")
-          .select("show_name_public")
+          .select("show_name_public, points")
           .eq("id", user.id)
           .maybeSingle();
+        
+        // Store current points for toast calculation
+        if (userProfile?.points !== undefined) {
+          setCurrentUserPoints(userProfile.points);
+        }
 
         // Prefill existing review by this user for this vendor
         const { data: review } = await supabase
@@ -227,10 +233,16 @@ export default function MobileRateVendorModal({ open, onOpenChange, vendor, onSu
         predicate: (query) => query.queryKey[0] === "community-stats" 
       });
       
-      // UPDATED TOAST MESSAGE - Now matches the desktop version!
+      // Calculate points to Starbucks for dynamic message
+      const newPointsTotal = currentUserPoints + 5; // They just earned 5 points
+      const pointsToStarbucks = Math.max(20 - newPointsTotal, 0);
+      const starbucksMessage = pointsToStarbucks > 0 
+        ? `${pointsToStarbucks} points to Starbucks gift card!` 
+        : "Starbucks card earned! ☕";
+      
       toast({ 
-        title: "🎉 Review Added!", 
-        description: "You earned 5 points! Monthly raffle entry confirmed for $200 service prize." 
+        title: "🎉 Review Added! +5 Points", 
+        description: `${starbucksMessage} Plus monthly raffle entry for $200 service credit!` 
       });
       
       onOpenChange(false);
