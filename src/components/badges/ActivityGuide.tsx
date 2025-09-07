@@ -77,6 +77,7 @@ export default function ActivityGuide() {
       if (error) throw error;
 
       const baseUrl = window.location.origin;
+      // FIXED: Include inviter parameter in URL
       const url = `${baseUrl}/communities/boca-bridges?invite=${code}&inviter=${user.id}&welcome=true`;
       setInviteUrl(url);
 
