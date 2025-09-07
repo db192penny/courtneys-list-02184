@@ -70,7 +70,7 @@ export function SimpleInvite() {
       if (error) throw error;
 
       const baseUrl = window.location.origin;
-      const url = `${baseUrl}/communities/boca-bridges?invite=${code}&welcome=true`;
+      const url = `${baseUrl}/communities/boca-bridges?invite=${code}&inviter=${user.id}&welcome=true`;
       setInviteUrl(url);
 
       // Try to copy automatically
