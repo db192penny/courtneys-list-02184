@@ -227,7 +227,12 @@ export default function MobileRateVendorModal({ open, onOpenChange, vendor, onSu
         predicate: (query) => query.queryKey[0] === "community-stats" 
       });
       
-      toast({ title: "Saved", description: "Thanks for contributing!" });
+      // UPDATED TOAST MESSAGE - Now matches the desktop version!
+      toast({ 
+        title: "🎉 Review Added!", 
+        description: "You earned 5 points! Monthly raffle entry confirmed for $200 service prize." 
+      });
+      
       onOpenChange(false);
       onSuccess?.();
     } catch (e: any) {
