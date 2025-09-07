@@ -12,7 +12,6 @@ import BadgeProgress from "@/components/badges/BadgeProgress";
 import PointHistoryTable from "@/components/badges/PointHistoryTable";
 import ActivityGuide from "@/components/badges/ActivityGuide";
 import BadgeLevelChart from "@/components/badges/BadgeLevelChart";
-import { SimpleInvite } from "@/components/SimpleInvite";
 import { Gift, Trophy } from "lucide-react";
 
 const NeighborhoodCred = () => {
@@ -201,9 +200,6 @@ const NeighborhoodCred = () => {
             </div>
           </CardHeader>
         </Card>
-
-        {/* Invite Neighbors */}
-        <SimpleInvite />
 
         {/* Activity Insights Section */}
         <div className="mt-8 space-y-6">
