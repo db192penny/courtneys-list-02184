@@ -84,8 +84,8 @@ export default function ActivityGuide() {
       const copySuccess = await copyToClipboard(url);
       if (copySuccess) {
         toast({ 
-          title: 'Invite link copied!',
-          description: 'Share it with your neighbor.' 
+          title: '📋 Invite Link Copied!',
+          description: 'Earn 10 points when your neighbor joins! That\'s halfway to your free Starbucks! ☕' 
         });
       } else {
         // Show modal if copy failed
@@ -108,12 +108,11 @@ export default function ActivityGuide() {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
       toast({ 
-        title: 'Invite link copied!',
-        description: 'Share it with your neighbor.' 
+        title: '📋 Invite Link Copied!',
+        description: 'Earn 10 points when your neighbor joins! That\'s halfway to your free Starbucks! ☕' 
       });
     }
   };
-
 
   const activities = [
     {
@@ -191,12 +190,12 @@ export default function ActivityGuide() {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>
-              Share Courtney's List to Boca Bridges Neighbors
+              Invite Neighbors to Earn 10 Points!
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Copy this link and share it with your neighbor:
+              Share this link with your neighbor and earn 10 points when they join - that's halfway to your free Starbucks! ☕
             </p>
             <div className="flex items-center space-x-2">
               <div className="grid flex-1 gap-2">
