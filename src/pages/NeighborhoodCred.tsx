@@ -12,6 +12,7 @@ import BadgeProgress from "@/components/badges/BadgeProgress";
 import PointHistoryTable from "@/components/badges/PointHistoryTable";
 import ActivityGuide from "@/components/badges/ActivityGuide";
 import BadgeLevelChart from "@/components/badges/BadgeLevelChart";
+import { SimpleInvite } from "@/components/SimpleInvite";
 import { Gift, Trophy } from "lucide-react";
 
 const NeighborhoodCred = () => {
@@ -126,7 +127,7 @@ const NeighborhoodCred = () => {
               
               {points < 20 && (
                 <div className="text-sm text-muted-foreground">
-                  Quick path: 1 invite (10 pts) + 1 review (5 pts) + join bonus (5 pts) = 20 points!
+                  Need {pointsToStarbucks} more points: Invite a neighbor (10 pts) or leave reviews (5 pts each)
                 </div>
               )}
             </div>
@@ -200,6 +201,9 @@ const NeighborhoodCred = () => {
             </div>
           </CardHeader>
         </Card>
+
+        {/* Invite Neighbors */}
+        <SimpleInvite />
 
         {/* Activity Insights Section */}
         <div className="mt-8 space-y-6">
