@@ -132,13 +132,13 @@ const NeighborhoodCred = () => {
               )}
             </div>
 
-            {/* Monthly Raffle */}
+            {/* Service Raffle */}
             <div className="space-y-3 pt-4 border-t">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="text-2xl">🎟️</div>
                   <div>
-                    <h3 className="font-semibold">Monthly Service Raffle</h3>
+                    <h3 className="font-semibold">Service Raffle</h3>
                     <p className="text-sm text-muted-foreground">$200 toward any community provider</p>
                   </div>
                 </div>
