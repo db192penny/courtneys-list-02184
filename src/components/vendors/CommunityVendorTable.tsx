@@ -276,18 +276,14 @@ export default function CommunityVendorTable({
         </div>
       ) : (
         /* Mobile Filter Controls */
-        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:gap-6">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setFilterModalOpen(true)}
-              className="flex items-center gap-2 text-sm font-medium"
-            >
-              <span className="truncate">{getFilterButtonText()}</span>
-              <ChevronDown className="h-4 w-4 shrink-0" />
-            </Button>
-          </div>
+        <div className="w-full mb-4">
+          <button
+            onClick={() => setFilterModalOpen(true)}
+            className="w-full flex justify-between items-center px-4 py-3 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 transition-colors"
+          >
+            <span className="text-sm font-medium truncate">{getFilterButtonText()}</span>
+            <ChevronDown className="h-4 w-4 shrink-0 text-gray-500" />
+          </button>
         </div>
       )}
 
