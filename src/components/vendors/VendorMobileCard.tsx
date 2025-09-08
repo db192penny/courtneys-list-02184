@@ -170,19 +170,6 @@ export default function VendorMobileCard({
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <h4 className="text-sm font-medium text-gray-700">Cost Information</h4>
-            {isAuthenticated && !userCosts?.has(vendor.id) && (
-              <button
-                onClick={() => onCosts(vendor)}
-                className="text-sm text-blue-600 hover:text-blue-700 font-medium"
-              >
-                + Add
-              </button>
-            )}
-          </div>
-        {/* Cost Information */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <h4 className="text-sm font-medium text-gray-700">Cost Information</h4>
             {isVerified && (
               <button
                 onClick={() => onCosts(vendor)}
@@ -244,7 +231,6 @@ export default function VendorMobileCard({
               No cost information yet
             </div>
           )}
-        </div>
         </div>
 
         {/* Contact Section */}
