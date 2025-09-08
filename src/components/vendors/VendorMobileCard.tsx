@@ -142,7 +142,12 @@ export default function VendorMobileCard({
               <DialogHeader>
                 <DialogTitle>Boca Bridges Reviews</DialogTitle>
               </DialogHeader>
-              <MobileReviewsModal vendorId={vendor.id} onRate={() => onRate(vendor)} />
+              <MobileReviewsModal 
+                vendorId={vendor.id} 
+                onRate={() => onRate(vendor)}
+                open={true}
+                setOpen={(open) => !open && document.querySelector('[data-state="open"]')?.querySelector('button')?.click()}
+              />
             </DialogContent>
           </Dialog>
           
