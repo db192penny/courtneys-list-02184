@@ -117,16 +117,12 @@ export function NeighborReviewPreview({
           </div>
         </div>
       </DialogTrigger>
-      <DialogContent className="max-w-md mx-auto">
-        <DialogHeader>
-          <DialogTitle>Boca Bridges Reviews</DialogTitle>
-        </DialogHeader>
-        <MobileReviewsModal 
-          open={true}
-          onOpenChange={() => {}}
-          vendor={{ id: vendorId }}
-        />
-      </DialogContent>
+     <DialogContent className="max-w-md mx-auto">
+  <DialogHeader>
+    <DialogTitle>Boca Bridges Reviews</DialogTitle>
+  </DialogHeader>
+  <MobileReviewsModal vendorId={vendorId} />
+</DialogContent>
     </Dialog>
   );
 }
