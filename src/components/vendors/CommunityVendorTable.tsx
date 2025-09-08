@@ -41,6 +41,7 @@ import RateVendorModalWrapper from "@/components/vendors/RateVendorModalWrapper"
 import VendorMobileCard from "@/components/vendors/VendorMobileCard";
 import CostManagementModalWrapper from "@/components/vendors/CostManagementModalWrapper";
 import { CostDisplay } from "@/components/vendors/CostDisplay";
+import { EnhancedMobileFilterModal } from "./EnhancedMobileFilterModal";
 import { formatUSPhoneDisplay } from "@/utils/phone";
 export type CommunityVendorRow = {
   id: string;
@@ -116,6 +117,7 @@ export default function CommunityVendorTable({
   // Modal states
   const [rateModalOpen, setRateModalOpen] = useState(false);
   const [costModalOpen, setCostModalOpen] = useState(false);
+  const [filterModalOpen, setFilterModalOpen] = useState(false);
   const [selectedVendor, setSelectedVendor] = useState<{ id: string; name: string; category: string } | null>(null);
 
   // Helper function to generate dynamic title based on category
@@ -243,45 +245,14 @@ export default function CommunityVendorTable({
         /* Mobile Filter Controls */
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:gap-6">
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground flex items-center gap-2 justify-between">
-                <span className="flex items-center gap-2">
-                  <Filter className="h-4 w-4" />
-                  Filter by Category
-                </span>
-              </label>
-              <div className="w-full sm:w-52 relative">
-                <Select value={category} onValueChange={setCategory}>
-                  <SelectTrigger className="bg-background border-2 border-primary hover:border-primary/80 focus:border-primary transition-colors shadow-sm">
-                    <SelectValue placeholder="All Categories" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-background border-2">
-                    <SelectItem value="all">All Categories</SelectItem>
-                    {CATEGORIES.map((c) => (
-                      <SelectItem key={c} value={c}>{c}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground flex items-center gap-2">
-                <ArrowUpDown className="h-4 w-4" />
-                Sort by
-              </label>
-              <div className="w-full sm:w-56">
-                <Select value={sortBy} onValueChange={(v) => setSortBy(v as any)}>
-                  <SelectTrigger className="bg-background border-2 border-primary bg-primary/5 hover:bg-primary/10 focus:border-primary transition-colors">
-                    <SelectValue placeholder="Neighbors Using" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-background border-2">
-                    {SORTS.map((s) => (
-                      <SelectItem key={s.key} value={s.key}>{s.label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
+            <Button
+              variant="outline"
+              onClick={() => setFilterModalOpen(true)}
+              className="flex items-center gap-2 justify-center"
+            >
+              <Filter className="h-4 w-4" />
+              Filter & Sort
+            </Button>
           </div>
         </div>
       )}
@@ -622,6 +593,19 @@ export default function CommunityVendorTable({
             onSuccess={() => { setCostModalOpen(false); refetch(); }}
             communityName={communityName}
           />
+
+          {/* Enhanced Mobile Filter Modal */}
+          {isMobile && (
+            <EnhancedMobileFilterModal
+              open={filterModalOpen}
+              onOpenChange={setFilterModalOpen}
+              selectedCategory={category}
+              selectedSort={sortBy}
+              onCategoryChange={setCategory}
+              onSortChange={(sort) => setSortBy(sort as any)}
+              categories={[...CATEGORIES]}
+            />
+          )}
         </>
       )}
     </div>
