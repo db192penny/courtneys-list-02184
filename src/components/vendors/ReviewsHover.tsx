@@ -29,7 +29,7 @@ export default function ReviewsHover({ vendorId, children }: { vendorId: string;
       if (error) throw error;
       return (data || []) as any[];
     },
-    enabled: !!vendorId && isAuthenticated,
+    enabled: !!vendorId,
   });
 
   return (
