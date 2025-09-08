@@ -53,19 +53,20 @@ export default function VendorMobileCard({
         {/* Header with rank, name, and rate button */}
         <div className="flex justify-between items-start mb-3">
           <div className="flex items-center gap-2 flex-1">
-            <span className="bg-blue-500 text-white text-xs font-semibold px-2 py-1 rounded">
+            <span className="bg-blue-500 text-white text-xs font-semibold px-2 py-1 rounded min-w-[28px] text-center">
               #{rank}
             </span>
             <div>
-              <h3 className="text-base font-semibold">{vendor.name}</h3>
-              <span className="text-xs text-gray-500 uppercase">{vendor.category}</span>
+              <h3 className="text-base font-semibold text-gray-900">{vendor.name}</h3>
+              <span className="text-xs font-medium uppercase tracking-wide text-gray-600">
+                {vendor.category}
+              </span>
             </div>
           </div>
           <Button
             size="sm"
-            variant="outline"
             onClick={() => isAuthenticated ? onRate(vendor) : window.location.href = `/auth?community=${encodeURIComponent(communityName || '')}`}
-            className="shrink-0"
+            className="shrink-0 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-3 py-1.5"
           >
             Rate
           </Button>
@@ -119,8 +120,11 @@ export default function VendorMobileCard({
             </div>
             <div className="flex items-center gap-1">
               <RatingStars rating={vendor.hoa_rating || 0} size="sm" />
-              <span className="text-sm text-gray-600">
-                {vendor.hoa_rating?.toFixed(1)} ({vendor.hoa_rating_count || 0})
+              <span className="text-sm font-medium text-gray-700">
+                {vendor.hoa_rating?.toFixed(1)}
+              </span>
+              <span className="text-xs text-gray-500">
+                ({vendor.hoa_rating_count || 0})
               </span>
             </div>
           </div>
@@ -134,8 +138,11 @@ export default function VendorMobileCard({
               </div>
               <div className="flex items-center gap-1">
                 <RatingStars rating={vendor.google_rating || 0} size="sm" />
-                <span className="text-sm text-gray-600">
-                  {vendor.google_rating?.toFixed(1)} ({vendor.google_rating_count})
+                <span className="text-sm font-medium text-gray-700">
+                  {vendor.google_rating?.toFixed(1)}
+                </span>
+                <span className="text-xs text-gray-500">
+                  ({vendor.google_rating_count})
                 </span>
               </div>
             </div>
@@ -184,7 +191,7 @@ export default function VendorMobileCard({
               variant="ghost"
               size="sm"
               onClick={() => window.location.href = `tel:${vendor.contact_info}`}
-              className="flex-1 text-sm"
+              className="flex-1 text-sm font-medium text-gray-700 hover:bg-gray-100"
             >
               <Phone className="w-3 h-3 mr-1" />
               Call
@@ -193,7 +200,7 @@ export default function VendorMobileCard({
               variant="ghost"
               size="sm"
               onClick={() => window.location.href = `sms:${vendor.contact_info}`}
-              className="flex-1 text-sm"
+              className="flex-1 text-sm font-medium text-gray-700 hover:bg-gray-100"
             >
               <MessageSquare className="w-3 h-3 mr-1" />
               Text

@@ -77,7 +77,7 @@ export function NeighborReviewPreview({
 
   if (!selectedReview) {
     return (
-      <div className={cn("text-xs text-muted-foreground italic bg-yellow-50 border border-yellow-200 p-2 rounded", className)}>
+      <div className={cn("text-sm font-medium text-yellow-700 bg-yellow-50 border border-yellow-200 p-2 rounded", className)}>
         🌟 Be the first to share your experience!
       </div>
     );
@@ -91,14 +91,14 @@ export function NeighborReviewPreview({
       </div>
       
       {selectedReview.comments && selectedReview.comments.trim() && (
-        <p className="text-xs text-muted-foreground line-clamp-2">
+        <p className="text-sm text-gray-700">
           "{selectedReview.comments.trim()}"
         </p>
       )}
       
-      <p className="text-xs text-muted-foreground">
-        — {formatDisplayName(selectedReview.author_label)}
-      </p>
+      <span className="text-xs text-gray-500">
+        by {formatDisplayName(selectedReview.author_label)}
+      </span>
     </div>
   );
 }
