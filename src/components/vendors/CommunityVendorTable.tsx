@@ -276,13 +276,18 @@ export default function CommunityVendorTable({
         </div>
       ) : (
         /* Mobile Filter Controls */
-        <div className="w-full mb-4">
+        <div className="w-full mb-6">
           <button
             onClick={() => setFilterModalOpen(true)}
-            className="w-full flex justify-between items-center px-4 py-3 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 transition-colors"
+            className="w-full flex justify-between items-center px-4 py-4 rounded-xl border-2 border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 transition-all duration-200 shadow-sm hover:shadow-md"
           >
-            <span className="text-sm font-medium truncate">{getFilterButtonText()}</span>
-            <ChevronDown className="h-4 w-4 shrink-0 text-gray-500" />
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-blue-500 rounded-lg">
+                <Filter className="h-4 w-4 text-white" />
+              </div>
+              <span className="text-base font-semibold text-blue-900 truncate">{getFilterButtonText()}</span>
+            </div>
+            <ChevronDown className="h-5 w-5 text-blue-600" />
           </button>
         </div>
       )}
@@ -627,21 +632,19 @@ export default function CommunityVendorTable({
         </>
       )}
 
-      {/* Enhanced Mobile Filter Modal */}
-      {isMobile && (
-        <EnhancedMobileFilterModal
-          open={filterModalOpen}
-          onOpenChange={setFilterModalOpen}
-          selectedCategory={category}
-          selectedSort={sortBy === 'homes' ? 'neighbors_using' : sortBy === 'hoa_rating' ? 'highest_rated' : 'most_reviews'}
-          onCategoryChange={setCategory}
-          onSortChange={(sort) => {
-            const mappedSort = sort === 'neighbors_using' ? 'homes' : sort === 'highest_rated' ? 'hoa_rating' : 'google_rating';
-            setSortBy(mappedSort as any);
-          }}
-          categories={[...CATEGORIES]}
-        />
-      )}
+      {/* Enhanced Mobile Filter Modal - Always show on smaller screens */}
+      <EnhancedMobileFilterModal
+        open={filterModalOpen}
+        onOpenChange={setFilterModalOpen}
+        selectedCategory={category}
+        selectedSort={sortBy === 'homes' ? 'neighbors_using' : sortBy === 'hoa_rating' ? 'highest_rated' : 'most_reviews'}
+        onCategoryChange={setCategory}
+        onSortChange={(sort) => {
+          const mappedSort = sort === 'neighbors_using' ? 'homes' : sort === 'highest_rated' ? 'hoa_rating' : 'google_rating';
+          setSortBy(mappedSort as any);
+        }}
+        categories={[...CATEGORIES]}
+      />
     </div>
     </TooltipProvider>
   );
