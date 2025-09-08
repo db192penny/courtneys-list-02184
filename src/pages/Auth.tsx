@@ -377,6 +377,14 @@ const Auth = () => {
                 </Button>
               </div>
               
+              <div className="flex items-start gap-3 p-4 bg-yellow-50 dark:bg-yellow-950/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                <Crown className="h-5 w-5 text-yellow-600 dark:text-yellow-400 mt-0.5 flex-shrink-0" />
+                <div className="space-y-1">
+                  <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                    Since you're part of the <strong>invite-only test group</strong> (thanks!), you'll be <strong>automatically verified</strong>. In the future, neighbors will need admin approval (that'll be me—unless one of you volunteers :)).
+                  </p>
+                </div>
+              </div>
             </CardHeader>
 
             <CardContent className="space-y-4">

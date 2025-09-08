@@ -4,35 +4,21 @@ import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/h
 import { Badge } from "@/components/ui/badge";
 import { Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
+import { useUserProfile } from "@/hooks/useUserProfile";
 
+// Lightweight hover card that shows community review texts for a vendor
 export default function ReviewsHover({ vendorId, children }: { vendorId: string; children: ReactNode }) {
-  const { isAuthenticated } = useAuth();
-  
-  if (!isAuthenticated) {
-    return <>{children}</>;
-  }
-  
-  const { data, isLoading, error } = useQuery({
+  const { data: profile } = useUserProfile();
+  const isVerified = !!profile?.isVerified;
+
+  const { data, isLoading, error } = useQuery<{ id: string; rating: number; comments: string | null; author_label: string; created_at: string | null; }[]>({
     queryKey: ["reviews-hover", vendorId],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc("list_vendor_reviews", { 
-        _vendor_id: vendorId 
-      });
-      
+      const { data, error } = await supabase.rpc("list_vendor_reviews", { _vendor_id: vendorId });
       if (error) throw error;
-      
-      // FIX: Ensure all fields are safe to render
-      return (data || []).map((item: any) => ({
-        id: String(item?.id || ''),
-        rating: Number(item?.rating || 0),
-        comments: item?.comments ? String(item.comments) : null,
-        author_label: String(item?.author_label || 'Neighbor'),
-        created_at: item?.created_at ? String(item.created_at) : null,
-        anonymous: Boolean(item?.anonymous)
-      }));
+      return (data || []) as any[];
     },
-    enabled: !!vendorId && isAuthenticated,
+    enabled: isVerified && !!vendorId,
   });
 
   return (
@@ -41,18 +27,21 @@ export default function ReviewsHover({ vendorId, children }: { vendorId: string;
         <span className="cursor-help">{children}</span>
       </HoverCardTrigger>
       <HoverCardContent className="w-80">
-        {isLoading && (
-          <div className="text-sm text-muted-foreground">Loading reviews…</div>
-        )}
-        {error && (
-          <div className="text-sm text-muted-foreground">Unable to load reviews.</div>
-        )}
-        {data && data.length === 0 && (
+        {!isVerified && (
           <div className="text-sm text-muted-foreground">
-            No reviews yet. Be the first to review!
+            Reviews are shared just within our neighborhood circle. Sign up to view them.
           </div>
         )}
-        {data && data.length > 0 && (
+        {isVerified && isLoading && (
+          <div className="text-sm text-muted-foreground">Loading reviews…</div>
+        )}
+        {isVerified && error && (
+          <div className="text-sm text-muted-foreground">Unable to load reviews.</div>
+        )}
+        {isVerified && data && data.length === 0 && (
+          <div className="text-sm text-muted-foreground">No reviews yet.</div>
+        )}
+        {isVerified && data && data.length > 0 && (
           <div className="max-h-64 overflow-y-auto space-y-3">
             {data.map((r) => (
               <div key={r.id} className="border rounded-md p-2">
