@@ -43,30 +43,59 @@ export function NeighborReviewPreview({
     enabled: !!vendorId,
   });
 
-  // Format the author labels using frontend utilities
+  // SAFE formatting with extensive error handling
   const reviews = rawData?.map(review => {
-    let name = 'Neighbor';
-    let street = '';
-    
-    // Parse the name|street format from database
-    if (review.author_label && review.author_label.includes('|')) {
-      const parts = review.author_label.split('|');
-      name = parts[0] || 'Neighbor';
-      street = parts[1] || '';
+    try {
+      let displayLabel = 'Neighbor'; // Default fallback
+      
+      if (!review.author_label) {
+        // No author label at all
+        displayLabel = 'Neighbor';
+      } else if (typeof review.author_label !== 'string') {
+        // Author label is not a string
+        console.warn('Invalid author_label type:', typeof review.author_label, review.author_label);
+        displayLabel = 'Neighbor';
+      } else {
+        // Parse the author label
+        let name = 'Neighbor';
+        let street = '';
+        
+        if (review.author_label.includes('|')) {
+          // New format: "David Birnbaum|Hotel Plaza Blvd"
+          const parts = review.author_label.split('|');
+          name = parts[0] || 'Neighbor';
+          street = parts[1] || '';
+        } else if (review.author_label.includes(',')) {
+          // Old format: "David Birnbaum, Hotel Plaza Blvd"
+          const parts = review.author_label.split(',');
+          name = parts[0]?.trim() || 'Neighbor';
+          street = parts[1]?.trim() || '';
+        } else {
+          // Just a name or "Neighbor"
+          name = review.author_label;
+          street = '';
+        }
+        
+        // Format based on anonymous flag
+        if (review.anonymous) {
+          displayLabel = street ? `Neighbor on ${capitalizeStreetName(street)}` : 'Neighbor';
+        } else {
+          const formattedName = formatNameWithLastInitial(name);
+          displayLabel = street ? `${formattedName} on ${capitalizeStreetName(street)}` : formattedName;
+        }
+      }
+      
+      return {
+        ...review,
+        author_label: displayLabel
+      };
+    } catch (err) {
+      console.error('Error formatting review:', err, review);
+      return {
+        ...review,
+        author_label: 'Neighbor' // Fallback on any error
+      };
     }
-    
-    let displayLabel;
-    if (review.anonymous) {
-      displayLabel = street ? `Neighbor on ${capitalizeStreetName(street)}` : 'Neighbor';
-    } else {
-      const formattedName = formatNameWithLastInitial(name);
-      displayLabel = street ? `${formattedName} on ${capitalizeStreetName(street)}` : formattedName;
-    }
-    
-    return {
-      ...review,
-      author_label: displayLabel
-    };
   });
 
   // Smart review selection: prioritize recent reviews with substantial content
