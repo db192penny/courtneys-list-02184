@@ -256,15 +256,20 @@ export default function VendorMobileCard({
       </CardContent>
     </Card>
 
-    {/* Reviews Modal - FIXED: Only pass vendorId */}
-    <Dialog open={isReviewsModalOpen} onOpenChange={setIsReviewsModalOpen}>
-      <DialogContent className="max-w-md mx-auto">
-        <DialogHeader>
-          <DialogTitle>Boca Bridges Reviews</DialogTitle>
-        </DialogHeader>
-        <MobileReviewsModal vendorId={vendor.id} />
-      </DialogContent>
-    </Dialog>
+   {/* Reviews Modal - Pass correct props */}
+<Dialog open={isReviewsModalOpen} onOpenChange={setIsReviewsModalOpen}>
+  <DialogContent className="max-w-md mx-auto">
+    <DialogHeader>
+      <DialogTitle>Boca Bridges Reviews</DialogTitle>
+    </DialogHeader>
+    <MobileReviewsModal 
+      open={true}
+      onOpenChange={() => {}}
+      vendor={vendor}
+      onRate={() => onRate(vendor)}
+    />
+  </DialogContent>
+</Dialog>
 
     {/* Cost Details Modal */}
     <Dialog open={costModalOpen} onOpenChange={setCostModalOpen}>
