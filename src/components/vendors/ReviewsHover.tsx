@@ -9,24 +9,28 @@ import { useAuth } from "@/hooks/useAuth";
 export default function ReviewsHover({ vendorId, children }: { vendorId: string; children: ReactNode }) {
   const { isAuthenticated } = useAuth();
   
-  // Don't show hover for unauthenticated users
   if (!isAuthenticated) {
     return <>{children}</>;
   }
   
-  const { data: rawData, isLoading, error } = useQuery({
+  const { data, isLoading, error } = useQuery<{ 
+    id: string; 
+    rating: number; 
+    comments: string | null; 
+    author_label: string; 
+    created_at: string | null;
+    anonymous: boolean;
+  }[]>({
     queryKey: ["reviews-hover", vendorId],
     queryFn: async () => {
       const { data, error } = await supabase.rpc("list_vendor_reviews", { 
         _vendor_id: vendorId 
       });
       if (error) throw error;
-      return data || [];
+      return (data || []) as any[];
     },
-    enabled: !!vendorId && isAuthenticated, // Re-add authentication check
+    enabled: !!vendorId && isAuthenticated,
   });
-
-  const data = rawData || [];
 
   return (
     <HoverCard openDelay={200} closeDelay={100}>
@@ -40,42 +44,36 @@ export default function ReviewsHover({ vendorId, children }: { vendorId: string;
         {error && (
           <div className="text-sm text-muted-foreground">Unable to load reviews.</div>
         )}
-        {data.length === 0 && (
+        {data && data.length === 0 && (
           <div className="text-sm text-muted-foreground">
             No reviews yet. Be the first to review!
           </div>
         )}
-        {data.length > 0 && (
+        {data && data.length > 0 && (
           <div className="max-h-64 overflow-y-auto space-y-3">
-            {data.map((r: any) => {
-              const authorLabel = String(r.author_label || 'Neighbor');
-              const rating = Number(r.rating || 0);
-              const comments = String(r.comments || '');
-              
-              return (
-                <div key={r.id} className="border rounded-md p-2">
-                  <div className="text-xs text-foreground flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="flex items-center gap-1">
-                        <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
-                        <span className="font-medium">{rating}/5</span>
-                      </div>
-                      <Badge variant="outline" className="text-xs px-2 py-0.5 bg-blue-50 text-blue-700 border-blue-200">
-                        {authorLabel}
-                      </Badge>
+            {data.map((r) => (
+              <div key={r.id} className="border rounded-md p-2">
+                <div className="text-xs text-foreground flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1">
+                      <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
+                      <span className="font-medium">{r.rating}/5</span>
                     </div>
-                    {r.created_at && (
-                      <div className="text-[10px] text-muted-foreground">
-                        {new Date(r.created_at).toLocaleDateString()}
-                      </div>
-                    )}
+                    <Badge variant="outline" className="text-xs px-2 py-0.5 bg-blue-50 text-blue-700 border-blue-200">
+                      {r.author_label}
+                    </Badge>
                   </div>
-                  {comments && (
-                    <p className="text-sm text-muted-foreground mt-1">{comments}</p>
+                  {r.created_at && (
+                    <div className="text-[10px] text-muted-foreground">
+                      {new Date(r.created_at).toLocaleDateString()}
+                    </div>
                   )}
                 </div>
-              );
-            })}
+                {r.comments && (
+                  <p className="text-sm text-muted-foreground mt-1">{r.comments}</p>
+                )}
+              </div>
+            ))}
           </div>
         )}
       </HoverCardContent>
