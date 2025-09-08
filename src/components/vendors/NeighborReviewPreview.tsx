@@ -2,9 +2,12 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { RatingStars } from "@/components/ui/rating-stars";
 import { ReviewSourceIcon } from "./ReviewSourceIcon";
+import { MobileReviewsModal } from "./MobileReviewsModal";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { formatNameWithLastInitial } from "@/utils/nameFormatting";
 import { extractStreetName, capitalizeStreetName } from "@/utils/address";
 import { cn } from "@/lib/utils";
+import { useState } from "react";
 
 interface NeighborReviewPreviewProps {
   vendorId: string;
@@ -23,6 +26,7 @@ export function NeighborReviewPreview({
   vendorId, 
   className 
 }: NeighborReviewPreviewProps) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const { data: reviews, isLoading, error } = useQuery({
     queryKey: ["vendor-reviews", vendorId],
     queryFn: async () => {
@@ -58,9 +62,9 @@ export function NeighborReviewPreview({
     return comment.substring(0, 60) + "...";
   };
 
-  const handleInteraction = () => {
-    // Handle click/keyboard interaction - could open reviews modal
-    console.log("Review preview clicked");
+  const handleInteraction = (e: React.MouseEvent | React.KeyboardEvent) => {
+    e.preventDefault();
+    setIsModalOpen(true);
   };
 
   if (isLoading) {
@@ -91,24 +95,34 @@ export function NeighborReviewPreview({
   }
 
   return (
-    <div
-      className={cn("bg-blue-50 border border-blue-200 rounded-lg p-3 cursor-pointer transition-transform hover:scale-[1.01]", className)}
-      onClick={handleInteraction}
-      onKeyPress={handleInteraction}
-      role="button"
-      tabIndex={0}
-    >
-      <div className="flex items-start gap-2">
-        <ReviewSourceIcon source="bb" size="sm" />
-        <div className="flex-1">
-          <p className="text-sm font-medium text-blue-800 mb-1">
-            💬 "{truncateComment(selectedReview.comments || "")}" - {selectedReview.author_label}
-          </p>
-          <p className="text-xs text-blue-600 font-medium mt-2">
-            Read all {totalReviews} Boca Bridges reviews →
-          </p>
+    <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+      <DialogTrigger asChild>
+        <div
+          className={cn("bg-blue-50 border border-blue-200 rounded-lg p-3 cursor-pointer transition-transform hover:scale-[1.01]", className)}
+          onClick={handleInteraction}
+          onKeyPress={handleInteraction}
+          role="button"
+          tabIndex={0}
+        >
+          <div className="flex items-start gap-2">
+            <ReviewSourceIcon source="bb" size="sm" />
+            <div className="flex-1">
+              <p className="text-sm font-medium text-blue-800 mb-1">
+                💬 "{truncateComment(selectedReview.comments || "")}" - {selectedReview.author_label}
+              </p>
+              <p className="text-xs text-blue-600 font-medium mt-2">
+                Read all {totalReviews} Boca Bridges reviews →
+              </p>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
+      </DialogTrigger>
+      <DialogContent className="max-w-md mx-auto">
+        <DialogHeader>
+          <DialogTitle>Boca Bridges Reviews</DialogTitle>
+        </DialogHeader>
+        <MobileReviewsModal vendorId={vendorId} />
+      </DialogContent>
+    </Dialog>
   );
 }
