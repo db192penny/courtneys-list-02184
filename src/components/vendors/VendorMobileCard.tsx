@@ -146,23 +146,31 @@ export default function VendorMobileCard({
             </DialogContent>
           </Dialog>
           
-          {/* Google Reviews - Green theme */}
-          {vendor.google_rating_count > 0 && (
-            <div className="flex justify-between items-center p-2 bg-green-50 border border-green-200 rounded-lg">
+          {/* Google Reviews - Make Clickable */}
+          {vendor.google_rating_count && vendor.google_rating_count > 0 && (
+            <button
+              onClick={() => {
+                // Option 1: Open Google Maps listing (external link)
+                if (vendor.google_place_id) {
+                  window.open(`https://www.google.com/maps/place/?q=place_id:${vendor.google_place_id}`, '_blank');
+                } else {
+                  // Fallback: Search Google for the business
+                  window.open(`https://www.google.com/search?q=${encodeURIComponent(vendor.name + ' ' + vendor.category + ' Boca Raton')}`, '_blank');
+                }
+              }}
+              className="w-full flex items-center justify-between bg-green-50 border border-green-200 rounded-lg px-3 py-2 hover:bg-green-100 transition-colors cursor-pointer"
+            >
               <div className="flex items-center gap-2">
                 <ReviewSourceIcon source="google" size="sm" />
-                <span className="text-sm font-medium text-green-700">Google</span>
+                <span className="text-sm font-medium text-gray-700">Google</span>
               </div>
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-2">
                 <RatingStars rating={vendor.google_rating || 0} size="sm" />
-                <span className="text-sm font-medium text-green-800 underline">
-                  {vendor.google_rating?.toFixed(1)}
-                </span>
-                <span className="text-xs text-green-600 underline">
+                <span className="text-sm text-gray-600">
                   ({vendor.google_rating_count})
                 </span>
               </div>
-            </div>
+            </button>
           )}
         </div>
 
