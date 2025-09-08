@@ -64,9 +64,8 @@ export default function VendorMobileCard({
             </div>
           </div>
           <Button
-            size="sm"
             onClick={() => isAuthenticated ? onRate(vendor) : window.location.href = `/auth?community=${encodeURIComponent(communityName || '')}`}
-            className="shrink-0 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-3 py-1.5"
+            className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2"
           >
             Rate
           </Button>

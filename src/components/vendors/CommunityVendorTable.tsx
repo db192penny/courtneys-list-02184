@@ -279,15 +279,15 @@ export default function CommunityVendorTable({
         <div className="w-full mb-4">
           <button
             onClick={() => setFilterModalOpen(true)}
-            className="w-full flex items-center justify-between px-4 py-3 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 transition-colors"
+            className="w-full flex items-center justify-center px-4 py-3 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 transition-colors relative"
           >
             <div className="flex items-center gap-2">
-              <span className="text-lg">{filterText.icon}</span>
-              <span className="text-sm font-medium">
+              <span className="text-xl">{filterText.icon}</span>
+              <span className="text-base font-medium">
                 {filterText.category ? `${filterText.category} • ${filterText.sort}` : filterText.sort}
               </span>
             </div>
-            <ChevronDown className="h-4 w-4 shrink-0 text-gray-500" />
+            <ChevronDown className="h-5 w-5 absolute right-4 text-gray-500" />
           </button>
         </div>
       )}
