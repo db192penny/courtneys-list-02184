@@ -7,24 +7,11 @@ import { useUserProfile } from "@/hooks/useUserProfile";
 import { ReviewSourceIcon } from "./ReviewSourceIcon";
 import { formatAuthorLabel } from "@/utils/formatAuthorLabel";
 
-interface MobileReviewsModalProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  vendor: any;
-  onRate?: () => void;
-}
-
-export function MobileReviewsModal({ open, onOpenChange, vendor, onRate }: MobileReviewsModalProps) {
+export function MobileReviewsModal({ open, onOpenChange, vendor, onRate }) {
   const { data: profile } = useUserProfile();
   const isVerified = !!profile?.isVerified;
   
-  const { data, isLoading, error } = useQuery<{ 
-    id: string; 
-    rating: number; 
-    comments: string | null; 
-    author_label: string; 
-    created_at: string | null; 
-  }[]>({
+  const { data, isLoading, error } = useQuery({
     queryKey: ["mobile-reviews", vendor?.id],
     queryFn: async () => {
       const { data, error } = await supabase.rpc("list_vendor_reviews", { 
@@ -33,7 +20,7 @@ export function MobileReviewsModal({ open, onOpenChange, vendor, onRate }: Mobil
       if (error) throw error;
       
       // Format the author labels
-      return (data || []).map((item: any) => ({
+      return (data || []).map((item) => ({
         ...item,
         author_label: formatAuthorLabel(item?.author_label)
       }));
@@ -92,4 +79,17 @@ export function MobileReviewsModal({ open, onOpenChange, vendor, onRate }: Mobil
                 </Badge>
               </div>
               {r.created_at && (
-                <div className="text-[10px] text-mute
+                <div className="text-[10px] text-muted-foreground">
+                  {new Date(r.created_at).toLocaleDateString()}
+                </div>
+              )}
+            </div>
+            {r.comments && (
+              <p className="text-sm text-muted-foreground">{r.comments}</p>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
