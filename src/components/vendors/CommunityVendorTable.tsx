@@ -188,7 +188,7 @@ export default function CommunityVendorTable({
     <TooltipProvider>
     <div className="space-y-6">
       {/* Enhanced Filter Bar for Desktop */}
-      {!isMobile ? (
+      {!isMobile && (
         <div className="space-y-4">
           {/* Category Tabs */}
           <div className="border-b border-border">
@@ -274,10 +274,14 @@ export default function CommunityVendorTable({
             </Tabs>
           </div>
         </div>
-      ) : (
-        /* Mobile Filter Controls */
+      )}
+
+      {/* Mobile Filter Controls */}
+      {isMobile && (
         <div className="w-full mb-4">
-          <label className="text-xs text-gray-500 font-medium mb-1 block">Category</label>
+          <label className="text-xs text-gray-600 font-medium uppercase tracking-wide mb-1 block">
+            Category
+          </label>
           <button
             onClick={() => setFilterModalOpen(true)}
             className="w-full flex items-center justify-between px-4 py-3 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 transition-colors"
