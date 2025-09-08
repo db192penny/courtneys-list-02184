@@ -4,10 +4,7 @@ import { Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useAuth } from "@/hooks/useAuth";
-import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { formatNameWithLastInitial } from "@/utils/nameFormatting";
-import { capitalizeStreetName } from "@/utils/address";
 
 interface MobileReviewsModalProps {
   vendorId: string;
@@ -18,16 +15,6 @@ export function MobileReviewsModal({ vendorId }: MobileReviewsModalProps) {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const isVerified = !!profile?.isVerified;
-  
-  const [reviewClicks, setReviewClicks] = useState(0);
-  const MAX_CLICKS = 3;
-  
-  useEffect(() => {
-    if (!isAuthenticated) {
-      const clicks = parseInt(localStorage.getItem('review_clicks') || '0');
-      setReviewClicks(clicks);
-    }
-  }, [isAuthenticated]);
   
   if (!isAuthenticated) {
     return (
@@ -45,7 +32,7 @@ export function MobileReviewsModal({ vendorId }: MobileReviewsModalProps) {
     comments: string | null; 
     author_label: string; 
     created_at: string | null;
-    anonymous: boolean;
+    anonymous?: boolean;
   }[]>({
     queryKey: ["mobile-reviews", vendorId],
     queryFn: async () => {
@@ -58,43 +45,46 @@ export function MobileReviewsModal({ vendorId }: MobileReviewsModalProps) {
     enabled: !!vendorId,
   });
   
-  // Format the author labels using frontend utilities
-  const data = rawData?.map(review => {
-    let name = 'Neighbor';
-    let street = '';
-    
-    // Parse the name|street format from database
-    if (review.author_label && review.author_label.includes('|')) {
-      const parts = review.author_label.split('|');
-      name = parts[0] || 'Neighbor';
-      street = parts[1] || '';
-    }
-    
-    let displayLabel;
-    if (review.anonymous) {
-      displayLabel = street ? `Neighbor on ${capitalizeStreetName(street)}` : 'Neighbor';
-    } else {
-      const formattedName = formatNameWithLastInitial(name);
-      displayLabel = street ? `${formattedName} on ${capitalizeStreetName(street)}` : formattedName;
-    }
-    
-    return {
-      ...review,
-      author_label: displayLabel
-    };
-  });
-  
-  const handleReviewInteraction = () => {
-    if (!isAuthenticated) {
-      const newClicks = reviewClicks + 1;
-      setReviewClicks(newClicks);
-      localStorage.setItem('review_clicks', newClicks.toString());
+  // SAFE formatting function
+  const formatAuthorLabel = (review: any): string => {
+    try {
+      if (!review.author_label) return 'Neighbor';
       
-      if (newClicks >= MAX_CLICKS) {
-        navigate(`/auth?community=Boca%20Bridges&vendor=${vendorId}`);
+      const authorStr = String(review.author_label);
+      
+      // Parse the name|street format
+      if (authorStr.includes('|')) {
+        const [namePart, streetPart] = authorStr.split('|');
+        const name = namePart?.trim() || 'Neighbor';
+        const street = streetPart?.trim() || '';
+        
+        if (review.anonymous) {
+          return street ? `Neighbor on ${street}` : 'Neighbor';
+        } else {
+          // Format name with last initial
+          const nameParts = name.split(' ').filter(Boolean);
+          if (nameParts.length >= 2) {
+            const firstName = nameParts[0];
+            const lastName = nameParts[nameParts.length - 1];
+            const lastInitial = lastName ? lastName.charAt(0).toUpperCase() + '.' : '';
+            const formatted = `${firstName} ${lastInitial}`;
+            return street ? `${formatted} on ${street}` : formatted;
+          }
+          return street ? `${name} on ${street}` : name;
+        }
       }
+      
+      return authorStr;
+    } catch (err) {
+      console.error('Error formatting author label:', err);
+      return 'Neighbor';
     }
   };
+  
+  const data = rawData?.map(review => ({
+    ...review,
+    author_label: formatAuthorLabel(review)
+  })) || [];
   
   if (isLoading) {
     return <div className="text-sm text-muted-foreground p-4">Loading reviews…</div>;
@@ -133,7 +123,7 @@ export function MobileReviewsModal({ vendorId }: MobileReviewsModalProps) {
             )}
           </div>
           {r.comments && (
-            <p className="text-sm text-muted-foreground">{r.comments}</p>
+            <p className="text-sm text-muted-foreground">{String(r.comments)}</p>
           )}
         </div>
       ))}
