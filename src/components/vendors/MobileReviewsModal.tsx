@@ -11,6 +11,7 @@ interface MobileReviewsModalProps {
 export function MobileReviewsModal({ vendorId }: MobileReviewsModalProps) {
   const { isAuthenticated } = useAuth();
   
+  // Early return for unauthenticated users
   if (!isAuthenticated) {
     return (
       <div className="p-4">
@@ -21,7 +22,7 @@ export function MobileReviewsModal({ vendorId }: MobileReviewsModalProps) {
     );
   }
   
-  const { data, isLoading, error } = useQuery({
+  const { data: rawData, isLoading, error } = useQuery({
     queryKey: ["mobile-reviews", vendorId],
     queryFn: async () => {
       const { data, error } = await supabase.rpc("list_vendor_reviews", { 
@@ -30,7 +31,7 @@ export function MobileReviewsModal({ vendorId }: MobileReviewsModalProps) {
       if (error) throw error;
       return data || [];
     },
-    enabled: !!vendorId,
+    enabled: !!vendorId && isAuthenticated, // Re-add authentication check
   });
   
   if (isLoading) {
@@ -41,7 +42,9 @@ export function MobileReviewsModal({ vendorId }: MobileReviewsModalProps) {
     return <div className="text-sm text-muted-foreground p-4">Unable to load reviews.</div>;
   }
   
-  if (!data || data.length === 0) {
+  const data = rawData || [];
+  
+  if (data.length === 0) {
     return (
       <div className="text-sm text-muted-foreground p-4">
         No reviews yet. Be the first to review!
@@ -51,29 +54,35 @@ export function MobileReviewsModal({ vendorId }: MobileReviewsModalProps) {
   
   return (
     <div className="max-h-96 overflow-y-auto space-y-3 p-4">
-      {data.map((r: any) => (
-        <div key={r.id} className="border rounded-md p-3">
-          <div className="text-xs text-foreground flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1">
-                <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
-                <span className="font-medium">{r.rating}/5</span>
+      {data.map((r: any) => {
+        const authorLabel = String(r.author_label || 'Neighbor');
+        const rating = Number(r.rating || 0);
+        const comments = String(r.comments || '');
+        
+        return (
+          <div key={r.id} className="border rounded-md p-3">
+            <div className="text-xs text-foreground flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1">
+                  <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
+                  <span className="font-medium">{rating}/5</span>
+                </div>
+                <Badge variant="outline" className="text-xs px-2 py-0.5 bg-blue-50 text-blue-700 border-blue-200">
+                  {authorLabel}
+                </Badge>
               </div>
-              <Badge variant="outline" className="text-xs px-2 py-0.5 bg-blue-50 text-blue-700 border-blue-200">
-                Neighbor
-              </Badge>
+              {r.created_at && (
+                <div className="text-[10px] text-muted-foreground">
+                  {new Date(r.created_at).toLocaleDateString()}
+                </div>
+              )}
             </div>
-            {r.created_at && (
-              <div className="text-[10px] text-muted-foreground">
-                {new Date(r.created_at).toLocaleDateString()}
-              </div>
+            {comments && (
+              <p className="text-sm text-muted-foreground">{comments}</p>
             )}
           </div>
-          {r.comments && (
-            <p className="text-sm text-muted-foreground">{String(r.comments)}</p>
-          )}
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
