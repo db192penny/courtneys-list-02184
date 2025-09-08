@@ -58,6 +58,14 @@ export function MobileReviewsModal({ vendorId }: MobileReviewsModalProps) {
     }
   };
   
+  if (!isAuthenticated) {
+    return (
+      <div className="text-sm text-muted-foreground p-4">
+        🔒 Sign up to see neighbor reviews
+      </div>
+    );
+  }
+  
   if (isLoading) {
     return <div className="text-sm text-muted-foreground p-4">Loading reviews…</div>;
   }

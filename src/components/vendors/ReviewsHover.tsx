@@ -31,6 +31,21 @@ export default function ReviewsHover({ vendorId, children }: { vendorId: string;
     enabled: !!vendorId && !!isAuthenticated,
   });
 
+  if (!isAuthenticated) {
+    return (
+      <HoverCard openDelay={200} closeDelay={100}>
+        <HoverCardTrigger asChild>
+          <span className="cursor-help">{children}</span>
+        </HoverCardTrigger>
+        <HoverCardContent className="w-80">
+          <div className="text-sm text-muted-foreground">
+            🔒 Sign up to see neighbor reviews
+          </div>
+        </HoverCardContent>
+      </HoverCard>
+    );
+  }
+
   return (
     <HoverCard openDelay={200} closeDelay={100}>
       <HoverCardTrigger asChild>
