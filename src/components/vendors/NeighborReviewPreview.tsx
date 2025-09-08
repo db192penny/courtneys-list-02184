@@ -77,14 +77,14 @@ export function NeighborReviewPreview({
 
   if (!selectedReview) {
     return (
-      <div className={cn("text-xs text-muted-foreground italic", className)}>
+      <div className={cn("text-xs text-muted-foreground italic bg-yellow-50 border border-yellow-200 p-2 rounded", className)}>
         🌟 Be the first to share your experience!
       </div>
     );
   }
 
   return (
-    <div className={cn("space-y-1", className)}>
+    <div className={cn("space-y-1 bg-gray-50 border border-gray-200 p-2 rounded", className)}>
       <div className="flex items-center gap-1.5">
         <RatingStars rating={selectedReview.rating} size="sm" />
         <ReviewSourceIcon source="bb" size="sm" />

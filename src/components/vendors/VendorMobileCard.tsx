@@ -1,4 +1,4 @@
-import { Star, Info, ChevronRight, Smartphone, DollarSign, Phone } from "lucide-react";
+import { Star, Info, ChevronRight, Smartphone, DollarSign, Phone, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { RatingStars } from "@/components/ui/rating-stars";
@@ -49,148 +49,101 @@ export default function VendorMobileCard({
 }: VendorMobileCardProps) {
   return (
     <Card className="w-full">
-      <CardContent className="p-4 space-y-3">
-        {/* Header with rank, name, and badges */}
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex-1 min-w-0">
-            {/* Labels above provider name */}
-            <div className="flex flex-wrap gap-1 mb-2">
-              {vendor.homes_serviced === 0 && (
-                <Badge 
-                  variant="secondary" 
-                  className="text-[10px] px-1 py-0 bg-orange-100 text-orange-800 hover:bg-orange-200 whitespace-nowrap"
-                >
-                  New
-                </Badge>
-              )}
-              {(() => {
-                const hasVendor = userHomeVendors?.has(vendor.id);
-                console.log(`[VendorMobileCard] Checking vendor ${vendor.name} (${vendor.id}):`, {
-                  hasVendor,
-                  userHomeVendorsSize: userHomeVendors?.size,
-                  userHomeVendorsArray: userHomeVendors ? Array.from(userHomeVendors) : []
-                });
-                return hasVendor;
-              })() && (
-                <Badge 
-                  variant="secondary" 
-                  className="text-[10px] px-1 py-0 bg-green-100 text-green-800 hover:bg-green-200 whitespace-nowrap"
-                >
-                  Your Provider
-                </Badge>
-              )}
-            </div>
-            {/* Rank and full provider name */}
-            <div className="flex items-center gap-2">
-              <span className="text-lg font-semibold text-muted-foreground">#{rank}</span>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <h3 className="font-medium text-foreground break-words leading-tight">{vendor.name}</h3>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>{vendor.name}</p>
-                </TooltipContent>
-              </Tooltip>
+      <CardContent className="p-3 space-y-3">
+        {/* Header with rank, name, and rate button */}
+        <div className="flex justify-between items-start mb-3">
+          <div className="flex items-center gap-2 flex-1">
+            <span className="bg-blue-500 text-white text-xs font-semibold px-2 py-1 rounded">
+              #{rank}
+            </span>
+            <div>
+              <h3 className="text-base font-semibold">{vendor.name}</h3>
+              <span className="text-xs text-gray-500 uppercase">{vendor.category}</span>
             </div>
           </div>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => isAuthenticated ? onRate(vendor) : window.location.href = `/auth?community=${encodeURIComponent(communityName || '')}`}
+            className="shrink-0"
+          >
+            Rate
+          </Button>
         </div>
 
-        {/* Category and homes serviced */}
-        <div className="flex items-center justify-between gap-2">
-          <Button 
-            size="sm" 
-            variant="outline" 
-            onClick={() => onCategoryClick(vendor.category)}
-            className="text-xs flex items-center gap-1"
-          >
-            {React.createElement(getCategoryIcon(vendor.category as any), { className: "h-3 w-3" })}
-            {vendor.category}
-          </Button>
-          <div className="flex items-center gap-2 text-sm">
-            <span className="font-medium">
-              {vendor.homes_serviced === 0 ? "–" : vendor.homes_serviced} neighbors
-            </span>
-            {vendor.homes_pct && (
-              <span className="text-xs text-muted-foreground">({vendor.homes_pct}%)</span>
-            )}
-          </div>
+        {/* Badges */}
+        <div className="flex flex-wrap gap-1 mb-2">
+          {vendor.homes_serviced === 0 && (
+            <Badge 
+              variant="secondary" 
+              className="text-[10px] px-1 py-0 bg-orange-100 text-orange-800 hover:bg-orange-200 whitespace-nowrap"
+            >
+              New
+            </Badge>
+          )}
+          {(() => {
+            const hasVendor = userHomeVendors?.has(vendor.id);
+            console.log(`[VendorMobileCard] Checking vendor ${vendor.name} (${vendor.id}):`, {
+              hasVendor,
+              userHomeVendorsSize: userHomeVendors?.size,
+              userHomeVendorsArray: userHomeVendors ? Array.from(userHomeVendors) : []
+            });
+            return hasVendor;
+          })() && (
+            <Badge 
+              variant="secondary" 
+              className="text-[10px] px-1 py-0 bg-green-100 text-green-800 hover:bg-green-200 whitespace-nowrap"
+            >
+              Your Provider
+            </Badge>
+          )}
+        </div>
+
+        {/* Homes serviced */}
+        <div className="flex justify-center text-sm">
+          <span className="font-medium">
+            {vendor.homes_serviced === 0 ? "–" : vendor.homes_serviced} neighbors
+          </span>
+          {vendor.homes_pct && (
+            <span className="text-xs text-muted-foreground ml-1">({vendor.homes_pct}%)</span>
+          )}
         </div>
 
         {/* Reviews Section */}
-        <div>
-          <SectionHeader icon={Star} title="Ratings & Reviews" />
-          <div className="space-y-3">
-            {/* Neighbor Reviews with Preview */}
-            <Dialog>
-              <DialogTrigger asChild>
-                <div className="flex items-center justify-between p-2 rounded-md bg-blue-50 hover:bg-blue-100 transition-colors border border-blue-200 cursor-pointer group">
-                  <span className="text-sm font-medium text-muted-foreground underline">{communityName}</span>
-                  <div className="flex items-center gap-1">
-                    {vendor.hoa_rating ? (
-                      <>
-                        <div className="underline">
-                          <RatingStars rating={vendor.hoa_rating} showValue />
-                        </div>
-                        {vendor.hoa_rating_count && (
-                          <span className="text-xs text-muted-foreground">({vendor.hoa_rating_count})</span>
-                        )}
-                      </>
-                    ) : (
-                      <span className="text-xs text-muted-foreground underline">No ratings yet</span>
-                    )}
-                    <ChevronRight className="h-3 w-3 text-muted-foreground" />
-                  </div>
-                </div>
-              </DialogTrigger>
-              <DialogContent className="max-w-sm max-h-[80vh] overflow-y-auto">
-                <DialogHeader>
-                  <DialogTitle>{communityName} Reviews</DialogTitle>
-                </DialogHeader>
-                <div className="mt-4">
-                  <MobileReviewsModal vendorId={vendor.id} />
-                </div>
-              </DialogContent>
-            </Dialog>
-
-            {/* Neighbor Review Preview */}
-            <NeighborReviewPreview vendorId={vendor.id} className="px-2" />
-            
-            {/* Google Reviews (if available) */}
-            {vendor.google_rating != null && (
-              <Dialog>
-                <DialogTrigger asChild>
-                  <div className="flex items-center justify-between p-2 rounded-md bg-green-50 hover:bg-green-100 transition-colors border border-green-200 cursor-pointer group">
-                    <div className="flex items-center gap-2">
-                      <ReviewSourceIcon source="google" size="sm" />
-                      <span className="text-sm font-medium text-muted-foreground underline">Google</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <div className="underline">
-                        <RatingStars rating={vendor.google_rating} showValue />
-                      </div>
-                      {vendor.google_rating_count && (
-                        <span className="text-xs text-muted-foreground">({vendor.google_rating_count})</span>
-                      )}
-                      <ChevronRight className="h-3 w-3 text-muted-foreground" />
-                    </div>
-                  </div>
-                </DialogTrigger>
-                <DialogContent className="max-w-sm max-h-[80vh] overflow-y-auto">
-                  <DialogHeader>
-                    <DialogTitle>Google Reviews</DialogTitle>
-                  </DialogHeader>
-                  <div className="mt-4">
-                    <MobileGoogleReviewsModal 
-                      vendorId={vendor.id} 
-                      googleReviewsJson={vendor.google_reviews_json}
-                      googlePlaceId={vendor.google_place_id}
-                    />
-                  </div>
-                </DialogContent>
-              </Dialog>
-            )}
+        <div className="space-y-2 mb-3">
+          {/* Simplified BB Reviews */}
+          <div className="flex items-center justify-between py-1">
+            <div className="flex items-center gap-2">
+              <ReviewSourceIcon source="bb" size="sm" />
+              <span className="text-sm font-medium">Boca Bridges</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <RatingStars rating={vendor.hoa_rating || 0} size="sm" />
+              <span className="text-sm text-gray-600">
+                {vendor.hoa_rating?.toFixed(1)} ({vendor.hoa_rating_count || 0})
+              </span>
+            </div>
           </div>
+          
+          {/* Simplified Google Reviews if available */}
+          {vendor.google_rating_count > 0 && (
+            <div className="flex items-center justify-between py-1">
+              <div className="flex items-center gap-2">
+                <ReviewSourceIcon source="google" size="sm" />
+                <span className="text-sm font-medium">Google</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <RatingStars rating={vendor.google_rating || 0} size="sm" />
+                <span className="text-sm text-gray-600">
+                  {vendor.google_rating?.toFixed(1)} ({vendor.google_rating_count})
+                </span>
+              </div>
+            </div>
+          )}
         </div>
+
+        {/* Neighbor Review Preview */}
+        <NeighborReviewPreview vendorId={vendor.id} className="px-2" />
 
         {/* Cost Information Section */}
         <div className="bg-gray-50 border border-gray-200 rounded-md p-3">
@@ -211,41 +164,42 @@ export default function VendorMobileCard({
         </div>
 
         {/* Actions Section */}
-        <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
-          <SectionHeader icon={Smartphone} title="Actions" />
+        {isAuthenticated && (
           <div className="flex gap-2">
             <Button 
               size="sm" 
               variant="outline"
-              className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700 flex items-center gap-1 flex-1"
-              onClick={() => isAuthenticated ? onRate(vendor) : window.location.href = `/auth?community=${encodeURIComponent(communityName || '')}`}
+              className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700 flex-1"
+              onClick={() => onCosts(vendor)}
             >
-              <Star className="h-3 w-3" />
-              {userReviews?.has(vendor.id) ? "Edit Rating" : "Rate Provider"}
+              {userCosts?.has(vendor.id) ? "Edit Cost Info" : "Add Cost Info"}
             </Button>
-            {isAuthenticated && (
-              <Button 
-                size="sm" 
-                variant="outline"
-                className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700 flex-1"
-                onClick={() => onCosts(vendor)}
-              >
-                {userCosts?.has(vendor.id) ? "Edit Cost Info" : "Add Cost Info"}
-              </Button>
-            )}
           </div>
-        </div>
+        )}
 
         {/* Contact Section */}
-        <div className="bg-purple-50 border border-purple-200 rounded-md p-3">
-          <SectionHeader icon={Phone} title="Contact" />
-          <div className="text-sm">
-            <span className="text-muted-foreground">Phone: </span>
-            <span className="font-medium">
-              {showContact ? (vendor.contact_info ? formatUSPhoneDisplay(vendor.contact_info) : "—") : "Hidden"}
-            </span>
+        {showContact && vendor.contact_info && (
+          <div className="flex gap-2 mt-3">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => window.location.href = `tel:${vendor.contact_info}`}
+              className="flex-1 text-sm"
+            >
+              <Phone className="w-3 h-3 mr-1" />
+              Call
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => window.location.href = `sms:${vendor.contact_info}`}
+              className="flex-1 text-sm"
+            >
+              <MessageSquare className="w-3 h-3 mr-1" />
+              Text
+            </Button>
           </div>
-        </div>
+        )}
       </CardContent>
     </Card>
   );
