@@ -95,12 +95,13 @@ export function CostDisplay({
                     <DialogTitle>Cost Details</DialogTitle>
                   </DialogHeader>
                   <div className="mt-4">
-                    {!isVerified ? (
-                      <div className="text-sm text-muted-foreground p-4">
-                        Costs are shared just within our neighborhood circle. Sign up to view them.
+                    <MobileCostsModal vendorId={vendorId} />
+                    {!isVerified && (
+                      <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md text-center">
+                        <p className="text-sm text-blue-700">
+                          Want to add your costs? Sign up to contribute!
+                        </p>
                       </div>
-                    ) : (
-                      <MobileCostsModal vendorId={vendorId} />
                     )}
                   </div>
                 </DialogContent>
@@ -122,18 +123,20 @@ export function CostDisplay({
           ) : (
             <div 
               className="px-2 py-1.5 rounded-md bg-blue-50 hover:bg-blue-100 transition-colors border border-blue-200 hover:border-blue-300 min-h-[28px] flex items-center group cursor-pointer"
-              onClick={onOpenCostModal}
+              onClick={isVerified ? onOpenCostModal : undefined}
             >
               {communityPrice ? (
                 <span className="text-xs font-medium underline decoration-dotted underline-offset-4">{communityPrice}</span>
               ) : (
-                <span className="text-xs text-muted-foreground underline decoration-dotted underline-offset-4">Share cost info</span>
+                <span className="text-xs text-muted-foreground underline decoration-dotted underline-offset-4">
+                  {isVerified ? "Share cost info" : "No cost data yet"}
+                </span>
               )}
             </div>
           )}
         </div>
 
-        {/* Area Average Price Line */}
+        {/* Area Average Price Line - unchanged */}
         {SHOW_AREA_AVERAGE && (
           <div className="flex items-center gap-1">
             <span className="text-xs text-muted-foreground min-w-[70px]">Area Average:</span>

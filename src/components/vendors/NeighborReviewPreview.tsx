@@ -121,11 +121,7 @@ export function NeighborReviewPreview({
         <DialogHeader>
           <DialogTitle>Boca Bridges Reviews</DialogTitle>
         </DialogHeader>
-        <MobileReviewsModal 
-          open={true}
-          onOpenChange={() => {}}
-          vendor={{ id: vendorId }}
-        />
+        <MobileReviewsModal vendorId={vendorId} />
       </DialogContent>
     </Dialog>
   );

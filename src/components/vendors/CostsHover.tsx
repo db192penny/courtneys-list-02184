@@ -51,7 +51,7 @@ export default function CostsHover({ vendorId, children }: Props) {
       
       return data as CostData[];
     },
-    enabled: isVerified && !!vendorId,
+    enabled: !!vendorId,  // Removed isVerified requirement
   });
 
   return (
@@ -64,21 +64,21 @@ export default function CostsHover({ vendorId, children }: Props) {
       <HoverCardContent className="w-80">
         <div className="space-y-3">
           <h4 className="text-sm font-semibold">Community Cost Submissions</h4>
-          {!isVerified && (
-            <div className="text-sm text-muted-foreground">
-              Costs are shared just within our neighborhood circle. Sign up to view them.
-            </div>
-          )}
-          {isVerified && isLoading && (
+          {isLoading && (
             <div className="text-sm text-muted-foreground">Loading costs...</div>
           )}
-          {isVerified && error && (
+          {error && (
             <div className="text-sm text-muted-foreground">Unable to load costs.</div>
           )}
-          {isVerified && costs && costs.length === 0 && (
-            <div className="text-sm text-muted-foreground">No cost submissions yet.</div>
+          {costs && costs.length === 0 && (
+            <div className="text-sm text-muted-foreground">
+              No cost submissions yet.
+              {!isVerified && (
+                <p className="mt-2 text-xs">Sign up to be the first to share costs!</p>
+              )}
+            </div>
           )}
-          {isVerified && costs && costs.length > 0 && (
+          {costs && costs.length > 0 && (
             <div className="space-y-2">
               {costs.map((cost) => (
                 <div key={cost.id} className="border rounded-md p-2">
@@ -107,6 +107,13 @@ export default function CostsHover({ vendorId, children }: Props) {
                   )}
                 </div>
               ))}
+              {!isVerified && (
+                <div className="mt-3 p-2 bg-blue-50 border border-blue-200 rounded-md text-center">
+                  <p className="text-xs text-blue-700">
+                    Want to add your costs? Sign up to contribute!
+                  </p>
+                </div>
+              )}
             </div>
           )}
         </div>

@@ -10,15 +10,23 @@ import { useUserProfile } from "@/hooks/useUserProfile";
 export default function ReviewsHover({ vendorId, children }: { vendorId: string; children: ReactNode }) {
   const { data: profile } = useUserProfile();
   const isVerified = !!profile?.isVerified;
-
-  const { data, isLoading, error } = useQuery<{ id: string; rating: number; comments: string | null; author_label: string; created_at: string | null; }[]>({
+  
+  const { data, isLoading, error } = useQuery<{ 
+    id: string; 
+    rating: number; 
+    comments: string | null; 
+    author_label: string; 
+    created_at: string | null; 
+  }[]>({
     queryKey: ["reviews-hover", vendorId],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc("list_vendor_reviews", { _vendor_id: vendorId });
+      const { data, error } = await supabase.rpc("list_vendor_reviews", { 
+        _vendor_id: vendorId 
+      });
       if (error) throw error;
       return (data || []) as any[];
     },
-    enabled: isVerified && !!vendorId,
+    enabled: !!vendorId,  // Removed isVerified requirement
   });
 
   return (
@@ -27,21 +35,21 @@ export default function ReviewsHover({ vendorId, children }: { vendorId: string;
         <span className="cursor-help">{children}</span>
       </HoverCardTrigger>
       <HoverCardContent className="w-80">
-        {!isVerified && (
-          <div className="text-sm text-muted-foreground">
-            Reviews are shared just within our neighborhood circle. Sign up to view them.
-          </div>
-        )}
-        {isVerified && isLoading && (
+        {isLoading && (
           <div className="text-sm text-muted-foreground">Loading reviews…</div>
         )}
-        {isVerified && error && (
+        {error && (
           <div className="text-sm text-muted-foreground">Unable to load reviews.</div>
         )}
-        {isVerified && data && data.length === 0 && (
-          <div className="text-sm text-muted-foreground">No reviews yet.</div>
+        {data && data.length === 0 && (
+          <div className="text-sm text-muted-foreground">
+            No reviews yet.
+            {!isVerified && (
+              <p className="mt-2 text-xs">Sign up to be the first to review!</p>
+            )}
+          </div>
         )}
-        {isVerified && data && data.length > 0 && (
+        {data && data.length > 0 && (
           <div className="max-h-64 overflow-y-auto space-y-3">
             {data.map((r) => (
               <div key={r.id} className="border rounded-md p-2">
@@ -66,6 +74,13 @@ export default function ReviewsHover({ vendorId, children }: { vendorId: string;
                 )}
               </div>
             ))}
+            {!isVerified && (
+              <div className="mt-3 p-2 bg-blue-50 border border-blue-200 rounded-md text-center">
+                <p className="text-xs text-blue-700">
+                  Want to add your review? Sign up to contribute!
+                </p>
+              </div>
+            )}
           </div>
         )}
       </HoverCardContent>
