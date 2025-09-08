@@ -59,22 +59,30 @@ export default function VendorMobileCard({
     <>
     <Card className="w-full">
       <CardContent className="p-3 space-y-3">
-        {/* Header with rank, name, and rate button */}
         <div className="flex justify-between items-start mb-3">
           <div className="flex items-center gap-2 flex-1">
-            <span className="bg-blue-500 text-white text-xs font-semibold px-2 py-1 rounded min-w-[28px] text-center">
+            <span className="bg-blue-500 text-white text-xs font-semibold px-2 py-1 rounded">
               #{rank}
             </span>
-            <div>
-              <h3 className="text-base font-semibold text-gray-900">{vendor.name}</h3>
-              <span className="text-xs font-medium uppercase tracking-wide text-gray-600">
-                {vendor.category}
-              </span>
+            <div className="flex-1">
+              <h3 className="text-base font-semibold">{vendor.name}</h3>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-gray-500 uppercase">{vendor.category}</span>
+                {vendor.homes_serviced > 0 && (
+                  <>
+                    <span className="text-xs text-gray-400">•</span>
+                    <span className="text-xs text-gray-500">{vendor.homes_serviced} neighbor{vendor.homes_serviced !== 1 ? 's' : ''}</span>
+                    {vendor.homes_pct && (
+                      <span className="text-xs text-gray-400">({vendor.homes_pct}%)</span>
+                    )}
+                  </>
+                )}
+              </div>
             </div>
           </div>
           <Button
             onClick={() => isAuthenticated ? onRate(vendor) : window.location.href = `/auth?community=${encodeURIComponent(communityName || '')}`}
-            className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2"
+            className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 shrink-0"
           >
             Rate
           </Button>
@@ -108,15 +116,6 @@ export default function VendorMobileCard({
           )}
         </div>
 
-        {/* Homes serviced */}
-        <div className="flex justify-center text-sm">
-          <span className="font-medium">
-            {vendor.homes_serviced === 0 ? "–" : vendor.homes_serviced} neighbors
-          </span>
-          {vendor.homes_pct && (
-            <span className="text-xs text-muted-foreground ml-1">({vendor.homes_pct}%)</span>
-          )}
-        </div>
 
         {/* Reviews Section */}
         <div className="space-y-2 mb-3">
