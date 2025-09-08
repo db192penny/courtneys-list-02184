@@ -45,7 +45,15 @@ export function NeighborReviewPreview({
 
   // Format the author labels using frontend utilities
   const reviews = rawData?.map(review => {
-    const [name, street] = review.author_label.split('|');
+    let name = 'Neighbor';
+    let street = '';
+    
+    // Parse the name|street format from database
+    if (review.author_label && review.author_label.includes('|')) {
+      const parts = review.author_label.split('|');
+      name = parts[0] || 'Neighbor';
+      street = parts[1] || '';
+    }
     
     let displayLabel;
     if (review.anonymous) {
@@ -65,7 +73,6 @@ export function NeighborReviewPreview({
   const selectBestReview = (reviews: Review[]): Review | null => {
     if (!reviews || reviews.length === 0) return null;
     
-    // Sort by: substantial comments first, then by date
     const sorted = [...reviews].sort((a, b) => {
       const aHasComment = a.comments && a.comments.trim().length > 10;
       const bHasComment = b.comments && b.comments.trim().length > 10;
