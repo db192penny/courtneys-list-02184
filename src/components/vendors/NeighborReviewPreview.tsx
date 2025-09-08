@@ -1,4 +1,3 @@
-import { formatAuthorLabel } from "@/utils/formatAuthorLabel";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { RatingStars } from "@/components/ui/rating-stars";
@@ -30,18 +29,13 @@ export function NeighborReviewPreview({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { data: reviews, isLoading, error } = useQuery({
     queryKey: ["vendor-reviews", vendorId],
- queryFn: async () => {
-  const { data, error } = await supabase
-    .rpc("list_vendor_reviews", { _vendor_id: vendorId });
-  
-  if (error) throw error;
-  
-  // Format the author labels
-  return (data || []).map((item) => ({
-    ...item,
-    author_label: formatAuthorLabel(item?.author_label)
-  }));
-},
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .rpc("list_vendor_reviews", { _vendor_id: vendorId });
+      
+      if (error) throw error;
+      return data as Review[];
+    },
     enabled: !!vendorId,
   });
 
@@ -123,16 +117,17 @@ export function NeighborReviewPreview({
           </div>
         </div>
       </DialogTrigger>
-      <DialogContent className="max-w-md mx-auto">
-        <DialogHeader>
-          <DialogTitle>Boca Bridges Reviews</DialogTitle>
-        </DialogHeader>
-        <MobileReviewsModal 
-          open={true}
-          onOpenChange={() => {}}
-          vendor={{ id: vendorId }}
-        />
-      </DialogContent>
+     <DialogContent className="max-w-md mx-auto">
+  <DialogHeader>
+    <DialogTitle>Boca Bridges Reviews</DialogTitle>
+  </DialogHeader>
+  <MobileReviewsModal 
+    open={true}
+    onOpenChange={() => {}}
+    vendor={{ id: vendorId }}
+    onRate={() => {}}
+  />
+</DialogContent>
     </Dialog>
   );
 }
