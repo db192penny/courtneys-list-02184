@@ -5,7 +5,7 @@ import { ReviewSourceIcon } from "./ReviewSourceIcon";
 import { MobileReviewsModal } from "./MobileReviewsModal";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { formatNameWithLastInitial } from "@/utils/nameFormatting";
-import { extractStreetName, capitalizeStreetName } from "@/utils/address";
+import { capitalizeStreetName } from "@/utils/address";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
@@ -21,6 +21,7 @@ interface Review {
   comments: string | null;
   created_at: string;
   author_label: string;
+  anonymous: boolean;
 }
 
 export function NeighborReviewPreview({ 
@@ -29,7 +30,8 @@ export function NeighborReviewPreview({
 }: NeighborReviewPreviewProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { isAuthenticated } = useAuth();
-  const { data: reviews, isLoading, error } = useQuery({
+  
+  const { data: rawData, isLoading, error } = useQuery({
     queryKey: ["vendor-reviews", vendorId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -39,6 +41,24 @@ export function NeighborReviewPreview({
       return data as Review[];
     },
     enabled: !!vendorId,
+  });
+
+  // Format the author labels using frontend utilities
+  const reviews = rawData?.map(review => {
+    const [name, street] = review.author_label.split('|');
+    
+    let displayLabel;
+    if (review.anonymous) {
+      displayLabel = street ? `Neighbor on ${capitalizeStreetName(street)}` : 'Neighbor';
+    } else {
+      const formattedName = formatNameWithLastInitial(name);
+      displayLabel = street ? `${formattedName} on ${capitalizeStreetName(street)}` : formattedName;
+    }
+    
+    return {
+      ...review,
+      author_label: displayLabel
+    };
   });
 
   // Smart review selection: prioritize recent reviews with substantial content
@@ -69,6 +89,16 @@ export function NeighborReviewPreview({
     setIsModalOpen(true);
   };
 
+  if (!isAuthenticated) {
+    return (
+      <div className={cn("bg-yellow-50 border border-yellow-200 rounded-lg p-3", className)}>
+        <p className="text-sm font-medium text-yellow-700">
+          🔒 Sign up to see neighbor reviews
+        </p>
+      </div>
+    );
+  }
+
   if (isLoading) {
     return (
       <div className={cn("text-xs text-muted-foreground", className)}>
@@ -87,16 +117,6 @@ export function NeighborReviewPreview({
 
   const selectedReview = selectBestReview(reviews || []);
   const totalReviews = reviews?.length || 0;
-
-  if (!isAuthenticated) {
-    return (
-      <div className={cn("bg-yellow-50 border border-yellow-200 rounded-lg p-3", className)}>
-        <p className="text-sm font-medium text-yellow-700">
-          🔒 Sign up to see neighbor reviews
-        </p>
-      </div>
-    );
-  }
 
   if (!selectedReview) {
     return (
