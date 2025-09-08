@@ -242,7 +242,9 @@ export default function MobileRateVendorModal({ open, onOpenChange, vendor, onSu
       
       toast({ 
         title: "🎉 Review Added! +5 Points", 
-        description: `${starbucksMessage} Plus monthly raffle entry for $200 service credit!` 
+        description: `${starbucksMessage} Plus monthly raffle entry for $200 service credit!`,
+        duration: 5000,
+        className: "bg-green-50 border-green-500 border-2 text-green-900"
       });
       
       onOpenChange(false);

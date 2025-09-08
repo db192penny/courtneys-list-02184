@@ -162,7 +162,9 @@ export function AddCostModal({
 
       toast({
         title: "💰 Cost Added!",
-        description: "You earned 5 points! You're getting closer to your free Starbucks card! ☕"
+        description: "You earned 5 points! You're getting closer to your free Starbucks card! ☕",
+        duration: 5000,
+        className: "bg-green-50 border-green-500 border-2 text-green-900"
       });
 
       // Refresh the vendor stats query
