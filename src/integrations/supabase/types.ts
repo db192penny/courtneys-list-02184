@@ -365,6 +365,33 @@ export type Database = {
           },
         ]
       }
+      email_queue: {
+        Row: {
+          created_at: string | null
+          data: Json | null
+          id: string
+          sent: boolean | null
+          template: string
+          to_email: string
+        }
+        Insert: {
+          created_at?: string | null
+          data?: Json | null
+          id?: string
+          sent?: boolean | null
+          template: string
+          to_email: string
+        }
+        Update: {
+          created_at?: string | null
+          data?: Json | null
+          id?: string
+          sent?: boolean | null
+          template?: string
+          to_email?: string
+        }
+        Relationships: []
+      }
       email_tracking: {
         Row: {
           action: string | null
@@ -1372,6 +1399,14 @@ export type Database = {
         Args: { _email: string }
         Returns: string
       }
+      get_inviter_info: {
+        Args: { inviter_id: string }
+        Returns: {
+          email: string
+          name: string
+          points: number
+        }[]
+      }
       get_my_hoa: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -1429,6 +1464,7 @@ export type Database = {
       list_vendor_reviews: {
         Args: { _vendor_id: string }
         Returns: {
+          anonymous: boolean
           author_label: string
           comments: string
           created_at: string
