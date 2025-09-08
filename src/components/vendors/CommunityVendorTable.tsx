@@ -266,10 +266,10 @@ export default function CommunityVendorTable({
               </h3>
               <button
                 onClick={() => window.location.href = `/submit?community=${communityName}&category=${category}`}
-                className="text-sm text-primary hover:text-primary/80 underline-offset-4 hover:underline flex items-center gap-1"
+                className="text-sm font-medium text-blue-600 hover:text-blue-700 flex items-center gap-1"
               >
                 <Plus className="h-3 w-3" />
-                New Provider
+                Add
               </button>
             </div>
           )}

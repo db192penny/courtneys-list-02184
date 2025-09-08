@@ -153,20 +153,7 @@ export default function Community() {
               </div>
             )}
 
-            {/* For logged in users - simplified actions */}
-            {!showSignUpPrompt && (
-              <div className="flex gap-2 justify-end">
-                <Button
-                  onClick={() => navigate(`/submit?community=${encodeURIComponent(communityName)}`)}
-                  variant="outline"
-                  size="sm"
-                  className="shrink-0"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Submit Provider
-                </Button>
-              </div>
-            )}
+            {/* For logged in users - no actions needed, removed submit provider button */}
           </div>
         </header>
 
