@@ -84,17 +84,7 @@ export const EnhancedMobileFilterModal: React.FC<EnhancedMobileFilterModalProps>
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="bottom" className="h-[85vh] overflow-hidden flex flex-col">
         <SheetHeader className="flex-shrink-0 pb-4 border-b">
-          <div className="flex justify-between items-center">
-            <SheetTitle>Filter & Sort</SheetTitle>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleClearAll}
-              className="text-blue-600 hover:text-blue-700"
-            >
-              Clear All
-            </Button>
-          </div>
+          <SheetTitle>Filter & Sort</SheetTitle>
         </SheetHeader>
         
         <div className="flex-1 overflow-y-auto py-4">
@@ -169,22 +159,14 @@ export const EnhancedMobileFilterModal: React.FC<EnhancedMobileFilterModalProps>
           </div>
         </div>
         
-        {/* Sticky Action Buttons */}
-        <div className="sticky bottom-0 left-0 right-0 bg-white border-t p-4 flex gap-2">
+        {/* Sticky Apply Button */}
+        <div className="sticky bottom-0 left-0 right-0 bg-white border-t p-4">
           <Button 
             onClick={() => onOpenChange(false)}
-            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium"
             size="lg"
           >
             Apply Filters
-          </Button>
-          <Button 
-            variant="outline"
-            onClick={handleClearAll}
-            className="flex-1 font-medium"
-            size="lg"
-          >
-            Clear All
           </Button>
         </div>
       </SheetContent>
