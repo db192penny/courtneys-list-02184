@@ -9,7 +9,7 @@ import { SectionHeader } from "@/components/ui/section-header";
 import { formatUSPhoneDisplay } from "@/utils/phone";
 import { getCategoryIcon } from "@/utils/categoryIcons";
 import { useUserReviews } from "@/hooks/useUserReviews";
-import { useUserCosts } from "@/hooks/useUserCosts";
+import { useVendorCosts } from "@/hooks/useVendorCosts";
 import ReviewsHover from "@/components/vendors/ReviewsHover";
 import GoogleReviewsHover from "@/components/vendors/GoogleReviewsHover";
 import { CostDisplay } from "@/components/vendors/CostDisplay";
@@ -47,6 +47,21 @@ export default function VendorMobileCard({
   isAuthenticated = false,
   communityName,
 }: VendorMobileCardProps) {
+  const { data: vendorCosts, isLoading: costsLoading } = useVendorCosts(vendor.id);
+
+  const formatCost = (amount: number, unit?: string | null, period?: string | null) => {
+    const formattedAmount = amount % 1 === 0 ? amount.toString() : amount.toFixed(2);
+    
+    let unitDisplay = "";
+    if (unit && unit !== "job") {
+      unitDisplay = `/${unit}`;
+    } else if (period && period !== "one_time") {
+      unitDisplay = `/${period}`;
+    }
+    
+    return `$${formattedAmount}${unitDisplay}`;
+  };
+
   return (
     <Card className="w-full">
       <CardContent className="p-3 space-y-3">
@@ -176,19 +191,54 @@ export default function VendorMobileCard({
           </div>
           
           <div className="bg-green-50 border border-green-200 rounded-md p-3">
-            <CostDisplay
-              vendorId={vendor.id}
-              vendorName={vendor.name}
-              category={vendor.category}
-              communityAmount={vendor.community_amount}
-              communityUnit={vendor.community_unit}
-              communitySampleSize={vendor.community_sample_size}
-              marketAmount={vendor.market_amount}
-              marketUnit={vendor.market_unit}
-              showContact={showContact}
-              communityName={communityName}
-              onOpenCostModal={() => onCosts(vendor)}
-            />
+            {/* Show individual cost submissions if available */}
+            {vendorCosts && vendorCosts.length > 0 ? (
+              <div className="space-y-2">
+                {vendorCosts.slice(0, 2).map((cost, idx) => (
+                  <div key={cost.id} className="bg-white border border-green-200 rounded-lg p-3">
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-sm font-medium text-green-700">
+                        💰 {formatCost(cost.amount, cost.unit, cost.period)}
+                        {cost.cost_kind && cost.cost_kind !== "one_time" && (
+                          <span className="text-green-600 ml-1 text-xs">
+                            ({cost.cost_kind.replace("_", " ")})
+                          </span>
+                        )}
+                      </span>
+                      <span className="text-xs text-green-600">
+                        {cost.author_label}
+                      </span>
+                    </div>
+                    
+                    {/* Display cost comments if they exist */}
+                    {cost.notes && (
+                      <p className="text-xs text-green-600 mt-2 italic">
+                        "{cost.notes}"
+                      </p>
+                    )}
+                  </div>
+                ))}
+                {vendorCosts.length > 2 && (
+                  <div className="text-xs text-green-600 text-center pt-1">
+                    +{vendorCosts.length - 2} more cost submission{vendorCosts.length - 2 !== 1 ? 's' : ''}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <CostDisplay
+                vendorId={vendor.id}
+                vendorName={vendor.name}
+                category={vendor.category}
+                communityAmount={vendor.community_amount}
+                communityUnit={vendor.community_unit}
+                communitySampleSize={vendor.community_sample_size}
+                marketAmount={vendor.market_amount}
+                marketUnit={vendor.market_unit}
+                showContact={showContact}
+                communityName={communityName}
+                onOpenCostModal={() => onCosts(vendor)}
+              />
+            )}
           </div>
         </div>
 
