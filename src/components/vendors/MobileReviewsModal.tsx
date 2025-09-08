@@ -6,6 +6,8 @@ import { useUserProfile } from "@/hooks/useUserProfile";
 import { useAuth } from "@/hooks/useAuth";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { formatNameWithLastInitial } from "@/utils/nameFormatting";
+import { capitalizeStreetName } from "@/utils/address";
 
 interface MobileReviewsModalProps {
   vendorId: string;
@@ -28,12 +30,23 @@ export function MobileReviewsModal({ vendorId }: MobileReviewsModalProps) {
     }
   }, [isAuthenticated]);
   
-  const { data, isLoading, error } = useQuery<{ 
+  if (!isAuthenticated) {
+    return (
+      <div className="p-4">
+        <p className="text-sm font-medium text-yellow-700">
+          🔒 Sign up to see neighbor reviews
+        </p>
+      </div>
+    );
+  }
+  
+  const { data: rawData, isLoading, error } = useQuery<{ 
     id: string; 
     rating: number; 
     comments: string | null; 
     author_label: string; 
-    created_at: string | null; 
+    created_at: string | null;
+    anonymous: boolean;
   }[]>({
     queryKey: ["mobile-reviews", vendorId],
     queryFn: async () => {
@@ -44,6 +57,24 @@ export function MobileReviewsModal({ vendorId }: MobileReviewsModalProps) {
       return (data || []) as any[];
     },
     enabled: !!vendorId,
+  });
+  
+  // Format the author labels using frontend utilities
+  const data = rawData?.map(review => {
+    const [name, street] = review.author_label.split('|');
+    
+    let displayLabel;
+    if (review.anonymous) {
+      displayLabel = street ? `Neighbor on ${capitalizeStreetName(street)}` : 'Neighbor';
+    } else {
+      const formattedName = formatNameWithLastInitial(name);
+      displayLabel = street ? `${formattedName} on ${capitalizeStreetName(street)}` : formattedName;
+    }
+    
+    return {
+      ...review,
+      author_label: displayLabel
+    };
   });
   
   const handleReviewInteraction = () => {
@@ -58,14 +89,6 @@ export function MobileReviewsModal({ vendorId }: MobileReviewsModalProps) {
     }
   };
   
-  if (!isAuthenticated) {
-    return (
-      <div className="text-sm text-muted-foreground p-4">
-        🔒 Sign up to see neighbor reviews
-      </div>
-    );
-  }
-  
   if (isLoading) {
     return <div className="text-sm text-muted-foreground p-4">Loading reviews…</div>;
   }
@@ -77,10 +100,7 @@ export function MobileReviewsModal({ vendorId }: MobileReviewsModalProps) {
   if (!data || data.length === 0) {
     return (
       <div className="text-sm text-muted-foreground p-4">
-        No reviews yet.
-        {!isVerified && (
-          <p className="mt-2 text-xs">Sign up to be the first to review!</p>
-        )}
+        Sign up to be the first to review!
       </div>
     );
   }
