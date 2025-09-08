@@ -126,7 +126,6 @@ export default function CommunityVendorTable({
       'all': '🏠',
       'HVAC': '🔧',
       'Pool': '🏊',
-      'Pool Service': '🏊',
       'Landscaping': '🌱',
       'Plumbing': '🚰',
       'Electrical': '⚡',
@@ -147,11 +146,12 @@ export default function CommunityVendorTable({
       'google_rating': 'Most Reviews'
     }[sortBy] || 'Most Used';
     
-    if (category === 'all') {
-      return `${categoryIcon} ${sortLabel}`;
-    }
-    return `${categoryIcon} ${category} • ${sortLabel}`;
+    const categoryLabel = category === 'all' ? '' : category;
+    
+    return { icon: categoryIcon, category: categoryLabel, sort: sortLabel };
   };
+
+  const filterText = getFilterButtonText();
 
   // Helper function to generate dynamic title based on category
   const getDynamicTitle = (category: string) => {
@@ -276,18 +276,18 @@ export default function CommunityVendorTable({
         </div>
       ) : (
         /* Mobile Filter Controls */
-        <div className="w-full mb-6">
+        <div className="w-full mb-4">
           <button
             onClick={() => setFilterModalOpen(true)}
-            className="w-full flex justify-between items-center px-4 py-4 rounded-xl border-2 border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 transition-all duration-200 shadow-sm hover:shadow-md"
+            className="w-full flex items-center justify-between px-4 py-3 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 transition-colors"
           >
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-500 rounded-lg">
-                <Filter className="h-4 w-4 text-white" />
-              </div>
-              <span className="text-base font-semibold text-blue-900 truncate">{getFilterButtonText()}</span>
+            <div className="flex items-center gap-2">
+              <span className="text-lg">{filterText.icon}</span>
+              <span className="text-sm font-medium">
+                {filterText.category ? `${filterText.category} • ${filterText.sort}` : filterText.sort}
+              </span>
             </div>
-            <ChevronDown className="h-5 w-5 text-blue-600" />
+            <ChevronDown className="h-4 w-4 shrink-0 text-gray-500" />
           </button>
         </div>
       )}
