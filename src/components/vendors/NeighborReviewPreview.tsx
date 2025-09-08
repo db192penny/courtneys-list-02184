@@ -35,9 +35,18 @@ export function NeighborReviewPreview({
         .rpc("list_vendor_reviews", { _vendor_id: vendorId });
       
       if (error) throw error;
-      return data as Review[];
+      
+      // FIX: Ensure all fields are safe to render
+      return (data || []).map((item: any) => ({
+        id: String(item?.id || ''),
+        rating: Number(item?.rating || 0),
+        comments: item?.comments ? String(item.comments) : null,
+        created_at: String(item?.created_at || ''),
+        author_label: String(item?.author_label || 'Neighbor'),
+        anonymous: Boolean(item?.anonymous)
+      })) as Review[];
     },
-    enabled: !!vendorId,
+    enabled: !!vendorId && isAuthenticated,
   });
 
   if (!isAuthenticated) {
@@ -76,7 +85,6 @@ export function NeighborReviewPreview({
     );
   }
 
-  // Find best review with comment
   const reviewWithComment = reviews?.find(r => r.comments && r.comments.length > 10);
   const selectedReview = reviewWithComment || reviews[0];
 
