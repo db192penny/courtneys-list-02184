@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 export type CostEntry = {
-  cost_kind: "monthly_plan" | "yearly_plan" | "service_call" | "hourly";
+  cost_kind: "monthly_plan" | "yearly_plan" | "service_call" | "hourly" | "one_time";
   amount: number | null;
   period?: string | null; // e.g., monthly, yearly
   unit?: string | null;   // e.g., month, year, visit, hour
@@ -48,6 +48,14 @@ export function buildDefaultCosts(category?: string): CostEntry[] {
   if (c === "power washing" || c === "car wash & detail") {
     return [
       { cost_kind: "service_call", amount: null, unit: "visit", quantity: null, notes: null },
+    ];
+  }
+  
+  // Water Filtration: Installation cost + optional yearly maintenance
+  if (c === "water filtration") {
+    return [
+      { cost_kind: "one_time", amount: null, unit: "installation", notes: null },
+      { cost_kind: "yearly_plan", amount: null, period: "yearly", unit: "year", notes: null },
     ];
   }
   
@@ -114,12 +122,14 @@ export default function CostInputs({
         entry.cost_kind === "service_call" ? "Service Call" :
         entry.cost_kind === "hourly" ? "Hourly Rate" :
         entry.cost_kind === "yearly_plan" ? "Maintenance Plan" :
+        entry.cost_kind === "one_time" ? "Installation Cost" :
         "Maintenance Plan";
 
       const unitDisplay = 
         entry.cost_kind === "service_call" ? " per Visit" :
         entry.cost_kind === "hourly" ? " per Hour" :
         entry.cost_kind === "yearly_plan" ? " per Year" :
+        entry.cost_kind === "one_time" ? " (one-time)" :
         " per Month";
 
       return (
