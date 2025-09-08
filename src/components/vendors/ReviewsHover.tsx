@@ -6,8 +6,6 @@ import { Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useAuth } from "@/hooks/useAuth";
-import { formatNameWithLastInitial } from "@/utils/nameFormatting";
-import { capitalizeStreetName } from "@/utils/address";
 
 export default function ReviewsHover({ vendorId, children }: { vendorId: string; children: ReactNode }) {
   const { data: profile } = useUserProfile();
@@ -35,7 +33,7 @@ export default function ReviewsHover({ vendorId, children }: { vendorId: string;
     comments: string | null; 
     author_label: string; 
     created_at: string | null;
-    anonymous: boolean;
+    anonymous?: boolean;
   }[]>({
     queryKey: ["reviews-hover", vendorId],
     queryFn: async () => {
@@ -48,31 +46,46 @@ export default function ReviewsHover({ vendorId, children }: { vendorId: string;
     enabled: !!vendorId,
   });
 
-  // Format the author labels using frontend utilities
-  const data = rawData?.map(review => {
-    let name = 'Neighbor';
-    let street = '';
-    
-    // Parse the name|street format from database
-    if (review.author_label && review.author_label.includes('|')) {
-      const parts = review.author_label.split('|');
-      name = parts[0] || 'Neighbor';
-      street = parts[1] || '';
+  // SAFE formatting function
+  const formatAuthorLabel = (review: any): string => {
+    try {
+      if (!review.author_label) return 'Neighbor';
+      
+      const authorStr = String(review.author_label);
+      
+      // Parse the name|street format
+      if (authorStr.includes('|')) {
+        const [namePart, streetPart] = authorStr.split('|');
+        const name = namePart?.trim() || 'Neighbor';
+        const street = streetPart?.trim() || '';
+        
+        if (review.anonymous) {
+          return street ? `Neighbor on ${street}` : 'Neighbor';
+        } else {
+          // Format name with last initial
+          const nameParts = name.split(' ').filter(Boolean);
+          if (nameParts.length >= 2) {
+            const firstName = nameParts[0];
+            const lastName = nameParts[nameParts.length - 1];
+            const lastInitial = lastName ? lastName.charAt(0).toUpperCase() + '.' : '';
+            const formatted = `${firstName} ${lastInitial}`;
+            return street ? `${formatted} on ${street}` : formatted;
+          }
+          return street ? `${name} on ${street}` : name;
+        }
+      }
+      
+      return authorStr;
+    } catch (err) {
+      console.error('Error formatting author label:', err);
+      return 'Neighbor';
     }
-    
-    let displayLabel;
-    if (review.anonymous) {
-      displayLabel = street ? `Neighbor on ${capitalizeStreetName(street)}` : 'Neighbor';
-    } else {
-      const formattedName = formatNameWithLastInitial(name);
-      displayLabel = street ? `${formattedName} on ${capitalizeStreetName(street)}` : formattedName;
-    }
-    
-    return {
-      ...review,
-      author_label: displayLabel
-    };
-  });
+  };
+
+  const data = rawData?.map(review => ({
+    ...review,
+    author_label: formatAuthorLabel(review)
+  })) || [];
 
   return (
     <HoverCard openDelay={200} closeDelay={100}>
@@ -112,7 +125,7 @@ export default function ReviewsHover({ vendorId, children }: { vendorId: string;
                   )}
                 </div>
                 {r.comments && (
-                  <p className="text-sm text-muted-foreground mt-1">{r.comments}</p>
+                  <p className="text-sm text-muted-foreground mt-1">{String(r.comments)}</p>
                 )}
               </div>
             ))}
