@@ -83,17 +83,17 @@ export const EnhancedMobileFilterModal: React.FC<EnhancedMobileFilterModalProps>
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="bottom" className="h-[85vh] overflow-hidden flex flex-col">
-        <SheetHeader className="flex-shrink-0 pb-4 border-b">
+        <SheetHeader className="flex-shrink-0 pb-3 border-b">
           <SheetTitle>Filter & Sort</SheetTitle>
         </SheetHeader>
         
-        <div className="flex-1 overflow-y-auto py-4">
-          {/* Categories Section */}
-          <div className="mb-6">
-            <h3 className="font-medium text-gray-700 mb-3 px-1">Service Category</h3>
-            <div className="grid grid-cols-2 gap-2">
-              {['all', ...categories].map((category) => {
-                const displayName = category === 'all' ? 'All Categories' : category;
+        <div className="flex-1 overflow-y-auto py-3">
+          {/* Compact Categories Section */}
+          <div className="mb-4">
+            <h3 className="font-medium text-gray-700 mb-2 px-1 text-sm">Category</h3>
+            <div className="grid grid-cols-2 gap-1.5">
+              {['all', ...categories.slice(0, 9)].map((category) => {
+                const displayName = category === 'all' ? 'All' : category;
                 const icon = CATEGORY_ICONS[category] || '🏠';
                 const isSelected = selectedCategory === category;
                 
@@ -102,24 +102,55 @@ export const EnhancedMobileFilterModal: React.FC<EnhancedMobileFilterModalProps>
                     key={category}
                     onClick={() => handleCategorySelect(category)}
                     className={cn(
-                      "min-h-[44px] p-3 text-sm font-medium rounded-lg text-left transition-colors flex items-center gap-2",
+                      "min-h-[40px] px-2 py-2 text-xs font-medium rounded-lg text-left transition-colors flex items-center gap-1.5",
                       isSelected
                         ? "bg-blue-50 border-2 border-blue-500 text-blue-700"
                         : "bg-gray-50 border border-gray-200 text-gray-700 hover:bg-gray-100"
                     )}
                   >
-                    <span className="text-base">{icon}</span>
+                    <span className="text-sm">{icon}</span>
                     <span className="truncate">{displayName}</span>
                   </button>
                 );
               })}
             </div>
+            
+            {/* Show More Categories */}
+            {categories.length > 9 && (
+              <details className="mt-2">
+                <summary className="text-sm text-blue-600 font-medium cursor-pointer px-1">
+                  Show {categories.length - 9} more categories
+                </summary>
+                <div className="grid grid-cols-2 gap-1.5 mt-2">
+                  {categories.slice(9).map((category) => {
+                    const icon = CATEGORY_ICONS[category] || '🏠';
+                    const isSelected = selectedCategory === category;
+                    
+                    return (
+                      <button
+                        key={category}
+                        onClick={() => handleCategorySelect(category)}
+                        className={cn(
+                          "min-h-[40px] px-2 py-2 text-xs font-medium rounded-lg text-left transition-colors flex items-center gap-1.5",
+                          isSelected
+                            ? "bg-blue-50 border-2 border-blue-500 text-blue-700"
+                            : "bg-gray-50 border border-gray-200 text-gray-700 hover:bg-gray-100"
+                        )}
+                      >
+                        <span className="text-sm">{icon}</span>
+                        <span className="truncate">{category}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </details>
+            )}
           </div>
 
-          {/* Sort Options Section */}
-          <div>
-            <h3 className="font-medium text-gray-700 mb-3 px-1">Sort By</h3>
-            <div className="space-y-2">
+          {/* Sort Options - Now Visible */}
+          <div className="border-t pt-4">
+            <h3 className="font-medium text-gray-700 mb-2 px-1 text-sm">Sort By</h3>
+            <div className="space-y-1">
               {SORT_OPTIONS.map((option) => {
                 const isSelected = selectedSort === option.value;
                 
@@ -128,28 +159,23 @@ export const EnhancedMobileFilterModal: React.FC<EnhancedMobileFilterModalProps>
                     key={option.value}
                     onClick={() => handleSortSelect(option.value)}
                     className={cn(
-                      "w-full min-h-[44px] flex items-start gap-3 p-3 rounded-lg transition-colors text-left",
+                      "w-full min-h-[40px] flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-left",
                       isSelected ? "bg-blue-50" : "hover:bg-gray-50"
                     )}
                   >
                     <div className={cn(
-                      "w-5 h-5 rounded-full border-2 flex-shrink-0 mt-0.5 flex items-center justify-center",
+                      "w-4 h-4 rounded-full border-2 flex-shrink-0 flex items-center justify-center",
                       isSelected ? "border-blue-500 bg-blue-500" : "border-gray-300"
                     )}>
-                      {isSelected && (
-                        <div className="w-2 h-2 bg-white rounded-full" />
-                      )}
+                      {isSelected && <div className="w-1.5 h-1.5 bg-white rounded-full" />}
                     </div>
                     
                     <div className="flex-1">
                       <div className={cn(
-                        "font-medium",
+                        "text-sm font-medium",
                         isSelected ? "text-blue-700" : "text-gray-700"
                       )}>
                         {option.label}
-                      </div>
-                      <div className="text-sm text-gray-500 mt-0.5">
-                        {option.description}
                       </div>
                     </div>
                   </button>
@@ -158,15 +184,15 @@ export const EnhancedMobileFilterModal: React.FC<EnhancedMobileFilterModalProps>
             </div>
           </div>
         </div>
-        
-        {/* Sticky Apply Button */}
-        <div className="sticky bottom-0 left-0 right-0 bg-white border-t p-4">
+
+        {/* Apply Button */}
+        <div className="border-t bg-white p-3">
           <Button 
             onClick={() => onOpenChange(false)}
             className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium"
             size="lg"
           >
-            Apply Filters
+            Apply
           </Button>
         </div>
       </SheetContent>
