@@ -53,6 +53,7 @@ export default function VendorMobileCard({
   const { data: profile } = useUserProfile();
   const isVerified = !!profile?.isVerified;
   const [costModalOpen, setCostModalOpen] = useState(false);
+  const [googleReviewsModalOpen, setGoogleReviewsModalOpen] = useState(false);
 
   return (
     <>
@@ -146,19 +147,11 @@ export default function VendorMobileCard({
             </DialogContent>
           </Dialog>
           
-          {/* Google Reviews - Make Clickable */}
+          {/* Google Reviews - Clickable */}
           {vendor.google_rating_count && vendor.google_rating_count > 0 && (
             <button
-              onClick={() => {
-                // Option 1: Open Google Maps listing (external link)
-                if (vendor.google_place_id) {
-                  window.open(`https://www.google.com/maps/place/?q=place_id:${vendor.google_place_id}`, '_blank');
-                } else {
-                  // Fallback: Search Google for the business
-                  window.open(`https://www.google.com/search?q=${encodeURIComponent(vendor.name + ' ' + vendor.category + ' Boca Raton')}`, '_blank');
-                }
-              }}
-              className="w-full flex items-center justify-between bg-green-50 border border-green-200 rounded-lg px-3 py-2 hover:bg-green-100 transition-colors cursor-pointer"
+              onClick={() => setGoogleReviewsModalOpen(true)}
+              className="w-full flex items-center justify-between bg-green-50 border border-green-200 rounded-lg px-3 py-2 hover:bg-green-100 transition-colors cursor-pointer text-left"
             >
               <div className="flex items-center gap-2">
                 <ReviewSourceIcon source="google" size="sm" />
@@ -167,7 +160,7 @@ export default function VendorMobileCard({
               <div className="flex items-center gap-2">
                 <RatingStars rating={vendor.google_rating || 0} size="sm" />
                 <span className="text-sm text-gray-600">
-                  ({vendor.google_rating_count})
+                  {vendor.google_rating?.toFixed(1)} ({vendor.google_rating_count})
                 </span>
               </div>
             </button>
@@ -277,6 +270,20 @@ export default function VendorMobileCard({
           <DialogTitle>Cost Details</DialogTitle>
         </DialogHeader>
         <MobileCostsModal vendorId={vendor.id} />
+      </DialogContent>
+    </Dialog>
+
+    {/* Google Reviews Modal */}
+    <Dialog open={googleReviewsModalOpen} onOpenChange={setGoogleReviewsModalOpen}>
+      <DialogContent className="max-w-md mx-auto">
+        <DialogHeader>
+          <DialogTitle>Google Reviews</DialogTitle>
+        </DialogHeader>
+        <MobileGoogleReviewsModal 
+          vendorId={vendor.id}
+          googleReviewsJson={vendor.google_reviews_json}
+          googlePlaceId={vendor.google_place_id}
+        />
       </DialogContent>
     </Dialog>
   </>
