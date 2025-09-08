@@ -112,22 +112,32 @@ export default function VendorMobileCard({
 
         {/* Reviews Section */}
         <div className="space-y-2 mb-3">
-          {/* Boca Bridges Reviews - Blue theme */}
-          <div className="flex justify-between items-center p-2 bg-blue-50 border border-blue-200 rounded-lg">
-            <div className="flex items-center gap-2">
-              <ReviewSourceIcon source="bb" size="sm" />
-              <span className="text-sm font-medium text-blue-700">Boca Bridges</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <RatingStars rating={vendor.hoa_rating || 0} size="sm" />
-              <span className="text-sm font-medium text-blue-800">
-                {vendor.hoa_rating?.toFixed(1)}
-              </span>
-              <span className="text-xs text-blue-600">
-                ({vendor.hoa_rating_count || 0})
-              </span>
-            </div>
-          </div>
+          {/* Boca Bridges Reviews - Blue theme - Clickable */}
+          <Dialog>
+            <DialogTrigger asChild>
+              <div className="flex justify-between items-center p-2 bg-blue-50 border border-blue-200 rounded-lg cursor-pointer transition-transform hover:scale-[1.01]">
+                <div className="flex items-center gap-2">
+                  <ReviewSourceIcon source="bb" size="sm" />
+                  <span className="text-sm font-medium text-blue-700">Boca Bridges</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <RatingStars rating={vendor.hoa_rating || 0} size="sm" />
+                  <span className="text-sm font-medium text-blue-800 underline">
+                    {vendor.hoa_rating?.toFixed(1)}
+                  </span>
+                  <span className="text-xs text-blue-600 underline">
+                    ({vendor.hoa_rating_count || 0})
+                  </span>
+                </div>
+              </div>
+            </DialogTrigger>
+            <DialogContent className="max-w-md mx-auto">
+              <DialogHeader>
+                <DialogTitle>Boca Bridges Reviews</DialogTitle>
+              </DialogHeader>
+              <MobileReviewsModal vendorId={vendor.id} onRate={() => onRate(vendor)} />
+            </DialogContent>
+          </Dialog>
           
           {/* Google Reviews - Green theme */}
           {vendor.google_rating_count > 0 && (
@@ -138,10 +148,10 @@ export default function VendorMobileCard({
               </div>
               <div className="flex items-center gap-1">
                 <RatingStars rating={vendor.google_rating || 0} size="sm" />
-                <span className="text-sm font-medium text-green-800">
+                <span className="text-sm font-medium text-green-800 underline">
                   {vendor.google_rating?.toFixed(1)}
                 </span>
-                <span className="text-xs text-green-600">
+                <span className="text-xs text-green-600 underline">
                   ({vendor.google_rating_count})
                 </span>
               </div>

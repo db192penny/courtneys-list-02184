@@ -8,9 +8,10 @@ import { ReviewSourceIcon } from "./ReviewSourceIcon";
 
 interface MobileReviewsModalProps {
   vendorId: string;
+  onRate?: () => void;
 }
 
-export function MobileReviewsModal({ vendorId }: MobileReviewsModalProps) {
+export function MobileReviewsModal({ vendorId, onRate }: MobileReviewsModalProps) {
   const { data: profile } = useUserProfile();
   const isVerified = !!profile?.isVerified;
 
@@ -87,15 +88,17 @@ export function MobileReviewsModal({ vendorId }: MobileReviewsModalProps) {
         ))}
       </div>
       
-      <div className="sticky bottom-0 left-0 right-0 bg-white border-t p-4 flex gap-2">
+      <div className="mt-4 pt-4 border-t flex gap-2">
         <Button 
           className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700"
+          onClick={onRate}
         >
           Write Review
         </Button>
         <Button 
           variant="outline" 
           className="flex-1"
+          onClick={() => {}}
         >
           Close
         </Button>
