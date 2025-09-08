@@ -8,6 +8,7 @@ import { formatNameWithLastInitial } from "@/utils/nameFormatting";
 import { extractStreetName, capitalizeStreetName } from "@/utils/address";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
 
 interface NeighborReviewPreviewProps {
   vendorId: string;
@@ -27,6 +28,7 @@ export function NeighborReviewPreview({
   className 
 }: NeighborReviewPreviewProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const { isAuthenticated } = useAuth();
   const { data: reviews, isLoading, error } = useQuery({
     queryKey: ["vendor-reviews", vendorId],
     queryFn: async () => {
@@ -36,7 +38,7 @@ export function NeighborReviewPreview({
       if (error) throw error;
       return data as Review[];
     },
-    enabled: !!vendorId,
+    enabled: !!vendorId && !!isAuthenticated,
   });
 
   // Smart review selection: prioritize recent reviews with substantial content
@@ -85,6 +87,16 @@ export function NeighborReviewPreview({
 
   const selectedReview = selectBestReview(reviews || []);
   const totalReviews = reviews?.length || 0;
+
+  if (!isAuthenticated) {
+    return (
+      <div className={cn("bg-yellow-50 border border-yellow-200 rounded-lg p-3", className)}>
+        <p className="text-sm font-medium text-yellow-700">
+          🔒 Sign up to see neighbor reviews
+        </p>
+      </div>
+    );
+  }
 
   if (!selectedReview) {
     return (

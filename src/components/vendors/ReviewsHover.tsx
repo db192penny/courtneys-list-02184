@@ -5,10 +5,12 @@ import { Badge } from "@/components/ui/badge";
 import { Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserProfile } from "@/hooks/useUserProfile";
+import { useAuth } from "@/hooks/useAuth";
 
 // Lightweight hover card that shows community review texts for a vendor
 export default function ReviewsHover({ vendorId, children }: { vendorId: string; children: ReactNode }) {
   const { data: profile } = useUserProfile();
+  const { isAuthenticated } = useAuth();
   const isVerified = !!profile?.isVerified;
   
   const { data, isLoading, error } = useQuery<{ 
@@ -26,7 +28,7 @@ export default function ReviewsHover({ vendorId, children }: { vendorId: string;
       if (error) throw error;
       return (data || []) as any[];
     },
-    enabled: !!vendorId,  // Removed isVerified requirement
+    enabled: !!vendorId && !!isAuthenticated,
   });
 
   return (
