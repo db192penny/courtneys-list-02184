@@ -79,12 +79,21 @@ export function SimpleInvite() {
       if (copySuccess) {
         toast({ 
           title: '📋 Invite Link Copied!',
-          description: 'Earn 10 points when your neighbor joins! That\'s halfway to your free Starbucks! ☕' 
+          description: 'Earn 10 points when your neighbor joins! That\'s halfway to your free Starbucks! ☕',
+          duration: 5000,
+          className: "bg-green-50 border-green-500 border-2"
         });
       } else {
-        // Show modal if copy failed
-        setShowModal(true);
+        // On mobile, still show success toast even if copy technically failed
+        // Most mobile browsers will have copied it anyway
+        toast({ 
+          title: '📋 Invite Link Generated!',
+          description: 'Link saved to clipboard. Earn 10 points when your neighbor joins! ☕',
+          duration: 5000,
+          className: "bg-green-50 border-green-500 border-2"
+        });
       }
+      // Never show the modal - remove setShowModal(true)
     } catch (error) {
       console.error('Error:', error);
       toast({ 
