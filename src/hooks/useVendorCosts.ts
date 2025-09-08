@@ -1,19 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserProfile } from "@/hooks/useUserProfile";
+import { formatAuthorLabel } from "@/utils/formatAuthorLabel";
 
-type CostData = {
-  id: string;
-  amount: number;
-  unit: string | null;
-  period: string | null;
-  cost_kind: string | null;
-  notes: string | null;
-  created_at: string;
-  author_label: string;
-};
-
-export function useVendorCosts(vendorId: string) {
+export function useVendorCosts(vendorId) {
   const { data: profile } = useUserProfile();
   const isVerified = !!profile?.isVerified;
 
@@ -29,7 +19,11 @@ export function useVendorCosts(vendorId: string) {
         throw error;
       }
 
-      return (data || []) as CostData[];
+      // Format the author labels
+      return (data || []).map((item) => ({
+        ...item,
+        author_label: formatAuthorLabel(item?.author_label)
+      }));
     },
     enabled: isVerified && !!vendorId,
   });
