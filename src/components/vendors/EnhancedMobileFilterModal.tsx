@@ -67,7 +67,7 @@ export const EnhancedMobileFilterModal: React.FC<EnhancedMobileFilterModalProps>
   const handleClearAll = () => {
     onCategoryChange('all');
     onSortChange('neighbors_using');
-    // DO NOT close modal here - let user click Apply
+    // NO onOpenChange(false) here
   };
 
   const handleCategorySelect = (category: string) => {
@@ -170,17 +170,19 @@ export const EnhancedMobileFilterModal: React.FC<EnhancedMobileFilterModalProps>
         </div>
         
         {/* Sticky Action Buttons */}
-        <div className="sticky bottom-0 left-0 right-0 bg-white border-t p-4 flex gap-2 mt-4">
+        <div className="sticky bottom-0 left-0 right-0 bg-white border-t p-4 flex gap-2">
           <Button 
             onClick={() => onOpenChange(false)}
-            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium"
+            size="lg"
           >
             Apply Filters
           </Button>
           <Button 
             variant="outline"
             onClick={handleClearAll}
-            className="flex-1"
+            className="flex-1 font-medium"
+            size="lg"
           >
             Clear All
           </Button>
