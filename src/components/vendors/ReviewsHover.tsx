@@ -9,7 +9,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { formatNameWithLastInitial } from "@/utils/nameFormatting";
 import { capitalizeStreetName } from "@/utils/address";
 
-// Lightweight hover card that shows community review texts for a vendor
 export default function ReviewsHover({ vendorId, children }: { vendorId: string; children: ReactNode }) {
   const { data: profile } = useUserProfile();
   const { isAuthenticated } = useAuth();
@@ -51,7 +50,15 @@ export default function ReviewsHover({ vendorId, children }: { vendorId: string;
 
   // Format the author labels using frontend utilities
   const data = rawData?.map(review => {
-    const [name, street] = review.author_label.split('|');
+    let name = 'Neighbor';
+    let street = '';
+    
+    // Parse the name|street format from database
+    if (review.author_label && review.author_label.includes('|')) {
+      const parts = review.author_label.split('|');
+      name = parts[0] || 'Neighbor';
+      street = parts[1] || '';
+    }
     
     let displayLabel;
     if (review.anonymous) {
