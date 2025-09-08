@@ -161,37 +161,36 @@ export default function VendorMobileCard({
         {/* Neighbor Review Preview */}
         <NeighborReviewPreview vendorId={vendor.id} className="px-2" />
 
-        {/* Cost Information Section - Green theme */}
-        <div className="bg-green-50 border border-green-200 rounded-md p-3">
-          <SectionHeader icon={DollarSign} title="Cost Information" className="text-green-700" />
-          <CostDisplay
-            vendorId={vendor.id}
-            vendorName={vendor.name}
-            category={vendor.category}
-            communityAmount={vendor.community_amount}
-            communityUnit={vendor.community_unit}
-            communitySampleSize={vendor.community_sample_size}
-            marketAmount={vendor.market_amount}
-            marketUnit={vendor.market_unit}
-            showContact={showContact}
-            communityName={communityName}
-            onOpenCostModal={() => onCosts(vendor)}
-          />
-        </div>
-
-        {/* Actions Section */}
-        {isAuthenticated && (
-          <div className="flex gap-2">
-            <Button 
-              size="sm" 
-              variant="outline"
-              className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700 flex-1"
-              onClick={() => onCosts(vendor)}
-            >
-              {userCosts?.has(vendor.id) ? "Edit Cost Info" : "Add Cost Info"}
-            </Button>
+        {/* Cost Information */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <h4 className="text-sm font-medium text-gray-700">Cost Information</h4>
+            {isAuthenticated && !userCosts?.has(vendor.id) && (
+              <button
+                onClick={() => onCosts(vendor)}
+                className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+              >
+                + Add
+              </button>
+            )}
           </div>
-        )}
+          
+          <div className="bg-green-50 border border-green-200 rounded-md p-3">
+            <CostDisplay
+              vendorId={vendor.id}
+              vendorName={vendor.name}
+              category={vendor.category}
+              communityAmount={vendor.community_amount}
+              communityUnit={vendor.community_unit}
+              communitySampleSize={vendor.community_sample_size}
+              marketAmount={vendor.market_amount}
+              marketUnit={vendor.market_unit}
+              showContact={showContact}
+              communityName={communityName}
+              onOpenCostModal={() => onCosts(vendor)}
+            />
+          </div>
+        </div>
 
         {/* Contact Section */}
         {showContact && vendor.contact_info && (
