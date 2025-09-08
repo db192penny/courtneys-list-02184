@@ -6,6 +6,8 @@ import { Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useAuth } from "@/hooks/useAuth";
+import { formatNameWithLastInitial } from "@/utils/nameFormatting";
+import { capitalizeStreetName } from "@/utils/address";
 
 // Lightweight hover card that shows community review texts for a vendor
 export default function ReviewsHover({ vendorId, children }: { vendorId: string; children: ReactNode }) {
@@ -13,24 +15,6 @@ export default function ReviewsHover({ vendorId, children }: { vendorId: string;
   const { isAuthenticated } = useAuth();
   const isVerified = !!profile?.isVerified;
   
-  const { data, isLoading, error } = useQuery<{ 
-    id: string; 
-    rating: number; 
-    comments: string | null; 
-    author_label: string; 
-    created_at: string | null; 
-  }[]>({
-    queryKey: ["reviews-hover", vendorId],
-    queryFn: async () => {
-      const { data, error } = await supabase.rpc("list_vendor_reviews", { 
-        _vendor_id: vendorId 
-      });
-      if (error) throw error;
-      return (data || []) as any[];
-    },
-    enabled: !!vendorId,
-  });
-
   if (!isAuthenticated) {
     return (
       <HoverCard openDelay={200} closeDelay={100}>
@@ -45,6 +29,43 @@ export default function ReviewsHover({ vendorId, children }: { vendorId: string;
       </HoverCard>
     );
   }
+  
+  const { data: rawData, isLoading, error } = useQuery<{ 
+    id: string; 
+    rating: number; 
+    comments: string | null; 
+    author_label: string; 
+    created_at: string | null;
+    anonymous: boolean;
+  }[]>({
+    queryKey: ["reviews-hover", vendorId],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("list_vendor_reviews", { 
+        _vendor_id: vendorId 
+      });
+      if (error) throw error;
+      return (data || []) as any[];
+    },
+    enabled: !!vendorId,
+  });
+
+  // Format the author labels using frontend utilities
+  const data = rawData?.map(review => {
+    const [name, street] = review.author_label.split('|');
+    
+    let displayLabel;
+    if (review.anonymous) {
+      displayLabel = street ? `Neighbor on ${capitalizeStreetName(street)}` : 'Neighbor';
+    } else {
+      const formattedName = formatNameWithLastInitial(name);
+      displayLabel = street ? `${formattedName} on ${capitalizeStreetName(street)}` : formattedName;
+    }
+    
+    return {
+      ...review,
+      author_label: displayLabel
+    };
+  });
 
   return (
     <HoverCard openDelay={200} closeDelay={100}>
@@ -60,10 +81,7 @@ export default function ReviewsHover({ vendorId, children }: { vendorId: string;
         )}
         {data && data.length === 0 && (
           <div className="text-sm text-muted-foreground">
-            No reviews yet.
-            {!isVerified && (
-              <p className="mt-2 text-xs">Sign up to be the first to review!</p>
-            )}
+            Sign up to be the first to review!
           </div>
         )}
         {data && data.length > 0 && (
