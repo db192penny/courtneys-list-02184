@@ -53,8 +53,14 @@ export function NeighborReviewPreview({
     return sorted[0];
   };
 
-  const formatDisplayName = (authorLabel: string) => {
-    return authorLabel || "Neighbor";
+  const truncateComment = (comment: string) => {
+    if (!comment || comment.length <= 60) return comment;
+    return comment.substring(0, 60) + "...";
+  };
+
+  const handleInteraction = () => {
+    // Handle click/keyboard interaction - could open reviews modal
+    console.log("Review preview clicked");
   };
 
   if (isLoading) {
@@ -74,31 +80,35 @@ export function NeighborReviewPreview({
   }
 
   const selectedReview = selectBestReview(reviews || []);
+  const totalReviews = reviews?.length || 0;
 
   if (!selectedReview) {
     return (
       <div className={cn("text-sm font-medium text-yellow-700 bg-yellow-50 border border-yellow-200 p-2 rounded", className)}>
-        🌟 Be the first to share your experience!
+        🌟 Be the first neighbor to review this vendor!
       </div>
     );
   }
 
   return (
-    <div className={cn("space-y-1 bg-gray-50 border border-gray-200 p-2 rounded", className)}>
-      <div className="flex items-center gap-1.5">
-        <RatingStars rating={selectedReview.rating} size="sm" />
+    <div
+      className={cn("bg-gray-50 border border-gray-200 rounded-lg p-3 cursor-pointer transition-transform hover:scale-[1.01]", className)}
+      onClick={handleInteraction}
+      onKeyPress={handleInteraction}
+      role="button"
+      tabIndex={0}
+    >
+      <div className="flex items-start gap-2">
         <ReviewSourceIcon source="bb" size="sm" />
+        <div className="flex-1">
+          <p className="text-sm text-gray-700 mb-1">
+            💬 "{truncateComment(selectedReview.comments || "")}" - {selectedReview.author_label}
+          </p>
+          <div className="text-sm font-medium text-blue-600">
+            Read all {totalReviews} Boca Bridges reviews →
+          </div>
+        </div>
       </div>
-      
-      {selectedReview.comments && selectedReview.comments.trim() && (
-        <p className="text-sm text-gray-700">
-          "{selectedReview.comments.trim()}"
-        </p>
-      )}
-      
-      <span className="text-xs text-gray-500">
-        by {formatDisplayName(selectedReview.author_label)}
-      </span>
     </div>
   );
 }
