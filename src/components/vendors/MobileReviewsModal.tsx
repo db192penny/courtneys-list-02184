@@ -89,29 +89,6 @@ export function MobileReviewsModal({ open, onOpenChange, vendor, onRate }: Mobil
           </div>
         ))}
       </div>
-      
-      {/* Sticky Action Buttons */}
-      <div className="sticky bottom-0 left-0 right-0 bg-white border-t p-4 flex gap-2">
-        <Button 
-          onClick={() => {
-            onOpenChange(false);  // Close this modal first
-            // Open the rate modal after a brief delay to prevent overlap
-            setTimeout(() => {
-              onRate?.();  // Call the onRate function passed as prop
-            }, 100);
-          }}
-          className="flex-1"
-        >
-          Write Review
-        </Button>
-        <Button 
-          variant="outline" 
-          onClick={() => onOpenChange(false)}
-          className="flex-1"
-        >
-          Close
-        </Button>
-      </div>
     </div>
   );
 }
