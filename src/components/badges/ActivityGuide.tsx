@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Lightbulb, ArrowRight, Share2 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Lightbulb, ArrowRight, Share2, Copy, Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { usePointRewards } from "@/hooks/usePointRewards";
 import { supabase } from '@/integrations/supabase/client';
@@ -17,6 +18,8 @@ export default function ActivityGuide() {
   const [inviteUrl, setInviteUrl] = useState('');
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState<User | null>(null);
+  const [showModal, setShowModal] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     // Get current user
@@ -74,20 +77,21 @@ export default function ActivityGuide() {
       if (error) throw error;
 
       const baseUrl = window.location.origin;
+      // FIXED: Include inviter parameter in URL
       const url = `${baseUrl}/communities/boca-bridges?invite=${code}&inviter=${user.id}&welcome=true`;
       setInviteUrl(url);
 
       // Try to copy automatically
-      await copyToClipboard(url);
-      
-      // Always show success toast - no modal
-      toast({ 
-        title: '📋 Invite Link Copied!',
-        description: 'Earn 10 points when your neighbor joins! That\'s halfway to your free Starbucks! ☕',
-        duration: 5000,
-        className: "bg-green-50 border-green-500 border-2"
-      });
-      
+      const copySuccess = await copyToClipboard(url);
+      if (copySuccess) {
+        toast({ 
+          title: '📋 Invite Link Copied!',
+          description: 'Earn 10 points when your neighbor joins! That\'s halfway to your free Starbucks! ☕' 
+        });
+      } else {
+        // Show modal if copy failed
+        setShowModal(true);
+      }
     } catch (error) {
       console.error('Error:', error);
       toast({ 
@@ -96,6 +100,18 @@ export default function ActivityGuide() {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleModalCopy = async () => {
+    const copySuccess = await copyToClipboard(inviteUrl);
+    if (copySuccess) {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+      toast({ 
+        title: '📋 Invite Link Copied!',
+        description: 'Earn 10 points when your neighbor joins! That\'s halfway to your free Starbucks! ☕' 
+      });
     }
   };
 
@@ -127,47 +143,86 @@ export default function ActivityGuide() {
   ];
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Lightbulb className="w-4 h-4" />
-          How to Earn Points
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {activities.map((activity) => (
-          <div key={activity.type} className="flex items-center justify-between p-4 rounded-lg border">
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-1">
-                <h4 className="font-medium">{activity.title}</h4>
-                <span className="text-sm font-semibold text-primary bg-primary/10 px-2 py-1 rounded">
-                  +{activity.points} pts
-                </span>
+    <>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Lightbulb className="w-4 h-4" />
+            How to Earn Points
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {activities.map((activity) => (
+            <div key={activity.type} className="flex items-center justify-between p-4 rounded-lg border">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <h4 className="font-medium">{activity.title}</h4>
+                  <span className="text-sm font-semibold text-primary bg-primary/10 px-2 py-1 rounded">
+                    +{activity.points} pts
+                  </span>
+                </div>
+                <p className="text-sm text-muted-foreground">{activity.description}</p>
               </div>
-              <p className="text-sm text-muted-foreground">{activity.description}</p>
+              <Button 
+                onClick={activity.action}
+                size="sm"
+                variant="outline"
+                disabled={activity.type === "invite_neighbor" && loading}
+                className="ml-4 flex items-center gap-1 bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700"
+              >
+                {activity.type === "invite_neighbor" ? (
+                  <>
+                    <Share2 className="w-3 h-3" />
+                    {loading ? 'Generating...' : activity.buttonText}
+                  </>
+                ) : (
+                  <>
+                    {activity.buttonText}
+                    <ArrowRight className="w-3 h-3" />
+                  </>
+                )}
+              </Button>
             </div>
-            <Button 
-              onClick={activity.action}
-              size="sm"
-              variant="outline"
-              disabled={activity.type === "invite_neighbor" && loading}
-              className="ml-4 flex items-center gap-1 bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700"
-            >
-              {activity.type === "invite_neighbor" ? (
-                <>
-                  <Share2 className="w-3 h-3" />
-                  {loading ? 'Generating...' : activity.buttonText}
-                </>
-              ) : (
-                <>
-                  {activity.buttonText}
-                  <ArrowRight className="w-3 h-3" />
-                </>
-              )}
-            </Button>
+          ))}
+        </CardContent>
+      </Card>
+
+      <Dialog open={showModal} onOpenChange={setShowModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              Invite Neighbors to Earn 10 Points!
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Share this link with your neighbor and earn 10 points when they join - that's halfway to your free Starbucks! ☕
+            </p>
+            <div className="flex items-center space-x-2">
+              <div className="grid flex-1 gap-2">
+                <input
+                  className="px-3 py-2 text-sm border rounded-md bg-muted"
+                  value={inviteUrl}
+                  readOnly
+                />
+              </div>
+              <Button size="sm" onClick={handleModalCopy}>
+                {copied ? (
+                  <>
+                    <Check className="w-4 h-4 mr-1" />
+                    Copied
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-4 h-4 mr-1" />
+                    Copy
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
-        ))}
-      </CardContent>
-    </Card>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

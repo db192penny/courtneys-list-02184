@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Share2 } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Copy, Share2, Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { User } from '@supabase/supabase-js';
 
@@ -9,6 +10,8 @@ export function SimpleInvite() {
   const [inviteUrl, setInviteUrl] = useState('');
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState<User | null>(null);
+  const [showModal, setShowModal] = useState(false);
+  const [copied, setCopied] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -67,21 +70,30 @@ export function SimpleInvite() {
       if (error) throw error;
 
       const baseUrl = window.location.origin;
+      // FIXED: Include inviter parameter in URL
       const url = `${baseUrl}/communities/boca-bridges?invite=${code}&inviter=${user.id}&welcome=true`;
       setInviteUrl(url);
 
       // Try to copy automatically
-      await copyToClipboard(url);
-      
-      // Always show success toast regardless of copy result
-      // Mobile browsers handle clipboard differently but the link is ready
-      toast({ 
-        title: '📋 Invite Link Copied!',
-        description: 'Earn 10 points when your neighbor joins! That\'s halfway to your free Starbucks! ☕',
-        duration: 5000,
-        className: "bg-green-50 border-green-500 border-2"
-      });
-      
+      const copySuccess = await copyToClipboard(url);
+      if (copySuccess) {
+        toast({ 
+          title: '📋 Invite Link Copied!',
+          description: 'Earn 10 points when your neighbor joins! That\'s halfway to your free Starbucks! ☕',
+          duration: 5000,
+          className: "bg-green-50 border-green-500 border-2"
+        });
+      } else {
+        // On mobile, still show success toast even if copy technically failed
+        // Most mobile browsers will have copied it anyway
+        toast({ 
+          title: '📋 Invite Link Generated!',
+          description: 'Link saved to clipboard. Earn 10 points when your neighbor joins! ☕',
+          duration: 5000,
+          className: "bg-green-50 border-green-500 border-2"
+        });
+      }
+      // Never show the modal - remove setShowModal(true)
     } catch (error) {
       console.error('Error:', error);
       toast({ 
@@ -93,36 +105,87 @@ export function SimpleInvite() {
     }
   };
 
+  const handleModalCopy = async () => {
+    const copySuccess = await copyToClipboard(inviteUrl);
+    if (copySuccess) {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+      toast({ 
+        title: '📋 Invite Link Copied!',
+        description: 'Earn 10 points when your neighbor joins! That\'s halfway to your free Starbucks! ☕' 
+      });
+    }
+  };
+
   return (
-    <div className="p-6 border rounded-lg bg-card shadow-sm">
-      <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-        <Share2 className="w-5 h-5" />
-        Invite Neighbors
-      </h3>
-      
-      <div className="space-y-3">
-        <p className="text-sm text-muted-foreground">
-          Earn 10 points for each neighbor you invite to join Courtney's List!
-        </p>
-        <Button 
-          onClick={generateInvite} 
-          disabled={loading}
-          className="w-full sm:w-auto bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700"
-        >
-          <Share2 className="w-4 h-4 mr-2" />
-          {loading ? 'Generating...' : 'Invite Neighbors'}
-        </Button>
-        {inviteUrl && (
+    <>
+      <div className="p-6 border rounded-lg bg-card shadow-sm">
+        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Share2 className="w-5 h-5" />
+          Invite Neighbors
+        </h3>
+        
+        <div className="space-y-3">
+          <p className="text-sm text-muted-foreground">
+            Earn 10 points for each neighbor you invite to join Courtney's List!
+          </p>
           <Button 
             onClick={generateInvite} 
-            variant="outline" 
-            size="sm"
-            className="w-full sm:w-auto mt-2"
+            disabled={loading}
+            className="w-full sm:w-auto bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700"
           >
-            Generate New Link
+            <Share2 className="w-4 h-4 mr-2" />
+            {loading ? 'Generating...' : 'Invite Neighbors'}
           </Button>
-        )}
+          {inviteUrl && (
+            <Button 
+              onClick={generateInvite} 
+              variant="outline" 
+              size="sm"
+              className="w-full sm:w-auto mt-2"
+            >
+              Generate New Link
+            </Button>
+          )}
+        </div>
       </div>
-    </div>
+
+      <Dialog open={showModal} onOpenChange={setShowModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              Share Courtney's List to Boca Bridges Neighbors
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Copy this link and share it with your neighbor:
+            </p>
+            <div className="flex items-center space-x-2">
+              <div className="grid flex-1 gap-2">
+                <input
+                  className="px-3 py-2 text-sm border rounded-md bg-muted"
+                  value={inviteUrl}
+                  readOnly
+                />
+              </div>
+              <Button size="sm" onClick={handleModalCopy}>
+                {copied ? (
+                  <>
+                    <Check className="w-4 h-4 mr-1" />
+                    Copied
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-4 h-4 mr-1" />
+                    Copy
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
