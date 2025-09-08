@@ -43,7 +43,7 @@ export function MobileReviewsModal({ vendorId }: MobileReviewsModalProps) {
       if (error) throw error;
       return (data || []) as any[];
     },
-    enabled: !!vendorId && !!isAuthenticated,
+    enabled: !!vendorId,
   });
   
   const handleReviewInteraction = () => {

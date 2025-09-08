@@ -38,7 +38,7 @@ export function NeighborReviewPreview({
       if (error) throw error;
       return data as Review[];
     },
-    enabled: !!vendorId && !!isAuthenticated,
+    enabled: !!vendorId,
   });
 
   // Smart review selection: prioritize recent reviews with substantial content
