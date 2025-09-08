@@ -114,35 +114,26 @@ export default function Community() {
         {/* Welcome toolbar for new users */}
         <WelcomeToolbar communitySlug={slug} />
         
-        <header className="space-y-0">
-          <div className="flex flex-col gap-2 sm:gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex gap-2 sm:gap-4 items-center sm:flex-row">
-              <img
-                src={photoUrl}
-                alt={`${communityName} HOA entrance sign and community graphic`}
-                className="h-10 w-10 sm:h-16 sm:w-16 rounded-md object-cover border"
-                loading="lazy"
-              />
+        {/* Mobile-first simplified header */}
+        <header className="space-y-4">
+          <div className="flex flex-col gap-4">
+            {/* Community info - simplified for mobile */}
+            <div className="flex gap-3 items-center">
+              <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg">
+                BB
+              </div>
               <div className="flex-1">
-                <h1 className="text-lg sm:text-2xl md:text-3xl font-semibold tracking-tight">{communityName}</h1>
-                <p className="text-sm text-muted-foreground truncate sm:whitespace-normal">Your Trusted Neighborhood — {homesLabel} Homes</p>
-                <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">{addressLine}</p>
-                {e164Phone && (
-                  <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-                    <Button variant="outline" asChild size="sm">
-                      <a href={`tel:${e164Phone}`} aria-label="Call HOA contact">Call HOA</a>
-                    </Button>
-                    <Button variant="secondary" asChild size="sm">
-                      <a href={`sms:${e164Phone}`} aria-label="Text HOA contact">Text HOA</a>
-                    </Button>
-                  </div>
-                )}
+                <h1 className="text-xl font-semibold tracking-tight">{communityName}</h1>
+                <p className="text-sm text-muted-foreground">{homesLabel} Homes</p>
               </div>
             </div>
-            
-            {/* Action Buttons */}
-            <div className="flex gap-2">
-              {showSignUpPrompt && (
+
+            {/* For logged out users - prominent call to action */}
+            {showSignUpPrompt && (
+              <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg p-6 text-center text-white">
+                <p className="text-lg font-medium mb-4">
+                  Rate vendors, share costs, and read detailed neighbor reviews
+                </p>
                 <Button
                   onClick={() => {
                     const inviteCode = localStorage.getItem('pending_invite_code');
@@ -154,32 +145,30 @@ export default function Community() {
                       navigate(`/auth?community=${communityName}`);
                     }
                   }}
-                  size="sm"
-                  className="shrink-0 bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700"
+                  size="lg"
+                  className="bg-white text-blue-600 hover:bg-gray-100 font-semibold px-8"
                 >
                   Request Access
                 </Button>
-              )}
-              <Button
-                onClick={() => navigate(`/submit?community=${encodeURIComponent(communityName)}`)}
-                variant="outline"
-                size="sm"
-                className="shrink-0 hidden sm:flex"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Submit Provider
-              </Button>
-            </div>
+              </div>
+            )}
+
+            {/* For logged in users - simplified actions */}
+            {!showSignUpPrompt && (
+              <div className="flex gap-2 justify-end">
+                <Button
+                  onClick={() => navigate(`/submit?community=${encodeURIComponent(communityName)}`)}
+                  variant="outline"
+                  size="sm"
+                  className="shrink-0"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Submit Provider
+                </Button>
+              </div>
+            )}
           </div>
         </header>
-
-        {showSignUpPrompt && (
-          <div className="flex flex-col gap-2 sm:gap-3">
-            <p className="text-sm text-muted-foreground">
-              Rate vendors, share costs, and read detailed neighbor reviews—verified neighbors only.
-            </p>
-          </div>
-        )}
 
         {isLoading && <div className="text-sm text-muted-foreground">Loading providers…</div>}
         {error && <div className="text-sm text-muted-foreground">Unable to load providers.</div>}
