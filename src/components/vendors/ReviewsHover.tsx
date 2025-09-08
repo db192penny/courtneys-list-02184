@@ -9,11 +9,12 @@ import { useAuth } from "@/hooks/useAuth";
 export default function ReviewsHover({ vendorId, children }: { vendorId: string; children: ReactNode }) {
   const { isAuthenticated } = useAuth();
   
+  // Don't show hover for unauthenticated users
   if (!isAuthenticated) {
     return <>{children}</>;
   }
   
-  const { data, isLoading, error } = useQuery({
+  const { data: rawData, isLoading, error } = useQuery({
     queryKey: ["reviews-hover", vendorId],
     queryFn: async () => {
       const { data, error } = await supabase.rpc("list_vendor_reviews", { 
@@ -22,8 +23,10 @@ export default function ReviewsHover({ vendorId, children }: { vendorId: string;
       if (error) throw error;
       return data || [];
     },
-    enabled: !!vendorId,
+    enabled: !!vendorId && isAuthenticated, // Re-add authentication check
   });
+
+  const data = rawData || [];
 
   return (
     <HoverCard openDelay={200} closeDelay={100}>
@@ -37,36 +40,42 @@ export default function ReviewsHover({ vendorId, children }: { vendorId: string;
         {error && (
           <div className="text-sm text-muted-foreground">Unable to load reviews.</div>
         )}
-        {data && data.length === 0 && (
+        {data.length === 0 && (
           <div className="text-sm text-muted-foreground">
             No reviews yet. Be the first to review!
           </div>
         )}
-        {data && data.length > 0 && (
+        {data.length > 0 && (
           <div className="max-h-64 overflow-y-auto space-y-3">
-            {data.map((r: any) => (
-              <div key={r.id} className="border rounded-md p-2">
-                <div className="text-xs text-foreground flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-1">
-                      <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
-                      <span className="font-medium">{r.rating}/5</span>
+            {data.map((r: any) => {
+              const authorLabel = String(r.author_label || 'Neighbor');
+              const rating = Number(r.rating || 0);
+              const comments = String(r.comments || '');
+              
+              return (
+                <div key={r.id} className="border rounded-md p-2">
+                  <div className="text-xs text-foreground flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1">
+                        <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
+                        <span className="font-medium">{rating}/5</span>
+                      </div>
+                      <Badge variant="outline" className="text-xs px-2 py-0.5 bg-blue-50 text-blue-700 border-blue-200">
+                        {authorLabel}
+                      </Badge>
                     </div>
-                    <Badge variant="outline" className="text-xs px-2 py-0.5 bg-blue-50 text-blue-700 border-blue-200">
-                      Neighbor
-                    </Badge>
+                    {r.created_at && (
+                      <div className="text-[10px] text-muted-foreground">
+                        {new Date(r.created_at).toLocaleDateString()}
+                      </div>
+                    )}
                   </div>
-                  {r.created_at && (
-                    <div className="text-[10px] text-muted-foreground">
-                      {new Date(r.created_at).toLocaleDateString()}
-                    </div>
+                  {comments && (
+                    <p className="text-sm text-muted-foreground mt-1">{comments}</p>
                   )}
                 </div>
-                {r.comments && (
-                  <p className="text-sm text-muted-foreground mt-1">{String(r.comments)}</p>
-                )}
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </HoverCardContent>
