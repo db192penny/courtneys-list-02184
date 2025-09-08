@@ -92,7 +92,7 @@ export function NeighborReviewPreview({
 
   return (
     <div
-      className={cn("bg-gray-50 border border-gray-200 rounded-lg p-3 cursor-pointer transition-transform hover:scale-[1.01]", className)}
+      className={cn("bg-blue-50 border border-blue-200 rounded-lg p-3 cursor-pointer transition-transform hover:scale-[1.01]", className)}
       onClick={handleInteraction}
       onKeyPress={handleInteraction}
       role="button"
@@ -101,12 +101,12 @@ export function NeighborReviewPreview({
       <div className="flex items-start gap-2">
         <ReviewSourceIcon source="bb" size="sm" />
         <div className="flex-1">
-          <p className="text-sm text-gray-700 mb-1">
+          <p className="text-sm font-medium text-blue-800 mb-1">
             💬 "{truncateComment(selectedReview.comments || "")}" - {selectedReview.author_label}
           </p>
-          <div className="text-sm font-medium text-blue-600">
+          <p className="text-xs text-blue-600 font-medium mt-2">
             Read all {totalReviews} Boca Bridges reviews →
-          </div>
+          </p>
         </div>
       </div>
     </div>

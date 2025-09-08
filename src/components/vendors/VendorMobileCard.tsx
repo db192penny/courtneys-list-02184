@@ -112,36 +112,36 @@ export default function VendorMobileCard({
 
         {/* Reviews Section */}
         <div className="space-y-2 mb-3">
-          {/* Simplified BB Reviews */}
-          <div className="flex items-center justify-between py-1">
+          {/* Boca Bridges Reviews - Blue theme */}
+          <div className="flex justify-between items-center p-2 bg-blue-50 border border-blue-200 rounded-lg">
             <div className="flex items-center gap-2">
               <ReviewSourceIcon source="bb" size="sm" />
-              <span className="text-sm font-medium">Boca Bridges</span>
+              <span className="text-sm font-medium text-blue-700">Boca Bridges</span>
             </div>
             <div className="flex items-center gap-1">
               <RatingStars rating={vendor.hoa_rating || 0} size="sm" />
-              <span className="text-sm font-medium text-gray-700">
+              <span className="text-sm font-medium text-blue-800">
                 {vendor.hoa_rating?.toFixed(1)}
               </span>
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-blue-600">
                 ({vendor.hoa_rating_count || 0})
               </span>
             </div>
           </div>
           
-          {/* Simplified Google Reviews if available */}
+          {/* Google Reviews - Green theme */}
           {vendor.google_rating_count > 0 && (
-            <div className="flex items-center justify-between py-1">
+            <div className="flex justify-between items-center p-2 bg-green-50 border border-green-200 rounded-lg">
               <div className="flex items-center gap-2">
                 <ReviewSourceIcon source="google" size="sm" />
-                <span className="text-sm font-medium">Google</span>
+                <span className="text-sm font-medium text-green-700">Google</span>
               </div>
               <div className="flex items-center gap-1">
                 <RatingStars rating={vendor.google_rating || 0} size="sm" />
-                <span className="text-sm font-medium text-gray-700">
+                <span className="text-sm font-medium text-green-800">
                   {vendor.google_rating?.toFixed(1)}
                 </span>
-                <span className="text-xs text-gray-500">
+                <span className="text-xs text-green-600">
                   ({vendor.google_rating_count})
                 </span>
               </div>
@@ -152,9 +152,9 @@ export default function VendorMobileCard({
         {/* Neighbor Review Preview */}
         <NeighborReviewPreview vendorId={vendor.id} className="px-2" />
 
-        {/* Cost Information Section */}
-        <div className="bg-gray-50 border border-gray-200 rounded-md p-3">
-          <SectionHeader icon={DollarSign} title="Cost Information" />
+        {/* Cost Information Section - Green theme */}
+        <div className="bg-green-50 border border-green-200 rounded-md p-3">
+          <SectionHeader icon={DollarSign} title="Cost Information" className="text-green-700" />
           <CostDisplay
             vendorId={vendor.id}
             vendorName={vendor.name}
