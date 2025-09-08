@@ -88,6 +88,14 @@ export function NeighborReviewPreview({
   const reviewWithComment = reviews?.find(r => r.comments && r.comments.length > 10);
   const selectedReview = reviewWithComment || reviews[0];
 
+  // Safety check - if no valid review exists
+if (!selectedReview) {
+  return (
+    <div className={cn("text-sm font-medium text-yellow-700 bg-yellow-50 border border-yellow-200 p-2 rounded", className)}>
+      🌟 Be the first neighbor to review this vendor!
+    </div>
+  );
+}
   const truncateComment = (comment: string | null) => {
     if (!comment) return '';
     return comment.length > 60 ? comment.substring(0, 60) + "..." : comment;
