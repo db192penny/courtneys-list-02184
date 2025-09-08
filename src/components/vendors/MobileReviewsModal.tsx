@@ -7,24 +7,24 @@ import { useUserProfile } from "@/hooks/useUserProfile";
 import { ReviewSourceIcon } from "./ReviewSourceIcon";
 
 interface MobileReviewsModalProps {
-  vendorId: string;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  vendor: any;
   onRate?: () => void;
-  open?: boolean;
-  setOpen?: (open: boolean) => void;
 }
 
-export function MobileReviewsModal({ vendorId, onRate, open, setOpen }: MobileReviewsModalProps) {
+export function MobileReviewsModal({ open, onOpenChange, vendor, onRate }: MobileReviewsModalProps) {
   const { data: profile } = useUserProfile();
   const isVerified = !!profile?.isVerified;
 
   const { data, isLoading, error } = useQuery<{ id: string; rating: number; comments: string | null; author_label: string; created_at: string | null; }[]>({
-    queryKey: ["mobile-reviews", vendorId],
+    queryKey: ["mobile-reviews", vendor?.id],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc("list_vendor_reviews", { _vendor_id: vendorId });
+      const { data, error } = await supabase.rpc("list_vendor_reviews", { _vendor_id: vendor?.id });
       if (error) throw error;
       return (data || []) as any[];
     },
-    enabled: isVerified && !!vendorId,
+    enabled: isVerified && !!vendor?.id,
   });
 
   if (!isVerified) {
@@ -90,22 +90,24 @@ export function MobileReviewsModal({ vendorId, onRate, open, setOpen }: MobileRe
         ))}
       </div>
       
-      <div className="mt-4 pt-4 border-t flex gap-2">
+      {/* Sticky Action Buttons */}
+      <div className="sticky bottom-0 left-0 right-0 bg-white border-t p-4 flex gap-2">
         <Button 
-          className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700"
           onClick={() => {
-            setOpen?.(false);
+            onOpenChange(false);  // Close this modal first
+            // Open the rate modal after a brief delay to prevent overlap
             setTimeout(() => {
-              onRate?.();
+              onRate?.();  // Call the onRate function passed as prop
             }, 100);
           }}
+          className="flex-1"
         >
           Write Review
         </Button>
         <Button 
           variant="outline" 
+          onClick={() => onOpenChange(false)}
           className="flex-1"
-          onClick={() => setOpen?.(false)}
         >
           Close
         </Button>
