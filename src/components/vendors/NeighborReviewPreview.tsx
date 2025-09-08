@@ -1,11 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { RatingStars } from "@/components/ui/rating-stars";
 import { ReviewSourceIcon } from "./ReviewSourceIcon";
 import { MobileReviewsModal } from "./MobileReviewsModal";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { formatNameWithLastInitial } from "@/utils/nameFormatting";
-import { capitalizeStreetName } from "@/utils/address";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
@@ -21,7 +18,7 @@ interface Review {
   comments: string | null;
   created_at: string;
   author_label: string;
-  anonymous: boolean;
+  anonymous?: boolean;
 }
 
 export function NeighborReviewPreview({ 
@@ -43,62 +40,50 @@ export function NeighborReviewPreview({
     enabled: !!vendorId,
   });
 
-  // SAFE formatting with extensive error handling
-  const reviews = rawData?.map(review => {
+  // SAFE formatting function
+  const formatAuthorLabel = (review: Review): string => {
     try {
-      let displayLabel = 'Neighbor'; // Default fallback
+      // Always return a string
+      if (!review.author_label) return 'Neighbor';
       
-      if (!review.author_label) {
-        // No author label at all
-        displayLabel = 'Neighbor';
-      } else if (typeof review.author_label !== 'string') {
-        // Author label is not a string
-        console.warn('Invalid author_label type:', typeof review.author_label, review.author_label);
-        displayLabel = 'Neighbor';
-      } else {
-        // Parse the author label
-        let name = 'Neighbor';
-        let street = '';
+      const authorStr = String(review.author_label);
+      
+      // Parse the name|street format
+      if (authorStr.includes('|')) {
+        const [namePart, streetPart] = authorStr.split('|');
+        const name = namePart?.trim() || 'Neighbor';
+        const street = streetPart?.trim() || '';
         
-        if (review.author_label.includes('|')) {
-          // New format: "David Birnbaum|Hotel Plaza Blvd"
-          const parts = review.author_label.split('|');
-          name = parts[0] || 'Neighbor';
-          street = parts[1] || '';
-        } else if (review.author_label.includes(',')) {
-          // Old format: "David Birnbaum, Hotel Plaza Blvd"
-          const parts = review.author_label.split(',');
-          name = parts[0]?.trim() || 'Neighbor';
-          street = parts[1]?.trim() || '';
-        } else {
-          // Just a name or "Neighbor"
-          name = review.author_label;
-          street = '';
-        }
-        
-        // Format based on anonymous flag
         if (review.anonymous) {
-          displayLabel = street ? `Neighbor on ${capitalizeStreetName(street)}` : 'Neighbor';
+          return street ? `Neighbor on ${street}` : 'Neighbor';
         } else {
-          const formattedName = formatNameWithLastInitial(name);
-          displayLabel = street ? `${formattedName} on ${capitalizeStreetName(street)}` : formattedName;
+          // Format name with last initial
+          const nameParts = name.split(' ').filter(Boolean);
+          if (nameParts.length >= 2) {
+            const firstName = nameParts[0];
+            const lastName = nameParts[nameParts.length - 1];
+            const lastInitial = lastName ? lastName.charAt(0).toUpperCase() + '.' : '';
+            const formatted = `${firstName} ${lastInitial}`;
+            return street ? `${formatted} on ${street}` : formatted;
+          }
+          return street ? `${name} on ${street}` : name;
         }
       }
       
-      return {
-        ...review,
-        author_label: displayLabel
-      };
+      // Fallback for old format or plain name
+      return authorStr;
     } catch (err) {
-      console.error('Error formatting review:', err, review);
-      return {
-        ...review,
-        author_label: 'Neighbor' // Fallback on any error
-      };
+      console.error('Error formatting author label:', err);
+      return 'Neighbor';
     }
-  });
+  };
 
-  // Smart review selection: prioritize recent reviews with substantial content
+  const reviews = rawData?.map(review => ({
+    ...review,
+    author_label: formatAuthorLabel(review)
+  }));
+
+  // Smart review selection
   const selectBestReview = (reviews: Review[]): Review | null => {
     if (!reviews || reviews.length === 0) return null;
     
@@ -115,9 +100,11 @@ export function NeighborReviewPreview({
     return sorted[0];
   };
 
-  const truncateComment = (comment: string) => {
-    if (!comment || comment.length <= 60) return comment;
-    return comment.substring(0, 60) + "...";
+  const truncateComment = (comment: string | null): string => {
+    if (!comment) return '';
+    const str = String(comment);
+    if (str.length <= 60) return str;
+    return str.substring(0, 60) + "...";
   };
 
   const handleInteraction = (e: React.MouseEvent | React.KeyboardEvent) => {
@@ -176,7 +163,7 @@ export function NeighborReviewPreview({
             <ReviewSourceIcon source="bb" size="sm" />
             <div className="flex-1">
               <p className="text-sm font-medium text-blue-800 mb-1">
-                💬 "{truncateComment(selectedReview.comments || "")}" - {selectedReview.author_label}
+                💬 "{truncateComment(selectedReview.comments)}" - {selectedReview.author_label}
               </p>
               <p className="text-xs text-blue-600 font-medium mt-2">
                 Read all {totalReviews} Boca Bridges reviews →
