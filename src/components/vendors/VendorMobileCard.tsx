@@ -10,6 +10,7 @@ import { formatUSPhoneDisplay } from "@/utils/phone";
 import { getCategoryIcon } from "@/utils/categoryIcons";
 import { useUserReviews } from "@/hooks/useUserReviews";
 import { useVendorCosts } from "@/hooks/useVendorCosts";
+import { useUserProfile } from "@/hooks/useUserProfile";
 import ReviewsHover from "@/components/vendors/ReviewsHover";
 import GoogleReviewsHover from "@/components/vendors/GoogleReviewsHover";
 import { CostDisplay } from "@/components/vendors/CostDisplay";
@@ -48,19 +49,8 @@ export default function VendorMobileCard({
   communityName,
 }: VendorMobileCardProps) {
   const { data: vendorCosts, isLoading: costsLoading } = useVendorCosts(vendor.id);
-
-  const formatCost = (amount: number, unit?: string | null, period?: string | null) => {
-    const formattedAmount = amount % 1 === 0 ? amount.toString() : amount.toFixed(2);
-    
-    let unitDisplay = "";
-    if (unit && unit !== "job") {
-      unitDisplay = `/${unit}`;
-    } else if (period && period !== "one_time") {
-      unitDisplay = `/${period}`;
-    }
-    
-    return `$${formattedAmount}${unitDisplay}`;
-  };
+  const { data: profile } = useUserProfile();
+  const isVerified = !!profile?.isVerified;
 
   return (
     <Card className="w-full">
@@ -189,57 +179,72 @@ export default function VendorMobileCard({
               </button>
             )}
           </div>
-          
-          <div className="bg-green-50 border border-green-200 rounded-md p-3">
-            {/* Show individual cost submissions if available */}
-            {vendorCosts && vendorCosts.length > 0 ? (
-              <div className="space-y-2">
-                {vendorCosts.slice(0, 2).map((cost, idx) => (
-                  <div key={cost.id} className="bg-white border border-green-200 rounded-lg p-3">
-                    <div className="flex justify-between items-center mb-1">
-                      <span className="text-sm font-medium text-green-700">
-                        💰 {formatCost(cost.amount, cost.unit, cost.period)}
-                        {cost.cost_kind && cost.cost_kind !== "one_time" && (
-                          <span className="text-green-600 ml-1 text-xs">
-                            ({cost.cost_kind.replace("_", " ")})
-                          </span>
-                        )}
-                      </span>
-                      <span className="text-xs text-green-600">
-                        {cost.author_label}
-                      </span>
-                    </div>
-                    
-                    {/* Display cost comments if they exist */}
-                    {cost.notes && (
-                      <p className="text-xs text-green-600 mt-2 italic">
-                        "{cost.notes}"
-                      </p>
-                    )}
-                  </div>
-                ))}
-                {vendorCosts.length > 2 && (
-                  <div className="text-xs text-green-600 text-center pt-1">
-                    +{vendorCosts.length - 2} more cost submission{vendorCosts.length - 2 !== 1 ? 's' : ''}
-                  </div>
-                )}
-              </div>
-            ) : (
-              <CostDisplay
-                vendorId={vendor.id}
-                vendorName={vendor.name}
-                category={vendor.category}
-                communityAmount={vendor.community_amount}
-                communityUnit={vendor.community_unit}
-                communitySampleSize={vendor.community_sample_size}
-                marketAmount={vendor.market_amount}
-                marketUnit={vendor.market_unit}
-                showContact={showContact}
-                communityName={communityName}
-                onOpenCostModal={() => onCosts(vendor)}
-              />
+        {/* Cost Information */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <h4 className="text-sm font-medium text-gray-700">Cost Information</h4>
+            {isVerified && (
+              <button
+                onClick={() => onCosts(vendor)}
+                className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+              >
+                + Add
+              </button>
             )}
           </div>
+
+          {vendorCosts && vendorCosts.length > 0 ? (
+            <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+              {/* Show cost range if multiple costs */}
+              {vendorCosts.length > 1 ? (
+                <>
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm font-medium text-green-700">
+                      💰 ${Math.min(...vendorCosts.map(c => c.amount || 0))} - ${Math.max(...vendorCosts.map(c => c.amount || 0))}
+                      {vendorCosts[0]?.period ? `/${vendorCosts[0].period}` : ''}
+                    </span>
+                    <span className="text-xs text-green-600">
+                      {vendorCosts.length} neighbors
+                    </span>
+                  </div>
+                  
+                  {/* Show first comment if available */}
+                  {vendorCosts.find(c => c.notes) && (
+                    <p className="text-xs text-green-600 italic">
+                      "{vendorCosts.find(c => c.notes)?.notes}"
+                    </p>
+                  )}
+                  
+                  <button
+                    onClick={() => onCosts(vendor)}
+                    className="text-xs text-green-600 font-medium mt-2"
+                  >
+                    View all cost details →
+                  </button>
+                </>
+              ) : (
+                /* Single cost - show full details */
+                <>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium text-green-700">
+                      💰 ${vendorCosts[0].amount}
+                      {vendorCosts[0].period ? `/${vendorCosts[0].period}` : ''}
+                    </span>
+                  </div>
+                  {vendorCosts[0].notes && (
+                    <p className="text-xs text-green-600 italic mt-1">
+                      "{vendorCosts[0].notes}"
+                    </p>
+                  )}
+                </>
+              )}
+            </div>
+          ) : (
+            <div className="text-center py-3 text-sm text-gray-500">
+              No cost information yet
+            </div>
+          )}
+        </div>
         </div>
 
         {/* Contact Section */}
