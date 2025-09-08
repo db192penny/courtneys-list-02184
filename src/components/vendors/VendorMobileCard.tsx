@@ -15,6 +15,8 @@ import GoogleReviewsHover from "@/components/vendors/GoogleReviewsHover";
 import { CostDisplay } from "@/components/vendors/CostDisplay";
 import { MobileReviewsModal } from "@/components/vendors/MobileReviewsModal";
 import { MobileGoogleReviewsModal } from "@/components/vendors/MobileGoogleReviewsModal";
+import { ReviewSourceIcon } from "./ReviewSourceIcon";
+import { NeighborReviewPreview } from "./NeighborReviewPreview";
 import type { CommunityVendorRow } from "@/components/vendors/CommunityVendorTable";
 import React from "react";
 
@@ -114,10 +116,11 @@ export default function VendorMobileCard({
           </div>
         </div>
 
-        {/* Ratings & Reviews Section */}
+        {/* Reviews Section */}
         <div>
           <SectionHeader icon={Star} title="Ratings & Reviews" />
-          <div className="space-y-2">
+          <div className="space-y-3">
+            {/* Neighbor Reviews with Preview */}
             <Dialog>
               <DialogTrigger asChild>
                 <div className="flex items-center justify-between p-2 rounded-md bg-blue-50 hover:bg-blue-100 transition-colors border border-blue-200 cursor-pointer group">
@@ -149,11 +152,18 @@ export default function VendorMobileCard({
               </DialogContent>
             </Dialog>
 
+            {/* Neighbor Review Preview */}
+            <NeighborReviewPreview vendorId={vendor.id} className="px-2" />
+            
+            {/* Google Reviews (if available) */}
             {vendor.google_rating != null && (
               <Dialog>
                 <DialogTrigger asChild>
                   <div className="flex items-center justify-between p-2 rounded-md bg-green-50 hover:bg-green-100 transition-colors border border-green-200 cursor-pointer group">
-                    <span className="text-sm font-medium text-muted-foreground underline">Google</span>
+                    <div className="flex items-center gap-2">
+                      <ReviewSourceIcon source="google" size="sm" />
+                      <span className="text-sm font-medium text-muted-foreground underline">Google</span>
+                    </div>
                     <div className="flex items-center gap-1">
                       <div className="underline">
                         <RatingStars rating={vendor.google_rating} showValue />
