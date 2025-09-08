@@ -1,15 +1,24 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ReviewSourceIcon } from "./ReviewSourceIcon";
-import { cn } from "@/lib/utils";
-import { useAuth } from "@/hooks/useAuth";
-import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { MobileReviewsModal } from "./MobileReviewsModal";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
+import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
 
 interface NeighborReviewPreviewProps {
   vendorId: string;
   className?: string;
+}
+
+interface Review {
+  id: string;
+  rating: number;
+  comments: string | null;
+  created_at: string;
+  author_label: string;
+  anonymous: boolean;
 }
 
 export function NeighborReviewPreview({ 
@@ -19,38 +28,14 @@ export function NeighborReviewPreview({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { isAuthenticated } = useAuth();
   
-  const { data: rawData, isLoading, error } = useQuery({
+  const { data: reviews, isLoading, error } = useQuery({
     queryKey: ["vendor-reviews", vendorId],
     queryFn: async () => {
-      try {
-        const { data, error } = await supabase
-          .rpc("list_vendor_reviews", { _vendor_id: vendorId });
-        
-        if (error) {
-          console.error("Review fetch error:", error);
-          return [];
-        }
-        
-        // Force all fields to be strings to prevent React rendering errors
-        const sanitized = (data || []).map((item: any) => {
-          // Console log to debug what we're getting
-          console.log("Raw review item:", item);
-          
-          return {
-            id: item?.id ? String(item.id) : Math.random().toString(),
-            rating: typeof item?.rating === 'number' ? item.rating : 0,
-            comments: item?.comments ? String(item.comments) : '',
-            created_at: item?.created_at ? String(item.created_at) : '',
-            // Force author_label to be a simple string
-            author_label: 'Neighbor'
-          };
-        });
-        
-        return sanitized;
-      } catch (err) {
-        console.error("Review processing error:", err);
-        return [];
-      }
+      const { data, error } = await supabase
+        .rpc("list_vendor_reviews", { _vendor_id: vendorId });
+      
+      if (error) throw error;
+      return data as Review[];
     },
     enabled: !!vendorId && isAuthenticated,
   });
@@ -81,8 +66,7 @@ export function NeighborReviewPreview({
     );
   }
 
-  const reviews = rawData || [];
-  const totalReviews = reviews.length;
+  const totalReviews = reviews?.length || 0;
 
   if (totalReviews === 0) {
     return (
@@ -92,8 +76,14 @@ export function NeighborReviewPreview({
     );
   }
 
-  const reviewWithComment = reviews.find(r => r.comments && r.comments.length > 10);
-  const displayReview = reviewWithComment || reviews[0];
+  // Find best review with comment
+  const reviewWithComment = reviews?.find(r => r.comments && r.comments.length > 10);
+  const selectedReview = reviewWithComment || reviews[0];
+
+  const truncateComment = (comment: string | null) => {
+    if (!comment) return '';
+    return comment.length > 60 ? comment.substring(0, 60) + "..." : comment;
+  };
 
   return (
     <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
@@ -106,13 +96,9 @@ export function NeighborReviewPreview({
           <div className="flex items-start gap-2">
             <ReviewSourceIcon source="bb" size="sm" />
             <div className="flex-1">
-              {displayReview?.comments && (
-                <p className="text-sm font-medium text-blue-800 mb-1">
-                  💬 "{displayReview.comments.length > 60 
-                    ? displayReview.comments.substring(0, 60) + "..." 
-                    : displayReview.comments}" - Neighbor
-                </p>
-              )}
+              <p className="text-sm font-medium text-blue-800 mb-1">
+                💬 "{truncateComment(selectedReview.comments)}" - {selectedReview.author_label}
+              </p>
               <p className="text-xs text-blue-600 font-medium mt-2">
                 Read all {totalReviews} Boca Bridges reviews →
               </p>
