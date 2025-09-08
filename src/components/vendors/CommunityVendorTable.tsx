@@ -277,17 +277,18 @@ export default function CommunityVendorTable({
       ) : (
         /* Mobile Filter Controls */
         <div className="w-full mb-4">
+          <label className="text-xs text-gray-500 font-medium mb-1 block">Category</label>
           <button
             onClick={() => setFilterModalOpen(true)}
-            className="w-full flex items-center justify-center px-4 py-3 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 transition-colors relative"
+            className="w-full flex items-center justify-between px-4 py-3 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 transition-colors"
           >
             <div className="flex items-center gap-2">
               <span className="text-xl">{filterText.icon}</span>
               <span className="text-base font-medium">
-                {filterText.category ? `${filterText.category} • ${filterText.sort}` : filterText.sort}
+                {filterText.category ? `${filterText.category} • ${filterText.sort}` : `All Categories • ${filterText.sort}`}
               </span>
             </div>
-            <ChevronDown className="h-5 w-5 absolute right-4 text-gray-500" />
+            <ChevronDown className="h-5 w-5 text-gray-500" />
           </button>
         </div>
       )}
