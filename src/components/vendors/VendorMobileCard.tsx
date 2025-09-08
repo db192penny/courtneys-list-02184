@@ -18,8 +18,9 @@ import { MobileReviewsModal } from "@/components/vendors/MobileReviewsModal";
 import { MobileGoogleReviewsModal } from "@/components/vendors/MobileGoogleReviewsModal";
 import { ReviewSourceIcon } from "./ReviewSourceIcon";
 import { NeighborReviewPreview } from "./NeighborReviewPreview";
+import { MobileCostsModal } from "./MobileCostsModal";
 import type { CommunityVendorRow } from "@/components/vendors/CommunityVendorTable";
-import React from "react";
+import React, { useState } from "react";
 
 interface VendorMobileCardProps {
   vendor: CommunityVendorRow;
@@ -51,8 +52,10 @@ export default function VendorMobileCard({
   const { data: vendorCosts, isLoading: costsLoading } = useVendorCosts(vendor.id);
   const { data: profile } = useUserProfile();
   const isVerified = !!profile?.isVerified;
+  const [costModalOpen, setCostModalOpen] = useState(false);
 
   return (
+    <>
     <Card className="w-full">
       <CardContent className="p-3 space-y-3">
         {/* Header with rank, name, and rate button */}
@@ -203,7 +206,7 @@ export default function VendorMobileCard({
                   )}
                   
                   <button
-                    onClick={() => onCosts(vendor)}
+                    onClick={() => setCostModalOpen(true)}
                     className="text-xs text-green-600 font-medium mt-2"
                   >
                     View all cost details →
@@ -258,5 +261,16 @@ export default function VendorMobileCard({
         )}
       </CardContent>
     </Card>
+
+    {/* Cost Details Modal */}
+    <Dialog open={costModalOpen} onOpenChange={setCostModalOpen}>
+      <DialogContent className="max-w-md mx-auto">
+        <DialogHeader>
+          <DialogTitle>Cost Details</DialogTitle>
+        </DialogHeader>
+        <MobileCostsModal vendorId={vendor.id} />
+      </DialogContent>
+    </Dialog>
+  </>
   );
 }

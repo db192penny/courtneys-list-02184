@@ -12,6 +12,7 @@ type CostData = {
   unit: string | null;
   period: string | null;
   cost_kind: string | null;
+  notes: string | null;
   created_at: string;
   author_label: string;
 };
@@ -57,27 +58,31 @@ export function MobileCostsModal({ vendorId }: Props) {
 
   return (
     <div className="max-h-96 overflow-y-auto space-y-3 p-4">
-      <div className="space-y-2">
+      <h4 className="font-medium text-gray-700">What neighbors are paying:</h4>
+      <div className="space-y-3">
         {costs.map((cost) => (
-          <div key={cost.id} className="border rounded-md p-3">
-            <div className="text-xs text-foreground flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2">
-                <div className="font-medium">
-                  {formatCost(cost.amount, cost.unit, cost.period)}
-                  {cost.cost_kind && cost.cost_kind !== "one_time" && (
-                    <span className="text-muted-foreground ml-1">
-                      ({cost.cost_kind.replace("_", " ")})
-                    </span>
-                  )}
-                </div>
-                <Badge variant="outline" className="text-xs px-2 py-0.5 bg-blue-50 text-blue-700 border-blue-200">
-                  {cost.author_label}
-                </Badge>
-              </div>
-              <div className="text-[10px] text-muted-foreground">
+          <div key={cost.id} className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+            <div className="flex justify-between items-center mb-1">
+              <span className="font-medium text-gray-700">
+                ${cost.amount}{cost.period ? `/${cost.period}` : ''}
+                {cost.cost_kind && cost.cost_kind !== "one_time" && (
+                  <span className="text-gray-600 ml-1 text-xs">
+                    ({cost.cost_kind.replace("_", " ")})
+                  </span>
+                )}
+              </span>
+              <span className="text-xs text-gray-500">
                 {new Date(cost.created_at).toLocaleDateString()}
-              </div>
+              </span>
             </div>
+            {cost.notes && (
+              <p className="text-sm text-gray-600 italic mt-1">
+                "{cost.notes}"
+              </p>
+            )}
+            <p className="text-xs text-gray-500 mt-1">
+              — {cost.author_label}
+            </p>
           </div>
         ))}
       </div>
