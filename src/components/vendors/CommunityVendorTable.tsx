@@ -120,6 +120,39 @@ export default function CommunityVendorTable({
   const [filterModalOpen, setFilterModalOpen] = useState(false);
   const [selectedVendor, setSelectedVendor] = useState<{ id: string; name: string; category: string } | null>(null);
 
+  // Dynamic filter button text
+  const getFilterButtonText = () => {
+    const categoryIcon = {
+      'all': '🏠',
+      'HVAC': '🔧',
+      'Pool': '🏊',
+      'Pool Service': '🏊',
+      'Landscaping': '🌱',
+      'Plumbing': '🚰',
+      'Electrical': '⚡',
+      'Pest Control': '🐛',
+      'House Cleaning': '🧹',
+      'Handyman': '🔨',
+      'Roofing': '🏠',
+      'General Contractor': '👷',
+      'Car Wash and Detail': '🚗',
+      'Pet Grooming': '🐕',
+      'Mobile Tire Repair': '🔧',
+      'Appliance Repair': '🔌'
+    }[category] || '🏠';
+    
+    const sortLabel = {
+      'homes': 'Most Used',
+      'hoa_rating': 'Highest Rated',
+      'google_rating': 'Most Reviews'
+    }[sortBy] || 'Most Used';
+    
+    if (category === 'all') {
+      return `${categoryIcon} ${sortLabel}`;
+    }
+    return `${categoryIcon} ${category} • ${sortLabel}`;
+  };
+
   // Helper function to generate dynamic title based on category
   const getDynamicTitle = (category: string) => {
     if (category === 'all') {
@@ -247,11 +280,12 @@ export default function CommunityVendorTable({
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:gap-6">
             <Button
               variant="outline"
+              size="sm"
               onClick={() => setFilterModalOpen(true)}
-              className="flex items-center gap-2 justify-center"
+              className="flex items-center gap-2 text-sm font-medium"
             >
-              <Filter className="h-4 w-4" />
-              Filter & Sort
+              <span className="truncate">{getFilterButtonText()}</span>
+              <ChevronDown className="h-4 w-4 shrink-0" />
             </Button>
           </div>
         </div>
@@ -594,19 +628,23 @@ export default function CommunityVendorTable({
             communityName={communityName}
           />
 
-          {/* Enhanced Mobile Filter Modal */}
-          {isMobile && (
-            <EnhancedMobileFilterModal
-              open={filterModalOpen}
-              onOpenChange={setFilterModalOpen}
-              selectedCategory={category}
-              selectedSort={sortBy}
-              onCategoryChange={setCategory}
-              onSortChange={(sort) => setSortBy(sort as any)}
-              categories={[...CATEGORIES]}
-            />
-          )}
         </>
+      )}
+
+      {/* Enhanced Mobile Filter Modal */}
+      {isMobile && (
+        <EnhancedMobileFilterModal
+          open={filterModalOpen}
+          onOpenChange={setFilterModalOpen}
+          selectedCategory={category}
+          selectedSort={sortBy === 'homes' ? 'neighbors_using' : sortBy === 'hoa_rating' ? 'highest_rated' : 'most_reviews'}
+          onCategoryChange={setCategory}
+          onSortChange={(sort) => {
+            const mappedSort = sort === 'neighbors_using' ? 'homes' : sort === 'highest_rated' ? 'hoa_rating' : 'google_rating';
+            setSortBy(mappedSort as any);
+          }}
+          categories={[...CATEGORIES]}
+        />
       )}
     </div>
     </TooltipProvider>

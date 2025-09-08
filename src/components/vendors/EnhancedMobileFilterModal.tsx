@@ -72,12 +72,12 @@ export const EnhancedMobileFilterModal: React.FC<EnhancedMobileFilterModalProps>
 
   const handleCategorySelect = (category: string) => {
     onCategoryChange(category);
-    onOpenChange(false);
+    // Don't close modal immediately - let user apply filters
   };
 
   const handleSortSelect = (sort: string) => {
     onSortChange(sort);
-    onOpenChange(false);
+    // Don't close modal immediately - let user apply filters
   };
 
   return (
@@ -167,6 +167,22 @@ export const EnhancedMobileFilterModal: React.FC<EnhancedMobileFilterModalProps>
               })}
             </div>
           </div>
+        </div>
+        
+        <div className="sticky bottom-0 bg-white border-t p-4 flex gap-2">
+          <Button 
+            onClick={() => onOpenChange(false)}
+            className="flex-1"
+          >
+            Apply Filters
+          </Button>
+          <Button 
+            variant="outline"
+            onClick={handleClearAll}
+            className="flex-1"
+          >
+            Clear All
+          </Button>
         </div>
       </SheetContent>
     </Sheet>
