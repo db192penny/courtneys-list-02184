@@ -13,23 +13,26 @@ export default function ReviewsHover({ vendorId, children }: { vendorId: string;
     return <>{children}</>;
   }
   
-  const { data, isLoading, error } = useQuery<{ 
-    id: string; 
-    rating: number; 
-    comments: string | null; 
-    author_label: string; 
-    created_at: string | null;
-    anonymous: boolean;
-  }[]>({
+  const { data, isLoading, error } = useQuery({
     queryKey: ["reviews-hover", vendorId],
     queryFn: async () => {
       const { data, error } = await supabase.rpc("list_vendor_reviews", { 
         _vendor_id: vendorId 
       });
+      
       if (error) throw error;
-      return (data || []) as any[];
+      
+      // FIX: Ensure all fields are safe to render
+      return (data || []).map((item: any) => ({
+        id: String(item?.id || ''),
+        rating: Number(item?.rating || 0),
+        comments: item?.comments ? String(item.comments) : null,
+        author_label: String(item?.author_label || 'Neighbor'),
+        created_at: item?.created_at ? String(item.created_at) : null,
+        anonymous: Boolean(item?.anonymous)
+      }));
     },
-    enabled: !!vendorId,
+    enabled: !!vendorId && isAuthenticated,
   });
 
   return (
