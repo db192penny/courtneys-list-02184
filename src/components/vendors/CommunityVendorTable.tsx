@@ -42,7 +42,6 @@ import VendorMobileCard from "@/components/vendors/VendorMobileCard";
 import CostManagementModalWrapper from "@/components/vendors/CostManagementModalWrapper";
 import { CostDisplay } from "@/components/vendors/CostDisplay";
 import { EnhancedMobileFilterModal } from "./EnhancedMobileFilterModal";
-import { DesktopReviewPreview } from "./DesktopReviewPreview";
 import { formatUSPhoneDisplay } from "@/utils/phone";
 export type CommunityVendorRow = {
   id: string;
@@ -467,13 +466,73 @@ export default function CommunityVendorTable({
                     </div>
                   </TableCell>
                    <TableCell>
-                     <DesktopReviewPreview 
-                       vendorId={r.id}
-                       communityRating={r.hoa_rating}
-                       communityRatingCount={r.hoa_rating_count}
-                       googleRating={r.google_rating}
-                       googleRatingCount={r.google_rating_count}
-                     />
+                     <div className="space-y-3">
+                       {/* Community Rating Section */}
+                       <div className="space-y-1">
+                         <div className="flex items-center gap-1">
+                           <Users className="h-3 w-3 text-blue-600" />
+                           <span className="text-[10px] font-medium text-blue-600 uppercase tracking-wide">Community Rating</span>
+                           <Tooltip>
+                             <TooltipTrigger asChild>
+                               <HelpCircle className="h-3 w-3 text-muted-foreground" />
+                             </TooltipTrigger>
+                             <TooltipContent>
+                               <p>Ratings from neighbors in {communityName}</p>
+                             </TooltipContent>
+                           </Tooltip>
+                         </div>
+                         <ReviewsHover vendorId={r.id}>
+                           <div className="cursor-pointer group">
+                             {r.hoa_rating ? (
+                               <div className="flex items-center gap-1 px-2 py-1.5 rounded-md bg-blue-50 hover:bg-blue-100 transition-colors border border-blue-200 hover:border-blue-300 min-h-[28px] underline decoration-dotted underline-offset-4">
+                                 <RatingStars rating={r.hoa_rating} showValue />
+                                 {r.hoa_rating_count ? <span className="text-xs text-muted-foreground">({r.hoa_rating_count})</span> : null}
+                               </div>
+                             ) : (
+                               <span 
+                                 className="text-xs text-muted-foreground px-2 py-1.5 rounded-md bg-blue-50 hover:bg-blue-100 transition-colors border border-blue-200 hover:border-blue-300 min-h-[28px] flex items-center underline decoration-dotted underline-offset-4"
+                                 title="Be the first to rate this provider"
+                               >
+                                 No Ratings Yet
+                               </span>
+                             )}
+                           </div>
+                         </ReviewsHover>
+                       </div>
+
+                       {/* Google Rating Section */}
+                       {r.google_rating != null && (
+                         <>
+                           <div className="h-px bg-border"></div>
+                           <div className="space-y-1">
+                             <div className="flex items-center gap-1">
+                               <Star className="h-3 w-3 text-green-600" />
+                               <span className="text-[10px] font-medium text-green-600 uppercase tracking-wide">Google Rating</span>
+                               <Tooltip>
+                                 <TooltipTrigger asChild>
+                                   <HelpCircle className="h-3 w-3 text-muted-foreground" />
+                                 </TooltipTrigger>
+                                 <TooltipContent>
+                                   <p>Public Google reviews and ratings</p>
+                                 </TooltipContent>
+                               </Tooltip>
+                             </div>
+                             <GoogleReviewsHover 
+                               vendorId={r.id} 
+                               googleReviewsJson={r.google_reviews_json}
+                               googlePlaceId={r.google_place_id}
+                             >
+                               <div className="cursor-pointer group">
+                                 <div className="flex items-center gap-1 px-2 py-1.5 rounded-md bg-green-50 hover:bg-green-100 transition-colors border border-green-200 hover:border-green-300 min-h-[28px] underline decoration-dotted underline-offset-4">
+                                   <RatingStars rating={r.google_rating} showValue />
+                                   {r.google_rating_count ? <span className="text-xs text-muted-foreground">({r.google_rating_count})</span> : null}
+                                 </div>
+                               </div>
+                             </GoogleReviewsHover>
+                           </div>
+                         </>
+                       )}
+                     </div>
                    </TableCell>
                     <TableCell>
                       <CostDisplay
