@@ -112,66 +112,6 @@ David (Rosella Rd — with Courtney + our two boys, 13 & 14)
 P.S. Have a category you'd like added (grill cleaning, roofers, pavers)? Just hit reply — I'd love your input. Any feedback helps make this better for all of us.`
   },
   {
-    id: "apology-email",
-    name: "Apology Email - Fresh Login Links",
-    description: "Send apology email with fresh magic login links to community members",
-    subject: "Your Boca Bridges Access - Login Issue - Fresh Link Inside",
-    body: `Hi Boca Bridges Neighbors,
-
-We're so sorry for the confusion with the login links! We had a software bug (I'll blame David :) that caused some of you to keep going to a log-in page - you are VIP and we made you stand in line - apologies! The good news is that we now have over 60 homes signed on!
-
-We've generated a fresh link just for you to see all the providers and rate and have fun.
-
-{{VIEW_PROVIDERS_BUTTON}}
-
-Again, our apologies for the technical hiccup. We really appreciate your patience as we work out these kinks. We promise this will save all of us stress in finding service providers :)
-
-💜 Courtney
-
-P.S Reach out to me on Whatsapp with any feedback or other categories you would want to see`
-  },
-  {
-    id: "hundred-homes-celebration",
-    name: "🎉 100 Homes Celebration",
-    description: "Celebration email for reaching 100+ homes milestone with rewards announcement",
-    subject: "🎉 We hit 100+ homes! Your coffee awaits ☕",
-    body: `We did it, neighbors! 🎉
-
-I wanted to share some exciting updates and say THANK YOU!
-
-📊 BY THE NUMBERS:
-- 102 Homes Joined
-- 157 Reviews Shared  
-- 48 Vendors Listed
-
-🆕 JUST ADDED: Water Filtration & Dryer Vent Cleaning
-Two of your most-requested categories are now live!
-
-💝 YOUR REWARDS ARE HERE!
-
-☕ Starbucks Gift Cards
-If you have 3+ reviews, check your email this week!
-(Limited time - I'd love to buy everyone coffee forever, but... 😅)
-
-💰 $200 Service Credit Raffle
-Every review = 1 entry. Drawing this Friday!
-
-Because if stopping the "can anyone recommend a plumber?" WhatsApp messages isn't reward enough... 😂
-
-🏆 NEIGHBORHOOD CHAMPIONS (TOP 10):
-{{LEADERBOARD}}
-
-FROM THE BOTTOM OF MY HEART: THANK YOU!
-
-When I started this, I just wanted to stop answering the same vendor questions over and over. But you've turned it into something amazing - a true community resource where neighbors help neighbors. Every review you add makes this more valuable for all 500 homes in Boca Bridges.
-
-Questions? Ideas? Just reply to this email!
-
-With gratitude (and caffeine),
-Courtney
-Founder, Courtney's List`
-  },
-  {
     id: "custom",
     name: "Custom Email",
     description: "Create your own custom email from scratch",
@@ -272,8 +212,6 @@ export default function EmailTemplatePanel({ communityName }: Props) {
         ? users.filter(u => selectedRecipients.includes(u.id)).map(u => u.email)
         : customRecipients.map(r => r.email);
 
-      const templateIdToSend = selectedTemplateId === "hundred-homes-celebration" ? "apology-email" : selectedTemplateId;
-
       const { data, error } = await supabase.functions.invoke("send-community-email", {
         body: {
           subject: subject.trim(),
@@ -281,7 +219,7 @@ export default function EmailTemplatePanel({ communityName }: Props) {
           recipients,
           communityName,
           senderName: "Courtney",
-          templateId: templateIdToSend
+          templateId: selectedTemplateId
         }
       });
 
