@@ -364,8 +364,7 @@ const Auth = () => {
           <h1 className="text-3xl font-semibold mb-6">{communityName ? `Join ${communityName.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}` : "Join Courtney's List"}</h1>
           <Card>
             <CardHeader className="space-y-4">
-              <div className="flex items-center justify-between">
-                <CardTitle>Request Access</CardTitle>
+              <div className="flex items-center justify-end">
                 <Button
                   variant="ghost"
                   size="sm"
@@ -376,7 +375,6 @@ const Auth = () => {
                   Back
                 </Button>
               </div>
-              
             </CardHeader>
 
             <CardContent className="space-y-4">
