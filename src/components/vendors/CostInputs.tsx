@@ -4,10 +4,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 export type CostEntry = {
-  cost_kind: "monthly_plan" | "yearly_plan" | "service_call" | "hourly";
+  cost_kind: "monthly_plan" | "yearly_plan" | "service_call" | "hourly" | "installation";
   amount: number | null;
   period?: string | null; // e.g., monthly, yearly
-  unit?: string | null;   // e.g., month, year, visit, hour
+  unit?: string | null;   // e.g., month, year, visit, hour, installation
   quantity?: number | null; // e.g., visits per month/year
   notes?: string | null;  // additional details/comments
 };
@@ -30,8 +30,15 @@ export function buildDefaultCosts(category?: string): CostEntry[] {
     ];
   }
   
-  // Plumbing/Electrical/Pet Grooming/House Cleaning/Mobile Tire Repair/Appliance Repair/Water Filtration: Service Call only
-  if (c === "plumbing" || c === "electrical" || c === "pet grooming" || c === "house cleaning" || c === "mobile tire repair" || c === "appliance repair" || c === "water filtration") {
+  // Water Filtration: Installation cost
+  if (c === "water filtration") {
+    return [
+      { cost_kind: "installation", amount: null, unit: "installation", notes: null },
+    ];
+  }
+
+  // Plumbing/Electrical/Pet Grooming/House Cleaning/Mobile Tire Repair/Appliance Repair: Service Call only
+  if (c === "plumbing" || c === "electrical" || c === "pet grooming" || c === "house cleaning" || c === "mobile tire repair" || c === "appliance repair") {
     return [
       { cost_kind: "service_call", amount: null, unit: "visit", notes: null },
     ];
@@ -114,12 +121,14 @@ export default function CostInputs({
         entry.cost_kind === "service_call" ? "Service Call" :
         entry.cost_kind === "hourly" ? "Hourly Rate" :
         entry.cost_kind === "yearly_plan" ? "Maintenance Plan" :
+        entry.cost_kind === "installation" ? "Installation Cost" :
         "Maintenance Plan";
 
       const unitDisplay = 
         entry.cost_kind === "service_call" ? " per Visit" :
         entry.cost_kind === "hourly" ? " per Hour" :
         entry.cost_kind === "yearly_plan" ? " per Year" :
+        entry.cost_kind === "installation" ? " (one-time)" :
         " per Month";
 
       return (
