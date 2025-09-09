@@ -67,17 +67,16 @@ export default function VendorMobileCard({
             </span>
             <div className="flex-1">
               <h3 className="text-base font-semibold">{vendor.name}</h3>
-              <div className="flex items-center gap-2">
+              {vendor.homes_serviced > 0 && (
+                <div className="flex items-center gap-1">
+                  <span className="text-xs text-gray-500">{vendor.homes_serviced} neighbor{vendor.homes_serviced !== 1 ? 's' : ''}</span>
+                  {vendor.homes_pct && (
+                    <span className="text-xs text-gray-400">({vendor.homes_pct}%)</span>
+                  )}
+                </div>
+              )}
+              <div className="flex items-center">
                 <span className="text-xs text-gray-500 uppercase">{vendor.category}</span>
-                {vendor.homes_serviced > 0 && (
-                  <>
-                    <span className="text-xs text-gray-400">•</span>
-                    <span className="text-xs text-gray-500">{vendor.homes_serviced} neighbor{vendor.homes_serviced !== 1 ? 's' : ''}</span>
-                    {vendor.homes_pct && (
-                      <span className="text-xs text-gray-400">({vendor.homes_pct}%)</span>
-                    )}
-                  </>
-                )}
               </div>
             </div>
           </div>
