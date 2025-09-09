@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Search, UserCheck, UserX, Trash2, Eye } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { UserActivityDetailsModal } from "@/components/admin/UserActivityDetailsModal";
 
 interface User {
   id: string;
@@ -42,6 +43,11 @@ const AdminUsers = () => {
   const [statusFilter, setStatusFilter] = useState<"all" | "verified" | "pending">("all");
   const [sourceFilter, setSourceFilter] = useState<"all" | "community" | "regular">("all");
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [selectedUserForModal, setSelectedUserForModal] = useState<{
+    id: string;
+    name: string;
+    email: string;
+  } | null>(null);
   const [userActivity, setUserActivity] = useState<UserActivity[]>([]);
   const [loadingAction, setLoadingAction] = useState<Record<string, string>>({});
 
@@ -319,7 +325,11 @@ const AdminUsers = () => {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => setSelectedUser(user)}
+                              onClick={() => setSelectedUserForModal({
+                                id: user.id,
+                                name: user.name || "Unknown",
+                                email: user.email
+                              })}
                             >
                               <Eye className="h-4 w-4" />
                             </Button>
@@ -449,6 +459,16 @@ const AdminUsers = () => {
             )}
           </DialogContent>
         </Dialog>
+
+        {selectedUserForModal && (
+          <UserActivityDetailsModal
+            open={!!selectedUserForModal}
+            onOpenChange={(open) => !open && setSelectedUserForModal(null)}
+            userId={selectedUserForModal.id}
+            userName={selectedUserForModal.name}
+            userEmail={selectedUserForModal.email}
+          />
+        )}
       </section>
     </main>
   );
