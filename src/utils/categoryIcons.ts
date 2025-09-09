@@ -11,6 +11,7 @@ import {
   Sparkles, 
   Car, 
   Settings,
+  Filter,
   LucideIcon 
 } from "lucide-react";
 import { Category } from "@/data/categories";
@@ -29,6 +30,7 @@ export const categoryIconMap: Record<Category, LucideIcon> = {
   "House Cleaning": Sparkles,
   "Mobile Tire Repair": Car,
   "Appliance Repair": Settings,
+  "Water Filtration": Filter,
 };
 
 export function getCategoryIcon(category: Category): LucideIcon {
