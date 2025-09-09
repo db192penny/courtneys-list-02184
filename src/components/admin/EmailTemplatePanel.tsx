@@ -155,6 +155,47 @@ Courtney
 Founder, Courtney's List`
   },
   {
+    id: "apology-email",
+    name: "🎉 100 Homes Celebration",
+    description: "Celebration email for reaching 100+ homes milestone with rewards announcement",
+    subject: "🎉 We hit 100+ homes! Your coffee awaits ☕",
+    body: `We did it, neighbors! 🎉
+
+I wanted to share some exciting updates and say THANK YOU!
+
+📊 BY THE NUMBERS:
+- 102 Homes Joined
+- 157 Reviews Shared  
+- 48 Vendors Listed
+
+🆕 JUST ADDED: Water Filtration & Dryer Vent Cleaning
+Two of your most-requested categories are now live!
+
+💝 YOUR REWARDS ARE HERE!
+
+☕ Starbucks Gift Cards
+If you have or create 3+ reviews, check your email this week!
+(Limited time - I'd love to buy everyone coffee forever, but... 😅)
+
+💰 $200 Service Credit Raffle
+Every review = 1 entry. Drawing this Friday!
+
+Because if stopping the "can anyone recommend a plumber?" WhatsApp messages isn't reward enough... 😂
+
+🏆 NEIGHBORHOOD CHAMPIONS (TOP 10):
+{{LEADERBOARD}}
+
+FROM THE BOTTOM OF MY HEART: THANK YOU!
+
+When I started this, I just wanted to stop answering the same vendor questions over and over. But you've turned it into something amazing - a true community resource where neighbors help neighbors. Every review you add makes this more valuable for all 500 homes in Boca Bridges.
+
+Questions? Ideas? Just reply to this email!
+
+With gratitude (and caffeine),
+Courtney
+Founder, Courtney's List`
+  },
+  {
     id: "custom",
     name: "Custom Email",
     description: "Create your own custom email from scratch",
