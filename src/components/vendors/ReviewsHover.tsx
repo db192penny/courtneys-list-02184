@@ -5,7 +5,6 @@ import { Badge } from "@/components/ui/badge";
 import { Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserProfile } from "@/hooks/useUserProfile";
-import { formatAuthorLabel } from "@/utils/formatAuthorLabel";
 
 export default function ReviewsHover({ vendorId, children }) {
   const { data: profile } = useUserProfile();
@@ -19,11 +18,7 @@ export default function ReviewsHover({ vendorId, children }) {
       });
       if (error) throw error;
       
-      // Format the author labels
-      return (data || []).map((item) => ({
-        ...item,
-        author_label: formatAuthorLabel(item?.author_label)
-      }));
+      return data || [];
     },
     enabled: !!vendorId,
   });

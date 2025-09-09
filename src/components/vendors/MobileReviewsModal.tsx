@@ -5,7 +5,6 @@ import { Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { ReviewSourceIcon } from "./ReviewSourceIcon";
-import { formatAuthorLabel } from "@/utils/formatAuthorLabel";
 
 export function MobileReviewsModal({ open, onOpenChange, vendor, onRate }) {
   const { data: profile } = useUserProfile();
@@ -19,11 +18,7 @@ export function MobileReviewsModal({ open, onOpenChange, vendor, onRate }) {
       });
       if (error) throw error;
       
-      // Format the author labels
-      return (data || []).map((item) => ({
-        ...item,
-        author_label: formatAuthorLabel(item?.author_label)
-      }));
+      return data || [];
     },
     enabled: isVerified && !!vendor?.id,
   });
