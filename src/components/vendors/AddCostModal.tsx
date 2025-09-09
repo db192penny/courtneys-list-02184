@@ -25,6 +25,7 @@ export function AddCostModal({
 }: AddCostModalProps) {
   const [loading, setLoading] = useState(false);
   const [skipForNow, setSkipForNow] = useState(false);
+  const [showName, setShowName] = useState(true);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -84,7 +85,8 @@ export function AddCostModal({
             cost_kind: "monthly_plan",
             unit: "month",
             period: "monthly",
-            quantity: visitsPerMonth ? parseFloat(visitsPerMonth) : 1
+            quantity: visitsPerMonth ? parseFloat(visitsPerMonth) : 1,
+            anonymous: !showName
           });
         }
       }
@@ -99,7 +101,8 @@ export function AddCostModal({
             cost_kind: "service_call",
             unit: "visit",
             period: "one_time",
-            quantity: 1
+            quantity: 1,
+            anonymous: !showName
           });
         }
         if (yearlyPlan) {
@@ -110,7 +113,8 @@ export function AddCostModal({
             cost_kind: "monthly_plan",
             unit: "month",
             period: "annually",
-            quantity: visitsPerYear ? parseFloat(visitsPerYear) : 1
+            quantity: visitsPerYear ? parseFloat(visitsPerYear) : 1,
+            anonymous: !showName
           });
         }
       }
@@ -125,7 +129,8 @@ export function AddCostModal({
             cost_kind: "service_call",
             unit: "visit",
             period: "one_time",
-            quantity: 1
+            quantity: 1,
+            anonymous: !showName
           });
         }
       }
@@ -140,7 +145,8 @@ export function AddCostModal({
             cost_kind: "hourly",
             unit: "hour",
             period: "one_time",
-            quantity: 1
+            quantity: 1,
+            anonymous: !showName
           });
         }
       }
@@ -319,6 +325,17 @@ export function AddCostModal({
         
         <div className="space-y-4">
           {getCategoryInputs()}
+          
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="showName"
+              checked={showName}
+              onCheckedChange={(checked) => setShowName(checked === true)}
+            />
+            <Label htmlFor="showName" className="text-sm">
+              Show My Name
+            </Label>
+          </div>
           
           <div className="flex items-center space-x-2">
             <Checkbox
