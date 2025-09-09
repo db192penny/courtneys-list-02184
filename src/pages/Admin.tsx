@@ -46,6 +46,8 @@ const [householdLoading, setHouseholdLoading] = useState<Record<string, boolean>
   const [brandingSaving, setBrandingSaving] = useState(false);
   const [brandingUploading, setBrandingUploading] = useState(false);
   const [totalHomes, setTotalHomes] = useState<number | "">("");
+  const [celebrationLoading, setCelebrationLoading] = useState(false);
+  
   const refreshBranding = async (hoa: string) => {
     const { data, error } = await supabase
       .from("community_assets")
@@ -247,6 +249,90 @@ const [householdLoading, setHouseholdLoading] = useState<Record<string, boolean>
     });
   };
 
+  // Add celebration email function
+  const sendCelebrationEmail = async () => {
+    setCelebrationLoading(true);
+    try {
+      // Get all verified users
+      const { data: verifiedUsers, error: usersError } = await supabase
+        .from('users')
+        .select('email')
+        .eq('is_verified', true);
+
+      if (usersError) throw usersError;
+
+      const recipients = verifiedUsers.map(u => u.email);
+      
+      // Celebration email content
+      const emailBody = `We did it, neighbors! 🎉
+
+I wanted to share some exciting updates and say THANK YOU!
+
+📊 BY THE NUMBERS:
+• 102 Homes Joined
+• 157 Reviews Shared  
+• 48 Vendors Listed
+
+🆕 JUST ADDED: Water Filtration & Dryer Vent Cleaning
+Two of your most-requested categories are now live!
+
+💝 YOUR REWARDS ARE HERE!
+
+☕ Starbucks Gift Cards
+If you have 3+ reviews, check your email this week!
+(Limited time - I'd love to buy everyone coffee forever, but... 😅)
+
+💰 $200 Service Credit Raffle
+Every review = 1 entry. Drawing last Friday this month!
+
+Because if stopping the "can anyone recommend a plumber?" WhatsApp messages isn't reward enough... 😂
+
+🏆 NEIGHBORHOOD CHAMPIONS (TOP 10):
+{{LEADERBOARD}}
+
+FROM THE BOTTOM OF MY HEART: THANK YOU!
+
+When I started this, I just wanted to stop answering the same vendor questions over and over. But you've turned it into something amazing - a true community resource where neighbors help neighbors. Every review you add makes this more valuable for all of us in Boca Bridges.
+
+Questions? Ideas? Just reply to this email!
+
+With gratitude (and caffeine),
+Courtney 
+With help (David, Justin, Ryan, and Penny poodle)`;
+
+      // Get current user for test mode
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      // First test with admin only
+      const testMode = confirm('Send TEST email to yourself first?');
+      
+      const { data, error } = await supabase.functions.invoke('send-celebration-email', {
+        body: {
+          subject: '🎉 We hit 100+ homes! Your coffee awaits ☕',
+          body: emailBody,
+          recipients: testMode ? [user?.email] : recipients,
+          testMode: testMode
+        }
+      });
+
+      if (error) throw error;
+
+      toast.success(testMode ? "Test email sent!" : "Celebration emails sent!", {
+        description: testMode 
+          ? "Check your inbox for the test email" 
+          : `Successfully sent to ${data.sent} recipients`,
+      });
+      
+    } catch (error) {
+      console.error('Failed to send celebration email:', error);
+      toast.error("Failed to send", {
+        description: error.message,
+      });
+    } finally {
+      setCelebrationLoading(false);
+    }
+  };
+
   const softDeleteUser = async (userId: string) => {
     const ok = confirm("This will delete the user and their data. Continue?");
     if (!ok) return;
@@ -365,6 +451,24 @@ const [householdLoading, setHouseholdLoading] = useState<Record<string, boolean>
               </div>
               <p className="text-sm text-muted-foreground">
                 Send welcome emails and updates to your community members with personalized leaderboards and invite links.
+              </p>
+            </div>
+
+            {/* Celebration Email Section */}
+            <div className="rounded-md border border-border p-4">
+              <h3 className="font-medium mb-3">🎉 100 Homes Celebration Email</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Send the celebration email with leaderboard and magic links to all verified users.
+              </p>
+              <Button 
+                onClick={sendCelebrationEmail}
+                disabled={celebrationLoading}
+                className="w-full sm:w-auto"
+              >
+                {celebrationLoading ? "Sending..." : "Send Celebration Email"}
+              </Button>
+              <p className="text-xs text-muted-foreground mt-2">
+                Will prompt to test with your email first before sending to everyone.
               </p>
             </div>
 
