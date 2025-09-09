@@ -90,7 +90,7 @@ export const EnhancedMobileFilterModal: React.FC<EnhancedMobileFilterModalProps>
         <div className="flex-1 overflow-y-auto py-3">
           {/* Compact Categories Section */}
           <div className="mb-4">
-            <h3 className="font-medium text-gray-700 mb-2 px-1 text-sm">Category</h3>
+            <h3 className="font-medium text-gray-700 mb-2 px-1 text-sm">Choose Category</h3>
             <div className="grid grid-cols-2 gap-1.5">
               {['all', ...categories.slice(0, 9)].map((category) => {
                 const displayName = category === 'all' ? 'All' : category;

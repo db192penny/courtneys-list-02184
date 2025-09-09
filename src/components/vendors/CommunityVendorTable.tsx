@@ -1,8 +1,9 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { RatingStars } from "@/components/ui/rating-stars";
@@ -24,7 +25,8 @@ import {
   Phone,
   Settings,
   HelpCircle,
-  Pencil
+  Pencil,
+  Share
 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { CATEGORIES } from "@/data/categories";
@@ -90,11 +92,21 @@ export default function CommunityVendorTable({
   isAuthenticated?: boolean;
   isVerified?: boolean;
 }) {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [category, setCategory] = useState<string>("Pool");
   const SORTS = getSorts(communityName);
   const [sortBy, setSortBy] = useState<typeof SORTS[number]["key"]>("homes");
+  const { toast } = useToast();
   // Always use mobile layout for desktop - removed isMobile detection
   const isMobile = true;
+
+  // Initialize category from URL parameter
+  useEffect(() => {
+    const urlCategory = searchParams.get('category');
+    if (urlCategory) {
+      setCategory(urlCategory);
+    }
+  }, [searchParams]);
 
   const { data, isLoading, error, refetch, isFetching } = useQuery<CommunityVendorRow[]>({
     queryKey: ["community-stats", communityName, category, sortBy],
@@ -155,6 +167,41 @@ export default function CommunityVendorTable({
 
   const filterText = getFilterButtonText();
 
+  const handleCategoryChange = (newCategory: string) => {
+    setCategory(newCategory);
+    // Update URL parameter
+    const newSearchParams = new URLSearchParams(searchParams);
+    if (newCategory === 'all') {
+      newSearchParams.delete('category');
+    } else {
+      newSearchParams.set('category', newCategory);
+    }
+    setSearchParams(newSearchParams);
+  };
+
+  const handleShareCategory = async () => {
+    try {
+      const currentUrl = new URL(window.location.href);
+      if (category !== 'all') {
+        currentUrl.searchParams.set('category', category);
+      } else {
+        currentUrl.searchParams.delete('category');
+      }
+      
+      await navigator.clipboard.writeText(currentUrl.toString());
+      toast({
+        title: "Link copied!",
+        description: `Share this ${category === 'all' ? 'vendor list' : category} link with neighbors`,
+      });
+    } catch (error) {
+      toast({
+        title: "Failed to copy link",
+        description: "Please try again",
+        variant: "destructive",
+      });
+    }
+  };
+
   const openRate = (row: CommunityVendorRow) => {
     setSelectedVendor({ id: row.id, name: row.name, category: row.category });
     setRateModalOpen(true);
@@ -173,20 +220,31 @@ export default function CommunityVendorTable({
         {/* Mobile-style Filter Controls for Desktop */}
         <div className="w-full mb-4">
           <label className="text-xs text-gray-600 font-medium uppercase tracking-wide mb-1 block">
-            Category
+            Choose Category
           </label>
-          <button
-            onClick={() => setFilterModalOpen(true)}
-            className="w-full flex items-center justify-between px-4 py-3 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 transition-colors"
-          >
-            <div className="flex items-center gap-2">
-              <span className="text-xl">{filterText.icon}</span>
-              <span className="text-base font-medium">
-                {filterText.category ? `${filterText.category} • ${filterText.sort}` : `All Categories • ${filterText.sort}`}
-              </span>
-            </div>
-            <ChevronDown className="h-5 w-5 text-gray-500" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setFilterModalOpen(true)}
+              className="flex-1 flex items-center justify-between px-4 py-3 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 transition-colors"
+            >
+              <div className="flex items-center gap-2">
+                <span className="text-xl">{filterText.icon}</span>
+                <span className="text-base font-medium">
+                  {filterText.category ? `${filterText.category} • ${filterText.sort}` : `All Categories • ${filterText.sort}`}
+                </span>
+              </div>
+              <ChevronDown className="h-5 w-5 text-gray-500" />
+            </button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleShareCategory}
+              className="flex items-center gap-2 px-3 py-3 h-auto"
+            >
+              <Share className="h-4 w-4" />
+              Share
+            </Button>
+          </div>
         </div>
 
         {/* Mobile-style Card Layout for Desktop */}
@@ -257,7 +315,7 @@ export default function CommunityVendorTable({
           onOpenChange={setFilterModalOpen}
           selectedCategory={category}
           selectedSort={sortBy === 'homes' ? 'neighbors_using' : sortBy === 'hoa_rating' ? 'highest_rated' : 'most_reviews'}
-          onCategoryChange={setCategory}
+          onCategoryChange={handleCategoryChange}
           onSortChange={(sort) => {
             const mappedSort = sort === 'neighbors_using' ? 'homes' : sort === 'highest_rated' ? 'hoa_rating' : 'google_rating';
             setSortBy(mappedSort as any);
