@@ -5,6 +5,7 @@ export const CATEGORIES = [
   "Pest Control",
   "Electrical",
   "Plumbing",
+  "Painters",
   "Power Washing",
   "Car Wash & Detail",
   "Handyman",

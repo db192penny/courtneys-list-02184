@@ -37,8 +37,8 @@ export function buildDefaultCosts(category?: string): CostEntry[] {
     ];
   }
 
-  // Plumbing/Electrical/Pet Grooming/House Cleaning/Mobile Tire Repair/Appliance Repair: Service Call only
-  if (c === "plumbing" || c === "electrical" || c === "pet grooming" || c === "house cleaning" || c === "mobile tire repair" || c === "appliance repair") {
+  // Plumbing/Electrical/Painters/Pet Grooming/House Cleaning/Mobile Tire Repair/Appliance Repair: Service Call only
+  if (c === "plumbing" || c === "electrical" || c === "painters" || c === "pet grooming" || c === "house cleaning" || c === "mobile tire repair" || c === "appliance repair") {
     return [
       { cost_kind: "service_call", amount: null, unit: "visit", notes: null },
     ];

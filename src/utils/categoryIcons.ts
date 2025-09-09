@@ -12,6 +12,7 @@ import {
   Car, 
   Settings,
   Filter,
+  PaintBucket,
   LucideIcon 
 } from "lucide-react";
 import { Category } from "@/data/categories";
@@ -21,6 +22,7 @@ export const categoryIconMap: Record<Category, LucideIcon> = {
   "HVAC": Thermometer,
   "Electrical": Zap,
   "Plumbing": Droplets,
+  "Painters": PaintBucket,
   "Landscaping": Trees,
   "Pest Control": Bug,
   "Power Washing": ShowerHead,
