@@ -112,25 +112,6 @@ David (Rosella Rd — with Courtney + our two boys, 13 & 14)
 P.S. Have a category you'd like added (grill cleaning, roofers, pavers)? Just hit reply — I'd love your input. Any feedback helps make this better for all of us.`
   },
   {
-    id: "apology-email",
-    name: "Apology Email - Fresh Login Links",
-    description: "Send apology email with fresh magic login links to community members",
-    subject: "Your Boca Bridges Access - Login Issue - Fresh Link Inside",
-    body: `Hi Boca Bridges Neighbors,
-
-We're so sorry for the confusion with the login links! We had a software bug (I'll blame David :) that caused some of you to keep going to a log-in page - you are VIP and we made you stand in line - apologies! The good news is that we now have over 60 homes signed on!
-
-We've generated a fresh link just for you to see all the providers and rate and have fun.
-
-{{VIEW_PROVIDERS_BUTTON}}
-
-Again, our apologies for the technical hiccup. We really appreciate your patience as we work out these kinks. We promise this will save all of us stress in finding service providers :)
-
-💜 Courtney
-
-P.S Reach out to me on Whatsapp with any feedback or other categories you would want to see`
-  },
-  {
     id: "hundred-homes-celebration",
     name: "🎉 100 Homes Celebration",
     description: "Celebration email for reaching 100+ homes milestone with rewards announcement",
@@ -163,13 +144,15 @@ Because if stopping the "can anyone recommend a plumber?" WhatsApp messages isn'
 
 FROM THE BOTTOM OF MY HEART: THANK YOU!
 
-When I started this, I just wanted to stop answering the same vendor questions over and over. But you've turned it into something amazing - a true community resource where neighbors help neighbors. Every review you add makes this more valuable for all 500 homes in Boca Bridges.
+When I started this, I just wanted to stop answering the same vendor questions over and over. But you've turned it into something amazing - a true community resource where neighbors help neighbors. Every review you add makes this more valuable for all of us in Boca Bridges.
 
 Questions? Ideas? Just reply to this email!
 
+{{VIEW_PROVIDERS_BUTTON}}
+
 With gratitude (and caffeine),
-Courtney
-Founder, Courtney's List`
+Courtney 
+With help (David, Justin, Ryan, and Penny poodle)`
   },
   {
     id: "custom",
@@ -272,20 +255,32 @@ export default function EmailTemplatePanel({ communityName }: Props) {
         ? users.filter(u => selectedRecipients.includes(u.id)).map(u => u.email)
         : customRecipients.map(r => r.email);
 
-      const templateIdToSend = selectedTemplateId === "hundred-homes-celebration" ? "apology-email" : selectedTemplateId;
-
-      const { data, error } = await supabase.functions.invoke("send-community-email", {
-        body: {
-          subject: subject.trim(),
-          body: body.trim(),
-          recipients,
-          communityName,
-          senderName: "Courtney",
-          templateId: templateIdToSend
-        }
-      });
-
-      if (error) throw error;
+      // Route celebration email to new function
+      if (selectedTemplateId === "hundred-homes-celebration") {
+        const { data, error } = await supabase.functions.invoke("send-celebration-email", {
+          body: {
+            subject: subject.trim(),
+            body: body.trim(),
+            recipients,
+            testMode: false
+          }
+        });
+        
+        if (error) throw error;
+      } else {
+        const { data, error } = await supabase.functions.invoke("send-community-email", {
+          body: {
+            subject: subject.trim(),
+            body: body.trim(),
+            recipients,
+            communityName,
+            senderName: "Courtney",
+            templateId: selectedTemplateId
+          }
+        });
+        
+        if (error) throw error;
+      }
 
       toast({
         title: "Email Sent Successfully",
