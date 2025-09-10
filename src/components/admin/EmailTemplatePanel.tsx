@@ -120,7 +120,7 @@ P.S. Have a category you'd like added (grill cleaning, roofers, pavers)? Just hi
 
 We did it! I wanted to share some exciting updates and say THANK YOU!
 
-📊 COURTNEY'S' LIST: BY THE NUMBERS:
+📊 COURTNEY'S LIST: BY THE NUMBERS:
 • 102 Neighbors Joined
 • 157 Reviews Shared  
 • 48 Vendors Listed
