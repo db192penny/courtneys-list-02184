@@ -319,22 +319,37 @@ const [householdLoading, setHouseholdLoading] = useState<Record<string, boolean>
         return;
       } else {
         // Get selected users' details
-        const { data: users } = await supabase
+        const { data: users, error: usersError } = await supabase
           .from('users')
           .select('email, name, points')
           .in('id', Array.from(selectedCelebrationUsers));
         
+        if (usersError) {
+          console.error('Error fetching users:', usersError);
+          throw new Error(`Failed to fetch users: ${usersError.message}`);
+        }
+        
         usersToEmail = users || [];
       }
 
+      if (usersToEmail.length === 0) {
+        toast.error("No users to email");
+        setCelebrationLoading(false);
+        return;
+      }
+
       // Get leaderboard for the email
-      const { data: leaderboard } = await supabase
+      const { data: leaderboard, error: leaderboardError } = await supabase
         .from('users')
         .select('name, points')
         .eq('is_verified', true)
         .gt('points', 0)
         .order('points', { ascending: false })
         .limit(10);
+
+      if (leaderboardError) {
+        console.warn('Error fetching leaderboard:', leaderboardError);
+      }
 
       // Format leaderboard
       const medals = ['🥇', '🥈', '🥉', '🏅', '⭐', '⭐', '⭐', '⭐', '⭐', '⭐'];
@@ -344,10 +359,12 @@ const [householdLoading, setHouseholdLoading] = useState<Record<string, boolean>
       }).join('<br>') || 'Leaderboard coming soon!';
 
       // Create batch with magic links
-      const emailBatch = await Promise.all(
-        usersToEmail.slice(0, 100).map(async (user) => {
+      const emailBatch = [];
+      
+      for (const user of usersToEmail.slice(0, 100)) {
+        try {
           // Generate magic link
-          const { data: authData } = await supabase.auth.admin.generateLink({
+          const { data: authData, error: linkError } = await supabase.auth.admin.generateLink({
             type: 'magiclink',
             email: user.email,
             options: {
@@ -355,9 +372,14 @@ const [householdLoading, setHouseholdLoading] = useState<Record<string, boolean>
             }
           });
 
-          const magicLink = authData?.properties?.action_link || window.location.origin;
+          if (linkError) {
+            console.error(`Failed to generate magic link for ${user.email}:`, linkError);
+            // Use fallback URL instead of failing
+          }
 
-          return {
+          const magicLink = authData?.properties?.action_link || `${window.location.origin}/communities/boca-bridges`;
+
+          emailBatch.push({
             from: "Courtney's List <noreply@courtneys-list.com>",
             to: user.email,
             subject: testMode ? "[TEST] 🎉 We hit 100+ homes! Your coffee awaits ☕" : "🎉 We hit 100+ homes! Your coffee awaits ☕",
@@ -437,12 +459,25 @@ const [householdLoading, setHouseholdLoading] = useState<Record<string, boolean>
                 </div>
               </div>
             `
-          };
-        })
-      );
+          });
+        } catch (linkError) {
+          console.error(`Error processing user ${user.email}:`, linkError);
+          // Continue with other users
+        }
+      }
 
-      // TODO: Replace with your actual Resend API key
+      if (emailBatch.length === 0) {
+        throw new Error('No emails could be prepared for sending');
+      }
+
+      console.log(`Attempting to send ${emailBatch.length} emails via Resend...`);
+
+      // Use the provided Resend API key (this should be replaced with a proper secret)
       const RESEND_API_KEY = 're_NpDFpfnQ_CgVf6fRhfrffFiAE2XTqzk55';
+      
+      if (!RESEND_API_KEY) {
+        throw new Error('Resend API key is not configured properly');
+      }
       
       const response = await fetch('https://api.resend.com/emails/batch', {
         method: 'POST',
@@ -453,10 +488,25 @@ const [householdLoading, setHouseholdLoading] = useState<Record<string, boolean>
         body: JSON.stringify(emailBatch)
       });
 
+      console.log('Resend API response status:', response.status);
+
       if (!response.ok) {
-        const error = await response.text();
-        throw new Error(`Resend API error: ${error}`);
+        const errorText = await response.text();
+        console.error('Resend API error response:', errorText);
+        
+        let errorMessage = `Resend API error (${response.status})`;
+        try {
+          const errorData = JSON.parse(errorText);
+          errorMessage = errorData.message || errorData.error || errorMessage;
+        } catch {
+          errorMessage = errorText || errorMessage;
+        }
+        
+        throw new Error(errorMessage);
       }
+
+      const result = await response.json();
+      console.log('Resend API success:', result);
 
       toast.success(testMode ? "Test email sent!" : "Celebration emails sent!", {
         description: `Successfully sent to ${emailBatch.length} ${emailBatch.length === 1 ? 'user' : 'users'}`
@@ -468,9 +518,9 @@ const [householdLoading, setHouseholdLoading] = useState<Record<string, boolean>
       }
       
     } catch (error) {
-      console.error('Failed to send:', error);
+      console.error('Failed to send celebration emails:', error);
       toast.error("Failed to send emails", {
-        description: error.message
+        description: error.message || 'Unknown error occurred'
       });
     } finally {
       setCelebrationLoading(false);
