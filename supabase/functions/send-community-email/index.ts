@@ -1,334 +1,542 @@
-import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { Resend } from "npm:resend@2.0.0";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { useState, useEffect } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { toast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
+import { Mail, Send, Users, FileText, UserPlus, X } from "lucide-react";
 
-const resendApiKey = Deno.env.get("RESEND_API_KEY");
-console.log('RESEND_API_KEY exists:', !!resendApiKey);
-const resend = new Resend(resendApiKey);
+interface EmailRecipient {
+  id: string;
+  name: string;
+  email: string;
+  address: string;
+  display: string;
+}
 
-const supabase = createClient(
-  Deno.env.get('SUPABASE_URL') ?? '',
-  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-);
+interface CustomRecipient {
+  name: string;
+  email: string;
+}
 
-const formatNameWithLastInitial = (fullName: string): string => {
-  if (!fullName || !fullName.trim()) return "Neighbor";
-  
-  const parts = fullName.trim().split(" ");
-  if (parts.length === 0) return "Neighbor";
-  
-  const firstName = parts[0];
-  const lastInitial = parts.length > 1 ? parts[parts.length - 1][0] : "";
-  
-  return lastInitial ? `${firstName} ${lastInitial}.` : firstName;
-};
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-};
-
-interface CommunityEmailRequest {
+interface EmailTemplate {
+  id: string;
+  name: string;
+  description: string;
   subject: string;
   body: string;
-  recipients: string[];
+}
+
+interface Props {
   communityName: string;
-  senderName: string;
-  templateId?: string;
 }
 
-interface LeaderboardEntry {
-  name: string;
-  points: number;
-}
+const EMAIL_TEMPLATES: EmailTemplate[] = [
+  {
+    id: "welcome-1",
+    name: "Welcome Email #1 - Community Leaderboard Update",
+    description: "Welcome email with current leaderboard and invitation links",
+    subject: "30+ {COMMUNITY_NAME} homes now on Courtney's List + leaderboard",
+    body: `Hi Neighbors 💜,
 
-interface UserData {
-  id: string;
-  email: string;
-  name: string;
-  points: number;
-}
+Thanks so much for signing up — we now have 30+ {COMMUNITY_NAME} homes on Courtney's List! Already, just by reading the organized reviews, I know who I'm calling for my next AC repair, and we even found a new pool vendor.
 
-const handler = async (req: Request): Promise<Response> => {
-  // Handle CORS preflight requests
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+To make this fun, we added a points system and a leaderboard:
+   •   Rate a Vendor = +5 pts
+   •   Submit a New Vendor = +5 pts
+   •   Invite a Neighbor = +10 pts
+
+Here's the current leaderboard 🏆:
+{{LEADERBOARD}}
+
+New this week: categories now include Mobile Tire Repair and Pet Groomers. Keep the feedback coming and let us know about any bugs!
+
+👉 Want to climb the leaderboard?
+	1.	Rate 3–4 of your vendors to help your neighbors.
+	2.	Invite a friend in {COMMUNITY_NAME} using your personal link below (points are tracked automatically when they join):
+
+Your Invite Link:
+{{INVITE_LINK}}
+
+The more we all contribute, the more valuable (and stress-free!) this list becomes for the whole community.
+
+💜 Courtney`
+  },
+  {
+    id: "apology-email",
+    name: "Apology Email - Fresh Login Links",
+    description: "Send apology email with fresh magic login links to community members",
+    subject: "Your Boca Bridges Access - Login Issue - Fresh Link Inside",
+    body: `Hi Boca Bridges Neighbors,
+
+We're so sorry for the confusion with the login links! We had a software bug (I'll blame David :) that caused some of you to keep going to a log-in page - you are VIP and we made you stand in line - apologies! The good news is that we now have over 60 homes signed on!
+
+We've generated a fresh link just for you to see all the providers and rate and have fun.
+
+{{VIEW_PROVIDERS_BUTTON}}
+
+Again, our apologies for the technical hiccup. We really appreciate your patience as we work out these kinks. We promise this will save all of us stress in finding service providers :)
+
+💜 Courtney
+
+P.S Reach out to me on Whatsapp with any feedback or other categories you would want to see`
+  },
+  {
+    id: "community-update-rosella",
+    name: "Community Update - Review Request",
+    description: "Personal request from David on Rosella Rd for community reviews",
+    subject: "A small favor from your Boca Bridges neighbor on Rosella Rd",
+    body: `Hi [FirstName],
+
+Thanks again for signing up for Courtney's List — a project I started to make it easier for all of us to find trusted service providers in Boca Bridges. My hope is that it grows into a resource we build together as neighbors.
+
+Quick update: the login issues some people had are now fixed ✅. Already, 80+ homes have joined, and reviews are starting to come in on plumbers, landscapers, AC techs, and more.
+
+I have a small favor to ask:
+👉 Could you please leave a review for one of your service providers?
+
+{{VIEW_PROVIDERS_BUTTON}}
+
+It takes less than a minute, and even a single review makes a difference for neighbors trying to choose the right providers.
+
+Together, we can make this something really useful for Boca Bridges — saving time, money, and stress for everyone.
+
+Thanks so much for helping,
+David (Rosella Rd — with Courtney + our two boys, 13 & 14)
+
+P.S. Have a category you'd like added (grill cleaning, roofers, pavers)? Just hit reply — I'd love your input. Any feedback helps make this better for all of us.`
+  },
+  {
+    id: "celebration-100-homes",
+    name: "🎉 100 Homes Celebration",
+    description: "Celebration email for reaching 100 homes milestone with rewards and leaderboard",
+    subject: "🎉 We hit 100+ homes! Your coffee awaits ☕",
+    body: `Hey {{FIRST_NAME}}!
+
+We did it! I wanted to share some exciting updates and say THANK YOU!
+
+📊 BY THE NUMBERS:
+• 102 Homes Joined
+• 157 Reviews Shared  
+• 48 Vendors Listed
+
+🆕 JUST ADDED:
+Water Filtration & Dryer Vent Cleaning - two of your most-requested categories are now live!
+
+🌟 THIS WEEK'S TOP CONTRIBUTORS:
+
+Lisa R. on Abrruzzo Ave - 7 reviews
+Frances F. on Chauvet Wy - 7 reviews
+Natalie L. on Espresso Mnr - 6 reviews
+Brian B. on Abruzzo Ave - 5 reviews
+Helena B. on Macchiato - 5 reviews
+Tara L. on Santaluce Mnr - 3 reviews
+Debra B. on Rosella Rd - 3 reviews
+
+💝 YOUR REWARDS ARE HERE!
+☕ Starbucks Gift Cards: If you submit 3+ reviews (Limited time - I'd love to buy everyone coffee forever, but... 😅)!
+💰 $200 Service Credit Raffle: Every review = 1 entry. Drawing this Friday!
+
+When I started this, I just wanted to stop answering the same vendor questions over and over. But you've turned it into something amazing - a true community resource where neighbors help neighbors. Every review you add makes this more valuable for all of us in {COMMUNITY_NAME}.
+
+With gratitude (and caffeine),
+Courtney
+With help (David, Justin, Ryan, and Penny poodle)
+
+{{VIEW_PROVIDERS_BUTTON}}`
+  },
+  {
+    id: "custom",
+    name: "Custom Email",
+    description: "Create your own custom email from scratch",
+    subject: "",
+    body: ""
   }
+];
 
-  try {
-    const { subject, body, recipients, communityName, senderName, templateId }: CommunityEmailRequest = await req.json();
-    
-    const isApologyEmail = templateId === 'apology-email';
-    const isCommunityUpdateRosella = templateId === 'community-update-rosella';
-    const isCelebrationEmail = templateId === 'celebration-100-homes';
+export default function EmailTemplatePanel({ communityName }: Props) {
+  const [open, setOpen] = useState(false);
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string>("welcome-1");
+  const [subject, setSubject] = useState("");
+  const [body, setBody] = useState("");
+  const [recipientMode, setRecipientMode] = useState<"all" | "selected" | "custom">("all");
+  const [selectedRecipients, setSelectedRecipients] = useState<string[]>([]);
+  const [customRecipients, setCustomRecipients] = useState<CustomRecipient[]>([]);
+  const [customName, setCustomName] = useState("");
+  const [customEmail, setCustomEmail] = useState("");
+  const [loading, setLoading] = useState(false);
 
-    console.log(`📧 Sending community email to ${recipients.length} recipients for ${communityName}`);
-    console.log('📥 Raw recipients received:', JSON.stringify(recipients));
+  const { data: users = [] } = useQuery({
+    queryKey: ["community-users", communityName],
+    queryFn: async () => {
+      console.log("Fetching users for email dropdown...");
+      
+      const { data, error } = await supabase
+        .from("users")
+        .select("id, name, email, address")
+        .eq("is_verified", true)
+        .not("name", "is", null)
+        .not("email", "is", null)
+        .not("address", "is", null);
 
-    // Validate required fields
-    if (!subject || !body || !recipients?.length || !communityName) {
-      throw new Error("Missing required fields: subject, body, recipients, or communityName");
+      if (error) {
+        console.error("Failed to fetch users:", error);
+        return [];
+      }
+
+      const communityUsers = data.map(user => ({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        address: user.address,
+        display: `${user.name.split(' ')[0]} ${user.name.split(' ').slice(-1)[0]?.charAt(0) || ''}. - ${user.address.split(',')[0]}`
+      })).sort((a, b) => a.name.localeCompare(b.name));
+
+      return communityUsers;
+    },
+    enabled: !!communityName
+  });
+
+  // Update subject and body when template changes
+  useEffect(() => {
+    const template = EMAIL_TEMPLATES.find(t => t.id === selectedTemplateId);
+    if (template) {
+      const processedSubject = template.subject.replace(/\{COMMUNITY_NAME\}/g, communityName);
+      const processedBody = template.body.replace(/\{COMMUNITY_NAME\}/g, communityName);
+      
+      setSubject(processedSubject);
+      setBody(processedBody);
+    }
+  }, [selectedTemplateId, communityName]);
+
+  const handleSendEmail = async () => {
+    if (!subject.trim() || !body.trim()) {
+      toast({
+        title: "Missing Information",
+        description: "Please provide both subject and email body.",
+        variant: "destructive",
+      });
+      return;
     }
 
-    // Get recent contributors from last 7 days (skip for celebration emails with hardcoded leaderboard)
-    let leaderboard = 'Amazing neighbors contributing this week!';
-    
-    if (!isCelebrationEmail) {
-      const { data: recentContributors, error: contributorsError } = await supabase
-        .from('users')
-        .select('name, created_at')
-        .eq('is_verified', true)
-        .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
-        .order('created_at', { ascending: false })
-        .limit(5);
-
-      if (contributorsError) {
-        console.error("Error fetching recent contributors:", contributorsError);
-      }
-
-      try {
-        if (recentContributors && recentContributors.length > 0) {
-          const activities = ['shared a review', 'added vendor info', 'left a review', 'contributed insights', 'helped neighbors'];
-          
-          leaderboard = recentContributors.map((user: any, index: number) => {
-            const displayName = formatNameWithLastInitial(user.name || 'Neighbor');
-            const activity = activities[index % activities.length];
-            return `• ${displayName} - ${activity}`;
-          }).join('\n');
-          
-          console.log(`🌟 Generated recent contributors for ${communityName}:`, leaderboard);
-        }
-      } catch (error) {
-        console.error("Error formatting recent contributors:", error);
-        leaderboard = 'Recent activity temporarily unavailable';
-      }
+    if (recipientMode === "selected" && selectedRecipients.length === 0) {
+      toast({
+        title: "No Recipients Selected",
+        description: "Please select at least one recipient or choose 'Send to All'.",
+        variant: "destructive",
+      });
+      return;
     }
 
-    // FIXED: Normalize emails to lowercase for case-insensitive matching
-    const normalizedRecipients = recipients.map(email => email.toLowerCase().trim());
-    
-    // Fetch all user data with case-insensitive email matching
-    const { data: allUsers, error: usersError } = await supabase
-      .from('users')
-      .select('id, email, name, points')
-      .eq('is_verified', true)
-      .in('email', normalizedRecipients);
-
-    if (usersError) {
-      console.error("Error fetching user data:", usersError);
-      throw new Error("Failed to fetch user data for personalization");
+    if (recipientMode === "custom" && customRecipients.length === 0) {
+      toast({
+        title: "No Custom Recipients Added",
+        description: "Please add at least one custom recipient.",
+        variant: "destructive",
+      });
+      return;
     }
 
-    console.log(`📊 Found ${allUsers.length} users in database out of ${recipients.length} requested`);
-    
-    // Log any missing users for debugging
-    const foundEmails = allUsers.map((u: any) => u.email.toLowerCase());
-    const missingEmails = normalizedRecipients.filter(email => !foundEmails.includes(email));
-    if (missingEmails.length > 0) {
-      console.warn(`⚠️ These emails were not found in verified users:`, missingEmails);
+    setLoading(true);
+
+    try {
+      const recipients = recipientMode === "all" 
+        ? users.map(u => u.email)
+        : recipientMode === "selected"
+        ? users.filter(u => selectedRecipients.includes(u.id)).map(u => u.email)
+        : customRecipients.map(r => r.email);
+
+      const { data, error } = await supabase.functions.invoke("send-community-email", {
+        body: {
+          subject: subject.trim(),
+          body: body.trim(),
+          recipients,
+          communityName,
+          senderName: "Courtney",
+          templateId: selectedTemplateId
+        }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Email Sent Successfully",
+        description: `Email sent to ${recipients.length} recipient(s).`,
+      });
+
+      setOpen(false);
+    } catch (error) {
+      console.error("Failed to send email:", error);
+      toast({
+        title: "Error",
+        description: "Failed to send email. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const toggleRecipient = (userId: string) => {
+    setSelectedRecipients(prev => 
+      prev.includes(userId) 
+        ? prev.filter(id => id !== userId)
+        : [...prev, userId]
+    );
+  };
+
+  const addCustomRecipient = () => {
+    if (!customName.trim() || !customEmail.trim()) {
+      toast({
+        title: "Missing Information",
+        description: "Please provide both name and email.",
+        variant: "destructive",
+      });
+      return;
     }
 
-    // Convert community name to slug format
-    const communitySlug = communityName.toLowerCase().replace(/\s+/g, '-');
+    if (!/\S+@\S+\.\S+/.test(customEmail)) {
+      toast({
+        title: "Invalid Email",
+        description: "Please provide a valid email address.",
+        variant: "destructive",
+      });
+      return;
+    }
 
-    // Send personalized emails to each user
-    const emailPromises = allUsers.map(async (user: any) => {
-      let personalizedBody = body;
-      
-      // Replace [FirstName] placeholder with actual first name for community update email
-      if (isCommunityUpdateRosella) {
-        const firstName = user.name ? user.name.split(' ')[0] : 'Neighbor';
-        personalizedBody = personalizedBody.replace(/\[FirstName\]/g, firstName);
-      }
-      
-      // Replace {{FIRST_NAME}} placeholder for celebration emails
-      if (isCelebrationEmail) {
-        const firstName = user.name ? user.name.split(' ')[0] : 'Neighbor';
-        personalizedBody = personalizedBody.replace(/\{\{FIRST_NAME\}\}/g, firstName);
-      }
-      
-      if (isApologyEmail || isCommunityUpdateRosella || isCelebrationEmail) {
-        // Generate magic link for apology emails, community updates, and celebration emails
-        const { data: authData, error: authError } = await supabase.auth.admin.generateLink({
-          type: 'magiclink',
-          email: user.email,
-          options: {
-            redirectTo: `https://courtneys-list.com/communities/${communitySlug}?welcome=true`
-          }
-        });
+    if (customRecipients.some(r => r.email.toLowerCase() === customEmail.toLowerCase())) {
+      toast({
+        title: "Duplicate Email",
+        description: "This email is already in the list.",
+        variant: "destructive",
+      });
+      return;
+    }
 
-        if (authError) {
-          console.error(`Failed to generate magic link for ${user.email}:`, authError);
-          throw authError;
-        }
+    setCustomRecipients(prev => [...prev, { name: customName.trim(), email: customEmail.trim() }]);
+    setCustomName("");
+    setCustomEmail("");
+  };
 
-        const magicLinkUrl = authData.properties?.action_link || '';
-        
-        // Create appropriate button text based on email type
-        let buttonText = 'Click here to leave a service provider review';
-        if (isApologyEmail) {
-          buttonText = 'See Boca Bridges Providers';
-        } else if (isCelebrationEmail) {
-          buttonText = '🎊 See Newest Providers (and your coffee status)';
-        }
-        
-        const viewProvidersButton = `<div style="text-align: center; margin: 20px 0;">
-          <a href="${magicLinkUrl}" 
-             style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                    color: white;
-                    padding: 14px 32px;
-                    text-decoration: none;
-                    border-radius: 8px;
-                    font-weight: 600;
-                    display: inline-block;
-                    font-size: 16px;
-                    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);">
-            ${buttonText}
-          </a>
-          <p style="color: #6b7280; font-size: 12px; margin: 10px 0 0 0;">
-            This link will sign you in automatically
-          </p>
-        </div>`;
-        
-        personalizedBody = personalizedBody.replace(/\{\{VIEW_PROVIDERS_BUTTON\}\}/g, viewProvidersButton);
-      } else {
-        // Generate a unique invite token for this user to share
-        const inviteToken = crypto.randomUUID();
-        
-        // Create invite record in the database for tracking
-        const { error: inviteError } = await supabase
-          .from('invitations')
-          .insert({
-            invite_token: inviteToken,
-            invited_by: user.id,
-            community_name: communityName,
-            community_slug: communitySlug,
-            status: 'pending'
-          });
-        
-        if (inviteError) {
-          console.error(`Error creating invite record for user ${user.id}:`, inviteError);
-        }
-        
-        // Generate proper custom invite link
-        const inviteLink = `https://courtneys-list.com/communities/${communitySlug}?welcome=true&invite=${inviteToken}`;
-        
-        // Generate view latest list link
-        const viewListLink = `https://courtneys-list.com/communities/${communitySlug}?welcome=true`;
-        
-        // Only replace leaderboard for non-celebration emails
-        if (!isCelebrationEmail) {
-          personalizedBody = personalizedBody.replace('{{LEADERBOARD}}', leaderboard);
-        }
-        personalizedBody = personalizedBody
-          .replace('{{INVITE_LINK}}', inviteLink)
-          .replace('{{VIEW_LIST_LINK}}', viewListLink);
-      }
+  const removeCustomRecipient = (index: number) => {
+    setCustomRecipients(prev => prev.filter((_, i) => i !== index));
+  };
 
-      // Determine sender email based on template
-      const fromEmail = isCommunityUpdateRosella 
-        ? `David from Courtney's List <david@courtneys-list.com>`
-        : `Courtney's List <noreply@courtneys-list.com>`;
-      
-      const replyTo = isCommunityUpdateRosella ? 'david@courtneys-list.com' : undefined;
+  const selectedTemplate = EMAIL_TEMPLATES.find(t => t.id === selectedTemplateId);
 
-      return resend.emails.send({
-        from: fromEmail,
-        to: [user.email],
-        subject: subject,
-        replyTo: replyTo,
-        html: `
-          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; line-height: 1.6;">
-            <div style="background: #4f46e5; color: white; padding: 20px; border-radius: 8px 8px 0 0; text-align: center;">
-              <h1 style="margin: 0; font-size: 24px;">${communityName}</h1>
-              <p style="margin: 5px 0 0; opacity: 0.9;">Neighbor Updates</p>
-            </div>
-            
-            <div style="background: white; padding: 30px; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 8px 8px;">
-              <div style="white-space: pre-wrap; color: #2d3748; font-size: 16px;">
-${personalizedBody}
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" size="sm" className="gap-2">
+          <Mail className="w-4 h-4" />
+          Send Community Email
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Mail className="w-5 h-5" />
+            Send Community Email
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-6">
+          {/* Template Selection */}
+          <div className="space-y-3">
+            <Label>Email Template</Label>
+            <Select value={selectedTemplateId} onValueChange={setSelectedTemplateId}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {EMAIL_TEMPLATES.map((template) => (
+                  <SelectItem key={template.id} value={template.id}>
+                    <div className="flex items-center gap-2">
+                      <FileText className="w-4 h-4" />
+                      {template.name}
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {selectedTemplate && (
+              <p className="text-sm text-muted-foreground">
+                {selectedTemplate.description}
+              </p>
+            )}
+          </div>
+
+          {/* Recipients Section */}
+          <div className="space-y-4">
+            <Label>Recipients</Label>
+            <Select value={recipientMode} onValueChange={(value: "all" | "selected" | "custom") => setRecipientMode(value)}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">
+                  <div className="flex items-center gap-2">
+                    <Users className="w-4 h-4" />
+                    Send to All ({users.length} users)
+                  </div>
+                </SelectItem>
+                <SelectItem value="selected">Select Specific Recipients</SelectItem>
+                <SelectItem value="custom">
+                  <div className="flex items-center gap-2">
+                    <UserPlus className="w-4 h-4" />
+                    Add Custom Recipients
+                  </div>
+                </SelectItem>
+              </SelectContent>
+            </Select>
+
+            {recipientMode === "selected" && (
+              <div className="space-y-3">
+                <div className="text-sm text-muted-foreground">
+                  Select recipients: {selectedRecipients.length} selected
+                </div>
+                <div className="max-h-48 overflow-y-auto border rounded-lg p-3 space-y-2">
+                  {users.map((user) => (
+                    <div
+                      key={user.id}
+                      className={`flex items-center justify-between p-2 rounded cursor-pointer transition-colors ${
+                        selectedRecipients.includes(user.id)
+                          ? "bg-primary/10 border border-primary/20"
+                          : "bg-muted/50 hover:bg-muted"
+                      }`}
+                      onClick={() => toggleRecipient(user.id)}
+                    >
+                      <span className="text-sm">{user.display}</span>
+                      {selectedRecipients.includes(user.id) && (
+                        <Badge variant="secondary">Selected</Badge>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
-              
-              ${!isApologyEmail && !isCommunityUpdateRosella && !isCelebrationEmail ?
-`<div style="margin-top: 20px; text-align: center;">
-                <a href="https://courtneys-list.com/signin" 
-                   style="display: inline-block; background: #4f46e5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; margin: 10px 10px;">
-                  Sign in to See Providers
-                </a>
-              </div>` : ''}
-              
-              <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e2e8f0; text-align: center;">
-                <p style="color: #718096; font-size: 14px; margin: 0;">
-                  This email was sent to verified members of ${communityName}
-                </p>
-                <p style="color: #718096; font-size: 12px; margin: 5px 0 0;">
-                  You received this because you're part of our community directory.
-                </p>
-                <p style="color: #718096; font-size: 12px; margin: 10px 0 0;">
-                  <a href="mailto:noreply@courtneys-list.com?subject=Unsubscribe%20from%20Community%20Emails" 
-                     style="color: #4299e1; text-decoration: underline;">
-                    Unsubscribe from community emails
-                  </a>
-                </p>
+            )}
+
+            {recipientMode === "custom" && (
+              <div className="space-y-4">
+                <div className="text-sm text-muted-foreground">
+                  Add custom recipients: {customRecipients.length} added
+                </div>
+                
+                {/* Add Custom Recipient Form */}
+                <div className="flex gap-2">
+                  <div className="flex-1">
+                    <Input
+                      placeholder="Name"
+                      value={customName}
+                      onChange={(e) => setCustomName(e.target.value)}
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <Input
+                      type="email"
+                      placeholder="Email"
+                      value={customEmail}
+                      onChange={(e) => setCustomEmail(e.target.value)}
+                    />
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={addCustomRecipient}
+                  >
+                    <UserPlus className="w-4 h-4" />
+                  </Button>
+                </div>
+
+                {/* Custom Recipients List */}
+                {customRecipients.length > 0 && (
+                  <div className="max-h-48 overflow-y-auto border rounded-lg p-3 space-y-2">
+                    {customRecipients.map((recipient, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between p-2 rounded bg-muted/50"
+                      >
+                        <span className="text-sm">
+                          {recipient.name} ({recipient.email})
+                        </span>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => removeCustomRecipient(index)}
+                          className="h-6 w-6"
+                        >
+                          <X className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Email Content */}
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="subject">Subject</Label>
+              <Input
+                id="subject"
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+                placeholder="Email subject"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="body">Email Body</Label>
+              <Textarea
+                id="body"
+                value={body}
+                onChange={(e) => setBody(e.target.value)}
+                placeholder="Email content"
+                className="min-h-[300px] resize-none"
+              />
+              <div className="text-xs text-muted-foreground">
+                Available placeholders: <code>{`{{LEADERBOARD}}`}</code>, <code>{`{{INVITE_LINK}}`}</code>, <code>{`{{FIRST_NAME}}`}</code>, <code>{`{{VIEW_PROVIDERS_BUTTON}}`}</code> and <code>{`{{VIEW_PROVIDERS_LINK}}`}</code> will be automatically replaced for each recipient.
               </div>
             </div>
           </div>
-        `,
-        tags: [
-          {
-            name: 'campaign_type',
-            value: isApologyEmail ? 'apology_email' : isCommunityUpdateRosella ? 'community_update_rosella' : isCelebrationEmail ? 'celebration_100_homes' : 'community_update'
-          },
-          {
-            name: 'community',
-            value: communitySlug
-          },
-          {
-            name: 'email_template',
-            value: templateId || 'custom'
-          },
-          {
-            name: 'recipient_count',
-            value: recipients.length.toString()
-          }
-        ],
-        headers: {
-          'X-Entity-Ref-ID': `${communitySlug}-${Date.now()}`,
-          'X-Campaign-Name': `${communityName} Community Email`,
-          'X-Message-Source': 'courtneys-list-admin'
-        }
-      });
-    });
 
-    const emailResults = await Promise.all(emailPromises);
-    console.log(`✅ Successfully sent ${emailResults.length} emails`);
-
-    return new Response(JSON.stringify({
-      success: true,
-      recipientCount: recipients.length,
-      emailsSent: emailResults.length,
-      missingEmails: missingEmails
-    }), {
-      status: 200,
-      headers: {
-        "Content-Type": "application/json",
-        ...corsHeaders,
-      },
-    });
-  } catch (error: any) {
-    console.error("❌ Error in send-community-email function:", error);
-    return new Response(
-      JSON.stringify({ 
-        error: error.message,
-        success: false 
-      }),
-      {
-        status: 500,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      }
-    );
-  }
-};
-
-serve(handler);
+          {/* Actions */}
+          <div className="flex gap-3 pt-4 border-t">
+            <Button
+              variant="outline"
+              onClick={() => setOpen(false)}
+              className="flex-1"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSendEmail}
+              disabled={loading}
+              className="flex-1 gap-2"
+            >
+              {loading ? (
+                <>
+                  <div className="animate-spin h-4 w-4 border-2 border-background border-t-transparent rounded-full" />
+                  Sending...
+                </>
+              ) : (
+                <>
+                  <Send className="w-4 h-4" />
+                  Send Email
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
