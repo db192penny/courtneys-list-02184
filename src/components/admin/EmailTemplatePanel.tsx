@@ -115,13 +115,13 @@ P.S. Have a category you'd like added (grill cleaning, roofers, pavers)? Just hi
     id: "celebration-100-homes",
     name: "🎉 100 Homes Celebration",
     description: "Celebration email for reaching 100 homes milestone with rewards and leaderboard",
-    subject: "🎉 We hit 100+ homes! Your coffee awaits ☕",
+    subject: "🎉 Boca Bridges 100+ neighbors joined! Your coffee awaits ☕",
     body: `Hey {{FIRST_NAME}}!
 
 We did it! I wanted to share some exciting updates and say THANK YOU!
 
-📊 BY THE NUMBERS:
-• 102 Homes Joined
+📊 COURTNEY's LIST: BY THE NUMBERS:
+• 102 Neighbors Joined
 • 157 Reviews Shared  
 • 48 Vendors Listed
 
@@ -130,13 +130,14 @@ Water Filtration & Dryer Vent Cleaning - two of your most-requested categories a
 
 🌟 THIS WEEK'S TOP CONTRIBUTORS:
 
-Lisa R. on Abrruzzo Ave - 7 reviews
-Frances F. on Chauvet Wy - 7 reviews
-Natalie L. on Espresso Mnr - 6 reviews
-Brian B. on Abruzzo Ave - 5 reviews
-Helena B. on Macchiato - 5 reviews
-Tara L. on Santaluce Mnr - 3 reviews
-Debra B. on Rosella Rd - 3 reviews
+**Neighbor**                    **# of Reviews**
+Lisa R. on Abrruzzo Ave               7
+Frances F. on Chauvet Wy              7
+Natalie L. on Espresso Mnr            6
+Brian B. on Abruzzo Ave               5
+Helena B. on Macchiato                5
+Tara L. on Santaluce Mnr              3
+Debra B. on Rosella Rd                3
 
 💝 YOUR REWARDS ARE HERE!
 ☕ Starbucks Gift Cards: If you submit 3+ reviews (Limited time - I'd love to buy everyone coffee forever, but... 😅)!
@@ -146,7 +147,7 @@ When I started this, I just wanted to stop answering the same vendor questions o
 
 With gratitude (and caffeine),
 Courtney
-With help (David, Justin, Ryan, and Penny poodle)
+With help (David and Penny,our toy poodle)
 
 {{VIEW_PROVIDERS_BUTTON}}`
   },
