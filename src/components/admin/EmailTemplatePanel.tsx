@@ -112,6 +112,38 @@ David (Rosella Rd — with Courtney + our two boys, 13 & 14)
 P.S. Have a category you'd like added (grill cleaning, roofers, pavers)? Just hit reply — I'd love your input. Any feedback helps make this better for all of us.`
   },
   {
+    id: "celebration-100-homes",
+    name: "🎉 100 Homes Celebration",
+    description: "Celebration email for reaching 100 homes milestone with rewards and leaderboard",
+    subject: "🎉 We hit 100+ homes! Your coffee awaits ☕",
+    body: `Hey {{FIRST_NAME}}!
+
+We did it! I wanted to share some exciting updates and say THANK YOU!
+
+📊 BY THE NUMBERS:
+• 102 Homes Joined
+• 157 Reviews Shared  
+• 48 Vendors Listed
+
+🆕 JUST ADDED:
+Water Filtration & Dryer Vent Cleaning - two of your most-requested categories are now live!
+
+🏆 TOP CONTRIBUTORS:
+{{LEADERBOARD}}
+
+💝 YOUR REWARDS ARE HERE!
+☕ Starbucks Gift Cards: If you have 3+ reviews, check your email this week!
+💰 $200 Service Credit Raffle: Every review = 1 entry. Drawing this Friday!
+
+{{VIEW_PROVIDERS_BUTTON}}
+
+When I started this, I just wanted to stop answering the same vendor questions over and over. But you've turned it into something amazing - a true community resource where neighbors help neighbors. Every review you add makes this more valuable for all of us in {COMMUNITY_NAME}.
+
+With gratitude (and caffeine),
+Courtney
+With help (David, Justin, Ryan, and Penny poodle)`
+  },
+  {
     id: "custom",
     name: "Custom Email",
     description: "Create your own custom email from scratch",
@@ -464,7 +496,7 @@ export default function EmailTemplatePanel({ communityName }: Props) {
                 className="min-h-[300px] resize-none"
               />
               <div className="text-xs text-muted-foreground">
-                Available placeholders: <code>{`{{LEADERBOARD}}`}</code>, <code>{`{{INVITE_LINK}}`}</code>, and <code>{`{{VIEW_PROVIDERS_BUTTON}}`}</code> will be automatically replaced for each recipient.
+                Available placeholders: <code>{`{{LEADERBOARD}}`}</code>, <code>{`{{INVITE_LINK}}`}</code>, <code>{`{{FIRST_NAME}}`}</code> and <code>{`{{VIEW_PROVIDERS_BUTTON}}`}</code> will be automatically replaced for each recipient.
               </div>
             </div>
           </div>
