@@ -128,7 +128,7 @@ We did it! I wanted to share some exciting updates and say THANK YOU!
 🆕 JUST ADDED:
 Water Filtration & Dryer Vent Cleaning - two of your most-requested categories are now live!
 
-🏆 TOP CONTRIBUTORS:
+🌟 THIS WEEK'S CONTRIBUTORS:
 {{LEADERBOARD}}
 
 💝 YOUR REWARDS ARE HERE!
