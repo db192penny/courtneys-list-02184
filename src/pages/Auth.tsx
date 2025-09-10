@@ -360,13 +360,10 @@ const Auth = () => {
         canonical={canonical}
       />
       
-        <section className="container max-w-xl py-6">
-          <h1 className="text-3xl font-semibold mb-6">{communityName ? `Join ${communityName.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}` : "Join Courtney's List"}</h1>
+        <section className="container max-w-xl py-4 sm:py-6 px-4 sm:px-6">
+          <h1 className="text-3xl font-semibold mb-4 sm:mb-6">{communityName ? `Join ${communityName.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}` : "Join Courtney's List"}</h1>
           <Card>
-            <CardHeader>
-            </CardHeader>
-
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 pt-6">
               <form onSubmit={onSubmit} className="space-y-4">
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
