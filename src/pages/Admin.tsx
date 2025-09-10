@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Link } from "react-router-dom";
 import { AdminQuickAccess } from "@/components/admin/AdminQuickAccess";
 import EmailTemplatePanel from "@/components/admin/EmailTemplatePanel";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface PendingRow {
   household_address: string;
@@ -36,6 +37,16 @@ const Admin = () => {
   const [loading, setLoading] = useState(true);
   const [userLoading, setUserLoading] = useState<Record<string, "approve" | "reject" | undefined>>({});
 const [householdLoading, setHouseholdLoading] = useState<Record<string, boolean>>({});
+
+  // Celebration email states
+  const [verifiedUsers, setVerifiedUsers] = useState<Array<{
+    id: string;
+    email: string;
+    name: string | null;
+    points: number;
+  }>>([]);
+  const [selectedCelebrationUsers, setSelectedCelebrationUsers] = useState<Set<string>>(new Set());
+  const [celebrationLoading, setCelebrationLoading] = useState(false);
 
   // Community Branding state
   const [hoaName, setHoaName] = useState<string | null>(null);
@@ -186,6 +197,27 @@ const [householdLoading, setHouseholdLoading] = useState<Record<string, boolean>
     return () => { cancelled = true; };
   }, []);
 
+  // Load verified users for celebration email
+  useEffect(() => {
+    const loadVerifiedUsers = async () => {
+      const { data, error } = await supabase
+        .from('users')
+        .select('id, email, name, points')
+        .eq('is_verified', true)
+        .order('name', { ascending: true });
+      
+      if (error) {
+        console.error('Failed to load verified users:', error);
+      } else {
+        setVerifiedUsers(data || []);
+      }
+    };
+
+    if (authed && (isHoaAdmin || isSiteAdmin)) {
+      loadVerifiedUsers();
+    }
+  }, [authed, isHoaAdmin, isSiteAdmin]);
+
   const approveHousehold = async (addr: string) => {
     setHouseholdLoading((prev) => ({ ...prev, [addr]: true }))
     const { error } = await supabase.rpc("admin_approve_household", { _addr: addr });
@@ -262,6 +294,186 @@ const [householdLoading, setHouseholdLoading] = useState<Record<string, boolean>
         .eq("is_verified", false)
         .order("created_at", { ascending: true });
       setPendingUsers((userRows as any as PendingUser[]) || []);
+    }
+  };
+
+  const sendCelebrationViaResend = async (testMode = false) => {
+    setCelebrationLoading(true);
+    try {
+      // Get selected users or use test mode
+      let usersToEmail;
+      
+      if (testMode) {
+        // Test mode: only current admin
+        const { data: { user } } = await supabase.auth.getUser();
+        usersToEmail = [{ 
+          email: user?.email || 'test@example.com', 
+          name: 'Test User',
+          points: 0 
+        }];
+      } else if (selectedCelebrationUsers.size === 0) {
+        toast.error("No users selected", {
+          description: "Please select at least one user to email"
+        });
+        setCelebrationLoading(false);
+        return;
+      } else {
+        // Get selected users' details
+        const { data: users } = await supabase
+          .from('users')
+          .select('email, name, points')
+          .in('id', Array.from(selectedCelebrationUsers));
+        
+        usersToEmail = users || [];
+      }
+
+      // Get leaderboard for the email
+      const { data: leaderboard } = await supabase
+        .from('users')
+        .select('name, points')
+        .eq('is_verified', true)
+        .gt('points', 0)
+        .order('points', { ascending: false })
+        .limit(10);
+
+      // Format leaderboard
+      const medals = ['🥇', '🥈', '🥉', '🏅', '⭐', '⭐', '⭐', '⭐', '⭐', '⭐'];
+      const leaderboardHtml = leaderboard?.map((user, i) => {
+        const firstName = user.name?.split(' ')[0] || 'Neighbor';
+        return `${medals[i]} ${firstName} - ${user.points} pts`;
+      }).join('<br>') || 'Leaderboard coming soon!';
+
+      // Create batch with magic links
+      const emailBatch = await Promise.all(
+        usersToEmail.slice(0, 100).map(async (user) => {
+          // Generate magic link
+          const { data: authData } = await supabase.auth.admin.generateLink({
+            type: 'magiclink',
+            email: user.email,
+            options: {
+              redirectTo: `${window.location.origin}/communities/boca-bridges?welcome=true`
+            }
+          });
+
+          const magicLink = authData?.properties?.action_link || window.location.origin;
+
+          return {
+            from: "Courtney's List <noreply@courtneys-list.com>",
+            to: user.email,
+            subject: testMode ? "[TEST] 🎉 We hit 100+ homes! Your coffee awaits ☕" : "🎉 We hit 100+ homes! Your coffee awaits ☕",
+            html: `
+              <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; background: white;">
+                <!-- Header with gradient -->
+                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 20px; text-align: center;">
+                  <h1 style="color: white; margin: 0; font-size: 28px;">🎉 We hit 100+ homes!</h1>
+                </div>
+                
+                <!-- Main content -->
+                <div style="padding: 40px 30px;">
+                  <h2 style="color: #1f2937; margin: 0 0 20px 0;">Hey ${user.name?.split(' ')[0] || 'Neighbor'}!</h2>
+                  
+                  <p style="color: #374151; line-height: 1.6;">We did it! I wanted to share some exciting updates and say THANK YOU!</p>
+                  
+                  <div style="background: #f9fafb; border-radius: 8px; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #1f2937; margin: 0 0 15px 0;">📊 BY THE NUMBERS:</h3>
+                    <p style="color: #4b5563; margin: 0; line-height: 1.8;">
+                      • 102 Homes Joined<br>
+                      • 157 Reviews Shared<br>
+                      • 48 Vendors Listed
+                    </p>
+                  </div>
+                  
+                  <div style="background: #f0fdf4; border-radius: 8px; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #1f2937; margin: 0 0 15px 0;">🆕 JUST ADDED:</h3>
+                    <p style="color: #4b5563; margin: 0;">
+                      Water Filtration & Dryer Vent Cleaning - two of your most-requested categories are now live!
+                    </p>
+                  </div>
+                  
+                  <div style="background: #fef3c7; border-radius: 8px; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #1f2937; margin: 0 0 15px 0;">🏆 TOP 10 LEADERBOARD:</h3>
+                    <p style="color: #4b5563; margin: 0; line-height: 1.8;">
+                      ${leaderboardHtml}
+                    </p>
+                  </div>
+                  
+                  <div style="margin: 30px 0;">
+                    <h3 style="color: #1f2937; margin: 0 0 15px 0;">💝 YOUR REWARDS ARE HERE!</h3>
+                    <p style="color: #374151; line-height: 1.6;">
+                      <strong>☕ Starbucks Gift Cards:</strong> If you have 3+ reviews, check your email this week!<br><br>
+                      <strong>💰 $200 Service Credit Raffle:</strong> Every review = 1 entry. Drawing this Friday!
+                    </p>
+                  </div>
+                  
+                  <div style="text-align: center; margin: 40px 0;">
+                    <a href="${magicLink}" 
+                       style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                              color: white;
+                              padding: 14px 32px;
+                              text-decoration: none;
+                              border-radius: 8px;
+                              font-weight: 600;
+                              display: inline-block;
+                              font-size: 16px;
+                              box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);">
+                      🎊 See Newest Providers
+                    </a>
+                    <p style="color: #6b7280; font-size: 12px; margin: 10px 0 0 0;">
+                      This link will sign you in automatically
+                    </p>
+                  </div>
+                  
+                  <p style="color: #374151; line-height: 1.6; margin: 30px 0 0 0;">
+                    When I started this, I just wanted to stop answering the same vendor questions over and over. 
+                    But you've turned it into something amazing - a true community resource where neighbors help neighbors. 
+                    Every review you add makes this more valuable for all of us in Boca Bridges.
+                  </p>
+                  
+                  <p style="color: #374151; margin: 30px 0 0 0;">
+                    With gratitude (and caffeine),<br>
+                    Courtney<br>
+                    With help (David, Justin, Ryan, and Penny poodle)
+                  </p>
+                </div>
+              </div>
+            `
+          };
+        })
+      );
+
+      // TODO: Replace with your actual Resend API key
+      const RESEND_API_KEY = 're_NpDFpfnQ_CgVf6fRhfrffFiAE2XTqzk55';
+      
+      const response = await fetch('https://api.resend.com/emails/batch', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${RESEND_API_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(emailBatch)
+      });
+
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(`Resend API error: ${error}`);
+      }
+
+      toast.success(testMode ? "Test email sent!" : "Celebration emails sent!", {
+        description: `Successfully sent to ${emailBatch.length} ${emailBatch.length === 1 ? 'user' : 'users'}`
+      });
+      
+      // Clear selection after sending
+      if (!testMode) {
+        setSelectedCelebrationUsers(new Set());
+      }
+      
+    } catch (error) {
+      console.error('Failed to send:', error);
+      toast.error("Failed to send emails", {
+        description: error.message
+      });
+    } finally {
+      setCelebrationLoading(false);
     }
   };
 
@@ -365,6 +577,92 @@ const [householdLoading, setHouseholdLoading] = useState<Record<string, boolean>
               </div>
               <p className="text-sm text-muted-foreground">
                 Send welcome emails and updates to your community members with personalized leaderboards and invite links.
+              </p>
+            </div>
+
+            {/* Celebration Email Section */}
+            <div className="rounded-md border border-border p-4">
+              <h3 className="font-medium mb-3">🎉 100 Homes Celebration Email (via Resend)</h3>
+              
+              {/* User Selection */}
+              <div className="space-y-3 mb-4">
+                <div className="flex items-center justify-between">
+                  <Label>Select Recipients</Label>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={async () => {
+                        // Select only yourself for testing
+                        const { data: { user } } = await supabase.auth.getUser();
+                        const currentUserEmail = user?.email;
+                        const yourself = verifiedUsers.find(u => u.email === currentUserEmail);
+                        if (yourself) {
+                          setSelectedCelebrationUsers(new Set([yourself.id]));
+                        }
+                      }}
+                    >
+                      Select Me Only
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setSelectedCelebrationUsers(new Set(verifiedUsers.map(u => u.id)));
+                      }}
+                    >
+                      Select All ({verifiedUsers.length})
+                    </Button>
+                  </div>
+                </div>
+                
+                {/* User list with checkboxes - shows YOU at the top */}
+                <div className="border rounded-md p-3 max-h-48 overflow-y-auto bg-background">
+                  {verifiedUsers.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">No verified users found</p>
+                  ) : (
+                    verifiedUsers.map(user => (
+                      <div key={user.id} className="flex items-center space-x-2 py-1 hover:bg-muted/50 rounded px-1">
+                        <Checkbox
+                          id={`celebration-${user.id}`}
+                          checked={selectedCelebrationUsers.has(user.id)}
+                          onCheckedChange={(checked) => {
+                            const newSet = new Set(selectedCelebrationUsers);
+                            if (checked) {
+                              newSet.add(user.id);
+                            } else {
+                              newSet.delete(user.id);
+                            }
+                            setSelectedCelebrationUsers(newSet);
+                          }}
+                        />
+                        <Label 
+                          htmlFor={`celebration-${user.id}`}
+                          className="text-sm cursor-pointer flex-1"
+                        >
+                          {user.name || user.email} {user.points > 0 && `(${user.points} pts)`}
+                        </Label>
+                      </div>
+                    ))
+                  )}
+                </div>
+                
+                <p className="text-sm text-muted-foreground">
+                  {selectedCelebrationUsers.size} of {verifiedUsers.length} users selected
+                </p>
+              </div>
+              
+              {/* Single Send Button */}
+              <Button 
+                onClick={() => sendCelebrationViaResend(false)}
+                disabled={celebrationLoading || selectedCelebrationUsers.size === 0}
+                className="w-full sm:w-auto"
+              >
+                {celebrationLoading ? "Sending..." : `Send to ${selectedCelebrationUsers.size} Selected Users`}
+              </Button>
+              
+              <p className="text-xs text-muted-foreground mt-2">
+                Sends celebration email with magic links via Resend API
               </p>
             </div>
 
