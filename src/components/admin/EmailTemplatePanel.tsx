@@ -132,17 +132,19 @@ Water Filtration & Dryer Vent Cleaning - two of your most-requested categories a
 {{LEADERBOARD}}
 
 💝 YOUR REWARDS ARE HERE!
-☕ Starbucks Gift Cards: If you have 3+ reviews, check your email this week! eminder to update the copy in email with this after the 3 reviews (Limited time - I'd love to buy everyone coffee forever, but... 😅)
-
+☕ Starbucks Gift Cards: If you submit 3+ reviews, check your email this week!
 💰 $200 Service Credit Raffle: Every review = 1 entry. Drawing this Friday!
-
-{{VIEW_PROVIDERS_BUTTON}}
 
 When I started this, I just wanted to stop answering the same vendor questions over and over. But you've turned it into something amazing - a true community resource where neighbors help neighbors. Every review you add makes this more valuable for all of us in {COMMUNITY_NAME}.
 
 With gratitude (and caffeine),
 Courtney
 With help (David, Justin, Ryan, and Penny poodle)`
+
+  {{VIEW_PROVIDERS_BUTTON}}
+  
+  
+  
   },
   {
     id: "custom",
