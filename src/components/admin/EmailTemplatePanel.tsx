@@ -115,15 +115,15 @@ P.S. Have a category you'd like added (grill cleaning, roofers, pavers)? Just hi
     id: "celebration-100-homes",
     name: "🎉 100 Homes Celebration",
     description: "Celebration email for reaching 100 homes milestone with rewards and leaderboard",
-    subject: "Boca Bridges milestone - 100 neighbors and your coffee awaits ☕",
+    subject: "🎉 We hit 100+ homes! Your coffee awaits ☕",
     body: `Hey {{FIRST_NAME}}!
 
 We did it! I wanted to share some exciting updates and say THANK YOU!
 
 📊 BY THE NUMBERS:
-• 104 Neighbors Have Joined
-• 172 Reviews Shared (1.5 reviews per neighbor!)
-• 106 Vendors Listed
+• 102 Homes Joined
+• 157 Reviews Shared  
+• 48 Vendors Listed
 
 🆕 JUST ADDED:
 Water Filtration & Dryer Vent Cleaning - two of your most-requested categories are now live!
@@ -132,8 +132,9 @@ Water Filtration & Dryer Vent Cleaning - two of your most-requested categories a
 {{LEADERBOARD}}
 
 💝 YOUR REWARDS ARE HERE!
-☕ Starbucks Gift Cards: If you have or create 3+ ratings/reviews, check your email this week! (Limited time joke)
-💰 $200 Service Credit Raffle: Every review = 1 entry. Drawing end of month on Friday!
+☕ Starbucks Gift Cards: If you have 3+ reviews, check your email this week! eminder to update the copy in email with this after the 3 reviews (Limited time - I'd love to buy everyone coffee forever, but... 😅)
+
+💰 $200 Service Credit Raffle: Every review = 1 entry. Drawing this Friday!
 
 {{VIEW_PROVIDERS_BUTTON}}
 
