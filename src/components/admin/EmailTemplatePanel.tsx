@@ -128,8 +128,16 @@ We did it! I wanted to share some exciting updates and say THANK YOU!
 🆕 JUST ADDED:
 Water Filtration & Dryer Vent Cleaning - two of your most-requested categories are now live!
 
-🌟 THIS WEEK'S CONTRIBUTORS:
-{{LEADERBOARD}}
+🌟 THIS WEEK'S TOP CONTRIBUTORS:
+
+**Neighbor**                    **# of Reviews**
+Lisa R. on Abrruzzo Ave                7
+Frances F. on Chauvet Wy              7
+Natalie L. on Espresso Mnr            6
+Brian B. on Abruzzo Ave               5
+Helena B. on Macchiato                5
+Tara L. on Santaluce Mnr              3
+Debra B. on Rosella Rd                3
 
 💝 YOUR REWARDS ARE HERE!
 ☕ Starbucks Gift Cards: If you submit 3+ reviews (Limited time - I'd love to buy everyone coffee forever, but... 😅)!
