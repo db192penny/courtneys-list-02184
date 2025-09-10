@@ -479,34 +479,20 @@ const [householdLoading, setHouseholdLoading] = useState<Record<string, boolean>
         throw new Error('Resend API key is not configured properly');
       }
       
-      const response = await fetch('https://api.resend.com/emails/batch', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${RESEND_API_KEY}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(emailBatch)
+      // Instead of fetch to Resend, use the edge function
+      const { data, error } = await supabase.functions.invoke('send-resend-batch', {
+        body: {
+          emails: emailBatch,
+          apiKey: RESEND_API_KEY
+        }
       });
 
-      console.log('Resend API response status:', response.status);
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Resend API error response:', errorText);
-        
-        let errorMessage = `Resend API error (${response.status})`;
-        try {
-          const errorData = JSON.parse(errorText);
-          errorMessage = errorData.message || errorData.error || errorMessage;
-        } catch {
-          errorMessage = errorText || errorMessage;
-        }
-        
-        throw new Error(errorMessage);
+      if (error) {
+        console.error('Edge function error:', error);
+        throw new Error(error.message || 'Failed to send emails via edge function');
       }
 
-      const result = await response.json();
-      console.log('Resend API success:', result);
+      console.log('Edge function success:', data);
 
       toast.success(testMode ? "Test email sent!" : "Celebration emails sent!", {
         description: `Successfully sent to ${emailBatch.length} ${emailBatch.length === 1 ? 'user' : 'users'}`
