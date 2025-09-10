@@ -70,32 +70,37 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error("Missing required fields: subject, body, recipients, or communityName");
     }
 
-    // Fetch leaderboard data using database function
-    const { data: leaderboardData, error: leaderboardError } = await supabase.rpc(
-      'get_community_leaderboard', 
-      { _community_name: communityName, _limit: 5 }
-    );
+    // Get recent contributors from last 7 days
+    const { data: recentContributors, error: contributorsError } = await supabase
+      .from('users')
+      .select('name, created_at')
+      .eq('is_verified', true)
+      .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
+      .order('created_at', { ascending: false })
+      .limit(5);
 
-    if (leaderboardError) {
-      console.error("Error fetching leaderboard:", leaderboardError);
+    if (contributorsError) {
+      console.error("Error fetching recent contributors:", contributorsError);
     }
 
-    // Create simplified leaderboard text (first name + last initial format)
-    let leaderboard = 'No leaderboard data available yet - be the first to earn points!';
-    
+    // Create recent contributors text
+    let leaderboard = 'Amazing neighbors contributing this week!';
+
     try {
-      if (leaderboardData && leaderboardData.length > 0) {
-        const medals = ['🥇', '🥈', '🥉', '🏅', '⭐'];
-        leaderboard = leaderboardData.map((user: any, index: number) => {
+      if (recentContributors && recentContributors.length > 0) {
+        const activities = ['shared a review', 'added vendor info', 'left a review', 'contributed insights', 'helped neighbors'];
+        
+        leaderboard = recentContributors.map((user: any, index: number) => {
           const displayName = formatNameWithLastInitial(user.name || 'Neighbor');
-          return `${medals[index]} ${displayName} – ${user.points} pts`;
+          const activity = activities[index % activities.length];
+          return `• ${displayName} - ${activity}`;
         }).join('\n');
         
-        console.log(`📊 Generated leaderboard for ${communityName}:`, leaderboard);
+        console.log(`🌟 Generated recent contributors for ${communityName}:`, leaderboard);
       }
     } catch (error) {
-      console.error("Error formatting leaderboard:", error);
-      leaderboard = 'Leaderboard temporarily unavailable';
+      console.error("Error formatting recent contributors:", error);
+      leaderboard = 'Recent activity temporarily unavailable';
     }
 
     // Fetch all user data to get individual emails and generate invite links
@@ -151,7 +156,7 @@ const handler = async (req: Request): Promise<Response> => {
         if (isApologyEmail) {
           buttonText = 'See Boca Bridges Providers';
         } else if (isCelebrationEmail) {
-          buttonText = '🎊 See Newest Providers';
+          buttonText = '🎊 See Newest Providers (and your coffee status)';
         }
         
         const viewProvidersButton = `<div style="text-align: center; margin: 20px 0;">
