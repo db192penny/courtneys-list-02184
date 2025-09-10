@@ -184,17 +184,7 @@ Deno.serve(async (req) => {
       try {
         const supabase = createClient(supabaseUrl!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!)
         
-        // Generate OTP for the user - ensure we target the right account
-        console.log('🎯 Generating magic link for specific user:', webhookData.user.email)
-        
-        // Verify this email exists in auth.users before generating link
-        const { data: authUser } = await supabase.auth.admin.getUserByEmail(webhookData.user.email)
-        if (!authUser.user) {
-          console.error('❌ User not found in auth system:', webhookData.user.email)
-          throw new Error('User not found in authentication system')
-        }
-        console.log('✅ Verified user exists in auth system with ID:', authUser.user.id)
-        
+        // Generate OTP for the user
         const { data: otpData, error: otpError } = await supabase.auth.admin.generateLink({
           type: 'magiclink',
           email: webhookData.user.email,
@@ -264,8 +254,6 @@ Deno.serve(async (req) => {
     `
 
     console.log('📤 Sending email via Resend...')
-    console.log('📧 Target email address:', webhookData.user.email)
-    console.log('🔗 Magic link URL:', magicLinkUrl)
     
     // Check RESEND_API_KEY early
     if (!RESEND_API_KEY) {
