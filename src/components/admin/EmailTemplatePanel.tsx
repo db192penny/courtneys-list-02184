@@ -139,12 +139,9 @@ When I started this, I just wanted to stop answering the same vendor questions o
 
 With gratitude (and caffeine),
 Courtney
-With help (David, Justin, Ryan, and Penny poodle)`
+With help (David, Justin, Ryan, and Penny poodle)
 
-  {{VIEW_PROVIDERS_BUTTON}}
-  
-  
-  
+{{VIEW_PROVIDERS_BUTTON}}`
   },
   {
     id: "custom",
