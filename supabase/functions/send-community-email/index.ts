@@ -64,55 +64,69 @@ const handler = async (req: Request): Promise<Response> => {
     const isCelebrationEmail = templateId === 'celebration-100-homes';
 
     console.log(`📧 Sending community email to ${recipients.length} recipients for ${communityName}`);
+    console.log('📥 Raw recipients received:', JSON.stringify(recipients));
 
     // Validate required fields
     if (!subject || !body || !recipients?.length || !communityName) {
       throw new Error("Missing required fields: subject, body, recipients, or communityName");
     }
 
-    // Get recent contributors from last 7 days
-    const { data: recentContributors, error: contributorsError } = await supabase
-      .from('users')
-      .select('name, created_at')
-      .eq('is_verified', true)
-      .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
-      .order('created_at', { ascending: false })
-      .limit(5);
-
-    if (contributorsError) {
-      console.error("Error fetching recent contributors:", contributorsError);
-    }
-
-    // Create recent contributors text
+    // Get recent contributors from last 7 days (skip for celebration emails with hardcoded leaderboard)
     let leaderboard = 'Amazing neighbors contributing this week!';
+    
+    if (!isCelebrationEmail) {
+      const { data: recentContributors, error: contributorsError } = await supabase
+        .from('users')
+        .select('name, created_at')
+        .eq('is_verified', true)
+        .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
+        .order('created_at', { ascending: false })
+        .limit(5);
 
-    try {
-      if (recentContributors && recentContributors.length > 0) {
-        const activities = ['shared a review', 'added vendor info', 'left a review', 'contributed insights', 'helped neighbors'];
-        
-        leaderboard = recentContributors.map((user: any, index: number) => {
-          const displayName = formatNameWithLastInitial(user.name || 'Neighbor');
-          const activity = activities[index % activities.length];
-          return `• ${displayName} - ${activity}`;
-        }).join('\n');
-        
-        console.log(`🌟 Generated recent contributors for ${communityName}:`, leaderboard);
+      if (contributorsError) {
+        console.error("Error fetching recent contributors:", contributorsError);
       }
-    } catch (error) {
-      console.error("Error formatting recent contributors:", error);
-      leaderboard = 'Recent activity temporarily unavailable';
+
+      try {
+        if (recentContributors && recentContributors.length > 0) {
+          const activities = ['shared a review', 'added vendor info', 'left a review', 'contributed insights', 'helped neighbors'];
+          
+          leaderboard = recentContributors.map((user: any, index: number) => {
+            const displayName = formatNameWithLastInitial(user.name || 'Neighbor');
+            const activity = activities[index % activities.length];
+            return `• ${displayName} - ${activity}`;
+          }).join('\n');
+          
+          console.log(`🌟 Generated recent contributors for ${communityName}:`, leaderboard);
+        }
+      } catch (error) {
+        console.error("Error formatting recent contributors:", error);
+        leaderboard = 'Recent activity temporarily unavailable';
+      }
     }
 
-    // Fetch all user data to get individual emails and generate invite links
+    // FIXED: Normalize emails to lowercase for case-insensitive matching
+    const normalizedRecipients = recipients.map(email => email.toLowerCase().trim());
+    
+    // Fetch all user data with case-insensitive email matching
     const { data: allUsers, error: usersError } = await supabase
       .from('users')
       .select('id, email, name, points')
       .eq('is_verified', true)
-      .in('email', recipients);
+      .in('email', normalizedRecipients);
 
     if (usersError) {
       console.error("Error fetching user data:", usersError);
       throw new Error("Failed to fetch user data for personalization");
+    }
+
+    console.log(`📊 Found ${allUsers.length} users in database out of ${recipients.length} requested`);
+    
+    // Log any missing users for debugging
+    const foundEmails = allUsers.map((u: any) => u.email.toLowerCase());
+    const missingEmails = normalizedRecipients.filter(email => !foundEmails.includes(email));
+    if (missingEmails.length > 0) {
+      console.warn(`⚠️ These emails were not found in verified users:`, missingEmails);
     }
 
     // Convert community name to slug format
@@ -203,8 +217,11 @@ const handler = async (req: Request): Promise<Response> => {
         // Generate view latest list link
         const viewListLink = `https://courtneys-list.com/communities/${communitySlug}?welcome=true`;
         
+        // Only replace leaderboard for non-celebration emails
+        if (!isCelebrationEmail) {
+          personalizedBody = personalizedBody.replace('{{LEADERBOARD}}', leaderboard);
+        }
         personalizedBody = personalizedBody
-          .replace('{{LEADERBOARD}}', leaderboard)
           .replace('{{INVITE_LINK}}', inviteLink)
           .replace('{{VIEW_LIST_LINK}}', viewListLink);
       }
@@ -285,12 +302,13 @@ ${personalizedBody}
     });
 
     const emailResults = await Promise.all(emailPromises);
-    console.log("✅ All personalized emails sent successfully");
+    console.log(`✅ Successfully sent ${emailResults.length} emails`);
 
     return new Response(JSON.stringify({
       success: true,
       recipientCount: recipients.length,
-      emailsSent: emailResults.length
+      emailsSent: emailResults.length,
+      missingEmails: missingEmails
     }), {
       status: 200,
       headers: {
