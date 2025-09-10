@@ -61,6 +61,7 @@ const handler = async (req: Request): Promise<Response> => {
     
     const isApologyEmail = templateId === 'apology-email';
     const isCommunityUpdateRosella = templateId === 'community-update-rosella';
+    const isCelebrationEmail = templateId === 'celebration-100-homes';
 
     console.log(`📧 Sending community email to ${recipients.length} recipients for ${communityName}`);
 
@@ -122,8 +123,14 @@ const handler = async (req: Request): Promise<Response> => {
         personalizedBody = personalizedBody.replace(/\[FirstName\]/g, firstName);
       }
       
-      if (isApologyEmail || isCommunityUpdateRosella) {
-        // Generate magic link for apology emails and community update
+      // Replace {{FIRST_NAME}} placeholder for celebration emails
+      if (isCelebrationEmail) {
+        const firstName = user.name ? user.name.split(' ')[0] : 'Neighbor';
+        personalizedBody = personalizedBody.replace(/\{\{FIRST_NAME\}\}/g, firstName);
+      }
+      
+      if (isApologyEmail || isCommunityUpdateRosella || isCelebrationEmail) {
+        // Generate magic link for apology emails, community updates, and celebration emails
         const { data: authData, error: authError } = await supabase.auth.admin.generateLink({
           type: 'magiclink',
           email: user.email,
@@ -138,7 +145,32 @@ const handler = async (req: Request): Promise<Response> => {
         }
 
         const magicLinkUrl = authData.properties?.action_link || '';
-        const viewProvidersButton = `<a href="${magicLinkUrl}" style="background-color: #4f46e5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold; margin: 10px 0; text-align: center;">${isApologyEmail ? 'See Boca Bridges Providers' : 'Click here to leave a service provider review'}</a>`;
+        
+        // Create appropriate button text based on email type
+        let buttonText = 'Click here to leave a service provider review';
+        if (isApologyEmail) {
+          buttonText = 'See Boca Bridges Providers';
+        } else if (isCelebrationEmail) {
+          buttonText = '🎊 See Newest Providers';
+        }
+        
+        const viewProvidersButton = `<div style="text-align: center; margin: 20px 0;">
+          <a href="${magicLinkUrl}" 
+             style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    padding: 14px 32px;
+                    text-decoration: none;
+                    border-radius: 8px;
+                    font-weight: 600;
+                    display: inline-block;
+                    font-size: 16px;
+                    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);">
+            ${buttonText}
+          </a>
+          <p style="color: #6b7280; font-size: 12px; margin: 10px 0 0 0;">
+            This link will sign you in automatically
+          </p>
+        </div>`;
         
         personalizedBody = personalizedBody.replace(/\{\{VIEW_PROVIDERS_BUTTON\}\}/g, viewProvidersButton);
       } else {
@@ -196,7 +228,8 @@ const handler = async (req: Request): Promise<Response> => {
 ${personalizedBody}
               </div>
               
-              ${!isApologyEmail && !isCommunityUpdateRosella ? `<div style="margin-top: 20px; text-align: center;">
+              ${!isApologyEmail && !isCommunityUpdateRosella && !isCelebrationEmail ?
+`<div style="margin-top: 20px; text-align: center;">
                 <a href="https://courtneys-list.com/signin" 
                    style="display: inline-block; background: #4f46e5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; margin: 10px 10px;">
                   Sign in to See Providers
@@ -223,7 +256,7 @@ ${personalizedBody}
         tags: [
           {
             name: 'campaign_type',
-            value: isApologyEmail ? 'apology_email' : isCommunityUpdateRosella ? 'community_update_rosella' : 'community_update'
+            value: isApologyEmail ? 'apology_email' : isCommunityUpdateRosella ? 'community_update_rosella' : isCelebrationEmail ? 'celebration_100_homes' : 'community_update'
           },
           {
             name: 'community',
