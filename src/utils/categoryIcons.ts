@@ -9,11 +9,11 @@ import {
   Hammer, 
   Heart, 
   Sparkles, 
-  Car, 
+  CarFront, 
   Settings,
-  Filter,
-  PaintBucket,
-  Palette,
+  Droplet,
+  Brush,
+  Sofa,
   LucideIcon 
 } from "lucide-react";
 import { Category } from "@/data/categories";
@@ -23,18 +23,18 @@ export const categoryIconMap: Record<Category, LucideIcon> = {
   "HVAC": Thermometer,
   "Electrical": Zap,
   "Plumbing": Droplets,
-  "Painters": PaintBucket,
+  "Painters": Brush,
   "Landscaping": Trees,
   "Pest Control": Bug,
   "Power Washing": ShowerHead,
-  "Car Wash & Detail": Car,
+  "Car Wash & Detail": CarFront,
   "Handyman": Hammer,
   "Pet Grooming": Heart,
   "House Cleaning": Sparkles,
-  "Mobile Tire Repair": Car,
+  "Mobile Tire Repair": CarFront,
   "Appliance Repair": Settings,
-  "Water Filtration": Filter,
-  "Interior Design": Palette,
+  "Water Filtration": Droplet,
+  "Interior Design": Sofa,
 };
 
 export function getCategoryIcon(category: Category): LucideIcon {
