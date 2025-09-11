@@ -14,6 +14,7 @@ import {
   Filter,
   PaintBucket,
   Palette,
+  Truck,
   LucideIcon 
 } from "lucide-react";
 import { Category } from "@/data/categories";
@@ -35,6 +36,7 @@ export const categoryIconMap: Record<Category, LucideIcon> = {
   "Appliance Repair": Settings,
   "Water Filtration": Filter,
   "Interior Design": Palette,
+  "Moving Company": Truck,
 };
 
 export function getCategoryIcon(category: Category): LucideIcon {
