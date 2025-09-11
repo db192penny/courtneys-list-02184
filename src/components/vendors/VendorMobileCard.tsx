@@ -150,7 +150,8 @@ export default function VendorMobileCard({
         </div>
 
 
-        {/* Reviews Section */}
+        {/* Ratings & Reviews section */}
+        <h4 className="text-sm font-medium text-gray-700 mb-2">Ratings & Reviews</h4>
         <div className="space-y-2 mb-3">
           {/* Boca Bridges Reviews - Blue theme - Clickable */}
           <button
