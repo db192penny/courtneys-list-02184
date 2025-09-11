@@ -49,7 +49,9 @@ We did it! I wanted to share some exciting updates and say THANK YOU!
 📊 COURTNEY'S LIST: BY THE NUMBERS:
 • 102 Neighbors Joined
 • 157 Reviews Shared  
-• 48 Vendors Listed
+• 48 Vendors Listed 
+• 1.5 Reviews/Neighbor
+
 
 🆕 JUST ADDED:
 Water Filtration & Dryer Vent Cleaning - two of your most-requested categories are now live!
