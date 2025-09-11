@@ -48,7 +48,7 @@ function PointsBadge() {
     >
       <span className="text-blue-600">{getBadgeIcon()}</span>
       <span className="font-semibold text-sm">{points}</span>
-      <span className="text-xs text-muted-foreground hidden sm:inline">pts</span>
+      <span className="text-xs text-muted-foreground">pts</span>
     </Button>
   );
 }
