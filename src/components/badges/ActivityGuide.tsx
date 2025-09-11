@@ -7,12 +7,14 @@ import { useNavigate } from "react-router-dom";
 import { usePointRewards } from "@/hooks/usePointRewards";
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { User } from '@supabase/supabase-js';
 
 export default function ActivityGuide() {
   const navigate = useNavigate();
   const { data: rewards = [] } = usePointRewards();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
   
   // Invite functionality state
   const [inviteUrl, setInviteUrl] = useState('');
@@ -122,7 +124,8 @@ export default function ActivityGuide() {
       description: "Invite someone from your community to join",
       points: rewards.find(r => r.activity === "invite_neighbor")?.points || 10,
       action: generateInvite,
-      buttonText: "Invite Neighbors"
+      buttonText: "Invite",
+      buttonIcon: <Share2 className="w-4 h-4" />
     },
     {
       type: "rate_vendor", 
@@ -130,7 +133,8 @@ export default function ActivityGuide() {
       description: "Share your experience with a vendor (unique per vendor)",
       points: rewards.find(r => r.activity === "rate_vendor")?.points || 5,
       action: () => navigate("/communities/boca-bridges"),
-      buttonText: "Rate Vendors"
+      buttonText: "Rate",
+      buttonIcon: <ArrowRight className="w-4 h-4" />
     },
     {
       type: "vendor_submission",
@@ -138,50 +142,94 @@ export default function ActivityGuide() {
       description: "Add a new service provider to help your community",
       points: rewards.find(r => r.activity === "vendor_submission")?.points || 5,
       action: () => navigate("/submit?community=Boca%20Bridges"),
-      buttonText: "Add Vendor"
+      buttonText: "Add",
+      buttonIcon: <ArrowRight className="w-4 h-4" />
     }
   ];
 
   return (
     <>
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-2 text-lg">
             <Lightbulb className="w-4 h-4" />
             How to Earn Points
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className={isMobile ? "px-4 pb-6 space-y-6" : "space-y-4"}>
           {activities.map((activity) => (
-            <div key={activity.type} className="flex items-center justify-between p-4 rounded-lg border">
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <h4 className="font-medium">{activity.title}</h4>
-                  <span className="text-sm font-semibold text-primary bg-primary/10 px-2 py-1 rounded">
-                    +{activity.points} pts
-                  </span>
-                </div>
-                <p className="text-sm text-muted-foreground">{activity.description}</p>
-              </div>
-              <Button 
-                onClick={activity.action}
-                size="sm"
-                variant="outline"
-                disabled={activity.type === "invite_neighbor" && loading}
-                className="ml-4 flex items-center gap-1 bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700"
-              >
-                {activity.type === "invite_neighbor" ? (
-                  <>
-                    <Share2 className="w-3 h-3" />
-                    {loading ? 'Generating...' : activity.buttonText}
-                  </>
-                ) : (
-                  <>
-                    {activity.buttonText}
-                    <ArrowRight className="w-3 h-3" />
-                  </>
-                )}
-              </Button>
+            <div 
+              key={activity.type} 
+              className={`
+                border rounded-lg
+                ${isMobile 
+                  ? 'p-5 space-y-4' 
+                  : 'p-4 flex items-center justify-between'
+                }
+              `}
+            >
+              {isMobile ? (
+                // Mobile Layout - Stacked
+                <>
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <h4 className="font-medium text-base">{activity.title}</h4>
+                    </div>
+                    <span className="ml-3 text-sm font-semibold text-primary bg-primary/10 px-2.5 py-1 rounded-full">
+                      +{activity.points} pts
+                    </span>
+                  </div>
+                  
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {activity.description}
+                  </p>
+                  
+                  <Button 
+                    onClick={activity.action}
+                    size="default"
+                    disabled={activity.type === "invite_neighbor" && loading}
+                    className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700"
+                  >
+                    {activity.type === "invite_neighbor" && loading ? (
+                      'Generating...'
+                    ) : (
+                      <span className="flex items-center justify-center gap-2">
+                        {activity.buttonIcon}
+                        {activity.buttonText}
+                      </span>
+                    )}
+                  </Button>
+                </>
+              ) : (
+                // Desktop Layout - Horizontal
+                <>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h4 className="font-medium">{activity.title}</h4>
+                      <span className="text-sm font-semibold text-primary bg-primary/10 px-2 py-1 rounded">
+                        +{activity.points} pts
+                      </span>
+                    </div>
+                    <p className="text-sm text-muted-foreground">{activity.description}</p>
+                  </div>
+                  <Button 
+                    onClick={activity.action}
+                    size="sm"
+                    variant="outline"
+                    disabled={activity.type === "invite_neighbor" && loading}
+                    className="ml-4 flex items-center gap-1 bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700"
+                  >
+                    {activity.type === "invite_neighbor" && loading ? (
+                      'Generating...'
+                    ) : (
+                      <>
+                        {activity.buttonIcon}
+                        {activity.buttonText}
+                      </>
+                    )}
+                  </Button>
+                </>
+              )}
             </div>
           ))}
         </CardContent>
