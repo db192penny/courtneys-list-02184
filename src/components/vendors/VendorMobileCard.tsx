@@ -22,6 +22,31 @@ import { MobileCostsModal } from "./MobileCostsModal";
 import type { CommunityVendorRow } from "@/components/vendors/CommunityVendorTable";
 import React, { useState } from "react";
 
+// Category emoji mapping (from CommunityVendorTable)
+const getCategoryEmoji = (category: string) => {
+  const categoryIcon = {
+    'HVAC': '🔧',
+    'Pool': '🏊',
+    'Landscaping': '🌱',
+    'Plumbing': '🚰',
+    'Electrical': '⚡',
+    'Pest Control': '🐛',
+    'House Cleaning': '🧹',
+    'Handyman': '🔨',
+    'Roofing': '🏠',
+    'General Contractor': '👷',
+    'Car Wash & Detail': '🚗',
+    'Pet Grooming': '🐕',
+    'Mobile Tire Repair': '🔧',
+    'Appliance Repair': '🔌',
+    'Painters': '🎨',
+    'Power Washing': '💧',
+    'Water Filtration': '💧',
+    'Interior Design': '🏡'
+  }[category] || '🏠';
+  return categoryIcon;
+};
+
 interface VendorMobileCardProps {
   vendor: CommunityVendorRow;
   rank: number;
@@ -67,17 +92,25 @@ export default function VendorMobileCard({
             </span>
             <div className="flex-1">
               <h3 className="text-base font-semibold">{vendor.name}</h3>
+              
+              {/* Category Badge with Emoji */}
+              <div className="flex items-center mt-1 mb-2">
+                <Badge variant="secondary" className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-700">
+                  {getCategoryEmoji(vendor.category)} {vendor.category}
+                </Badge>
+              </div>
+              
+              {/* Updated Neighbor Count */}
               {vendor.homes_serviced > 0 && (
                 <div className="flex items-center gap-1">
-                  <span className="text-xs text-gray-500">{vendor.homes_serviced} neighbor{vendor.homes_serviced !== 1 ? 's' : ''}</span>
+                  <span className="text-xs text-gray-500">
+                    {vendor.homes_serviced} neighbor{vendor.homes_serviced !== 1 ? 's' : ''} in Boca Bridges using
+                  </span>
                   {vendor.homes_pct && (
-                    <span className="text-xs text-gray-400">({vendor.homes_pct}%)</span>
+                    <span className="text-xs text-gray-400">({vendor.homes_pct}% of total homes)</span>
                   )}
                 </div>
               )}
-              <div className="flex items-center">
-                <span className="text-xs text-gray-500 uppercase">{vendor.category}</span>
-              </div>
             </div>
           </div>
           <Button
