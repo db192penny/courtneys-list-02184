@@ -8,9 +8,17 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-// ... other imports and interfaces remain the same ...
+interface Reward {
+  activity: string;
+  points: number;
+  description?: string;
+}
 
-export function ActivityGuide({ rewards }: ActivityGuideProps) {
+interface ActivityGuideProps {
+  rewards: Reward[];
+}
+
+export default function ActivityGuide({ rewards }: ActivityGuideProps) {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [loading, setLoading] = useState(false);
@@ -18,7 +26,54 @@ export function ActivityGuide({ rewards }: ActivityGuideProps) {
   const [inviteUrl, setInviteUrl] = useState("");
   const [copied, setCopied] = useState(false);
 
-  // ... generateInvite and handleModalCopy functions remain the same ...
+  const generateInvite = async () => {
+    setLoading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user?.email) {
+        toast.error("Please sign in to generate an invite link");
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('simple_invites')
+        .insert({
+          inviter_email: user.email,
+          invite_url: crypto.randomUUID()
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      const baseUrl = window.location.origin;
+      const fullInviteUrl = `${baseUrl}/invite/${data.invite_url}`;
+      
+      setInviteUrl(fullInviteUrl);
+      setShowModal(true);
+      
+      toast.success('Invite link generated! You\'ll earn 10 points when your neighbor joins! That\'s halfway to your free Starbucks! ☕', {
+        duration: 5000,
+        description: 'Share this link with your neighbor and earn 10 points when they join! That\'s halfway to your free Starbucks! ☕'
+      });
+    } catch (error) {
+      console.error('Error generating invite:', error);
+      toast.error('Failed to generate invite link. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleModalCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(inviteUrl);
+      setCopied(true);
+      toast.success('Invite link copied to clipboard!');
+      setTimeout(() => setCopied(false), 2000);
+    } catch (error) {
+      toast.error('Failed to copy link. Please copy manually.');
+    }
+  };
 
   const activities = [
     {
@@ -138,9 +193,41 @@ export function ActivityGuide({ rewards }: ActivityGuideProps) {
         </CardContent>
       </Card>
 
-      {/* Dialog remains the same */}
       <Dialog open={showModal} onOpenChange={setShowModal}>
-        {/* ... existing dialog content ... */}
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              Invite Neighbors to Earn 10 Points!
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Share this link with your neighbor and earn 10 points when they join - that's halfway to your free Starbucks! ☕
+            </p>
+            <div className="flex items-center space-x-2">
+              <div className="grid flex-1 gap-2">
+                <input
+                  className="px-3 py-2 text-sm border rounded-md bg-muted"
+                  value={inviteUrl}
+                  readOnly
+                />
+              </div>
+              <Button size="sm" onClick={handleModalCopy}>
+                {copied ? (
+                  <>
+                    <Check className="w-4 h-4 mr-1" />
+                    Copied
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-4 h-4 mr-1" />
+                    Copy
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
       </Dialog>
     </>
   );
