@@ -14,6 +14,7 @@ export const CATEGORIES = [
   "Mobile Tire Repair",
   "Appliance Repair",
   "Water Filtration",
+  "Interior Design",
 ] as const;
 
 export type Category = (typeof CATEGORIES)[number];
