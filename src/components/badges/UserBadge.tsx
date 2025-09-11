@@ -39,15 +39,15 @@ export default function UserBadge({
   const IconComponent = iconMap[icon] || Star;
   
   const sizeClasses = {
-    sm: "px-2 py-1 text-xs",
-    md: "px-3 py-1.5 text-sm",
-    lg: "px-4 py-2 text-base"
+    sm: "px-2 py-1 text-xs min-h-[28px] min-w-[28px]",
+    md: "px-3 py-1.5 text-sm min-h-[36px] min-w-[36px]",
+    lg: "px-4 py-2 text-base min-h-[48px] min-w-[48px]"
   };
   
   const iconSizes = {
     sm: "w-3 h-3",
     md: "w-4 h-4", 
-    lg: "w-5 h-5"
+    lg: "w-6 h-6"
   };
 
   return (
