@@ -3,29 +3,6 @@ import React from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { getCategoryIcon } from "@/utils/categoryIcons";
-import { Home } from "lucide-react";
-
-// Category-specific colors to make icons visually appealing
-const CATEGORY_COLORS: Record<string, string> = {
-  'all': 'text-blue-600',
-  'HVAC': 'text-orange-500',
-  'Pool': 'text-blue-500', 
-  'Landscaping': 'text-green-500',
-  'Plumbing': 'text-blue-600',
-  'Electrical': 'text-yellow-500',
-  'Pest Control': 'text-red-500',
-  'House Cleaning': 'text-purple-500',
-  'Handyman': 'text-amber-600',
-  'Painters': 'text-indigo-500',
-  'Power Washing': 'text-cyan-500',
-  'Car Wash & Detail': 'text-gray-600',
-  'Pet Grooming': 'text-pink-500',
-  'Mobile Tire Repair': 'text-slate-600',
-  'Appliance Repair': 'text-emerald-600',
-  'Water Filtration': 'text-blue-400',
-  'Interior Design': 'text-violet-500',
-};
 
 interface EnhancedMobileFilterModalProps {
   open: boolean;
@@ -37,6 +14,23 @@ interface EnhancedMobileFilterModalProps {
   categories: string[];
 }
 
+const CATEGORY_ICONS: Record<string, string> = {
+  'all': '🏠',
+  'HVAC': '🔧',
+  'Pool': '🏊',
+  'Landscaping': '🌱',
+  'Plumbing': '🚰',
+  'Electrical': '⚡',
+  'Pest Control': '🐛',
+  'House Cleaning': '🧹',
+  'Handyman': '🔨',
+  'Roofing': '🏠',
+  'General Contractor': '👷',
+  'Car Wash and Detail': '🚗',
+  'Pet Grooming': '🐕',
+  'Mobile Tire Repair': '🔧',
+  'Appliance Repair': '🔌'
+};
 
 const SORT_OPTIONS = [
   { 
@@ -100,8 +94,7 @@ export const EnhancedMobileFilterModal: React.FC<EnhancedMobileFilterModalProps>
             <div className="grid grid-cols-2 gap-1.5">
               {['all', ...categories.slice(0, 9)].map((category) => {
                 const displayName = category === 'all' ? 'All' : category;
-                const IconComponent = category === 'all' ? Home : getCategoryIcon(category as any);
-                const iconColor = CATEGORY_COLORS[category] || 'text-gray-600';
+                const icon = CATEGORY_ICONS[category] || '🏠';
                 const isSelected = selectedCategory === category;
                 
                 return (
@@ -115,7 +108,7 @@ export const EnhancedMobileFilterModal: React.FC<EnhancedMobileFilterModalProps>
                         : "bg-gray-50 border border-gray-200 text-gray-700 hover:bg-gray-100"
                     )}
                   >
-                    <IconComponent className={cn("w-4 h-4 flex-shrink-0", isSelected ? "text-blue-700" : iconColor)} />
+                    <span className="text-sm">{icon}</span>
                     <span className="truncate">{displayName}</span>
                   </button>
                 );
@@ -130,8 +123,7 @@ export const EnhancedMobileFilterModal: React.FC<EnhancedMobileFilterModalProps>
                 </summary>
                 <div className="grid grid-cols-2 gap-1.5 mt-2">
                   {categories.slice(9).map((category) => {
-                    const IconComponent = getCategoryIcon(category as any);
-                    const iconColor = CATEGORY_COLORS[category] || 'text-gray-600';
+                    const icon = CATEGORY_ICONS[category] || '🏠';
                     const isSelected = selectedCategory === category;
                     
                     return (
@@ -145,7 +137,7 @@ export const EnhancedMobileFilterModal: React.FC<EnhancedMobileFilterModalProps>
                             : "bg-gray-50 border border-gray-200 text-gray-700 hover:bg-gray-100"
                         )}
                       >
-                        <IconComponent className={cn("w-4 h-4 flex-shrink-0", isSelected ? "text-blue-700" : iconColor)} />
+                        <span className="text-sm">{icon}</span>
                         <span className="truncate">{category}</span>
                       </button>
                     );
