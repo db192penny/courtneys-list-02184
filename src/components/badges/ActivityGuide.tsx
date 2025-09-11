@@ -1,77 +1,117 @@
-import { useState } from "react";
-import { Share2, ArrowRight, Lightbulb, Check, Copy } from "lucide-react";
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Lightbulb, ArrowRight, Share2, Copy, Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { usePointRewards } from "@/hooks/usePointRewards";
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { User } from '@supabase/supabase-js';
 
-interface Reward {
-  activity: string;
-  points: number;
-  description?: string;
-}
-
-interface ActivityGuideProps {
-  rewards: Reward[];
-}
-
-export default function ActivityGuide({ rewards }: ActivityGuideProps) {
+export default function ActivityGuide() {
   const navigate = useNavigate();
-  const isMobile = useIsMobile();
+  const { data: rewards = [] } = usePointRewards();
+  const { toast } = useToast();
+  
+  // Invite functionality state
+  const [inviteUrl, setInviteUrl] = useState('');
   const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
   const [showModal, setShowModal] = useState(false);
-  const [inviteUrl, setInviteUrl] = useState("");
   const [copied, setCopied] = useState(false);
 
-  const generateInvite = async () => {
-    setLoading(true);
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user?.email) {
-        toast.error("Please sign in to generate an invite link");
-        return;
-      }
+  useEffect(() => {
+    // Get current user
+    supabase.auth.getUser().then(({ data }) => {
+      setUser(data.user);
+    });
+  }, []);
 
-      const { data, error } = await supabase
+  const copyToClipboard = async (text: string) => {
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+        return true;
+      }
+      
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      textArea.style.position = "fixed";
+      textArea.style.left = "-999999px";
+      textArea.style.top = "-999999px";
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      
+      const result = document.execCommand('copy');
+      document.body.removeChild(textArea);
+      return result;
+    } catch (error) {
+      console.error('Copy failed:', error);
+      return false;
+    }
+  };
+
+  const generateInvite = async () => {
+    if (!user) {
+      toast({ 
+        title: 'Please log in first', 
+        variant: 'destructive' 
+      });
+      return;
+    }
+
+    setLoading(true);
+    
+    try {
+      const code = Math.random().toString(36).substring(2, 10).toUpperCase();
+
+      const { error } = await supabase
         .from('simple_invites')
-        .insert({
-          inviter_email: user.email,
-          invite_url: crypto.randomUUID()
-        })
-        .select()
-        .single();
+        .insert({ 
+          code: code, 
+          inviter_id: user.id 
+        });
 
       if (error) throw error;
 
       const baseUrl = window.location.origin;
-      const fullInviteUrl = `${baseUrl}/invite/${data.invite_url}`;
-      
-      setInviteUrl(fullInviteUrl);
-      setShowModal(true);
-      
-      toast.success('Invite link generated! You\'ll earn 10 points when your neighbor joins! That\'s halfway to your free Starbucks! ☕', {
-        duration: 5000,
-        description: 'Share this link with your neighbor and earn 10 points when they join! That\'s halfway to your free Starbucks! ☕'
-      });
+      // FIXED: Include inviter parameter in URL
+      const url = `${baseUrl}/communities/boca-bridges?invite=${code}&inviter=${user.id}&welcome=true`;
+      setInviteUrl(url);
+
+      // Try to copy automatically
+      const copySuccess = await copyToClipboard(url);
+      if (copySuccess) {
+        toast({ 
+          title: '📋 Invite Link Copied!',
+          description: 'Earn 10 points when your neighbor joins! That\'s halfway to your free Starbucks! ☕' 
+        });
+      } else {
+        // Show modal if copy failed
+        setShowModal(true);
+      }
     } catch (error) {
-      console.error('Error generating invite:', error);
-      toast.error('Failed to generate invite link. Please try again.');
+      console.error('Error:', error);
+      toast({ 
+        title: 'Failed to generate invite', 
+        variant: 'destructive' 
+      });
     } finally {
       setLoading(false);
     }
   };
 
   const handleModalCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(inviteUrl);
+    const copySuccess = await copyToClipboard(inviteUrl);
+    if (copySuccess) {
       setCopied(true);
-      toast.success('Invite link copied to clipboard!');
       setTimeout(() => setCopied(false), 2000);
-    } catch (error) {
-      toast.error('Failed to copy link. Please copy manually.');
+      toast({ 
+        title: '📋 Invite Link Copied!',
+        description: 'Earn 10 points when your neighbor joins! That\'s halfway to your free Starbucks! ☕' 
+      });
     }
   };
 
@@ -82,8 +122,7 @@ export default function ActivityGuide({ rewards }: ActivityGuideProps) {
       description: "Invite someone from your community to join",
       points: rewards.find(r => r.activity === "invite_neighbor")?.points || 10,
       action: generateInvite,
-      buttonText: "Invite",
-      buttonIcon: <Share2 className="w-3 h-3" />
+      buttonText: "Invite Neighbors"
     },
     {
       type: "rate_vendor", 
@@ -91,8 +130,7 @@ export default function ActivityGuide({ rewards }: ActivityGuideProps) {
       description: "Share your experience with a vendor (unique per vendor)",
       points: rewards.find(r => r.activity === "rate_vendor")?.points || 5,
       action: () => navigate("/communities/boca-bridges"),
-      buttonText: "Rate",
-      buttonIcon: <ArrowRight className="w-3 h-3" />
+      buttonText: "Rate Vendors"
     },
     {
       type: "vendor_submission",
@@ -100,94 +138,50 @@ export default function ActivityGuide({ rewards }: ActivityGuideProps) {
       description: "Add a new service provider to help your community",
       points: rewards.find(r => r.activity === "vendor_submission")?.points || 5,
       action: () => navigate("/submit?community=Boca%20Bridges"),
-      buttonText: "Add",
-      buttonIcon: <ArrowRight className="w-3 h-3" />
+      buttonText: "Add Vendor"
     }
   ];
 
   return (
     <>
       <Card>
-        <CardHeader className="pb-4">
-          <CardTitle className="flex items-center gap-2 text-lg">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
             <Lightbulb className="w-4 h-4" />
             How to Earn Points
           </CardTitle>
         </CardHeader>
-        <CardContent className={isMobile ? "px-4 pb-6 space-y-4" : "space-y-4"}>
+        <CardContent className="space-y-4">
           {activities.map((activity) => (
-            <div 
-              key={activity.type} 
-              className={`
-                border rounded-lg
-                ${isMobile 
-                  ? 'p-4 space-y-3' 
-                  : 'p-4 flex items-center justify-between'
-                }
-              `}
-            >
-              {isMobile ? (
-                // Mobile Layout - Stacked
-                <>
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <h4 className="font-medium text-base">{activity.title}</h4>
-                    </div>
-                    <span className="ml-3 text-sm font-semibold text-primary bg-primary/10 px-2.5 py-1 rounded-full">
-                      +{activity.points} pts
-                    </span>
-                  </div>
-                  
-                  <p className="text-sm text-muted-foreground">
-                    {activity.description}
-                  </p>
-                  
-                  <Button 
-                    onClick={activity.action}
-                    size="sm"
-                    disabled={activity.type === "invite_neighbor" && loading}
-                    className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700"
-                  >
-                    {activity.type === "invite_neighbor" && loading ? (
-                      'Generating...'
-                    ) : (
-                      <span className="flex items-center justify-center gap-2">
-                        {activity.buttonIcon}
-                        {activity.buttonText}
-                      </span>
-                    )}
-                  </Button>
-                </>
-              ) : (
-                // Desktop Layout - Horizontal
-                <>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h4 className="font-medium">{activity.title}</h4>
-                      <span className="text-sm font-semibold text-primary bg-primary/10 px-2 py-1 rounded">
-                        +{activity.points} pts
-                      </span>
-                    </div>
-                    <p className="text-sm text-muted-foreground">{activity.description}</p>
-                  </div>
-                  <Button 
-                    onClick={activity.action}
-                    size="sm"
-                    variant="outline"
-                    disabled={activity.type === "invite_neighbor" && loading}
-                    className="ml-4 flex items-center gap-1 bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700"
-                  >
-                    {activity.type === "invite_neighbor" && loading ? (
-                      'Generating...'
-                    ) : (
-                      <>
-                        {activity.buttonIcon}
-                        {activity.buttonText}
-                      </>
-                    )}
-                  </Button>
-                </>
-              )}
+            <div key={activity.type} className="flex items-center justify-between p-4 rounded-lg border">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <h4 className="font-medium">{activity.title}</h4>
+                  <span className="text-sm font-semibold text-primary bg-primary/10 px-2 py-1 rounded">
+                    +{activity.points} pts
+                  </span>
+                </div>
+                <p className="text-sm text-muted-foreground">{activity.description}</p>
+              </div>
+              <Button 
+                onClick={activity.action}
+                size="sm"
+                variant="outline"
+                disabled={activity.type === "invite_neighbor" && loading}
+                className="ml-4 flex items-center gap-1 bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700"
+              >
+                {activity.type === "invite_neighbor" ? (
+                  <>
+                    <Share2 className="w-3 h-3" />
+                    {loading ? 'Generating...' : activity.buttonText}
+                  </>
+                ) : (
+                  <>
+                    {activity.buttonText}
+                    <ArrowRight className="w-3 h-3" />
+                  </>
+                )}
+              </Button>
             </div>
           ))}
         </CardContent>
