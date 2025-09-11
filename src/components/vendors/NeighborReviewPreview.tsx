@@ -107,9 +107,14 @@ export function NeighborReviewPreview({
           <div className="flex items-start gap-2">
             <ReviewSourceIcon source="bb" size="sm" />
             <div className="flex-1">
-              <p className="text-sm font-medium text-blue-800 mb-1">
-                💬 "{truncateComment(selectedReview.comments || "")}" - {selectedReview.author_label}
-              </p>
+              <div className="mb-1">
+                <p className="text-sm text-blue-700 mb-1">
+                  💬 "{truncateComment(selectedReview.comments || "")}"
+                </p>
+                <p className="text-sm font-semibold text-blue-900">
+                  - {selectedReview.author_label}
+                </p>
+              </div>
               <p className="text-xs text-blue-600 font-medium mt-2">
                 Read all {totalReviews} Boca Bridges reviews →
               </p>
