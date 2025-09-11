@@ -38,80 +38,6 @@ interface Props {
 
 const EMAIL_TEMPLATES: EmailTemplate[] = [
   {
-    id: "welcome-1",
-    name: "Welcome Email #1 - Community Leaderboard Update",
-    description: "Welcome email with current leaderboard and invitation links",
-    subject: "30+ {COMMUNITY_NAME} homes now on Courtney's List + leaderboard",
-    body: `Hi Neighbors 💜,
-
-Thanks so much for signing up — we now have 30+ {COMMUNITY_NAME} homes on Courtney's List! Already, just by reading the organized reviews, I know who I'm calling for my next AC repair, and we even found a new pool vendor.
-
-To make this fun, we added a points system and a leaderboard:
-   •   Rate a Vendor = +5 pts
-   •   Submit a New Vendor = +5 pts
-   •   Invite a Neighbor = +10 pts
-
-Here's the current leaderboard 🏆:
-{{LEADERBOARD}}
-
-New this week: categories now include Mobile Tire Repair and Pet Groomers. Keep the feedback coming and let us know about any bugs!
-
-👉 Want to climb the leaderboard?
-	1.	Rate 3–4 of your vendors to help your neighbors.
-	2.	Invite a friend in {COMMUNITY_NAME} using your personal link below (points are tracked automatically when they join):
-
-Your Invite Link:
-{{INVITE_LINK}}
-
-The more we all contribute, the more valuable (and stress-free!) this list becomes for the whole community.
-
-💜 Courtney`
-  },
-  {
-    id: "apology-email",
-    name: "Apology Email - Fresh Login Links",
-    description: "Send apology email with fresh magic login links to community members",
-    subject: "Your Boca Bridges Access - Login Issue - Fresh Link Inside",
-    body: `Hi Boca Bridges Neighbors,
-
-We're so sorry for the confusion with the login links! We had a software bug (I'll blame David :) that caused some of you to keep going to a log-in page - you are VIP and we made you stand in line - apologies! The good news is that we now have over 60 homes signed on!
-
-We've generated a fresh link just for you to see all the providers and rate and have fun.
-
-{{VIEW_PROVIDERS_BUTTON}}
-
-Again, our apologies for the technical hiccup. We really appreciate your patience as we work out these kinks. We promise this will save all of us stress in finding service providers :)
-
-💜 Courtney
-
-P.S Reach out to me on Whatsapp with any feedback or other categories you would want to see`
-  },
-  {
-    id: "community-update-rosella",
-    name: "Community Update - Review Request",
-    description: "Personal request from David on Rosella Rd for community reviews",
-    subject: "A small favor from your Boca Bridges neighbor on Rosella Rd",
-    body: `Hi [FirstName],
-
-Thanks again for signing up for Courtney's List — a project I started to make it easier for all of us to find trusted service providers in Boca Bridges. My hope is that it grows into a resource we build together as neighbors.
-
-Quick update: the login issues some people had are now fixed ✅. Already, 80+ homes have joined, and reviews are starting to come in on plumbers, landscapers, AC techs, and more.
-
-I have a small favor to ask:
-👉 Could you please leave a review for one of your service providers?
-
-{{VIEW_PROVIDERS_BUTTON}}
-
-It takes less than a minute, and even a single review makes a difference for neighbors trying to choose the right providers.
-
-Together, we can make this something really useful for Boca Bridges — saving time, money, and stress for everyone.
-
-Thanks so much for helping,
-David (Rosella Rd — with Courtney + our two boys, 13 & 14)
-
-P.S. Have a category you'd like added (grill cleaning, roofers, pavers)? Just hit reply — I'd love your input. Any feedback helps make this better for all of us.`
-  },
-  {
     id: "celebration-100-homes",
     name: "🎉 100 Homes Celebration",
     description: "Celebration email for reaching 100 homes milestone with rewards and leaderboard",
@@ -146,9 +72,9 @@ When I started this, I just wanted to stop answering the same vendor questions o
 
 With gratitude (and caffeine),
 Courtney
-With help (David and Penny,our toy poodle)
+With help (David and Penny, our toy poodle)
 
-{{VIEW_PROVIDERS_BUTTON}}`
+{{VIEW_PROVIDERS_LINK}}`
   },
   {
     id: "custom",
@@ -161,7 +87,7 @@ With help (David and Penny,our toy poodle)
 
 export default function EmailTemplatePanel({ communityName }: Props) {
   const [open, setOpen] = useState(false);
-  const [selectedTemplateId, setSelectedTemplateId] = useState<string>("welcome-1");
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string>("celebration-100-homes");
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
   const [recipientMode, setRecipientMode] = useState<"all" | "selected" | "custom">("all");
@@ -179,10 +105,7 @@ export default function EmailTemplatePanel({ communityName }: Props) {
       const { data, error } = await supabase
         .from("users")
         .select("id, name, email, address")
-        .eq("is_verified", true)
-        .not("name", "is", null)
-        .not("email", "is", null)
-        .not("address", "is", null);
+        .eq("is_verified", true);
 
       if (error) {
         console.error("Failed to fetch users:", error);
@@ -191,11 +114,11 @@ export default function EmailTemplatePanel({ communityName }: Props) {
 
       const communityUsers = data.map(user => ({
         id: user.id,
-        name: user.name,
+        name: user.name || "No name",
         email: user.email,
-        address: user.address,
-        display: `${user.name.split(' ')[0]} ${user.name.split(' ').slice(-1)[0]?.charAt(0) || ''}. - ${user.address.split(',')[0]}`
-      })).sort((a, b) => a.name.localeCompare(b.name));
+        address: user.address || "No address",
+        display: `${user.name?.split(' ')[0] || 'No name'} ${user.name?.split(' ').slice(-1)[0]?.charAt(0) || ''}. - ${user.address?.split(',')[0] || 'No address'}`
+      })).sort((a, b) => (a.name || '').localeCompare(b.name || ''));
 
       return communityUsers;
     },
@@ -250,6 +173,10 @@ export default function EmailTemplatePanel({ communityName }: Props) {
         : recipientMode === "selected"
         ? users.filter(u => selectedRecipients.includes(u.id)).map(u => u.email)
         : customRecipients.map(r => r.email);
+
+      console.log('Selected IDs:', selectedRecipients);
+      console.log('Recipients being sent:', recipients);
+      console.log('Number of recipients:', recipients.length);
 
       const { data, error } = await supabase.functions.invoke("send-community-email", {
         body: {
@@ -399,6 +326,8 @@ export default function EmailTemplatePanel({ communityName }: Props) {
               <div className="space-y-3">
                 <div className="text-sm text-muted-foreground">
                   Select recipients: {selectedRecipients.length} selected
+                  <br />
+                  Emails to send: {users.filter(u => selectedRecipients.includes(u.id)).length}
                 </div>
                 <div className="max-h-48 overflow-y-auto border rounded-lg p-3 space-y-2">
                   {users.map((user) => (
@@ -503,7 +432,7 @@ export default function EmailTemplatePanel({ communityName }: Props) {
                 className="min-h-[300px] resize-none"
               />
               <div className="text-xs text-muted-foreground">
-                Available placeholders: <code>{`{{LEADERBOARD}}`}</code>, <code>{`{{INVITE_LINK}}`}</code>, <code>{`{{FIRST_NAME}}`}</code> and <code>{`{{VIEW_PROVIDERS_BUTTON}}`}</code> will be automatically replaced for each recipient.
+                Available placeholders: <code>{`{{FIRST_NAME}}`}</code> and <code>{`{{VIEW_PROVIDERS_LINK}}`}</code> will be automatically replaced for each recipient.
               </div>
             </div>
           </div>
