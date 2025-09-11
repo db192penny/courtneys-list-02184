@@ -102,7 +102,7 @@ export default function CostsHover({ vendorId, children }: Props) {
                   </div>
                   {cost.notes && (
                     <div className="mt-2 text-xs text-muted-foreground">
-                      {cost.notes}
+                      {cost.notes.length > 100 ? cost.notes.substring(0, 100) + '...' : cost.notes}
                     </div>
                   )}
                 </div>

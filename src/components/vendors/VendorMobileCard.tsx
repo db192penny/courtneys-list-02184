@@ -227,7 +227,10 @@ export default function VendorMobileCard({
                   {/* Show first comment if available */}
                   {vendorCosts.find(c => c.notes) && (
                     <p className="text-xs text-green-600 italic">
-                      "{vendorCosts.find(c => c.notes)?.notes}"
+                      "{(() => {
+                        const note = vendorCosts.find(c => c.notes)?.notes || '';
+                        return note.length > 100 ? note.substring(0, 100) + '...' : note;
+                      })()}"
                     </p>
                   )}
                   
@@ -249,7 +252,7 @@ export default function VendorMobileCard({
                   </div>
                   {vendorCosts[0].notes && (
                     <p className="text-xs text-green-600 italic mt-1">
-                      "{vendorCosts[0].notes}"
+                      "{vendorCosts[0].notes.length > 100 ? vendorCosts[0].notes.substring(0, 100) + '...' : vendorCosts[0].notes}"
                     </p>
                   )}
                 </>
