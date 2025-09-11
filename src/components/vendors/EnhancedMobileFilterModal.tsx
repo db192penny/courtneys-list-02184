@@ -27,9 +27,14 @@ const CATEGORY_ICONS: Record<string, string> = {
   'Roofing': '🏠',
   'General Contractor': '👷',
   'Car Wash and Detail': '🚗',
+  'Car Wash & Detail': '🚗',
   'Pet Grooming': '🐕',
   'Mobile Tire Repair': '🔧',
-  'Appliance Repair': '🔌'
+  'Appliance Repair': '🔌',
+  'Painters': '🖌️',
+  'Power Washing': '🚿',
+  'Water Filtration': '💧',
+  'Interior Design': '🛋️'
 };
 
 const SORT_OPTIONS = [
