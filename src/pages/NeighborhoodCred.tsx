@@ -159,11 +159,6 @@ const NeighborhoodCred = () => {
                 </div>
               )}
               
-              {reviewsThisMonth === 0 && (
-                <Button asChild size="sm" className="w-fit">
-                  <Link to="/communities/boca-bridges">Leave a Review</Link>
-                </Button>
-              )}
             </div>
           </CardContent>
         </Card>
