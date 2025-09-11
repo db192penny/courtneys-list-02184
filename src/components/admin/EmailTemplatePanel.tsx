@@ -91,7 +91,7 @@ export default function EmailTemplatePanel({ communityName }: Props) {
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
   const [recipientMode, setRecipientMode] = useState<"all" | "selected" | "custom">("all");
-  const [selectedRecipients, setSelectedRecipients] = useState<string[]>([]);
+  const [selectedEmails, setSelectedEmails] = useState<string[]>([]);
   const [customRecipients, setCustomRecipients] = useState<CustomRecipient[]>([]);
   const [customName, setCustomName] = useState("");
   const [customEmail, setCustomEmail] = useState("");
@@ -147,7 +147,7 @@ export default function EmailTemplatePanel({ communityName }: Props) {
       return;
     }
 
-    if (recipientMode === "selected" && selectedRecipients.length === 0) {
+    if (recipientMode === "selected" && selectedEmails.length === 0) {
       toast({
         title: "No Recipients Selected",
         description: "Please select at least one recipient or choose 'Send to All'.",
@@ -171,10 +171,10 @@ export default function EmailTemplatePanel({ communityName }: Props) {
       const recipients = recipientMode === "all" 
         ? users.map(u => u.email)
         : recipientMode === "selected"
-        ? users.filter(u => selectedRecipients.includes(u.id)).map(u => u.email)
+        ? selectedEmails  // Now using emails directly
         : customRecipients.map(r => r.email);
 
-      console.log('Selected IDs:', selectedRecipients);
+      console.log('Selected emails:', selectedEmails);
       console.log('Recipients being sent:', recipients);
       console.log('Number of recipients:', recipients.length);
 
@@ -196,6 +196,9 @@ export default function EmailTemplatePanel({ communityName }: Props) {
         description: `Email sent to ${recipients.length} recipient(s).`,
       });
 
+      // Clear selections after successful send
+      setSelectedEmails([]);
+      setCustomRecipients([]);
       setOpen(false);
     } catch (error) {
       console.error("Failed to send email:", error);
@@ -209,11 +212,11 @@ export default function EmailTemplatePanel({ communityName }: Props) {
     }
   };
 
-  const toggleRecipient = (userId: string) => {
-    setSelectedRecipients(prev => 
-      prev.includes(userId) 
-        ? prev.filter(id => id !== userId)
-        : [...prev, userId]
+  const toggleRecipient = (userEmail: string) => {
+    setSelectedEmails(prev => 
+      prev.includes(userEmail) 
+        ? prev.filter(email => email !== userEmail)
+        : [...prev, userEmail]
     );
   };
 
@@ -301,7 +304,12 @@ export default function EmailTemplatePanel({ communityName }: Props) {
           {/* Recipients Section */}
           <div className="space-y-4">
             <Label>Recipients</Label>
-            <Select value={recipientMode} onValueChange={(value: "all" | "selected" | "custom") => setRecipientMode(value)}>
+            <Select value={recipientMode} onValueChange={(value: "all" | "selected" | "custom") => {
+              setRecipientMode(value);
+              // Clear selections when switching modes
+              setSelectedEmails([]);
+              setCustomRecipients([]);
+            }}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -325,23 +333,21 @@ export default function EmailTemplatePanel({ communityName }: Props) {
             {recipientMode === "selected" && (
               <div className="space-y-3">
                 <div className="text-sm text-muted-foreground">
-                  Select recipients: {selectedRecipients.length} selected
-                  <br />
-                  Emails to send: {users.filter(u => selectedRecipients.includes(u.id)).length}
+                  Recipients selected: {selectedEmails.length}
                 </div>
                 <div className="max-h-48 overflow-y-auto border rounded-lg p-3 space-y-2">
                   {users.map((user) => (
                     <div
                       key={user.id}
                       className={`flex items-center justify-between p-2 rounded cursor-pointer transition-colors ${
-                        selectedRecipients.includes(user.id)
+                        selectedEmails.includes(user.email)
                           ? "bg-primary/10 border border-primary/20"
                           : "bg-muted/50 hover:bg-muted"
                       }`}
-                      onClick={() => toggleRecipient(user.id)}
+                      onClick={() => toggleRecipient(user.email)}
                     >
                       <span className="text-sm">{user.display}</span>
-                      {selectedRecipients.includes(user.id) && (
+                      {selectedEmails.includes(user.email) && (
                         <Badge variant="secondary">Selected</Badge>
                       )}
                     </div>
