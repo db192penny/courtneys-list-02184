@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { Category } from "@/data/categories";
 
+// Category icon mapping for vendors
 export const categoryIconMap: Record<Category, LucideIcon> = {
   "Pool": Waves,
   "HVAC": Thermometer,
