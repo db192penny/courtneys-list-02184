@@ -7,12 +7,14 @@ import { useNavigate } from "react-router-dom";
 import { usePointRewards } from "@/hooks/usePointRewards";
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { User } from '@supabase/supabase-js';
 
 export default function ActivityGuide() {
   const navigate = useNavigate();
   const { data: rewards = [] } = usePointRewards();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
   
   // Invite functionality state
   const [inviteUrl, setInviteUrl] = useState('');
@@ -122,7 +124,7 @@ export default function ActivityGuide() {
       description: "Invite someone from your community to join",
       points: rewards.find(r => r.activity === "invite_neighbor")?.points || 10,
       action: generateInvite,
-      buttonText: "Invite Neighbors"
+      buttonText: isMobile ? "Invite" : "Invite Neighbors"
     },
     {
       type: "rate_vendor", 
@@ -130,7 +132,7 @@ export default function ActivityGuide() {
       description: "Share your experience with a vendor (unique per vendor)",
       points: rewards.find(r => r.activity === "rate_vendor")?.points || 5,
       action: () => navigate("/communities/boca-bridges"),
-      buttonText: "Rate Vendors"
+      buttonText: isMobile ? "Rate" : "Rate Vendors"
     },
     {
       type: "vendor_submission",
@@ -138,7 +140,7 @@ export default function ActivityGuide() {
       description: "Add a new service provider to help your community",
       points: rewards.find(r => r.activity === "vendor_submission")?.points || 5,
       action: () => navigate("/submit?community=Boca%20Bridges"),
-      buttonText: "Add Vendor"
+      buttonText: isMobile ? "Submit" : "Add Vendor"
     }
   ];
 
@@ -151,34 +153,47 @@ export default function ActivityGuide() {
             How to Earn Points
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className={isMobile ? "space-y-6" : "space-y-4"}>
           {activities.map((activity) => (
-            <div key={activity.type} className="flex items-center justify-between p-4 rounded-lg border">
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <h4 className="font-medium">{activity.title}</h4>
-                  <span className="text-sm font-semibold text-primary bg-primary/10 px-2 py-1 rounded">
+            <div 
+              key={activity.type} 
+              className={`rounded-lg border ${
+                isMobile 
+                  ? "p-5 space-y-4" 
+                  : "p-4 flex items-center justify-between"
+              }`}
+            >
+              <div className={isMobile ? "space-y-3" : "flex-1"}>
+                <div className={isMobile ? "space-y-2" : "flex items-center gap-2 mb-1"}>
+                  <h4 className="font-medium text-base">{activity.title}</h4>
+                  <span className="text-sm font-semibold text-primary bg-primary/10 px-2 py-1 rounded inline-block">
                     +{activity.points} pts
                   </span>
                 </div>
-                <p className="text-sm text-muted-foreground">{activity.description}</p>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {activity.description}
+                </p>
               </div>
               <Button 
                 onClick={activity.action}
-                size="sm"
+                size={isMobile ? "default" : "sm"}
                 variant="outline"
                 disabled={activity.type === "invite_neighbor" && loading}
-                className="ml-4 flex items-center gap-1 bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700"
+                className={`flex items-center gap-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700 ${
+                  isMobile 
+                    ? "w-full justify-center py-3" 
+                    : "ml-4"
+                }`}
               >
                 {activity.type === "invite_neighbor" ? (
                   <>
-                    <Share2 className="w-3 h-3" />
+                    <Share2 className="w-4 h-4" />
                     {loading ? 'Generating...' : activity.buttonText}
                   </>
                 ) : (
                   <>
                     {activity.buttonText}
-                    <ArrowRight className="w-3 h-3" />
+                    <ArrowRight className="w-4 h-4" />
                   </>
                 )}
               </Button>
