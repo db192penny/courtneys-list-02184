@@ -88,8 +88,11 @@ export function NeighborReviewPreview({
 
   if (!selectedReview) {
     return (
-      <div className={cn("text-sm font-medium text-yellow-700 bg-yellow-50 border border-yellow-200 p-2 rounded", className)}>
-        🌟 Be the first neighbor to review this vendor!
+      <div className={cn("text-sm font-semibold text-yellow-800 bg-gradient-to-r from-yellow-50 to-amber-50 border-2 border-yellow-300 p-3 rounded-lg shadow-sm", className)}>
+        <div className="flex items-center gap-2">
+          <span className="text-lg">⭐</span>
+          <span>Be the first neighbor to review this vendor!</span>
+        </div>
       </div>
     );
   }
@@ -98,28 +101,44 @@ export function NeighborReviewPreview({
     <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
       <DialogTrigger asChild>
         <div
-          className={cn("bg-blue-50 border border-blue-200 rounded-lg p-3 cursor-pointer transition-transform hover:scale-[1.01]", className)}
+          className={cn("bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-4 cursor-pointer transition-all duration-200 hover:scale-[1.02] hover:shadow-md hover:border-blue-300 active:scale-[0.98]", className)}
           onClick={handleInteraction}
           onKeyPress={handleInteraction}
           role="button"
           tabIndex={0}
         >
-          <div className="flex items-start gap-2">
-            <ReviewSourceIcon source="bb" size="sm" />
+          <div className="flex items-start gap-3">
+            <div className="mt-1">
+              <ReviewSourceIcon source="bb" size="md" />
+            </div>
             <div className="flex-1">
-              <div className="mb-1">
-                {selectedReview.comments && selectedReview.comments.trim() && (
-                  <p className="text-sm text-blue-700 mb-1">
-                    💬 "{truncateComment(selectedReview.comments)}"
+              {selectedReview.comments && selectedReview.comments.trim() && (
+                <div className="bg-white/60 rounded-lg p-3 mb-3 border border-blue-100">
+                  <p className="text-base text-blue-800 font-medium leading-relaxed">
+                    "{truncateComment(selectedReview.comments)}"
                   </p>
-                )}
+                </div>
+              )}
+              <div className="flex items-center justify-between">
                 <p className="text-sm font-semibold text-blue-900">
                   - {selectedReview.author_label}
                 </p>
+                <div className="flex items-center gap-1">
+                  <RatingStars rating={selectedReview.rating} size="sm" />
+                  <span className="text-xs text-blue-700 font-medium">{selectedReview.rating}/5</span>
+                </div>
               </div>
-              <p className="text-xs text-blue-600 font-medium mt-2">
-                Read all {totalReviews} Boca Bridges reviews →
-              </p>
+              <div className="mt-3 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-medium">
+                    👥 {totalReviews} neighbor{totalReviews !== 1 ? 's' : ''}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1 text-blue-600 font-semibold">
+                  <span className="text-sm">See all reviews</span>
+                  <span className="text-lg">→</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>

@@ -153,23 +153,35 @@ export default function VendorMobileCard({
         {/* Ratings & Reviews section */}
         <h4 className="text-sm font-medium text-gray-700 mb-2">Ratings & Reviews</h4>
         <div className="space-y-2 mb-3">
-          {/* Boca Bridges Reviews - Blue theme - Clickable */}
+          {/* Boca Bridges Reviews - Enhanced CTA */}
           <button
             onClick={() => setIsReviewsModalOpen(true)}
-            className="w-full flex justify-between items-center p-2 bg-blue-50 border border-blue-200 rounded-lg cursor-pointer transition-transform hover:scale-[1.01]"
+            className="w-full bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-3 cursor-pointer transition-all duration-200 hover:scale-[1.02] hover:shadow-lg hover:border-blue-300 active:scale-[0.98] group"
           >
-            <div className="flex items-center gap-2">
-              <ReviewSourceIcon source="bb" size="sm" />
-              <span className="text-sm font-medium text-blue-700">Boca Bridges</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <RatingStars rating={vendor.hoa_rating || 0} size="sm" />
-              <span className="text-sm font-medium text-blue-800 underline">
-                {vendor.hoa_rating?.toFixed(1)}
-              </span>
-              <span className="text-xs text-blue-600 underline">
-                ({vendor.hoa_rating_count || 0})
-              </span>
+            <div className="flex justify-between items-center">
+              <div className="flex items-center gap-3">
+                <ReviewSourceIcon source="bb" size="md" />
+                <div className="text-left">
+                  <div className="text-sm font-bold text-blue-800">Community Ratings</div>
+                  <div className="text-xs text-blue-600">From your neighbors</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="text-right">
+                  <div className="flex items-center gap-1">
+                    <RatingStars rating={vendor.hoa_rating || 0} size="sm" />
+                    <span className="text-sm font-bold text-blue-800">
+                      {vendor.hoa_rating?.toFixed(1) || '0.0'}
+                    </span>
+                  </div>
+                  <div className="text-xs text-blue-600 font-medium">
+                    {vendor.hoa_rating_count || 0} review{(vendor.hoa_rating_count || 0) !== 1 ? 's' : ''}
+                  </div>
+                </div>
+                <div className="text-blue-500 group-hover:translate-x-1 transition-transform">
+                  →
+                </div>
+              </div>
             </div>
           </button>
           
