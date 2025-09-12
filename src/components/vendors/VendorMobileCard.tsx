@@ -100,16 +100,17 @@ export default function VendorMobileCard({
                 </Badge>
               </div>
               
-              {/* Updated Neighbor Count */}
+              {/* Interactive Neighbor Count Button */}
               {vendor.homes_serviced > 0 && (
-                <div className="flex items-center gap-1">
-                  <span className="text-xs text-gray-500">
-                    {vendor.homes_serviced} neighbor{vendor.homes_serviced !== 1 ? 's' : ''} in Boca Bridges using
-                  </span>
+                <button
+                  onClick={() => setIsReviewsModalOpen(true)}
+                  className="flex items-center gap-1 text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded-full font-medium hover:bg-blue-100 transition-colors cursor-pointer"
+                >
+                  👥 {vendor.homes_serviced} neighbor{vendor.homes_serviced !== 1 ? 's' : ''}
                   {vendor.homes_pct && (
-                    <span className="text-xs text-gray-400">({vendor.homes_pct}% of total homes)</span>
+                    <span className="text-blue-500">({vendor.homes_pct}%)</span>
                   )}
-                </div>
+                </button>
               )}
             </div>
           </div>

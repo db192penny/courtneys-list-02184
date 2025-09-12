@@ -183,13 +183,8 @@ export function NeighborReviewPreview({
         </div>
       </div>
       
-      {/* Footer with Social Proof and CTA */}
-      <div className="mt-3 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-medium">
-            👥 {totalReviews} neighbor{totalReviews !== 1 ? 's' : ''}
-          </span>
-        </div>
+      {/* Footer with CTA */}
+      <div className="mt-3 flex items-center justify-end">
         <div className="flex items-center gap-1 text-blue-600 font-semibold group-hover:translate-x-1 transition-transform">
           <span className="text-sm">View all reviews</span>
           <span className="text-lg">→</span>
