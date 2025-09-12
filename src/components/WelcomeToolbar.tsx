@@ -116,11 +116,7 @@ export function WelcomeToolbar({ communitySlug }: WelcomeToolbarProps) {
         <PartyPopper className="h-5 w-5 text-yellow-600" />
         <div className="pr-8">
           <AlertDescription className="text-sm leading-relaxed text-yellow-800">
-            <strong>Welcome aboard!</strong> Please try to rate at least 3 vendors (and more if you're having fun!). 
-            Also check the filter for other categories (Pool, Pest Control, etc). And please let me know any comments 
-            or suggestions—I want this to be an invaluable tool for all of us!
-            <br />
-            <span className="text-yellow-700 font-medium">— Courtney</span>
+            <strong>Welcome aboard!</strong> Please try to rate at least 3 vendors (and more if you're having fun!)
           </AlertDescription>
         </div>
         <Button
