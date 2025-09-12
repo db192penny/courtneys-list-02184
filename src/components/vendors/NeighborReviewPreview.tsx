@@ -108,9 +108,11 @@ export function NeighborReviewPreview({
             <ReviewSourceIcon source="bb" size="sm" />
             <div className="flex-1">
               <div className="mb-1">
-                <p className="text-sm text-blue-700 mb-1">
-                  💬 "{truncateComment(selectedReview.comments || "")}"
-                </p>
+                {selectedReview.comments && selectedReview.comments.trim() && (
+                  <p className="text-sm text-blue-700 mb-1">
+                    💬 "{truncateComment(selectedReview.comments)}"
+                  </p>
+                )}
                 <p className="text-sm font-semibold text-blue-900">
                   - {selectedReview.author_label}
                 </p>
