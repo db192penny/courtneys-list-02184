@@ -186,6 +186,9 @@ export default function CommunityVendorTable({
       newSearchParams.set('category', newCategory);
     }
     setSearchParams(newSearchParams);
+    
+    // Scroll to top of vendor list with smooth animation
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleShareCategory = async () => {
@@ -331,6 +334,8 @@ export default function CommunityVendorTable({
           onSortChange={(sort) => {
             const mappedSort = sort === 'neighbors_using' ? 'homes' : sort === 'highest_rated' ? 'hoa_rating' : 'google_rating';
             setSortBy(mappedSort as any);
+            // Scroll to top when sort order changes
+            window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
           categories={[...CATEGORIES]}
         />
