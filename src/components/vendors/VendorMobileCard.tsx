@@ -241,6 +241,14 @@ export default function VendorMobileCard({
                       "{vendorCosts[0].notes.length > 100 ? vendorCosts[0].notes.substring(0, 100) + '...' : vendorCosts[0].notes}"
                     </p>
                   )}
+                  
+                  {/* Always show view all details link for single cost too */}
+                  <button
+                    onClick={() => setCostModalOpen(true)}
+                    className="text-xs text-green-600 font-medium mt-2"
+                  >
+                    View all cost details →
+                  </button>
                 </>
               )}
             </div>

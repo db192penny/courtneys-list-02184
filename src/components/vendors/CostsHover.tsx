@@ -1,8 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserProfile } from "@/hooks/useUserProfile";
+import { MobileCostsModal } from "./MobileCostsModal";
+import { useState } from "react";
 
 type Props = {
   vendorId: string;
@@ -36,6 +39,7 @@ const formatCost = (amount: number, unit?: string | null, period?: string | null
 export default function CostsHover({ vendorId, children }: Props) {
   const { data: profile } = useUserProfile();
   const isVerified = !!profile?.isVerified;
+  const [detailsModalOpen, setDetailsModalOpen] = useState(false);
 
   const { data: costs, isLoading, error } = useQuery({
     queryKey: ["vendor-costs", vendorId],
@@ -55,6 +59,7 @@ export default function CostsHover({ vendorId, children }: Props) {
   });
 
   return (
+    <>
     <HoverCard openDelay={200} closeDelay={100}>
       <HoverCardTrigger asChild>
         <span className="cursor-pointer underline decoration-dotted underline-offset-4">
@@ -107,10 +112,27 @@ export default function CostsHover({ vendorId, children }: Props) {
                   )}
                 </div>
               ))}
+              <button
+                onClick={() => setDetailsModalOpen(true)}
+                className="w-full text-xs text-blue-600 hover:text-blue-700 font-medium mt-2 text-center"
+              >
+                View all cost details →
+              </button>
             </div>
           )}
         </div>
       </HoverCardContent>
     </HoverCard>
+
+    {/* Full Details Modal */}
+    <Dialog open={detailsModalOpen} onOpenChange={setDetailsModalOpen}>
+      <DialogContent className="max-w-md mx-auto">
+        <DialogHeader>
+          <DialogTitle>Cost Details</DialogTitle>
+        </DialogHeader>
+        <MobileCostsModal vendorId={vendorId} />
+      </DialogContent>
+    </Dialog>
+  </>
   );
 }
