@@ -201,7 +201,7 @@ export function NeighborReviewPreview({
       </DialogTrigger>
       <DialogContent className="max-w-md mx-auto">
         <DialogHeader>
-          <DialogTitle>Boca Bridges Reviews</DialogTitle>
+          <DialogTitle>Boca Bridges</DialogTitle>
         </DialogHeader>
         <MobileReviewsModal 
           open={true}
