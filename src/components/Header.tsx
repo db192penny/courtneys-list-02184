@@ -131,7 +131,7 @@ const Header = () => {
   ] : [];
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <nav className="container flex h-12 sm:h-14 items-center justify-between">
         <span className="font-semibold text-base sm:text-lg cursor-default">Courtney's List</span>
         

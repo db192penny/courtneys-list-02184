@@ -114,48 +114,52 @@ export default function Community() {
         {/* Welcome toolbar for new users */}
         <WelcomeToolbar communitySlug={slug} />
         
-        {/* Mobile-first simplified header */}
-        <header className="space-y-4">
-          <div className="flex flex-col gap-4">
-            {/* Community info - simplified for mobile */}
-            <div className="flex gap-3 items-center">
-              <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg">
-                BB
-              </div>
-              <div className="flex-1">
-                <h1 className="text-xl font-semibold tracking-tight">{communityName}</h1>
-                <p className="text-sm text-muted-foreground">{homesLabel} Homes</p>
-              </div>
-            </div>
+        {/* Sticky Community Header */}
+        <div className="sticky top-12 sm:top-14 z-40 backdrop-blur-md bg-background/95 border-b border-border/40 shadow-sm transition-all duration-200 -mx-4 px-4 py-3 sm:py-4">
+          <div className="container">
+            <header className="space-y-4">
+              <div className="flex flex-col gap-4">
+                {/* Community info - simplified for mobile */}
+                <div className="flex gap-3 items-center">
+                  <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg">
+                    BB
+                  </div>
+                  <div className="flex-1">
+                    <h1 className="text-xl font-semibold tracking-tight">{communityName}</h1>
+                    <p className="text-sm text-muted-foreground">{homesLabel} Homes</p>
+                  </div>
+                </div>
 
-            {/* For logged out users - prominent call to action */}
-            {showSignUpPrompt && (
-              <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg p-6 text-center text-white">
-                <p className="text-lg font-medium mb-4">
-                  Rate vendors, share costs, and read detailed neighbor reviews
-                </p>
-                <Button
-                  onClick={() => {
-                    const inviteCode = localStorage.getItem('pending_invite_code');
-                    const inviterId = localStorage.getItem('pending_inviter_id');
-                    
-                    if (inviteCode && inviterId) {
-                      navigate(`/auth?community=${communityName}&invite=${inviteCode}&inviter=${inviterId}`);
-                    } else {
-                      navigate(`/auth?community=${communityName}`);
-                    }
-                  }}
-                  size="lg"
-                  className="bg-white text-blue-600 hover:bg-gray-100 font-semibold px-8"
-                >
-                  Request Access
-                </Button>
-              </div>
-            )}
+                {/* For logged out users - prominent call to action */}
+                {showSignUpPrompt && (
+                  <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg p-6 text-center text-white">
+                    <p className="text-lg font-medium mb-4">
+                      Rate vendors, share costs, and read detailed neighbor reviews
+                    </p>
+                    <Button
+                      onClick={() => {
+                        const inviteCode = localStorage.getItem('pending_invite_code');
+                        const inviterId = localStorage.getItem('pending_inviter_id');
+                        
+                        if (inviteCode && inviterId) {
+                          navigate(`/auth?community=${communityName}&invite=${inviteCode}&inviter=${inviterId}`);
+                        } else {
+                          navigate(`/auth?community=${communityName}`);
+                        }
+                      }}
+                      size="lg"
+                      className="bg-white text-blue-600 hover:bg-gray-100 font-semibold px-8"
+                    >
+                      Request Access
+                    </Button>
+                  </div>
+                )}
 
-            {/* For logged in users - no actions needed, removed submit provider button */}
+                {/* For logged in users - no actions needed, removed submit provider button */}
+              </div>
+            </header>
           </div>
-        </header>
+        </div>
 
         {isLoading && <div className="text-sm text-muted-foreground">Loading providers…</div>}
         {error && <div className="text-sm text-muted-foreground">Unable to load providers.</div>}
