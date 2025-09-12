@@ -131,8 +131,8 @@ export default function Community() {
 
                 {/* For logged out users - prominent call to action */}
                 {showSignUpPrompt && (
-                  <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg p-6 text-center text-white">
-                    <p className="text-lg font-medium mb-4">
+                  <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg py-4 px-6 text-center text-white">
+                    <p className="text-base font-medium mb-3">
                       Rate vendors, share costs, and read detailed neighbor reviews
                     </p>
                     <Button
@@ -146,8 +146,8 @@ export default function Community() {
                           navigate(`/auth?community=${communityName}`);
                         }
                       }}
-                      size="lg"
-                      className="bg-white text-blue-600 hover:bg-gray-100 font-semibold px-8"
+                      size="default"
+                      className="bg-white text-blue-600 hover:bg-gray-100 font-semibold px-6"
                     >
                       Request Access
                     </Button>
