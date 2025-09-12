@@ -65,8 +65,8 @@ export function NeighborReviewPreview({
   };
 
   const truncateComment = (comment: string) => {
-    if (!comment || comment.length <= 60) return comment;
-    return comment.substring(0, 60) + "...";
+    if (!comment || comment.length <= 140) return comment;
+    return comment.substring(0, 140) + "...";
   };
 
   const handleInteraction = (e: React.MouseEvent | React.KeyboardEvent) => {
@@ -166,12 +166,12 @@ export function NeighborReviewPreview({
       {/* Comment Preview with Right-aligned Attribution */}
       {selectedReview.comments && selectedReview.comments.trim() && (
         <div className="bg-white/60 rounded-lg p-3 mb-3 border border-blue-100">
-          <p className="text-base text-blue-800 font-medium leading-relaxed mb-1">
+          <p className="text-sm text-blue-800 font-medium leading-snug mb-2 italic">
             "{truncateComment(selectedReview.comments)}"
           </p>
           {/* Right-aligned attribution */}
           <div className="flex justify-end">
-            <p className="text-sm font-semibold text-blue-900">
+            <p className="text-xs font-medium text-blue-600">
               — {selectedReview.author_label}
             </p>
           </div>
