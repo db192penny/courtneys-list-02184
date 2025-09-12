@@ -163,21 +163,17 @@ export function NeighborReviewPreview({
         </div>
       </div>
 
-      {/* Comment Preview with Attribution Inside */}
+      {/* Comment Preview with Right-aligned Attribution */}
       {selectedReview.comments && selectedReview.comments.trim() && (
         <div className="bg-white/60 rounded-lg p-3 mb-3 border border-blue-100">
-          <p className="text-base text-blue-800 font-medium leading-relaxed mb-3">
+          <p className="text-base text-blue-800 font-medium leading-relaxed mb-1">
             "{truncateComment(selectedReview.comments)}"
           </p>
-          {/* Attribution inside the quote box */}
-          <div className="flex items-center justify-between pt-2 border-t border-blue-100/50">
+          {/* Right-aligned attribution */}
+          <div className="flex justify-end">
             <p className="text-sm font-semibold text-blue-900">
               — {selectedReview.author_label}
             </p>
-            <div className="flex items-center gap-1">
-              <RatingStars rating={selectedReview.rating} size="sm" />
-              <span className="text-xs text-blue-700 font-medium">{selectedReview.rating}/5</span>
-            </div>
           </div>
         </div>
       )}
