@@ -156,6 +156,7 @@ export default function VendorMobileCard({
             vendorId={vendor.id} 
             vendor={vendor}
             onOpenModal={() => setIsReviewsModalOpen(true)}
+            communityName={communityName}
           />
           
           {/* Google Reviews - Separate External Reviews */}

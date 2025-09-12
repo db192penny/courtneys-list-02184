@@ -17,6 +17,7 @@ interface NeighborReviewPreviewProps {
   };
   onOpenModal?: () => void;
   className?: string;
+  communityName?: string;
 }
 
 interface Review {
@@ -31,7 +32,8 @@ export function NeighborReviewPreview({
   vendorId, 
   vendor,
   onOpenModal,
-  className 
+  className,
+  communityName 
 }: NeighborReviewPreviewProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { data: reviews, isLoading, error } = useQuery({
@@ -105,7 +107,7 @@ export function NeighborReviewPreview({
           <div className="flex items-center gap-3">
             <ReviewSourceIcon source="bb" size="md" />
             <div>
-              <div className="text-sm font-bold text-blue-800">Community Reviews</div>
+              <div className="text-sm font-bold text-blue-800">{communityName || 'Community'} Reviews</div>
               <div className="text-xs text-blue-600">From your neighbors</div>
             </div>
           </div>
@@ -146,7 +148,7 @@ export function NeighborReviewPreview({
         <div className="flex items-center gap-3">
           <ReviewSourceIcon source="bb" size="md" />
           <div>
-            <div className="text-sm font-bold text-blue-800">Community Reviews</div>
+            <div className="text-sm font-bold text-blue-800">{communityName || 'Community'} Reviews</div>
             <div className="text-xs text-blue-600">From your neighbors</div>
           </div>
         </div>
