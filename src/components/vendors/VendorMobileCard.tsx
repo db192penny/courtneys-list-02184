@@ -150,7 +150,6 @@ export default function VendorMobileCard({
 
         {/* Community Reviews Section */}
         <div className="space-y-3">
-          <h4 className="text-sm font-medium text-gray-700">Community Reviews</h4>
           
           {/* Enhanced Neighbor Review Preview - Primary BB Section */}
           <NeighborReviewPreview 

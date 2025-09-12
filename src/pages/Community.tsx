@@ -119,16 +119,16 @@ export default function Community() {
           <div className="container">
             <header className="space-y-4">
               <div className="flex flex-col gap-4">
-                {/* Community info - simplified for mobile */}
-                <div className="flex gap-3 items-center">
-                  <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg">
-                    BB
-                  </div>
-                  <div className="flex-1">
-                    <h1 className="text-xl font-semibold tracking-tight">{communityName}</h1>
-                    <p className="text-sm text-muted-foreground">{homesLabel} Homes</p>
-                  </div>
-                </div>
+                 {/* Community info - mobile optimized layout */}
+                 <div className="flex gap-3 items-center">
+                   <div className="h-8 w-8 sm:h-12 sm:w-12 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm sm:text-lg">
+                     BB
+                   </div>
+                   <div className="flex-1">
+                     <h1 className="text-lg sm:text-xl font-semibold tracking-tight">{communityName} Reviews</h1>
+                     <p className="text-xs sm:text-sm text-muted-foreground">{homesLabel} Homes</p>
+                   </div>
+                 </div>
 
                 {/* For logged out users - prominent call to action */}
                 {showSignUpPrompt && (
