@@ -99,6 +99,7 @@ export default function CommunityVendorTable({
   const { toast } = useToast();
   // Always use mobile layout for desktop - removed isMobile detection
   const isMobile = true;
+  const [showInitialAnimation, setShowInitialAnimation] = useState(true);
 
   // Initialize category from URL parameter
   useEffect(() => {
@@ -107,6 +108,14 @@ export default function CommunityVendorTable({
       setCategory(urlCategory);
     }
   }, [searchParams]);
+
+  // Remove animation after initial attention
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowInitialAnimation(false);
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, []);
 
   const { data, isLoading, error, refetch, isFetching } = useQuery<CommunityVendorRow[]>({
     queryKey: ["community-stats", communityName, category, sortBy],
@@ -220,21 +229,22 @@ export default function CommunityVendorTable({
         {/* Sticky Filter Controls */}
         <div className="sticky top-[120px] sm:top-[140px] z-30 backdrop-blur-md bg-background/95 border-b border-border/40 shadow-sm transition-all duration-200 mb-4 -mx-4 px-4 py-2 sm:py-3">
           <div className="max-w-4xl mx-auto">
-            <label className="text-xs text-muted-foreground font-medium uppercase tracking-wide mb-1.5 sm:mb-2 block">
+            <label className="text-xs text-primary font-semibold uppercase tracking-wide mb-1.5 sm:mb-2 block flex items-center gap-1.5">
+              <Filter className="h-3 w-3" />
               Choose Category
             </label>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setFilterModalOpen(true)}
-                className="flex-1 flex items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg border border-border bg-card hover:bg-accent transition-colors active:bg-accent"
+                className={`flex-1 flex items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg border-2 border-primary/20 bg-gradient-to-r from-primary/5 to-accent/5 hover:from-primary/10 hover:to-accent/10 transition-all duration-200 shadow-sm hover:shadow-md hover:scale-[1.01] active:scale-[0.99] ${showInitialAnimation ? 'animate-pulse' : ''}`}
               >
                 <div className="flex items-center gap-2">
                   <span className="text-lg sm:text-xl">{filterText.icon}</span>
-                  <span className="text-sm sm:text-base font-medium text-foreground truncate">
+                  <span className="text-sm sm:text-base font-semibold text-foreground truncate">
                     {filterText.category ? `${filterText.category} • ${filterText.sort}` : `All Categories • ${filterText.sort}`}
                   </span>
                 </div>
-                <ChevronDown className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground flex-shrink-0" />
+                <ChevronDown className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" />
               </button>
               <Button
                 variant="outline"
