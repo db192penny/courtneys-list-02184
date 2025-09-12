@@ -172,14 +172,16 @@ export function NeighborReviewPreview({
         </div>
       )}
       
-      {/* Review Author and CTA */}
+      {/* Review Author with Rating - Improved Attribution */}
       <div className="flex items-center justify-between">
-        <p className="text-sm font-semibold text-blue-900">
-          - {selectedReview.author_label}
-        </p>
-        <div className="flex items-center gap-1">
-          <RatingStars rating={selectedReview.rating} size="sm" />
-          <span className="text-xs text-blue-700 font-medium">{selectedReview.rating}/5</span>
+        <div className="flex items-center gap-2">
+          <p className="text-sm font-semibold text-blue-900">
+            - {selectedReview.author_label}
+          </p>
+          <div className="flex items-center gap-1 bg-white/50 rounded-full px-2 py-1">
+            <RatingStars rating={selectedReview.rating} size="sm" />
+            <span className="text-xs text-blue-700 font-medium">{selectedReview.rating}/5</span>
+          </div>
         </div>
       </div>
       
