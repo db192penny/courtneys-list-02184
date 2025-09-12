@@ -124,7 +124,7 @@ export default function Community() {
                      BB
                    </div>
                    <div className="flex-1">
-                     <h1 className="text-lg sm:text-xl font-semibold tracking-tight">{communityName} Reviews</h1>
+                     <h1 className="text-lg sm:text-xl font-semibold tracking-tight">{communityName}</h1>
                      <p className="text-xs sm:text-sm text-muted-foreground">{homesLabel} Homes</p>
                    </div>
                  </div>
