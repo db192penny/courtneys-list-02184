@@ -163,27 +163,24 @@ export function NeighborReviewPreview({
         </div>
       </div>
 
-      {/* Comment Preview */}
+      {/* Comment Preview with Attribution Inside */}
       {selectedReview.comments && selectedReview.comments.trim() && (
         <div className="bg-white/60 rounded-lg p-3 mb-3 border border-blue-100">
-          <p className="text-base text-blue-800 font-medium leading-relaxed">
+          <p className="text-base text-blue-800 font-medium leading-relaxed mb-3">
             "{truncateComment(selectedReview.comments)}"
           </p>
-        </div>
-      )}
-      
-      {/* Review Author with Rating - Improved Attribution */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <p className="text-sm font-semibold text-blue-900">
-            - {selectedReview.author_label}
-          </p>
-          <div className="flex items-center gap-1 bg-white/50 rounded-full px-2 py-1">
-            <RatingStars rating={selectedReview.rating} size="sm" />
-            <span className="text-xs text-blue-700 font-medium">{selectedReview.rating}/5</span>
+          {/* Attribution inside the quote box */}
+          <div className="flex items-center justify-between pt-2 border-t border-blue-100/50">
+            <p className="text-sm font-semibold text-blue-900">
+              — {selectedReview.author_label}
+            </p>
+            <div className="flex items-center gap-1">
+              <RatingStars rating={selectedReview.rating} size="sm" />
+              <span className="text-xs text-blue-700 font-medium">{selectedReview.rating}/5</span>
+            </div>
           </div>
         </div>
-      </div>
+      )}
       
       {/* Footer with CTA */}
       <div className="mt-3 flex items-center justify-end">
