@@ -115,9 +115,8 @@ export default function Community() {
         <WelcomeToolbar communitySlug={slug} />
         
         {/* Sticky Community Header */}
-        <div className="sticky top-12 sm:top-14 z-40 backdrop-blur-md bg-background/95 border-b border-border/40 shadow-sm transition-all duration-200 -mx-4 px-4 py-3 sm:py-4">
-          <div className="container">
-            <header className="space-y-4">
+        <div className="sticky top-12 sm:top-14 z-40 backdrop-blur-md bg-background/95 border-b border-border/40 shadow-sm transition-all duration-200 -mx-4 sm:mx-0 px-4 sm:px-0 py-3 sm:py-4">
+          <header className="space-y-4">
               <div className="flex flex-col gap-4">
                  {/* Community info - mobile optimized layout */}
                  <div className="flex gap-3 items-center">
@@ -158,7 +157,6 @@ export default function Community() {
                 {/* For logged in users - no actions needed, removed submit provider button */}
               </div>
             </header>
-          </div>
         </div>
 
         {isLoading && <div className="text-sm text-muted-foreground">Loading providers…</div>}
