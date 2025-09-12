@@ -150,63 +150,39 @@ export default function VendorMobileCard({
         </div>
 
 
-        {/* Ratings & Reviews section */}
-        <h4 className="text-sm font-medium text-gray-700 mb-2">Ratings & Reviews</h4>
-        <div className="space-y-2 mb-3">
-          {/* Boca Bridges Reviews - Enhanced CTA */}
-          <button
-            onClick={() => setIsReviewsModalOpen(true)}
-            className="w-full bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-3 cursor-pointer transition-all duration-200 hover:scale-[1.02] hover:shadow-lg hover:border-blue-300 active:scale-[0.98] group"
-          >
-            <div className="flex justify-between items-center">
-              <div className="flex items-center gap-3">
-                <ReviewSourceIcon source="bb" size="md" />
-                <div className="text-left">
-                  <div className="text-sm font-bold text-blue-800">Community Ratings</div>
-                  <div className="text-xs text-blue-600">From your neighbors</div>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="text-right">
-                  <div className="flex items-center gap-1">
-                    <RatingStars rating={vendor.hoa_rating || 0} size="sm" />
-                    <span className="text-sm font-bold text-blue-800">
-                      {vendor.hoa_rating?.toFixed(1) || '0.0'}
-                    </span>
-                  </div>
-                  <div className="text-xs text-blue-600 font-medium">
-                    {vendor.hoa_rating_count || 0} review{(vendor.hoa_rating_count || 0) !== 1 ? 's' : ''}
-                  </div>
-                </div>
-                <div className="text-blue-500 group-hover:translate-x-1 transition-transform">
-                  →
-                </div>
-              </div>
-            </div>
-          </button>
+        {/* Community Reviews Section */}
+        <div className="space-y-3">
+          <h4 className="text-sm font-medium text-gray-700">Community Reviews</h4>
           
-          {/* Google Reviews - Clickable */}
+          {/* Enhanced Neighbor Review Preview - Primary BB Section */}
+          <NeighborReviewPreview 
+            vendorId={vendor.id} 
+            vendor={vendor}
+            onOpenModal={() => setIsReviewsModalOpen(true)}
+          />
+          
+          {/* Google Reviews - Separate External Reviews */}
           {vendor.google_rating_count && vendor.google_rating_count > 0 && (
-            <button
-              onClick={() => setGoogleReviewsModalOpen(true)}
-              className="w-full flex items-center justify-between bg-green-50 border border-green-200 rounded-lg px-3 py-2 hover:bg-green-100 transition-colors cursor-pointer text-left"
-            >
-              <div className="flex items-center gap-2">
-                <ReviewSourceIcon source="google" size="sm" />
-                <span className="text-sm font-medium text-gray-700">Google</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <RatingStars rating={vendor.google_rating || 0} size="sm" />
-                <span className="text-sm text-gray-600">
-                  {vendor.google_rating?.toFixed(1)} ({vendor.google_rating_count})
-                </span>
-              </div>
-            </button>
+            <div>
+              <h5 className="text-xs font-medium text-gray-600 mb-1">External Reviews</h5>
+              <button
+                onClick={() => setGoogleReviewsModalOpen(true)}
+                className="w-full flex items-center justify-between bg-green-50 border border-green-200 rounded-lg px-3 py-2 hover:bg-green-100 transition-colors cursor-pointer text-left"
+              >
+                <div className="flex items-center gap-2">
+                  <ReviewSourceIcon source="google" size="sm" />
+                  <span className="text-sm font-medium text-gray-700">Google Reviews</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <RatingStars rating={vendor.google_rating || 0} size="sm" />
+                  <span className="text-sm text-gray-600">
+                    {vendor.google_rating?.toFixed(1)} ({vendor.google_rating_count})
+                  </span>
+                </div>
+              </button>
+            </div>
           )}
         </div>
-
-        {/* Neighbor Review Preview */}
-        <NeighborReviewPreview vendorId={vendor.id} className="px-2" />
 
         {/* Cost Information */}
         <div className="space-y-2">
