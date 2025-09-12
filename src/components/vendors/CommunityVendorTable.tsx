@@ -216,39 +216,41 @@ export default function CommunityVendorTable({
 
   return (
     <TooltipProvider>
-      <div className="max-w-4xl mx-auto space-y-4">
-        {/* Mobile-style Filter Controls for Desktop */}
-        <div className="w-full mb-4">
-          <label className="text-xs text-gray-600 font-medium uppercase tracking-wide mb-1 block">
-            Choose Category
-          </label>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setFilterModalOpen(true)}
-              className="flex-1 flex items-center justify-between px-4 py-3 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 transition-colors"
-            >
-              <div className="flex items-center gap-2">
-                <span className="text-xl">{filterText.icon}</span>
-                <span className="text-base font-medium">
-                  {filterText.category ? `${filterText.category} • ${filterText.sort}` : `All Categories • ${filterText.sort}`}
-                </span>
-              </div>
-              <ChevronDown className="h-5 w-5 text-gray-500" />
-            </button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleShareCategory}
-              className="flex items-center gap-2 px-3 py-3 h-auto"
-            >
-              <Share className="h-4 w-4" />
-              Share
-            </Button>
+      <div className="max-w-4xl mx-auto">
+        {/* Sticky Filter Controls */}
+        <div className="sticky top-0 z-40 backdrop-blur-md bg-background/95 border-b border-border/40 shadow-sm transition-all duration-200 mb-4 -mx-4 px-4 py-2 sm:py-3">
+          <div className="max-w-4xl mx-auto">
+            <label className="text-xs text-muted-foreground font-medium uppercase tracking-wide mb-1.5 sm:mb-2 block">
+              Choose Category
+            </label>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setFilterModalOpen(true)}
+                className="flex-1 flex items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg border border-border bg-card hover:bg-accent transition-colors active:bg-accent"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-lg sm:text-xl">{filterText.icon}</span>
+                  <span className="text-sm sm:text-base font-medium text-foreground truncate">
+                    {filterText.category ? `${filterText.category} • ${filterText.sort}` : `All Categories • ${filterText.sort}`}
+                  </span>
+                </div>
+                <ChevronDown className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground flex-shrink-0" />
+              </button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleShareCategory}
+                className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-2.5 sm:py-3 h-auto text-xs sm:text-sm"
+              >
+                <Share className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <span className="hidden xs:inline">Share</span>
+              </Button>
+            </div>
           </div>
         </div>
 
         {/* Mobile-style Card Layout for Desktop */}
-        <div className="space-y-3">
+        <div className="space-y-3 pt-2">
           {category !== "all" && (
             <div className="flex items-center justify-between py-2">
               <h3 className="text-lg font-semibold text-foreground">
