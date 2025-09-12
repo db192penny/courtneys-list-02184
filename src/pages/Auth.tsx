@@ -180,6 +180,11 @@ const Auth = () => {
     return () => subscription.unsubscribe();
   }, [finalizeOnboarding, isVerifiedMagicLink, justSignedUp]);
 
+  // Auto-scroll to top when component mounts to ensure users see the page header
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
