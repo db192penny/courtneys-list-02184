@@ -124,7 +124,7 @@ const Header = () => {
   }, []);
 
   const navigationItems = authed ? [
-    { to: "/communities/boca-bridges", label: "Providers" },
+    { to: "/communities/boca-bridges", label: "Service Providers" },
     { to: "/neighborhood-cred", label: "Points & Rewards" },
     { to: "/settings", label: "Settings" },
     ...(isAdmin ? [{ to: "/admin", label: "Admin" }] : []),
