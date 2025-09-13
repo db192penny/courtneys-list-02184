@@ -105,15 +105,15 @@ export default function UserBadge({
         <IconComponent className={cn("flex-shrink-0", iconSizes[size])} />
         {showName && <span>{name}</span>}
         
+        {state === "earned" && (
+          <CheckCircle className={cn("flex-shrink-0 text-green-400", 
+            size === "sm" ? "w-3 h-3" : size === "md" ? "w-4 h-4" : "w-5 h-5",
+            "animate-bounce-in")} />
+        )}
+        
         {state === "locked" && (
           <Lock className={cn("absolute -top-1 -right-1 bg-badge-locked rounded-full p-0.5", 
             size === "sm" ? "w-3 h-3" : size === "md" ? "w-4 h-4" : "w-5 h-5")} />
-        )}
-        
-        {state === "earned" && (
-          <CheckCircle className={cn("absolute -top-1 -right-1 bg-badge-success text-white rounded-full", 
-            size === "sm" ? "w-3 h-3" : size === "md" ? "w-4 h-4" : "w-5 h-5",
-            "animate-bounce-in")} />
         )}
       </div>
     </Badge>
