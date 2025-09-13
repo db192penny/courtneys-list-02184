@@ -11,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export function WelcomeEmailTemplate() {
   const { toast } = useToast();
@@ -19,6 +20,7 @@ export function WelcomeEmailTemplate() {
   const [selectedUserId, setSelectedUserId] = useState<string>('');
   const [users, setUsers] = useState<any[]>([]);
   const [newUsersWithoutWelcome, setNewUsersWithoutWelcome] = useState<any[]>([]);
+  const [selectedNewUsers, setSelectedNewUsers] = useState<string[]>([]);
   const [welcomeSentList, setWelcomeSentList] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
 
@@ -102,6 +104,13 @@ export function WelcomeEmailTemplate() {
     }
     loadUsers();
   }, []);
+
+  useEffect(() => {
+    // When new users list changes, select all by default
+    if (newUsersWithoutWelcome.length > 0) {
+      setSelectedNewUsers(newUsersWithoutWelcome.map(u => u.id));
+    }
+  }, [newUsersWithoutWelcome]);
 
   const loadUsers = async () => {
     setLoading(true);
@@ -223,10 +232,11 @@ export function WelcomeEmailTemplate() {
   };
 
   const sendBatchWelcomeEmails = async () => {
-    if (newUsersWithoutWelcome.length === 0) {
+    if (selectedNewUsers.length === 0) {
       toast({
-        title: "No new users",
-        description: "All recent users have already received welcome emails",
+        title: "No users selected",
+        description: "Please select at least one user to send welcome emails to.",
+        variant: "destructive"
       });
       return;
     }
@@ -235,22 +245,26 @@ export function WelcomeEmailTemplate() {
     let successCount = 0;
     
     try {
-      for (const user of newUsersWithoutWelcome) {
+      // Only send to selected users
+      const usersToSend = newUsersWithoutWelcome.filter(u => selectedNewUsers.includes(u.id));
+      
+      for (const user of usersToSend) {
         const success = await sendWelcomeEmailToUser(user);
         if (success) successCount++;
         
         // 2 second delay between emails to avoid rate limits
-        if (newUsersWithoutWelcome.indexOf(user) < newUsersWithoutWelcome.length - 1) {
+        if (usersToSend.indexOf(user) < usersToSend.length - 1) {
           await new Promise(resolve => setTimeout(resolve, 2000));
         }
       }
       
       toast({
         title: "Welcome emails sent!",
-        description: `Successfully sent ${successCount} out of ${newUsersWithoutWelcome.length} emails`,
+        description: `Successfully sent ${successCount} out of ${usersToSend.length} emails`,
       });
       
       loadUsers(); // Refresh everything
+      setSelectedNewUsers([]); // Clear selections
     } catch (error) {
       console.error('Error sending batch emails:', error);
       toast({
@@ -260,6 +274,22 @@ export function WelcomeEmailTemplate() {
       });
     } finally {
       setSendingBatch(false);
+    }
+  };
+
+  const toggleUserSelection = (userId: string) => {
+    setSelectedNewUsers(prev => 
+      prev.includes(userId) 
+        ? prev.filter(id => id !== userId)
+        : [...prev, userId]
+    );
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedNewUsers.length === newUsersWithoutWelcome.length) {
+      setSelectedNewUsers([]);
+    } else {
+      setSelectedNewUsers(newUsersWithoutWelcome.map(u => u.id));
     }
   };
 
@@ -276,7 +306,7 @@ export function WelcomeEmailTemplate() {
 
   return (
     <div className="space-y-4">
-      {/* New Users Section */}
+      {/* New Users Section with Checkboxes */}
       {newUsersWithoutWelcome.length > 0 && (
         <Card className="border-orange-200 bg-orange-50/30">
           <CardHeader>
@@ -292,10 +322,27 @@ export function WelcomeEmailTemplate() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              <div className="bg-white rounded-lg border p-3 max-h-48 overflow-y-auto">
+              <div className="flex items-center justify-between px-3 py-2 bg-white rounded-t-lg border-b">
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    checked={selectedNewUsers.length === newUsersWithoutWelcome.length}
+                    onCheckedChange={toggleSelectAll}
+                  />
+                  <span className="text-sm font-medium">Select All</span>
+                </div>
+                <span className="text-sm text-gray-600">
+                  {selectedNewUsers.length} of {newUsersWithoutWelcome.length} selected
+                </span>
+              </div>
+              
+              <div className="bg-white rounded-b-lg border max-h-48 overflow-y-auto">
                 {newUsersWithoutWelcome.map(user => (
-                  <div key={user.id} className="flex items-center justify-between py-2 border-b last:border-0">
-                    <div>
+                  <div key={user.id} className="flex items-center gap-3 px-3 py-2 border-b last:border-0 hover:bg-gray-50">
+                    <Checkbox
+                      checked={selectedNewUsers.includes(user.id)}
+                      onCheckedChange={() => toggleUserSelection(user.id)}
+                    />
+                    <div className="flex-1">
                       <div className="font-medium">
                         {user.name || 'No name'}
                       </div>
@@ -313,19 +360,32 @@ export function WelcomeEmailTemplate() {
               
               <Button 
                 onClick={sendBatchWelcomeEmails}
-                disabled={sendingBatch}
+                disabled={sendingBatch || selectedNewUsers.length === 0}
                 className="w-full"
                 variant="default"
               >
                 {sendingBatch ? (
-                  <>Sending {newUsersWithoutWelcome.length} emails...</>
+                  <>Sending {selectedNewUsers.length} emails...</>
                 ) : (
                   <>
                     <Send className="h-4 w-4 mr-2" />
-                    Send Welcome to All {newUsersWithoutWelcome.length} New Users
+                    Send Welcome to {selectedNewUsers.length} Selected User{selectedNewUsers.length !== 1 ? 's' : ''}
                   </>
                 )}
               </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* No new users message */}
+      {newUsersWithoutWelcome.length === 0 && !loading && (
+        <Card className="border-green-200 bg-green-50/30">
+          <CardContent className="pt-6">
+            <div className="text-center text-green-700">
+              <Check className="h-8 w-8 mx-auto mb-2" />
+              <p className="font-medium">All caught up!</p>
+              <p className="text-sm">No new users in the last 3 days need welcome emails.</p>
             </div>
           </CardContent>
         </Card>
