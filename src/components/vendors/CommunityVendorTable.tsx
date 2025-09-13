@@ -164,10 +164,10 @@ export default function CommunityVendorTable({
     }[category] || '🏠';
     
     const sortLabel = {
-      'homes': 'Most Used',
+      'homes': 'Most Used by Neighbors',
       'hoa_rating': 'Highest Rated',
       'google_rating': 'Most Reviews'
-    }[sortBy] || 'Most Used';
+    }[sortBy] || 'Most Used by Neighbors';
     
     const categoryLabel = category === 'all' ? '' : category;
     
@@ -239,15 +239,15 @@ export default function CommunityVendorTable({
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setFilterModalOpen(true)}
-                className={`flex-1 flex items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg border-2 border-primary/20 bg-gradient-to-r from-primary/5 to-accent/5 hover:from-primary/10 hover:to-accent/10 transition-all duration-200 shadow-sm hover:shadow-md hover:scale-[1.01] active:scale-[0.99] ${showInitialAnimation ? 'animate-pulse' : ''}`}
+                className={`flex-1 flex items-center justify-center px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg border-2 border-primary/20 bg-gradient-to-r from-primary/5 to-accent/5 hover:from-primary/10 hover:to-accent/10 transition-all duration-200 shadow-sm hover:shadow-md hover:scale-[1.01] active:scale-[0.99] ${showInitialAnimation ? 'animate-pulse' : ''} relative`}
               >
                 <div className="flex items-center gap-2">
                   <span className="text-lg sm:text-xl">{filterText.icon}</span>
-                  <span className="text-sm sm:text-base font-semibold text-foreground truncate">
-                    {filterText.category ? `${filterText.category} • ${filterText.sort}` : `All Categories • ${filterText.sort}`}
+                  <span className="text-sm sm:text-base font-semibold text-foreground">
+                    {filterText.category ? `${filterText.category} - ${filterText.sort}` : `All Categories - ${filterText.sort}`}
                   </span>
                 </div>
-                <ChevronDown className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" />
+                <ChevronDown className="h-4 w-4 sm:h-5 sm:w-5 text-primary absolute right-3" />
               </button>
               <Button
                 variant="outline"
