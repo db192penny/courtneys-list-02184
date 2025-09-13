@@ -8,6 +8,7 @@ import { formatNameWithLastInitial } from "@/utils/nameFormatting";
 import { extractStreetName, capitalizeStreetName } from "@/utils/address";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface NeighborReviewPreviewProps {
   vendorId: string;
@@ -36,6 +37,7 @@ export function NeighborReviewPreview({
   communityName 
 }: NeighborReviewPreviewProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const isMobile = useIsMobile();
   const { data: reviews, isLoading, error } = useQuery({
     queryKey: ["vendor-reviews", vendorId],
     queryFn: async () => {
@@ -67,8 +69,9 @@ export function NeighborReviewPreview({
   };
 
   const truncateComment = (comment: string) => {
-    if (!comment || comment.length <= 140) return comment;
-    return comment.substring(0, 140) + "...";
+    const limit = isMobile ? 140 : 250;
+    if (!comment || comment.length <= limit) return comment;
+    return comment.substring(0, limit) + "...";
   };
 
   const handleInteraction = (e: React.MouseEvent | React.KeyboardEvent) => {
