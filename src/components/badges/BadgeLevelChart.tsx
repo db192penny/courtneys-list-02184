@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Trophy, Lock, CheckCircle } from "lucide-react";
-import { useBadgeLevels, getUserCurrentBadge } from "@/hooks/useBadgeLevels";
+import { useBadgeLevels, getUserCurrentBadge, getUserNextBadge } from "@/hooks/useBadgeLevels";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import UserBadge from "./UserBadge";
@@ -12,6 +12,7 @@ type BadgeLevelChartProps = {
 export default function BadgeLevelChart({ currentPoints }: BadgeLevelChartProps) {
   const { data: badgeLevels = [] } = useBadgeLevels();
   const currentBadge = getUserCurrentBadge(currentPoints, badgeLevels);
+  const nextBadge = getUserNextBadge(currentPoints, badgeLevels);
   const isMobile = useIsMobile();
 
   return (
@@ -27,16 +28,23 @@ export default function BadgeLevelChart({ currentPoints }: BadgeLevelChartProps)
           {badgeLevels.map((badge, index) => {
             const isEarned = currentPoints >= badge.min_points;
             const isCurrent = currentBadge?.id === badge.id;
-            const isNext = !isEarned && (index === 0 || currentPoints >= badgeLevels[index - 1]?.min_points);
+            const isNext = nextBadge?.id === badge.id;
+            
+            // Calculate progress for locked badges
+            const prevBadge = index > 0 ? badgeLevels[index - 1] : null;
+            const pointsInLevel = currentPoints - (prevBadge?.min_points || 0);
+            const totalPointsForLevel = badge.min_points - (prevBadge?.min_points || 0);
+            const progress = isEarned ? 1 : Math.min(Math.max(pointsInLevel / totalPointsForLevel, 0), 1);
+            const pointsToUnlock = isEarned ? 0 : badge.min_points - currentPoints;
 
             return (
               <div
                 key={badge.id}
                 className={cn(
-                  "p-4 rounded-lg border transition-all",
+                  "p-4 rounded-lg border transition-all duration-300",
                   isEarned ? "bg-primary/5 border-primary/20" : "bg-muted/30",
-                  isCurrent && "ring-2 ring-primary/50",
-                  isNext && !isEarned && "border-accent",
+                  isCurrent && "ring-2 ring-primary/50 shadow-lg",
+                  isNext && "ring-2 ring-accent border-accent/50 shadow-accent/20 shadow-lg",
                   isMobile ? "space-y-4" : "flex items-center justify-between"
                 )}
               >
@@ -52,16 +60,20 @@ export default function BadgeLevelChart({ currentPoints }: BadgeLevelChartProps)
                       icon={badge.icon}
                       showName={false}
                       size={isMobile ? "lg" : "lg"}
-                      className={cn(
-                        "transition-all",
-                        !isEarned && "opacity-50 grayscale"
-                      )}
+                      progress={progress}
+                      isLocked={!isEarned}
+                      isCurrent={isCurrent}
+                      isNext={isNext}
+                      pointsToUnlock={pointsToUnlock}
                     />
                     {isEarned && (
-                      <CheckCircle className="absolute -top-1 -right-1 w-5 h-5 text-green-500 bg-background rounded-full" />
+                      <CheckCircle className="absolute -top-1 -right-1 w-5 h-5 text-green-500 bg-background rounded-full animate-bounce" />
                     )}
                     {!isEarned && (
-                      <Lock className="absolute -top-1 -right-1 w-5 h-5 text-muted-foreground bg-background rounded-full" />
+                      <Lock className={cn(
+                        "absolute -top-1 -right-1 w-5 h-5 text-muted-foreground bg-background rounded-full transition-transform",
+                        "hover:animate-pulse"
+                      )} />
                     )}
                   </div>
                   
