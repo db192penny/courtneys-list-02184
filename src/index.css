@@ -91,6 +91,12 @@ All colors MUST be HSL.
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Badge system colors */
+    --badge-glow: 210 100% 70%;
+    --badge-success: 142 76% 36%;
+    --badge-warning: 48 96% 53%;
+    --badge-locked: 215 20% 65%;
   }
 }
 

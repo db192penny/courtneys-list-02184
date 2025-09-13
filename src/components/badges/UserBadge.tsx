@@ -6,9 +6,12 @@ import {
   Star, 
   Crown, 
   Trophy,
+  Lock,
+  CheckCircle,
   LucideIcon
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const iconMap: Record<string, LucideIcon> = {
   user: User,
@@ -26,6 +29,8 @@ type UserBadgeProps = {
   className?: string;
   showName?: boolean;
   size?: "sm" | "md" | "lg";
+  state?: "locked" | "next" | "current" | "earned";
+  pointsToUnlock?: number;
 };
 
 export default function UserBadge({ 
@@ -34,7 +39,9 @@ export default function UserBadge({
   icon, 
   className, 
   showName = true,
-  size = "md" 
+  size = "md",
+  state = "earned",
+  pointsToUnlock
 }: UserBadgeProps) {
   const IconComponent = iconMap[icon] || Star;
   
@@ -50,22 +57,82 @@ export default function UserBadge({
     lg: "w-6 h-6"
   };
 
-  return (
+  const getStateStyles = () => {
+    switch (state) {
+      case "locked":
+        return {
+          opacity: "0.4",
+          filter: "saturate(0.3)",
+          animation: "none"
+        };
+      case "next":
+        return {
+          opacity: "0.7",
+          animation: "pulse-glow 2s ease-in-out infinite",
+          boxShadow: `0 0 20px ${color}40, 0 4px 12px ${color}33`
+        };
+      case "current":
+        return {
+          background: `linear-gradient(135deg, ${color}, ${color}dd, ${color})`,
+          backgroundSize: "200% 100%",
+          animation: "shimmer 2s linear infinite",
+          boxShadow: `0 0 15px ${color}60, 0 4px 12px ${color}33`
+        };
+      case "earned":
+      default:
+        return {
+          background: `linear-gradient(135deg, ${color}, ${color}dd)`,
+          boxShadow: `0 4px 12px ${color}33`
+        };
+    }
+  };
+
+  const badgeContent = (
     <Badge
       className={cn(
-        "inline-flex items-center gap-2 font-medium border-0 animate-fade-in hover-scale",
+        "relative inline-flex items-center gap-2 font-medium border-0 transition-all duration-300 hover:scale-105",
         sizeClasses[size],
+        state === "locked" && "hover:opacity-80 hover:filter-none",
         className
       )}
       style={{
         backgroundColor: color,
         color: "#ffffff",
-        background: `linear-gradient(135deg, ${color}, ${color}dd)`,
-        boxShadow: `0 4px 12px ${color}33`
+        ...getStateStyles()
       }}
     >
-      <IconComponent className={cn("flex-shrink-0", iconSizes[size])} />
-      {showName && <span>{name}</span>}
+      <div className="relative flex items-center gap-2">
+        <IconComponent className={cn("flex-shrink-0", iconSizes[size])} />
+        {showName && <span>{name}</span>}
+        
+        {state === "locked" && (
+          <Lock className={cn("absolute -top-1 -right-1 bg-badge-locked rounded-full p-0.5", 
+            size === "sm" ? "w-3 h-3" : size === "md" ? "w-4 h-4" : "w-5 h-5")} />
+        )}
+        
+        {state === "earned" && (
+          <CheckCircle className={cn("absolute -top-1 -right-1 bg-badge-success text-white rounded-full", 
+            size === "sm" ? "w-3 h-3" : size === "md" ? "w-4 h-4" : "w-5 h-5",
+            "animate-bounce-in")} />
+        )}
+      </div>
     </Badge>
   );
+
+  if (state === "locked" && pointsToUnlock) {
+    return (
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            {badgeContent}
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>{pointsToUnlock} points needed to unlock</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    );
+  }
+
+  return badgeContent;
 }
