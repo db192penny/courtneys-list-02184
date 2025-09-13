@@ -271,14 +271,9 @@ export default function VendorMobileCard({
           <div className="space-y-2 mt-3">
             <div className="text-center">
               <span className="text-xs text-gray-600 font-medium">Contact: </span>
-              <span className="text-sm font-medium text-gray-800">
-                {formatUSPhoneDisplay(vendor.contact_info)}
-              </span>
-            </div>
-            <div className="text-center">
               <button
                 onClick={() => window.location.href = `tel:${vendor.contact_info}`}
-                className="text-blue-600 underline hover:text-blue-800 transition-colors"
+                className="text-sm font-medium text-blue-600 underline hover:text-blue-800 transition-colors"
               >
                 {formatUSPhoneDisplay(vendor.contact_info)}
               </button>
