@@ -1,16 +1,18 @@
-import { Star, Info, ChevronRight, Smartphone, DollarSign, Phone, MessageSquare } from "lucide-react";
+import { Star, Info, ChevronRight, Smartphone, DollarSign, Phone, MessageSquare, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { RatingStars } from "@/components/ui/rating-stars";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { SectionHeader } from "@/components/ui/section-header";
 import { formatUSPhoneDisplay } from "@/utils/phone";
 import { getCategoryIcon } from "@/utils/categoryIcons";
 import { useUserReviews } from "@/hooks/useUserReviews";
 import { useVendorCosts } from "@/hooks/useVendorCosts";
 import { useUserProfile } from "@/hooks/useUserProfile";
+import { useToast } from "@/hooks/use-toast";
 import ReviewsHover from "@/components/vendors/ReviewsHover";
 import GoogleReviewsHover from "@/components/vendors/GoogleReviewsHover";
 import { CostDisplay } from "@/components/vendors/CostDisplay";
@@ -76,10 +78,45 @@ export default function VendorMobileCard({
 }: VendorMobileCardProps) {
   const { data: vendorCosts, isLoading: costsLoading } = useVendorCosts(vendor.id);
   const { data: profile } = useUserProfile();
+  const { toast } = useToast();
   const isVerified = !!profile?.isVerified;
   const [costModalOpen, setCostModalOpen] = useState(false);
   const [googleReviewsModalOpen, setGoogleReviewsModalOpen] = useState(false);
   const [isReviewsModalOpen, setIsReviewsModalOpen] = useState(false);
+  const [contactPopoverOpen, setContactPopoverOpen] = useState(false);
+
+  const handleCall = () => {
+    window.location.href = `tel:${vendor.contact_info}`;
+    setContactPopoverOpen(false);
+  };
+
+  const handleText = () => {
+    window.location.href = `sms:${vendor.contact_info}`;
+    setContactPopoverOpen(false);
+  };
+
+  const handleCopyNumber = async () => {
+    try {
+      await navigator.clipboard.writeText(vendor.contact_info || '');
+      toast({
+        title: "Number copied",
+        description: "Phone number copied to clipboard",
+      });
+    } catch (err) {
+      // Fallback for older browsers
+      const textArea = document.createElement('textarea');
+      textArea.value = vendor.contact_info || '';
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      toast({
+        title: "Number copied",
+        description: "Phone number copied to clipboard",
+      });
+    }
+    setContactPopoverOpen(false);
+  };
 
   return (
     <>
@@ -271,12 +308,44 @@ export default function VendorMobileCard({
           <div className="space-y-2 mt-3">
             <div className="text-center">
               <span className="text-xs text-gray-600 font-medium">Contact: </span>
-              <button
-                onClick={() => window.location.href = `tel:${vendor.contact_info}`}
-                className="text-sm font-medium text-blue-600 underline hover:text-blue-800 transition-colors"
-              >
-                {formatUSPhoneDisplay(vendor.contact_info)}
-              </button>
+              <Popover open={contactPopoverOpen} onOpenChange={setContactPopoverOpen}>
+                <PopoverTrigger asChild>
+                  <button className="text-base font-medium text-blue-600 underline hover:text-blue-800 transition-colors">
+                    {formatUSPhoneDisplay(vendor.contact_info)}
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-2">
+                  <div className="flex flex-col gap-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleCall}
+                      className="flex items-center gap-2 justify-start text-sm"
+                    >
+                      <Phone size={16} />
+                      Call
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleText}
+                      className="flex items-center gap-2 justify-start text-sm"
+                    >
+                      <MessageSquare size={16} />
+                      Text
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleCopyNumber}
+                      className="flex items-center gap-2 justify-start text-sm"
+                    >
+                      <Copy size={16} />
+                      Copy Number
+                    </Button>
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
           </div>
         )}
