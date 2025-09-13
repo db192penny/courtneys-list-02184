@@ -162,11 +162,16 @@ export default function VendorMobileCard({
           {/* Google Reviews - Separate External Reviews */}
           {vendor.google_rating_count && vendor.google_rating_count > 0 && (
             <div>
-              <h5 className="text-xs font-medium text-gray-600 mb-1">External Reviews</h5>
-              <button
-                onClick={() => setGoogleReviewsModalOpen(true)}
-                className="w-full flex items-center justify-between bg-green-50 border border-green-200 rounded-lg px-3 py-2 hover:bg-green-100 transition-colors cursor-pointer text-left"
-              >
+              <div className="flex items-center justify-between mb-1">
+                <h5 className="text-xs font-medium text-gray-600">External Reviews</h5>
+                <button
+                  onClick={() => setGoogleReviewsModalOpen(true)}
+                  className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+                >
+                  View all reviews →
+                </button>
+              </div>
+              <div className="w-full flex items-center justify-between bg-green-50 border border-green-200 rounded-lg px-3 py-2">
                 <div className="flex items-center gap-2">
                   <ReviewSourceIcon source="google" size="sm" />
                   <span className="text-sm font-medium text-gray-700">Google Reviews</span>
@@ -177,7 +182,7 @@ export default function VendorMobileCard({
                     {vendor.google_rating?.toFixed(1)} ({vendor.google_rating_count})
                   </span>
                 </div>
-              </button>
+              </div>
             </div>
           )}
         </div>
@@ -185,11 +190,11 @@ export default function VendorMobileCard({
         {/* Cost Information */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <h4 className="text-sm font-medium text-gray-700">Cost Information</h4>
+            <h5 className="text-xs font-medium text-gray-600">Cost Information</h5>
             {isVerified && (
               <button
                 onClick={() => onCosts(vendor)}
-                className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                className="text-xs text-blue-600 hover:text-blue-700 font-medium"
               >
                 + Add
               </button>
@@ -221,12 +226,14 @@ export default function VendorMobileCard({
                     </p>
                   )}
                   
-                  <button
-                    onClick={() => setCostModalOpen(true)}
-                    className="text-xs text-green-600 font-medium mt-2"
-                  >
-                    View all cost details →
-                  </button>
+                  <div className="text-right mt-2">
+                    <button
+                      onClick={() => setCostModalOpen(true)}
+                      className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+                    >
+                      View all cost details →
+                    </button>
+                  </div>
                 </>
               ) : (
                 /* Single cost - show full details */
@@ -244,12 +251,14 @@ export default function VendorMobileCard({
                   )}
                   
                   {/* Always show view all details link for single cost too */}
-                  <button
-                    onClick={() => setCostModalOpen(true)}
-                    className="text-xs text-green-600 font-medium mt-2"
-                  >
-                    View all cost details →
-                  </button>
+                  <div className="text-right mt-2">
+                    <button
+                      onClick={() => setCostModalOpen(true)}
+                      className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+                    >
+                      View all cost details →
+                    </button>
+                  </div>
                 </>
               )}
             </div>
@@ -262,24 +271,21 @@ export default function VendorMobileCard({
 
         {/* Contact Section */}
         {showContact && vendor.contact_info && (
-          <div className="flex gap-2 mt-3">
+          <div className="space-y-2 mt-3">
+            <div className="text-center">
+              <span className="text-xs text-gray-600 font-medium">Contact: </span>
+              <span className="text-sm font-medium text-gray-800">
+                {formatUSPhoneDisplay(vendor.contact_info)}
+              </span>
+            </div>
             <Button
-              variant="ghost"
+              variant="outline"
               size="sm"
               onClick={() => window.location.href = `tel:${vendor.contact_info}`}
-              className="flex-1 text-sm font-medium text-gray-700 hover:bg-gray-100"
+              className="w-full text-sm font-medium"
             >
-              <Phone className="w-3 h-3 mr-1" />
+              <Phone className="w-4 h-4 mr-2" />
               Call
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => window.location.href = `sms:${vendor.contact_info}`}
-              className="flex-1 text-sm font-medium text-gray-700 hover:bg-gray-100"
-            >
-              <MessageSquare className="w-3 h-3 mr-1" />
-              Text
             </Button>
           </div>
         )}
