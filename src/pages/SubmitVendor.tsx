@@ -344,7 +344,7 @@ const SubmitVendor = () => {
 
       toast({ 
         title: "🎉 Review Added!", 
-        description: "You earned 5 points! Monthly raffle entry confirmed for $200 service prize." 
+        description: "You earned 5 points! Help neighbors with more reviews!" 
       });
       navigate("/dashboard");
       return;
