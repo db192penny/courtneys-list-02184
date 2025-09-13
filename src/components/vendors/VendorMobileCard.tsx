@@ -162,16 +162,13 @@ export default function VendorMobileCard({
           {/* Google Reviews - Separate External Reviews */}
           {vendor.google_rating_count && vendor.google_rating_count > 0 && (
             <div>
-              <div className="flex items-center justify-between mb-1">
+              <div className="mb-2">
                 <h5 className="text-xs font-medium text-gray-600">External Reviews</h5>
-                <button
-                  onClick={() => setGoogleReviewsModalOpen(true)}
-                  className="text-xs text-blue-600 hover:text-blue-700 font-medium"
-                >
-                  View all reviews →
-                </button>
               </div>
-              <div className="w-full flex items-center justify-between bg-green-50 border border-green-200 rounded-lg px-3 py-2">
+              <button 
+                onClick={() => setGoogleReviewsModalOpen(true)}
+                className="w-full flex items-center justify-between bg-green-50 border border-green-200 rounded-lg px-3 py-2 hover:bg-green-100 transition-colors border-b-2 border-b-green-300 hover:border-b-green-400"
+              >
                 <div className="flex items-center gap-2">
                   <ReviewSourceIcon source="google" size="sm" />
                   <span className="text-sm font-medium text-gray-700">Google Reviews</span>
@@ -182,7 +179,7 @@ export default function VendorMobileCard({
                     {vendor.google_rating?.toFixed(1)} ({vendor.google_rating_count})
                   </span>
                 </div>
-              </div>
+              </button>
             </div>
           )}
         </div>
@@ -278,15 +275,14 @@ export default function VendorMobileCard({
                 {formatUSPhoneDisplay(vendor.contact_info)}
               </span>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => window.location.href = `tel:${vendor.contact_info}`}
-              className="w-full text-sm font-medium"
-            >
-              <Phone className="w-4 h-4 mr-2" />
-              Call
-            </Button>
+            <div className="text-center">
+              <button
+                onClick={() => window.location.href = `tel:${vendor.contact_info}`}
+                className="text-blue-600 underline hover:text-blue-800 transition-colors"
+              >
+                {formatUSPhoneDisplay(vendor.contact_info)}
+              </button>
+            </div>
           </div>
         )}
       </CardContent>
