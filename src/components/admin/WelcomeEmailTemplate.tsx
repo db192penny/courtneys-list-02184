@@ -112,48 +112,60 @@ export function WelcomeEmailTemplate() {
     }
   }, [newUsersWithoutWelcome]);
 
+  const normalizeAddress = (address: string) => {
+    if (!address) return '';
+    return address.toLowerCase().replace(/[^\w\s]/g, '').trim();
+  };
+
   const loadUsers = async () => {
     setLoading(true);
     
     try {
-      // Query users table with household_hoa join for Boca Bridges
-      const { data: usersData, error } = await supabase
+      // First get all verified users
+      const { data: usersData, error: usersError } = await supabase
         .from('users')
-        .select(`
-          id,
-          email,
-          name,
-          created_at,
-          is_verified,
-          address,
-          household_hoa!inner(
-            hoa_name
-          )
-        `)
-        .eq('household_hoa.hoa_name', 'Boca Bridges')
+        .select('*')
         .eq('is_verified', true)
         .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('Database query error:', error);
-        throw error;
+      if (usersError) {
+        console.error('Error fetching users:', usersError);
+        throw usersError;
       }
 
-      if (usersData) {
-        setUsers(usersData);
-        
-        // Find new users (last 3 days) without welcome emails
-        const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
-        const stored = localStorage.getItem('welcomeEmailsSent');
-        const sentList = stored ? JSON.parse(stored) : {};
-        
-        const newUsersNoWelcome = usersData.filter(user => {
-          const userCreatedAt = new Date(user.created_at);
-          return userCreatedAt > threeDaysAgo && !sentList[user.id];
-        });
-        
-        setNewUsersWithoutWelcome(newUsersNoWelcome);
+      // Then get household_hoa mappings for Boca Bridges
+      const { data: householdData, error: householdError } = await supabase
+        .from('household_hoa')
+        .select('normalized_address')
+        .eq('hoa_name', 'Boca Bridges');
+
+      if (householdError) {
+        console.error('Error fetching household data:', householdError);
+        throw householdError;
       }
+
+      // Filter users who are in Boca Bridges
+      const bocaBridgesAddresses = householdData?.map(h => h.normalized_address) || [];
+      const bocaBridgesUsers = usersData?.filter(user => {
+        const normalizedUserAddress = normalizeAddress(user.address);
+        return bocaBridgesAddresses.some(addr => 
+          addr.toLowerCase() === normalizedUserAddress
+        );
+      }) || [];
+
+      setUsers(bocaBridgesUsers);
+      
+      // Find new users (last 3 days) without welcome emails
+      const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
+      const stored = localStorage.getItem('welcomeEmailsSent');
+      const sentList = stored ? JSON.parse(stored) : {};
+      
+      const newUsersNoWelcome = bocaBridgesUsers.filter(user => {
+        const userCreatedAt = new Date(user.created_at);
+        return userCreatedAt > threeDaysAgo && !sentList[user.id];
+      });
+      
+      setNewUsersWithoutWelcome(newUsersNoWelcome);
     } catch (error) {
       console.error('Error loading users:', error);
       toast({
