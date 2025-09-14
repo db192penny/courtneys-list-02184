@@ -10,8 +10,6 @@ import { Link } from "react-router-dom";
 import { AdminQuickAccess } from "@/components/admin/AdminQuickAccess";
 import EmailTemplatePanel from "@/components/admin/EmailTemplatePanel";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
 interface PendingRow {
   household_address: string;
   hoa_name: string;
@@ -286,87 +284,75 @@ const [householdLoading, setHouseholdLoading] = useState<Record<string, boolean>
         )}
 
         {authed && isSiteAdmin && (
-          <Tabs defaultValue="admin-tools" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="admin-tools">Admin Tools</TabsTrigger>
-              <TabsTrigger value="pending-users">Pending Users</TabsTrigger>
-            </TabsList>
+          <div className="grid gap-6">
+            <AdminQuickAccess />
             
-            <TabsContent value="admin-tools">
-              <div className="grid gap-6">
-                <AdminQuickAccess />
-                
-                <div className="rounded-md border border-border p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <h2 className="font-medium">Admin Tools</h2>
-                    <div className="flex gap-2">
-                      <Button asChild variant="outline" size="sm">
-                        <Link to="/admin/vendors/seed">Seed Vendor</Link>
-                      </Button>
-                      <Button asChild variant="outline" size="sm">
-                        <Link to="/admin/vendors/manage">Manage Vendors</Link>
-                      </Button>
-                      <Button asChild variant="outline" size="sm">
-                        <Link to="/admin/badges">Manage Badges</Link>
-                      </Button>
-                      <Button asChild variant="outline" size="sm">
-                        <Link to="/admin/costs">Manage Costs</Link>
-                      </Button>
-                      <Button asChild variant="outline" size="sm">
-                        <Link to="/admin/users">Manage Users</Link>
-                      </Button>
-                    </div>
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Use these tools to manage the platform and seed initial vendor data for communities.
-                  </p>
+            <div className="rounded-md border border-border p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="font-medium">Admin Tools</h2>
+                <div className="flex gap-2">
+                  <Button asChild variant="outline" size="sm">
+                    <Link to="/admin/vendors/seed">Seed Vendor</Link>
+                  </Button>
+                  <Button asChild variant="outline" size="sm">
+                    <Link to="/admin/vendors/manage">Manage Vendors</Link>
+                  </Button>
+                  <Button asChild variant="outline" size="sm">
+                    <Link to="/admin/badges">Manage Badges</Link>
+                  </Button>
+                  <Button asChild variant="outline" size="sm">
+                    <Link to="/admin/costs">Manage Costs</Link>
+                  </Button>
+                  <Button asChild variant="outline" size="sm">
+                    <Link to="/admin/users">Manage Users</Link>
+                  </Button>
                 </div>
               </div>
-            </TabsContent>
+              <p className="text-sm text-muted-foreground mb-4">
+                Use these tools to manage the platform and seed initial vendor data for communities.
+              </p>
+            </div>
 
-            <TabsContent value="pending-users">
-              <div className="rounded-md border border-border p-4">
-                <h2 className="font-medium mb-3">Pending Users ({pendingUsers.length})</h2>
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
+            <div className="rounded-md border border-border p-4">
+              <h2 className="font-medium mb-3">Pending Users ({pendingUsers.length})</h2>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Address</TableHead>
+                      <TableHead>Joined</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {pendingUsers.length === 0 && (
                       <TableRow>
-                        <TableHead>Email</TableHead>
-                        <TableHead>Name</TableHead>
-                        <TableHead>Address</TableHead>
-                        <TableHead>Joined</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
+                        <TableCell colSpan={5} className="text-sm text-muted-foreground">No users pending approval.</TableCell>
                       </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {pendingUsers.length === 0 && (
-                        <TableRow>
-                          <TableCell colSpan={5} className="text-sm text-muted-foreground">No users pending approval.</TableCell>
+                    )}
+                    {pendingUsers.map((u) => (
+                        <TableRow key={u.id}>
+                          <TableCell>{u.email}</TableCell>
+                          <TableCell>{u.name || "—"}</TableCell>
+                          <TableCell>{u.formatted_address || u.address || "—"}</TableCell>
+                          <TableCell>{u.created_at ? new Date(u.created_at).toLocaleDateString() : "—"}</TableCell>
+                          <TableCell className="text-right space-x-2">
+                            <Button size="sm" variant="secondary" disabled={!!userLoading?.[u.id]} onClick={() => setUserVerification(u.id, false, u.email)}>
+                              {userLoading?.[u.id] === "reject" ? "Rejecting…" : "Reject"}
+                            </Button>
+                            <Button size="sm" disabled={!!userLoading?.[u.id]} onClick={() => setUserVerification(u.id, true, u.email)}>
+                              {userLoading?.[u.id] === "approve" ? "Approving…" : "Approve"}
+                            </Button>
+                          </TableCell>
                         </TableRow>
-                      )}
-                      {pendingUsers.map((u) => (
-                          <TableRow key={u.id}>
-                            <TableCell>{u.email}</TableCell>
-                            <TableCell>{u.name || "—"}</TableCell>
-                            <TableCell>{u.formatted_address || u.address || "—"}</TableCell>
-                            <TableCell>{u.created_at ? new Date(u.created_at).toLocaleDateString() : "—"}</TableCell>
-                            <TableCell className="text-right space-x-2">
-                              <Button size="sm" variant="secondary" disabled={!!userLoading?.[u.id]} onClick={() => setUserVerification(u.id, false, u.email)}>
-                                {userLoading?.[u.id] === "reject" ? "Rejecting…" : "Reject"}
-                              </Button>
-                              <Button size="sm" disabled={!!userLoading?.[u.id]} onClick={() => setUserVerification(u.id, true, u.email)}>
-                                {userLoading?.[u.id] === "approve" ? "Approving…" : "Approve"}
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
+                    ))}
+                  </TableBody>
+                </Table>
               </div>
-            </TabsContent>
-            
-          </Tabs>
+            </div>
+          </div>
         )}
 
         {authed && isHoaAdmin && (
