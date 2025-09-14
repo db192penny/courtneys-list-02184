@@ -38,8 +38,38 @@ interface Props {
 
 const EMAIL_TEMPLATES: EmailTemplate[] = [
   {
-    id: "welcome-1",
-    name: "Welcome Email #1 - Community Leaderboard Update",
+    id: "welcome",
+    name: "Welcome Email",
+    description: "Welcome new members to Courtney's List with 100+ homes milestone",
+    subject: "Welcome to Courtney's List - Your Trusted Neighbor Network! 🏡",
+    body: `Hi {{FIRST_NAME}},
+
+Welcome to our exclusive network of 100+ {COMMUNITY_NAME} homes who trust each other's service provider recommendations!
+
+Say goodbye to those "Can anyone recommend a good plumber?" posts on Facebook and WhatsApp! 🙋‍♀️ You've just joined the place where your neighbors' ratings, reviews, and more have been organized in one location and this will hopefully make your lives in {COMMUNITY_NAME} a little less stressful :) 
+
+What you can do now:
+- Browse trusted service provider reviews from neighbors
+- Share your own experiences to help others  
+- Find reliable professionals who already know our neighborhood
+- Earn points for every contribution
+
+Ready to dive in? Click here to explore service provider reviews from your neighbors:
+{{VIEW_PROVIDERS_BUTTON}}
+
+💡 Pro Tip: Start by searching for services you currently use. Your reviews help neighbors make informed decisions!
+
+Questions, feedback, or suggestions of other categories that would be helpful for you? Just reply to this email and let me know. So appreciate you!
+
+Your neighbor,
+Courtney 
+
+---
+Courtney's List - Trusted by 100+ {COMMUNITY_NAME} Homes`
+  },
+  {
+    id: "welcome-leaderboard",
+    name: "Welcome Email with Leaderboard",
     description: "Welcome email with current leaderboard and invitation links",
     subject: "30+ {COMMUNITY_NAME} homes now on Courtney's List + leaderboard",
     body: `Hi Neighbors 💜,
@@ -66,6 +96,45 @@ Your Invite Link:
 The more we all contribute, the more valuable (and stress-free!) this list becomes for the whole community.
 
 💜 Courtney`
+  },
+  {
+    id: "celebration-100-homes",
+    name: "🎉 100 Homes Celebration",
+    description: "Celebration email for reaching 100 homes milestone with rewards and leaderboard",
+    subject: "🎉 We hit 100+ homes! Your coffee awaits ☕",
+    body: `Hey {{FIRST_NAME}}!
+
+We did it! I wanted to share some exciting updates and say THANK YOU!
+
+📊 BY THE NUMBERS:
+• 102 Homes Joined
+• 157 Reviews Shared  
+• 48 Vendors Listed
+
+🆕 JUST ADDED:
+Water Filtration & Dryer Vent Cleaning - two of your most-requested categories are now live!
+
+🌟 THIS WEEK'S TOP CONTRIBUTORS:
+
+Lisa R. on Abrruzzo Ave - 7 reviews
+Frances F. on Chauvet Wy - 7 reviews
+Natalie L. on Espresso Mnr - 6 reviews
+Brian B. on Abruzzo Ave - 5 reviews
+Helena B. on Macchiato - 5 reviews
+Tara L. on Santaluce Mnr - 3 reviews
+Debra B. on Rosella Rd - 3 reviews
+
+💝 YOUR REWARDS ARE HERE!
+☕ Starbucks Gift Cards: If you submit 3+ reviews (Limited time - I'd love to buy everyone coffee forever, but... 😅)!
+💰 $200 Service Credit Raffle: Every review = 1 entry. Drawing this Friday!
+
+When I started this, I just wanted to stop answering the same vendor questions over and over. But you've turned it into something amazing - a true community resource where neighbors help neighbors. Every review you add makes this more valuable for all of us in {COMMUNITY_NAME}.
+
+With gratitude (and caffeine),
+Courtney
+With help (David, Justin, Ryan, and Penny poodle)
+
+{{VIEW_PROVIDERS_BUTTON}}`
   },
   {
     id: "apology-email",
@@ -112,45 +181,6 @@ David (Rosella Rd — with Courtney + our two boys, 13 & 14)
 P.S. Have a category you'd like added (grill cleaning, roofers, pavers)? Just hit reply — I'd love your input. Any feedback helps make this better for all of us.`
   },
   {
-    id: "celebration-100-homes",
-    name: "🎉 100 Homes Celebration",
-    description: "Celebration email for reaching 100 homes milestone with rewards and leaderboard",
-    subject: "🎉 We hit 100+ homes! Your coffee awaits ☕",
-    body: `Hey {{FIRST_NAME}}!
-
-We did it! I wanted to share some exciting updates and say THANK YOU!
-
-📊 BY THE NUMBERS:
-• 102 Homes Joined
-• 157 Reviews Shared  
-• 48 Vendors Listed
-
-🆕 JUST ADDED:
-Water Filtration & Dryer Vent Cleaning - two of your most-requested categories are now live!
-
-🌟 THIS WEEK'S TOP CONTRIBUTORS:
-
-Lisa R. on Abrruzzo Ave - 7 reviews
-Frances F. on Chauvet Wy - 7 reviews
-Natalie L. on Espresso Mnr - 6 reviews
-Brian B. on Abruzzo Ave - 5 reviews
-Helena B. on Macchiato - 5 reviews
-Tara L. on Santaluce Mnr - 3 reviews
-Debra B. on Rosella Rd - 3 reviews
-
-💝 YOUR REWARDS ARE HERE!
-☕ Starbucks Gift Cards: If you submit 3+ reviews (Limited time - I'd love to buy everyone coffee forever, but... 😅)!
-💰 $200 Service Credit Raffle: Every review = 1 entry. Drawing this Friday!
-
-When I started this, I just wanted to stop answering the same vendor questions over and over. But you've turned it into something amazing - a true community resource where neighbors help neighbors. Every review you add makes this more valuable for all of us in {COMMUNITY_NAME}.
-
-With gratitude (and caffeine),
-Courtney
-With help (David, Justin, Ryan, and Penny poodle)
-
-{{VIEW_PROVIDERS_BUTTON}}`
-  },
-  {
     id: "custom",
     name: "Custom Email",
     description: "Create your own custom email from scratch",
@@ -161,7 +191,7 @@ With help (David, Justin, Ryan, and Penny poodle)
 
 export default function EmailTemplatePanel({ communityName }: Props) {
   const [open, setOpen] = useState(false);
-  const [selectedTemplateId, setSelectedTemplateId] = useState<string>("welcome-1");
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string>("welcome");
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
   const [recipientMode, setRecipientMode] = useState<"all" | "selected" | "custom">("all");
