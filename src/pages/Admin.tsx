@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Link } from "react-router-dom";
 import { AdminQuickAccess } from "@/components/admin/AdminQuickAccess";
 import EmailTemplatePanel from "@/components/admin/EmailTemplatePanel";
-import { WelcomeEmailTemplate } from '@/components/admin/WelcomeEmailTemplate';
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface PendingRow {
@@ -287,10 +287,9 @@ const [householdLoading, setHouseholdLoading] = useState<Record<string, boolean>
 
         {authed && isSiteAdmin && (
           <Tabs defaultValue="admin-tools" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="admin-tools">Admin Tools</TabsTrigger>
               <TabsTrigger value="pending-users">Pending Users</TabsTrigger>
-              <TabsTrigger value="welcome-email">Welcome Email</TabsTrigger>
             </TabsList>
             
             <TabsContent value="admin-tools">
@@ -367,9 +366,6 @@ const [householdLoading, setHouseholdLoading] = useState<Record<string, boolean>
               </div>
             </TabsContent>
             
-            <TabsContent value="welcome-email">
-              <WelcomeEmailTemplate />
-            </TabsContent>
           </Tabs>
         )}
 
