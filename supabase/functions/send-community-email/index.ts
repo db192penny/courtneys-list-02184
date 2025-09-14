@@ -68,38 +68,8 @@ Courtney
 Courtney's List - Trusted by 100+ {COMMUNITY_NAME} Homes`
   },
   {
-    id: "welcome-leaderboard",
-    name: "Welcome Email with Leaderboard",
-    description: "Welcome email with current leaderboard and invitation links",
-    subject: "30+ {COMMUNITY_NAME} homes now on Courtney's List + leaderboard",
-    body: `Hi Neighbors 💜,
-
-Thanks so much for signing up — we now have 30+ {COMMUNITY_NAME} homes on Courtney's List! Already, just by reading the organized reviews, I know who I'm calling for my next AC repair, and we even found a new pool vendor.
-
-To make this fun, we added a points system and a leaderboard:
-   •   Rate a Vendor = +5 pts
-   •   Submit a New Vendor = +5 pts
-   •   Invite a Neighbor = +10 pts
-
-Here's the current leaderboard 🏆:
-{{LEADERBOARD}}
-
-New this week: categories now include Mobile Tire Repair and Pet Groomers. Keep the feedback coming and let us know about any bugs!
-
-👉 Want to climb the leaderboard?
-	1.	Rate 3–4 of your vendors to help your neighbors.
-	2.	Invite a friend in {COMMUNITY_NAME} using your personal link below (points are tracked automatically when they join):
-
-Your Invite Link:
-{{INVITE_LINK}}
-
-The more we all contribute, the more valuable (and stress-free!) this list becomes for the whole community.
-
-💜 Courtney`
-  },
-  {
     id: "celebration-100-homes",
-    name: "🎉 100 Homes Celebration",
+    name: "100 Homes Celebration",
     description: "Celebration email for reaching 100 homes milestone with rewards and leaderboard",
     subject: "🎉 We hit 100+ homes! Your coffee awaits ☕",
     body: `Hey {{FIRST_NAME}}!
@@ -135,50 +105,6 @@ Courtney
 With help (David, Justin, Ryan, and Penny poodle)
 
 {{VIEW_PROVIDERS_BUTTON}}`
-  },
-  {
-    id: "apology-email",
-    name: "Apology Email - Fresh Login Links",
-    description: "Send apology email with fresh magic login links to community members",
-    subject: "Your Boca Bridges Access - Login Issue - Fresh Link Inside",
-    body: `Hi Boca Bridges Neighbors,
-
-We're so sorry for the confusion with the login links! We had a software bug (I'll blame David :) that caused some of you to keep going to a log-in page - you are VIP and we made you stand in line - apologies! The good news is that we now have over 60 homes signed on!
-
-We've generated a fresh link just for you to see all the providers and rate and have fun.
-
-{{VIEW_PROVIDERS_BUTTON}}
-
-Again, our apologies for the technical hiccup. We really appreciate your patience as we work out these kinks. We promise this will save all of us stress in finding service providers :)
-
-💜 Courtney
-
-P.S Reach out to me on Whatsapp with any feedback or other categories you would want to see`
-  },
-  {
-    id: "community-update-rosella",
-    name: "Community Update - Review Request",
-    description: "Personal request from David on Rosella Rd for community reviews",
-    subject: "A small favor from your Boca Bridges neighbor on Rosella Rd",
-    body: `Hi [FirstName],
-
-Thanks again for signing up for Courtney's List — a project I started to make it easier for all of us to find trusted service providers in Boca Bridges. My hope is that it grows into a resource we build together as neighbors.
-
-Quick update: the login issues some people had are now fixed ✅. Already, 80+ homes have joined, and reviews are starting to come in on plumbers, landscapers, AC techs, and more.
-
-I have a small favor to ask:
-👉 Could you please leave a review for one of your service providers?
-
-{{VIEW_PROVIDERS_BUTTON}}
-
-It takes less than a minute, and even a single review makes a difference for neighbors trying to choose the right providers.
-
-Together, we can make this something really useful for Boca Bridges — saving time, money, and stress for everyone.
-
-Thanks so much for helping,
-David (Rosella Rd — with Courtney + our two boys, 13 & 14)
-
-P.S. Have a category you'd like added (grill cleaning, roofers, pavers)? Just hit reply — I'd love your input. Any feedback helps make this better for all of us.`
   },
   {
     id: "custom",
