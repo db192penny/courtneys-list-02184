@@ -55,7 +55,8 @@ What you can do now:
 - Earn points for every contribution
 
 Ready to dive in? Click here to explore service provider reviews from your neighbors:
-{{VIEW_PROVIDERS_BUTTON}}
+
+👉 {{VIEW_PROVIDERS_LINK}}
 
 💡 Pro Tip: Start by searching for services you currently use. Your reviews help neighbors make informed decisions!
 
