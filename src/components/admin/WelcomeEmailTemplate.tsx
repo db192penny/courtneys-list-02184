@@ -116,30 +116,38 @@ export function WelcomeEmailTemplate() {
     setLoading(true);
     
     try {
-      // Get all users - we'll filter by community based on their household_hoa mapping
-      const { data: users } = await supabase
+      // Query users table with household_hoa join for Boca Bridges
+      const { data: usersData, error } = await supabase
         .from('users')
         .select(`
-          id, 
-          email, 
-          name, 
-          created_at, 
+          id,
+          email,
+          name,
+          created_at,
           is_verified,
-          household_hoa!inner(hoa_name)
+          address,
+          household_hoa!inner(
+            hoa_name
+          )
         `)
         .eq('household_hoa.hoa_name', 'Boca Bridges')
         .eq('is_verified', true)
         .order('created_at', { ascending: false });
 
-      if (users) {
-        setUsers(users);
+      if (error) {
+        console.error('Database query error:', error);
+        throw error;
+      }
+
+      if (usersData) {
+        setUsers(usersData);
         
         // Find new users (last 3 days) without welcome emails
         const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
         const stored = localStorage.getItem('welcomeEmailsSent');
         const sentList = stored ? JSON.parse(stored) : {};
         
-        const newUsersNoWelcome = users.filter(user => {
+        const newUsersNoWelcome = usersData.filter(user => {
           const userCreatedAt = new Date(user.created_at);
           return userCreatedAt > threeDaysAgo && !sentList[user.id];
         });
@@ -150,7 +158,7 @@ export function WelcomeEmailTemplate() {
       console.error('Error loading users:', error);
       toast({
         title: "Error loading users",
-        description: "Please refresh and try again",
+        description: "Please check the console for details",
         variant: "destructive"
       });
     }
@@ -325,7 +333,7 @@ export function WelcomeEmailTemplate() {
               <div className="flex items-center justify-between px-3 py-2 bg-white rounded-t-lg border-b">
                 <div className="flex items-center gap-2">
                   <Checkbox
-                    checked={selectedNewUsers.length === newUsersWithoutWelcome.length}
+                    checked={selectedNewUsers.length === newUsersWithoutWelcome.length && newUsersWithoutWelcome.length > 0}
                     onCheckedChange={toggleSelectAll}
                   />
                   <span className="text-sm font-medium">Select All</span>
