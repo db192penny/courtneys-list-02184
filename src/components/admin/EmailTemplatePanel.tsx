@@ -55,12 +55,11 @@ What you can do now:
 - Earn points for every contribution
 
 Ready to dive in? Click here to explore service provider reviews from your neighbors:
-
 👉 {{VIEW_PROVIDERS_LINK}}
 
 💡 Pro Tip: Start by searching for services you currently use. Your reviews help neighbors make informed decisions!
 
-Questions, feedback, or suggestions of other categories that would be helpful for you? Just reply to this email and let me know. So appreciate you!
+So appreciate you!
 
 Your neighbor,
 Courtney 
