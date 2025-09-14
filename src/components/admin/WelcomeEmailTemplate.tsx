@@ -114,19 +114,22 @@ export function WelcomeEmailTemplate() {
   const sendWelcomeEmail = async (user: any) => {
     setSending(user.id);
     
-    const finalHtml = emailTemplate.html
-      .replace(/{{NAME}}/g, user.name || 'Neighbor')
-      .replace(/{{LINK}}/g, `${window.location.origin}/communities/boca-bridges`);
-    
-    const { error } = await supabase.functions.invoke('send-community-email', {
-      body: {
-        to: user.email,
-        subject: emailTemplate.subject,
-        html: finalHtml
-      }
-    });
+    try {
+      const finalHtml = emailTemplate.html
+        .replace(/{{NAME}}/g, user.name || 'Neighbor')
+        .replace(/{{LINK}}/g, `${window.location.origin}/communities/boca-bridges`);
+      
+      // Match the exact format from 100 homes email
+      const { error } = await supabase.functions.invoke('send-community-email', {
+        body: {
+          to: user.email,  // This is the key - use 'to' not 'recipients'
+          subject: emailTemplate.subject,
+          html: finalHtml
+        }
+      });
 
-    if (!error) {
+      if (error) throw error;
+
       toast({
         title: "Welcome email sent!",
         description: `Sent to ${user.name || user.email}`,
@@ -134,7 +137,8 @@ export function WelcomeEmailTemplate() {
       
       // Add to sent list so it disappears
       setSentEmails(prev => [...prev, user.id]);
-    } else {
+    } catch (error) {
+      console.error('Error sending email:', error);
       toast({
         title: "Failed to send",
         description: "Please try again",
