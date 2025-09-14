@@ -38,33 +38,61 @@ interface Props {
 
 const EMAIL_TEMPLATES: EmailTemplate[] = [
   {
+    id: "welcome",
+    name: "Welcome Email",
+    description: "Welcome new members to Courtney's List with 100+ homes milestone",
+    subject: "Welcome to Courtney's List - Your Trusted Neighbor Network! 🏡",
+    body: `Hi {{FIRST_NAME}},
+
+Welcome to our exclusive network of 100+ {COMMUNITY_NAME} homes who trust each other's service provider recommendations!
+
+Say goodbye to those "Can anyone recommend a good plumber?" posts on Facebook and WhatsApp! 🙋‍♀️ You've just joined the place where your neighbors' ratings, reviews, and more have been organized in one location and this will hopefully make your lives in {COMMUNITY_NAME} a little less stressful :) 
+
+What you can do now:
+- Browse trusted service provider reviews from neighbors
+- Share your own experiences to help others  
+- Find reliable professionals who already know our neighborhood
+- Earn points for every contribution
+
+Ready to dive in? Click here to explore service provider reviews from your neighbors:
+{{VIEW_PROVIDERS_BUTTON}}
+
+💡 Pro Tip: Start by searching for services you currently use. Your reviews help neighbors make informed decisions!
+
+Questions, feedback, or suggestions of other categories that would be helpful for you? Just reply to this email and let me know. So appreciate you!
+
+Your neighbor,
+Courtney 
+
+---
+Courtney's List - Trusted by 100+ {COMMUNITY_NAME} Homes`
+  },
+  {
     id: "celebration-100-homes",
-    name: "🎉 100 Homes Celebration",
+    name: "100 Homes Celebration",
     description: "Celebration email for reaching 100 homes milestone with rewards and leaderboard",
-    subject: "🎉 Boca Bridges 100+ neighbors joined! Your coffee awaits ☕",
+    subject: "🎉 We hit 100+ homes! Your coffee awaits ☕",
     body: `Hey {{FIRST_NAME}}!
 
 We did it! I wanted to share some exciting updates and say THANK YOU!
 
-📊 COURTNEY'S LIST: BY THE NUMBERS:
-• 102 Neighbors Joined
+📊 BY THE NUMBERS:
+• 102 Homes Joined
 • 157 Reviews Shared  
-• 48 Vendors Listed 
-• 1.5 Reviews/Neighbor
-
+• 48 Vendors Listed
 
 🆕 JUST ADDED:
 Water Filtration & Dryer Vent Cleaning - two of your most-requested categories are now live!
 
 🌟 THIS WEEK'S TOP CONTRIBUTORS:
 
-• Lisa R. (Abrruzzo Ave) - 7 reviews
-• Frances F. (Chauvet Wy) - 7 reviews  
-• Natalie L. (Espresso Mnr) - 6 reviews
-• Brian B. (Abruzzo Ave) - 5 reviews
-• Helena B. (Macchiato) - 5 reviews
-• Tara L. (Santaluce Mnr) - 3 reviews
-• Debra B. (Rosella Rd) - 3 reviews
+Lisa R. on Abrruzzo Ave - 7 reviews
+Frances F. on Chauvet Wy - 7 reviews
+Natalie L. on Espresso Mnr - 6 reviews
+Brian B. on Abruzzo Ave - 5 reviews
+Helena B. on Macchiato - 5 reviews
+Tara L. on Santaluce Mnr - 3 reviews
+Debra B. on Rosella Rd - 3 reviews
 
 💝 YOUR REWARDS ARE HERE!
 ☕ Starbucks Gift Cards: If you submit 3+ reviews (Limited time - I'd love to buy everyone coffee forever, but... 😅)!
@@ -74,9 +102,9 @@ When I started this, I just wanted to stop answering the same vendor questions o
 
 With gratitude (and caffeine),
 Courtney
-With help (David and Penny, our toy poodle)
+With help (David, Justin, Ryan, and Penny poodle)
 
-{{VIEW_PROVIDERS_LINK}}`
+{{VIEW_PROVIDERS_BUTTON}}`
   },
   {
     id: "custom",
@@ -89,11 +117,11 @@ With help (David and Penny, our toy poodle)
 
 export default function EmailTemplatePanel({ communityName }: Props) {
   const [open, setOpen] = useState(false);
-  const [selectedTemplateId, setSelectedTemplateId] = useState<string>("celebration-100-homes");
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string>("welcome");
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
   const [recipientMode, setRecipientMode] = useState<"all" | "selected" | "custom">("all");
-  const [selectedEmails, setSelectedEmails] = useState<string[]>([]);
+  const [selectedRecipients, setSelectedRecipients] = useState<string[]>([]);
   const [customRecipients, setCustomRecipients] = useState<CustomRecipient[]>([]);
   const [customName, setCustomName] = useState("");
   const [customEmail, setCustomEmail] = useState("");
@@ -107,7 +135,10 @@ export default function EmailTemplatePanel({ communityName }: Props) {
       const { data, error } = await supabase
         .from("users")
         .select("id, name, email, address")
-        .eq("is_verified", true);
+        .eq("is_verified", true)
+        .not("name", "is", null)
+        .not("email", "is", null)
+        .not("address", "is", null);
 
       if (error) {
         console.error("Failed to fetch users:", error);
@@ -116,11 +147,11 @@ export default function EmailTemplatePanel({ communityName }: Props) {
 
       const communityUsers = data.map(user => ({
         id: user.id,
-        name: user.name || "No name",
+        name: user.name,
         email: user.email,
-        address: user.address || "No address",
-        display: `${user.name?.split(' ')[0] || 'No name'} ${user.name?.split(' ').slice(-1)[0]?.charAt(0) || ''}. - ${user.address?.split(',')[0] || 'No address'}`
-      })).sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+        address: user.address,
+        display: `${user.name.split(' ')[0]} ${user.name.split(' ').slice(-1)[0]?.charAt(0) || ''}. - ${user.address.split(',')[0]}`
+      })).sort((a, b) => a.name.localeCompare(b.name));
 
       return communityUsers;
     },
@@ -149,7 +180,7 @@ export default function EmailTemplatePanel({ communityName }: Props) {
       return;
     }
 
-    if (recipientMode === "selected" && selectedEmails.length === 0) {
+    if (recipientMode === "selected" && selectedRecipients.length === 0) {
       toast({
         title: "No Recipients Selected",
         description: "Please select at least one recipient or choose 'Send to All'.",
@@ -173,12 +204,8 @@ export default function EmailTemplatePanel({ communityName }: Props) {
       const recipients = recipientMode === "all" 
         ? users.map(u => u.email)
         : recipientMode === "selected"
-        ? selectedEmails  // Now using emails directly
+        ? users.filter(u => selectedRecipients.includes(u.id)).map(u => u.email)
         : customRecipients.map(r => r.email);
-
-      console.log('Selected emails:', selectedEmails);
-      console.log('Recipients being sent:', recipients);
-      console.log('Number of recipients:', recipients.length);
 
       const { data, error } = await supabase.functions.invoke("send-community-email", {
         body: {
@@ -198,9 +225,6 @@ export default function EmailTemplatePanel({ communityName }: Props) {
         description: `Email sent to ${recipients.length} recipient(s).`,
       });
 
-      // Clear selections after successful send
-      setSelectedEmails([]);
-      setCustomRecipients([]);
       setOpen(false);
     } catch (error) {
       console.error("Failed to send email:", error);
@@ -214,11 +238,11 @@ export default function EmailTemplatePanel({ communityName }: Props) {
     }
   };
 
-  const toggleRecipient = (userEmail: string) => {
-    setSelectedEmails(prev => 
-      prev.includes(userEmail) 
-        ? prev.filter(email => email !== userEmail)
-        : [...prev, userEmail]
+  const toggleRecipient = (userId: string) => {
+    setSelectedRecipients(prev => 
+      prev.includes(userId) 
+        ? prev.filter(id => id !== userId)
+        : [...prev, userId]
     );
   };
 
@@ -306,12 +330,7 @@ export default function EmailTemplatePanel({ communityName }: Props) {
           {/* Recipients Section */}
           <div className="space-y-4">
             <Label>Recipients</Label>
-            <Select value={recipientMode} onValueChange={(value: "all" | "selected" | "custom") => {
-              setRecipientMode(value);
-              // Clear selections when switching modes
-              setSelectedEmails([]);
-              setCustomRecipients([]);
-            }}>
+            <Select value={recipientMode} onValueChange={(value: "all" | "selected" | "custom") => setRecipientMode(value)}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -335,21 +354,21 @@ export default function EmailTemplatePanel({ communityName }: Props) {
             {recipientMode === "selected" && (
               <div className="space-y-3">
                 <div className="text-sm text-muted-foreground">
-                  Recipients selected: {selectedEmails.length}
+                  Select recipients: {selectedRecipients.length} selected
                 </div>
                 <div className="max-h-48 overflow-y-auto border rounded-lg p-3 space-y-2">
                   {users.map((user) => (
                     <div
                       key={user.id}
                       className={`flex items-center justify-between p-2 rounded cursor-pointer transition-colors ${
-                        selectedEmails.includes(user.email)
+                        selectedRecipients.includes(user.id)
                           ? "bg-primary/10 border border-primary/20"
                           : "bg-muted/50 hover:bg-muted"
                       }`}
-                      onClick={() => toggleRecipient(user.email)}
+                      onClick={() => toggleRecipient(user.id)}
                     >
                       <span className="text-sm">{user.display}</span>
-                      {selectedEmails.includes(user.email) && (
+                      {selectedRecipients.includes(user.id) && (
                         <Badge variant="secondary">Selected</Badge>
                       )}
                     </div>
@@ -440,7 +459,7 @@ export default function EmailTemplatePanel({ communityName }: Props) {
                 className="min-h-[300px] resize-none"
               />
               <div className="text-xs text-muted-foreground">
-                Available placeholders: <code>{`{{FIRST_NAME}}`}</code> and <code>{`{{VIEW_PROVIDERS_LINK}}`}</code> will be automatically replaced for each recipient.
+                Available placeholders: <code>{`{{LEADERBOARD}}`}</code>, <code>{`{{INVITE_LINK}}`}</code>, <code>{`{{FIRST_NAME}}`}</code>, <code>{`{{VIEW_PROVIDERS_BUTTON}}`}</code> and <code>{`{{VIEW_PROVIDERS_LINK}}`}</code> will be automatically replaced for each recipient.
               </div>
             </div>
           </div>
