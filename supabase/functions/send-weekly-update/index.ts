@@ -17,6 +17,16 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    // Emergency stop: block all sends by default unless explicitly disabled
+    const emergencyStop = (Deno.env.get("EMERGENCY_EMAIL_STOP") ?? "true").toLowerCase() === "true";
+    if (emergencyStop) {
+      console.warn("[send-weekly-update] Emergency stop active — aborting send");
+      return new Response(
+        JSON.stringify({ success: false, error: "Weekly emails are temporarily disabled (emergency stop)." }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 503 }
+      );
+    }
+
     const { 
       testMode = true,
       fiveStarHtml = '',
