@@ -227,6 +227,8 @@ export default function RateVendorModal({ open, onOpenChange, vendor, onSuccess,
 
       // Invalidate relevant caches to ensure fresh data
       queryClient.invalidateQueries({ queryKey: ["reviews-hover"] });
+      queryClient.invalidateQueries({ queryKey: ["vendor-reviews"] });
+      queryClient.invalidateQueries({ queryKey: ["mobile-reviews"] });
       queryClient.invalidateQueries({ queryKey: ["community-stats"] });
       queryClient.invalidateQueries({ queryKey: ["community-vendors"] });
       queryClient.invalidateQueries({ queryKey: ["vendor-costs"] });

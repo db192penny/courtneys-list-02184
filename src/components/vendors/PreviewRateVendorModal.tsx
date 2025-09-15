@@ -133,6 +133,8 @@ export default function PreviewRateVendorModal({ open, onOpenChange, vendor, onS
       // Invalidate relevant caches to ensure fresh data
       queryClient.invalidateQueries({ queryKey: ["community-stats"] });
       queryClient.invalidateQueries({ queryKey: ["reviews-hover"] });
+      queryClient.invalidateQueries({ queryKey: ["vendor-reviews"] });
+      queryClient.invalidateQueries({ queryKey: ["mobile-reviews"] });
 
       toast({
         title: "Review Saved",

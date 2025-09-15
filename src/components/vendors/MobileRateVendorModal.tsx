@@ -225,6 +225,8 @@ export default function MobileRateVendorModal({ open, onOpenChange, vendor, onSu
 
       // Invalidate relevant caches to ensure fresh data
       queryClient.invalidateQueries({ queryKey: ["reviews-hover"] });
+      queryClient.invalidateQueries({ queryKey: ["vendor-reviews"] });
+      queryClient.invalidateQueries({ queryKey: ["mobile-reviews"] });
       queryClient.invalidateQueries({ queryKey: ["community-stats"] });
       queryClient.invalidateQueries({ queryKey: ["community-vendors"] });
       queryClient.invalidateQueries({ queryKey: ["vendor-costs"] });
