@@ -361,7 +361,26 @@ const [householdLoading, setHouseholdLoading] = useState<Record<string, boolean>
             <div className="rounded-md border border-border p-4">
               <div className="flex items-center justify-between mb-3">
                 <h2 className="font-medium">Community Communication</h2>
-                <EmailTemplatePanel communityName={hoaName || ""} />
+                <div className="flex gap-2">
+                  <EmailTemplatePanel communityName={hoaName || ""} />
+                  <Button 
+                    variant="outline"
+                    size="sm"
+                    onClick={async () => {
+                      try {
+                        const { data, error } = await supabase.functions.invoke('send-weekly-update', {
+                          body: { testMode: true }
+                        });
+                        if (error) throw error;
+                        toast("Test email sent to 1 recipient");
+                      } catch (error) {
+                        toast("Error: " + error.message);
+                      }
+                    }}
+                  >
+                    Test Weekly (1 person)
+                  </Button>
+                </div>
               </div>
               <p className="text-sm text-muted-foreground">
                 Send welcome emails and updates to your community members with personalized leaderboards and invite links.
