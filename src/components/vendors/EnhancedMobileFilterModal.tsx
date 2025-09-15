@@ -35,6 +35,8 @@ const CATEGORY_ICONS: Record<string, string> = {
   'Power Washing': '🚿',
   'Water Filtration': '💧',
   'Interior Design': '🛋️'
+  'Moving Company': '🚚',
+  'Damage Assessment/Restoration': '🛠️'
 };
 
 const SORT_OPTIONS = [
