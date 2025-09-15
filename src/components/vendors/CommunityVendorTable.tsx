@@ -93,7 +93,7 @@ export default function CommunityVendorTable({
   isVerified?: boolean;
 }) {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [category, setCategory] = useState<string>("all");
+  const [category, setCategory] = useState<string>("Pool");
   const SORTS = getSorts(communityName);
   const [sortBy, setSortBy] = useState<typeof SORTS[number]["key"]>("homes");
   const { toast } = useToast();
@@ -146,21 +146,26 @@ export default function CommunityVendorTable({
   // Dynamic filter button text
   const getFilterButtonText = () => {
     const categoryIcon = {
-      'all': '🏠',
-      'HVAC': '🔧',
-      'Pool': '🏊',
-      'Landscaping': '🌱',
-      'Plumbing': '🚰',
-      'Electrical': '⚡',
-      'Pest Control': '🐛',
-      'House Cleaning': '🧹',
-      'Handyman': '🔨',
-      'Roofing': '🏠',
-      'General Contractor': '👷',
-      'Car Wash and Detail': '🚗',
-      'Pet Grooming': '🐕',
-      'Mobile Tire Repair': '🔧',
-      'Appliance Repair': '🔌'
+  'all': '🏠',
+  'HVAC': '🔧',
+  'Pool': '🏊',
+  'Landscaping': '🌱',
+  'Plumbing': '🚰',
+  'Electrical': '⚡',
+  'Pest Control': '🐛',
+  'House Cleaning': '🧹',
+  'Handyman': '🔨',
+  'Roofing': '🏠',
+  'General Contractor': '👷',
+  'Car Wash and Detail': '🚗',
+  'Car Wash & Detail': '🚗',
+  'Pet Grooming': '🐕',
+  'Mobile Tire Repair': '🔧',
+  'Appliance Repair': '🔌',
+  'Painters': '🖌️',
+  'Power Washing': '🚿',
+  'Water Filtration': '💧',
+  'Interior Design': '🛋️'
     }[category] || '🏠';
     
     const sortLabel = {
