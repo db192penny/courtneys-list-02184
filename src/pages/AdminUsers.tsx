@@ -47,6 +47,10 @@ const AdminUsers = () => {
     id: string;
     name: string;
     email: string;
+    address?: string | null;
+    hoaName?: string | null;
+    signupSource?: string | null;
+    points?: number | null;
   } | null>(null);
   const [userActivity, setUserActivity] = useState<UserActivity[]>([]);
   const [loadingAction, setLoadingAction] = useState<Record<string, string>>({});
@@ -328,7 +332,11 @@ const AdminUsers = () => {
                               onClick={() => setSelectedUserForModal({
                                 id: user.id,
                                 name: user.name || "Unknown",
-                                email: user.email
+                                email: user.email,
+                                address: user.address,
+                                hoaName: user.hoa_name,
+                                signupSource: user.signup_source,
+                                points: user.points
                               })}
                             >
                               <Eye className="h-4 w-4" />
@@ -467,6 +475,10 @@ const AdminUsers = () => {
             userId={selectedUserForModal.id}
             userName={selectedUserForModal.name}
             userEmail={selectedUserForModal.email}
+            userAddress={selectedUserForModal.address}
+            userHoaName={selectedUserForModal.hoaName}
+            userSignupSource={selectedUserForModal.signupSource}
+            userPoints={selectedUserForModal.points}
           />
         )}
       </section>

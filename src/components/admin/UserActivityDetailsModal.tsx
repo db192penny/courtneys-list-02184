@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Star, Building2, DollarSign, Calendar, MessageSquare, Tag } from "lucide-react";
+import { Star, Building2, DollarSign, Calendar, MessageSquare, Tag, MapPin, Home, Trophy, Users } from "lucide-react";
 import { RatingStars } from "@/components/ui/rating-stars";
 import { format } from "date-fns";
 
@@ -16,6 +16,10 @@ interface UserActivityDetailsModalProps {
   userId: string;
   userName: string;
   userEmail: string;
+  userAddress?: string | null;
+  userHoaName?: string | null;
+  userSignupSource?: string | null;
+  userPoints?: number | null;
 }
 
 export function UserActivityDetailsModal({
@@ -23,7 +27,11 @@ export function UserActivityDetailsModal({
   onOpenChange,
   userId,
   userName,
-  userEmail
+  userEmail,
+  userAddress,
+  userHoaName,
+  userSignupSource,
+  userPoints
 }: UserActivityDetailsModalProps) {
   const [activeTab, setActiveTab] = useState("reviews");
 
@@ -125,12 +133,43 @@ export function UserActivityDetailsModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden">
         <DialogHeader>
-          <DialogTitle className="flex flex-col gap-1">
+          <DialogTitle className="flex flex-col gap-2">
             <span>User Activity Details</span>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground font-normal">
-              <span>{userName}</span>
-              <span>•</span>
-              <span>{userEmail}</span>
+            <div className="flex flex-col gap-1 text-sm text-muted-foreground font-normal">
+              <div className="flex items-center gap-2">
+                <span className="font-medium">{userName}</span>
+                <span>•</span>
+                <span>{userEmail}</span>
+              </div>
+              <div className="flex flex-wrap items-center gap-3">
+                {userAddress && (
+                  <div className="flex items-center gap-1">
+                    <MapPin className="h-3 w-3" />
+                    <span>{userAddress}</span>
+                  </div>
+                )}
+                {userHoaName && (
+                  <div className="flex items-center gap-1">
+                    <Home className="h-3 w-3" />
+                    <span>{userHoaName}</span>
+                  </div>
+                )}
+                {userPoints !== null && userPoints !== undefined && (
+                  <div className="flex items-center gap-1">
+                    <Trophy className="h-3 w-3" />
+                    <span>{userPoints} points</span>
+                  </div>
+                )}
+                {userSignupSource && (
+                  <div className="flex items-center gap-1">
+                    <Users className="h-3 w-3" />
+                    <span>{userSignupSource.startsWith("community:") 
+                      ? `${userSignupSource.replace("community:", "")} signup`
+                      : "Regular signup"
+                    }</span>
+                  </div>
+                )}
+              </div>
             </div>
           </DialogTitle>
         </DialogHeader>
