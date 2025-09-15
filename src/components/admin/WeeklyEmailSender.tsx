@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,7 +11,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
-import { Calendar, Send, Users, UserPlus, X } from "lucide-react";
+import { Calendar, Send, Users, UserPlus, X, AlertTriangle } from "lucide-react";
 
 interface EmailRecipient {
   id: string;
@@ -31,13 +32,14 @@ interface Props {
 
 export default function WeeklyEmailSender({ communityName }: Props) {
   const [open, setOpen] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [recipientMode, setRecipientMode] = useState<"all" | "selected" | "custom">("all");
   const [selectedRecipients, setSelectedRecipients] = useState<string[]>([]);
   const [customRecipients, setCustomRecipients] = useState<CustomRecipient[]>([]);
   const [customName, setCustomName] = useState("");
   const [customEmail, setCustomEmail] = useState("");
   const [loading, setLoading] = useState(false);
-  const [testMode, setTestMode] = useState(true);
+  const [testMode, setTestMode] = useState(true); // Default to TEST MODE ON
   
   // Weekly email specific fields
   const [fiveStarHtml, setFiveStarHtml] = useState("");
@@ -75,33 +77,68 @@ export default function WeeklyEmailSender({ communityName }: Props) {
     enabled: !!communityName
   });
 
+  // Calculate recipient count based on current selection
+  const getRecipientCount = () => {
+    if (testMode) return 1;
+    
+    switch (recipientMode) {
+      case "all":
+        return users.length;
+      case "selected":
+        return selectedRecipients.length;
+      case "custom":
+        return customRecipients.length;
+      default:
+        return 0;
+    }
+  };
+
+  const recipientCount = getRecipientCount();
+
+  const handleSendClick = () => {
+    // Basic validation first
+    if (!testMode) {
+      if (recipientMode === "selected" && selectedRecipients.length === 0) {
+        toast({
+          title: "No Recipients Selected",
+          description: "Please select at least one recipient or enable test mode.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (recipientMode === "custom" && customRecipients.length === 0) {
+        toast({
+          title: "No Custom Recipients Added",
+          description: "Please add at least one custom recipient or enable test mode.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // If sending to more than 5 people, show confirmation
+      if (recipientCount > 5) {
+        setShowConfirmDialog(true);
+        return;
+      }
+    }
+
+    // Direct send for test mode or small batches
+    handleSendWeeklyEmail();
+  };
+
   const handleSendWeeklyEmail = async () => {
-    if (recipientMode === "selected" && selectedRecipients.length === 0) {
-      toast({
-        title: "No Recipients Selected",
-        description: "Please select at least one recipient or choose 'Send to All'.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (recipientMode === "custom" && customRecipients.length === 0) {
-      toast({
-        title: "No Custom Recipients Added",
-        description: "Please add at least one custom recipient.",
-        variant: "destructive",
-      });
-      return;
-    }
-
+    setShowConfirmDialog(false);
     setLoading(true);
 
     try {
-      const recipients = recipientMode === "all" 
-        ? users.map(u => u.email)
-        : recipientMode === "selected"
-        ? users.filter(u => selectedRecipients.includes(u.id)).map(u => u.email)
-        : customRecipients.map(r => r.email);
+      const recipients = testMode ? [] : (
+        recipientMode === "all" 
+          ? users.map(u => u.email)
+          : recipientMode === "selected"
+          ? users.filter(u => selectedRecipients.includes(u.id)).map(u => u.email)
+          : customRecipients.map(r => r.email)
+      );
 
       const { data, error } = await supabase.functions.invoke("send-weekly-update", {
         body: {
@@ -115,10 +152,10 @@ export default function WeeklyEmailSender({ communityName }: Props) {
 
       if (error) throw error;
 
-      const recipientCount = testMode ? 1 : recipients.length;
+      const actualRecipientCount = testMode ? 1 : recipients.length;
       toast({
         title: "Weekly Email Sent Successfully",
-        description: `Weekly update sent to ${recipientCount} recipient(s).`,
+        description: `Weekly update sent to ${actualRecipientCount} recipient${actualRecipientCount === 1 ? '' : 's'}.`,
       });
 
       setOpen(false);
@@ -126,7 +163,7 @@ export default function WeeklyEmailSender({ communityName }: Props) {
       console.error("Failed to send weekly email:", error);
       toast({
         title: "Error",
-        description: "Failed to send weekly email. Please try again.",
+        description: `Failed to send weekly email: ${error.message}`,
         variant: "destructive",
       });
     } finally {
@@ -179,212 +216,273 @@ export default function WeeklyEmailSender({ communityName }: Props) {
     setCustomRecipients(prev => prev.filter((_, i) => i !== index));
   };
 
+  // Smart button label based on mode and count
+  const getButtonLabel = () => {
+    if (testMode) return "Send TEST to 1 person";
+    if (recipientCount > 50) return `Send to ${recipientCount} people (Confirm)`;
+    return `Send to ${recipientCount} people`;
+  };
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-2">
-          <Calendar className="w-4 h-4" />
-          Send Weekly Update
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Calendar className="w-5 h-5" />
-            Send Weekly Update Email
-          </DialogTitle>
-        </DialogHeader>
+    <>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger asChild>
+          <Button variant="outline" size="sm" className="gap-2">
+            <Calendar className="w-4 h-4" />
+            Send Weekly Update
+          </Button>
+        </DialogTrigger>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Calendar className="w-5 h-5" />
+              Send Weekly Update Email
+            </DialogTitle>
+          </DialogHeader>
 
-        <div className="space-y-6">
-          {/* Test Mode Toggle */}
-          <div className="flex items-center space-x-2">
-            <Checkbox 
-              id="testMode" 
-              checked={testMode} 
-              onCheckedChange={(checked) => setTestMode(checked === true)}
-            />
-            <Label htmlFor="testMode" className="text-sm">
-              Test mode (send to 1 recipient only)
-            </Label>
-          </div>
-
-          {/* Recipients Section - Only show if not in test mode */}
-          {!testMode && (
-            <div className="space-y-4">
-              <Label>Recipients</Label>
-              <Select value={recipientMode} onValueChange={(value: "all" | "selected" | "custom") => setRecipientMode(value)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">
-                    <div className="flex items-center gap-2">
-                      <Users className="w-4 h-4" />
-                      Send to All ({users.length} users)
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="selected">Select Specific Recipients</SelectItem>
-                  <SelectItem value="custom">
-                    <div className="flex items-center gap-2">
-                      <UserPlus className="w-4 h-4" />
-                      Add Custom Recipients
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-
-              {recipientMode === "selected" && (
-                <div className="space-y-3">
-                  <div className="text-sm text-muted-foreground">
-                    Select recipients: {selectedRecipients.length} selected
-                  </div>
-                  <div className="max-h-48 overflow-y-auto border rounded-lg p-3 space-y-2">
-                    {users.map((user) => (
-                      <div
-                        key={user.id}
-                        className={`flex items-center justify-between p-2 rounded cursor-pointer transition-colors ${
-                          selectedRecipients.includes(user.id)
-                            ? "bg-primary/10 border border-primary/20"
-                            : "bg-muted/50 hover:bg-muted"
-                        }`}
-                        onClick={() => toggleRecipient(user.id)}
-                      >
-                        <span className="text-sm">{user.display}</span>
-                        {selectedRecipients.includes(user.id) && (
-                          <Badge variant="secondary">Selected</Badge>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
+          <div className="space-y-6">
+            {/* Test Mode Warning Box */}
+            <div className={`flex items-start gap-3 p-4 rounded-lg border ${
+              testMode 
+                ? "bg-green-50 border-green-200 text-green-800" 
+                : "bg-amber-50 border-amber-200 text-amber-800"
+            }`}>
+              <div className="flex items-center space-x-2 flex-1">
+                <Checkbox 
+                  id="testMode" 
+                  checked={testMode} 
+                  onCheckedChange={(checked) => setTestMode(checked === true)}
+                />
+                <Label htmlFor="testMode" className="text-sm font-medium cursor-pointer">
+                  {testMode ? "☑" : "☐"} TEST MODE - Send to 1 person only
+                </Label>
+              </div>
+              {!testMode && (
+                <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
               )}
+            </div>
 
-              {recipientMode === "custom" && (
-                <div className="space-y-4">
-                  <div className="text-sm text-muted-foreground">
-                    Add custom recipients: {customRecipients.length} added
-                  </div>
-                  
-                  {/* Add Custom Recipient Form */}
-                  <div className="flex gap-2">
-                    <div className="flex-1">
-                      <Input
-                        placeholder="Name"
-                        value={customName}
-                        onChange={(e) => setCustomName(e.target.value)}
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <Input
-                        type="email"
-                        placeholder="Email"
-                        value={customEmail}
-                        onChange={(e) => setCustomEmail(e.target.value)}
-                      />
-                    </div>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="icon"
-                      onClick={addCustomRecipient}
-                    >
-                      <UserPlus className="w-4 h-4" />
-                    </Button>
-                  </div>
+            {/* Recipient Count Display */}
+            <div className="text-center p-4 bg-muted/30 rounded-lg">
+              <p className="text-lg font-semibold">
+                This will send to <span className="text-primary">{recipientCount}</span> {recipientCount === 1 ? 'person' : 'people'}
+              </p>
+              {testMode && (
+                <p className="text-sm text-muted-foreground mt-1">
+                  Test mode is enabled - only 1 email will be sent regardless of selection
+                </p>
+              )}
+            </div>
 
-                  {/* Custom Recipients List */}
-                  {customRecipients.length > 0 && (
+            {/* Recipients Section - Only show if not in test mode */}
+            {!testMode && (
+              <div className="space-y-4">
+                <Label>Recipients</Label>
+                <Select value={recipientMode} onValueChange={(value: "all" | "selected" | "custom") => setRecipientMode(value)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">
+                      <div className="flex items-center gap-2">
+                        <Users className="w-4 h-4" />
+                        Send to All ({users.length} users)
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="selected">Select Specific Recipients</SelectItem>
+                    <SelectItem value="custom">
+                      <div className="flex items-center gap-2">
+                        <UserPlus className="w-4 h-4" />
+                        Add Custom Recipients
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+
+                {recipientMode === "selected" && (
+                  <div className="space-y-3">
+                    <div className="text-sm text-muted-foreground">
+                      Select recipients: {selectedRecipients.length} selected
+                    </div>
                     <div className="max-h-48 overflow-y-auto border rounded-lg p-3 space-y-2">
-                      {customRecipients.map((recipient, index) => (
+                      {users.map((user) => (
                         <div
-                          key={index}
-                          className="flex items-center justify-between p-2 rounded bg-muted/50"
+                          key={user.id}
+                          className={`flex items-center justify-between p-2 rounded cursor-pointer transition-colors ${
+                            selectedRecipients.includes(user.id)
+                              ? "bg-primary/10 border border-primary/20"
+                              : "bg-muted/50 hover:bg-muted"
+                          }`}
+                          onClick={() => toggleRecipient(user.id)}
                         >
-                          <span className="text-sm">
-                            {recipient.name} ({recipient.email})
-                          </span>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => removeCustomRecipient(index)}
-                            className="h-6 w-6"
-                          >
-                            <X className="w-3 h-3" />
-                          </Button>
+                          <span className="text-sm">{user.display}</span>
+                          {selectedRecipients.includes(user.id) && (
+                            <Badge variant="secondary">Selected</Badge>
+                          )}
                         </div>
                       ))}
                     </div>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
+                  </div>
+                )}
 
-          {/* Weekly Content Sections */}
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="fiveStarHtml">5-Star Reviews HTML (optional)</Label>
-              <Textarea
-                id="fiveStarHtml"
-                value={fiveStarHtml}
-                onChange={(e) => setFiveStarHtml(e.target.value)}
-                placeholder="HTML content for this week's 5-star reviews section"
-                className="min-h-[100px] resize-none"
-              />
+                {recipientMode === "custom" && (
+                  <div className="space-y-4">
+                    <div className="text-sm text-muted-foreground">
+                      Add custom recipients: {customRecipients.length} added
+                    </div>
+                    
+                    {/* Add Custom Recipient Form */}
+                    <div className="flex gap-2">
+                      <div className="flex-1">
+                        <Input
+                          placeholder="Name"
+                          value={customName}
+                          onChange={(e) => setCustomName(e.target.value)}
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <Input
+                          type="email"
+                          placeholder="Email"
+                          value={customEmail}
+                          onChange={(e) => setCustomEmail(e.target.value)}
+                        />
+                      </div>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        onClick={addCustomRecipient}
+                      >
+                        <UserPlus className="w-4 h-4" />
+                      </Button>
+                    </div>
+
+                    {/* Custom Recipients List */}
+                    {customRecipients.length > 0 && (
+                      <div className="max-h-48 overflow-y-auto border rounded-lg p-3 space-y-2">
+                        {customRecipients.map((recipient, index) => (
+                          <div
+                            key={index}
+                            className="flex items-center justify-between p-2 rounded bg-muted/50"
+                          >
+                            <span className="text-sm">
+                              {recipient.name} ({recipient.email})
+                            </span>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => removeCustomRecipient(index)}
+                              className="h-6 w-6"
+                            >
+                              <X className="w-3 h-3" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Weekly Content Sections */}
+            <div className="space-y-4">
+              <Label className="text-base font-semibold">Weekly Content</Label>
+              
+              <div className="space-y-2">
+                <Label htmlFor="fiveStarHtml">5-Star Reviews HTML (optional)</Label>
+                <Textarea
+                  id="fiveStarHtml"
+                  value={fiveStarHtml}
+                  onChange={(e) => setFiveStarHtml(e.target.value)}
+                  placeholder="HTML content for this week's 5-star reviews section"
+                  className="min-h-[100px] resize-none"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="alertsHtml">Service Alerts HTML (optional)</Label>
+                <Textarea
+                  id="alertsHtml"
+                  value={alertsHtml}
+                  onChange={(e) => setAlertsHtml(e.target.value)}
+                  placeholder="HTML content for service alerts section"
+                  className="min-h-[100px] resize-none"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="activityHtml">Community Activity HTML (optional)</Label>
+                <Textarea
+                  id="activityHtml"
+                  value={activityHtml}
+                  onChange={(e) => setActivityHtml(e.target.value)}
+                  placeholder="HTML content for community activity section"
+                  className="min-h-[100px] resize-none"
+                />
+              </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="alertsHtml">Service Alerts HTML (optional)</Label>
-              <Textarea
-                id="alertsHtml"
-                value={alertsHtml}
-                onChange={(e) => setAlertsHtml(e.target.value)}
-                placeholder="HTML content for service alerts section"
-                className="min-h-[100px] resize-none"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="activityHtml">Community Activity HTML (optional)</Label>
-              <Textarea
-                id="activityHtml"
-                value={activityHtml}
-                onChange={(e) => setActivityHtml(e.target.value)}
-                placeholder="HTML content for community activity section"
-                className="min-h-[100px] resize-none"
-              />
+            {/* Actions */}
+            <div className="flex gap-3 pt-4 border-t">
+              <Button
+                variant="outline"
+                onClick={() => setOpen(false)}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSendClick}
+                disabled={loading}
+                className="flex-1 gap-2"
+                variant={testMode ? "default" : (recipientCount > 50 ? "destructive" : "default")}
+              >
+                {loading ? (
+                  <>
+                    <div className="animate-spin h-4 w-4 border-2 border-background border-t-transparent rounded-full" />
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-4 h-4" />
+                    {getButtonLabel()}
+                  </>
+                )}
+              </Button>
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
 
-          {/* Actions */}
-          <div className="flex gap-3 pt-4 border-t">
-            <Button
-              variant="outline"
-              onClick={() => setOpen(false)}
-              className="flex-1"
-            >
-              Cancel
-            </Button>
-            <Button
+      {/* Confirmation Dialog for Bulk Sends */}
+      <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-amber-600" />
+              Confirm Bulk Email Send
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-base">
+              Are you sure you want to send the weekly update to{" "}
+              <span className="font-bold text-foreground">{recipientCount} people</span>?
+              <br />
+              <br />
+              <span className="text-destructive font-medium">This action cannot be undone.</span>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
               onClick={handleSendWeeklyEmail}
-              disabled={loading}
-              className="flex-1 gap-2"
+              className="bg-destructive hover:bg-destructive/90"
             >
-              {loading ? (
-                <>
-                  <div className="animate-spin h-4 w-4 border-2 border-background border-t-transparent rounded-full" />
-                  Sending...
-                </>
-              ) : (
-                <>
-                  <Send className="w-4 h-4" />
-                  {testMode ? "Send Test" : "Send Weekly Update"}
-                </>
-              )}
-            </Button>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
+              Yes, Send to {recipientCount} People
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
