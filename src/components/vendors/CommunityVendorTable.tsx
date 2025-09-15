@@ -165,7 +165,9 @@ export default function CommunityVendorTable({
   'Painters': '🖌️',
   'Power Washing': '🚿',
   'Water Filtration': '💧',
-  'Interior Design': '🛋️'
+  'Interior Design': '🛋️',
+  'Moving Company': '🚚',
+  'Damage Assessment/Restoration': '🛠️'
     }[category] || '🏠';
     
     const sortLabel = {
