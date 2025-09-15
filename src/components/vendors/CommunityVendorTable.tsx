@@ -93,7 +93,7 @@ export default function CommunityVendorTable({
   isVerified?: boolean;
 }) {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [category, setCategory] = useState<string>("Pool");
+  const [category, setCategory] = useState<string>("all");
   const SORTS = getSorts(communityName);
   const [sortBy, setSortBy] = useState<typeof SORTS[number]["key"]>("homes");
   const { toast } = useToast();

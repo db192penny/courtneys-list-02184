@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 export type CostEntry = {
-  cost_kind: "monthly_plan" | "yearly_plan" | "service_call" | "hourly" | "installation" | "project_fee" | "base_fee";
+  cost_kind: "monthly_plan" | "yearly_plan" | "service_call" | "hourly" | "installation" | "project_fee" | "base_fee" | "assessment_fee";
   amount: number | null;
   period?: string | null; // e.g., monthly, yearly
   unit?: string | null;   // e.g., month, year, visit, hour, installation, project, move
@@ -64,6 +64,15 @@ export function buildDefaultCosts(category?: string): CostEntry[] {
     return [
       { cost_kind: "hourly", amount: null, unit: "hour", notes: null },
       { cost_kind: "base_fee", amount: null, unit: "move", notes: null },
+    ];
+  }
+
+  // Damage Assessment/Restoration: Assessment fee + Service call + Project estimate
+  if (c === "damage assessment/restoration") {
+    return [
+      { cost_kind: "assessment_fee", amount: null, unit: "visit", notes: null },
+      { cost_kind: "service_call", amount: null, unit: "visit", notes: null },
+      { cost_kind: "project_fee", amount: null, unit: "project", notes: null },
     ];
   }
   
@@ -140,6 +149,7 @@ export default function CostInputs({
         entry.cost_kind === "installation" ? "Installation Cost" :
         entry.cost_kind === "project_fee" ? "Project Fee" :
         entry.cost_kind === "base_fee" ? "Base Move Fee" :
+        entry.cost_kind === "assessment_fee" ? "Assessment/Inspection Fee" :
         "Maintenance Plan";
 
       const unitDisplay = 
@@ -149,6 +159,7 @@ export default function CostInputs({
         entry.cost_kind === "installation" ? " (one-time)" :
         entry.cost_kind === "project_fee" ? " per Project" :
         entry.cost_kind === "base_fee" ? " per Move" :
+        entry.cost_kind === "assessment_fee" ? " per Visit" :
         " per Month";
 
       return (
