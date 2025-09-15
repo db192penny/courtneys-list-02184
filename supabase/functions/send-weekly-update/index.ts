@@ -25,6 +25,7 @@ const handler = async (req: Request): Promise<Response> => {
     } = await req.json();
     
     console.log(`[send-weekly-update] Starting. Test mode: ${testMode}`);
+    console.log("[send-weekly-update] Function is live and ready");
     
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
     
