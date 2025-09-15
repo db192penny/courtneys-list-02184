@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Link } from "react-router-dom";
 import { AdminQuickAccess } from "@/components/admin/AdminQuickAccess";
 import EmailTemplatePanel from "@/components/admin/EmailTemplatePanel";
+import WeeklyEmailSender from "@/components/admin/WeeklyEmailSender";
 
 interface PendingRow {
   household_address: string;
@@ -363,6 +364,7 @@ const [householdLoading, setHouseholdLoading] = useState<Record<string, boolean>
                 <h2 className="font-medium">Community Communication</h2>
                 <div className="flex gap-2">
                   <EmailTemplatePanel communityName={hoaName || ""} />
+                  <WeeklyEmailSender communityName={hoaName || ""} />
                   <Button 
                     variant="outline"
                     size="sm"
