@@ -365,7 +365,7 @@ const [householdLoading, setHouseholdLoading] = useState<Record<string, boolean>
                 <div className="flex gap-2">
                   <EmailTemplatePanel communityName={hoaName || ""} />
                   <WeeklyEmailSender communityName={hoaName || ""} />
-                  <Button 
+                  <Button
                     variant="outline"
                     size="sm"
                     onClick={async () => {
@@ -374,13 +374,13 @@ const [householdLoading, setHouseholdLoading] = useState<Record<string, boolean>
                           body: { testMode: true }
                         });
                         if (error) throw error;
-                        toast("Test email sent to 1 recipient");
+                        toast("Test email sent to 1 recipient ONLY");
                       } catch (error) {
                         toast("Error: " + error.message);
                       }
                     }}
                   >
-                    Test Weekly (1 person)
+                    Test Weekly (1 person ONLY)
                   </Button>
                 </div>
               </div>
