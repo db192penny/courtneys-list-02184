@@ -364,7 +364,7 @@ const [householdLoading, setHouseholdLoading] = useState<Record<string, boolean>
                 <h2 className="font-medium">Community Communication</h2>
                 <div className="flex gap-2">
                   <EmailTemplatePanel communityName={hoaName || ""} />
-                  <WeeklyEmailSender communityName={hoaName || ""} />
+                  {/* <WeeklyEmailSender communityName={hoaName || ""} /> */}
                 </div>
               </div>
               <p className="text-sm text-muted-foreground">
