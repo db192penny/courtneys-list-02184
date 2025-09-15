@@ -107,6 +107,87 @@ With help (David, Justin, Ryan, and Penny poodle)
 {{VIEW_PROVIDERS_BUTTON}}`
   },
   {
+    id: "weekly-update",
+    name: "📊 Weekly Update",
+    description: "Weekly community activity report with reviews, insights, and raffle info",
+    subject: "Boca Bridges Weekly Update - 5-star reviews & $200 raffle",
+    body: `Hey {{FIRST_NAME}},
+
+Here's your weekly recap of service provider activity.
+
+**News from your community**
+
+**5-Star Reviews This Week**
+⭐ HVAC - Elite Air Solutions
+Reviewed by Sarah M. (Rosella Rd)
+
+⭐ Pool Service - Crystal Clear Pools  
+Reviewed by Mike T. (Abruzzo Ave)
+
+⭐ Landscaping - Green Thumb Pros
+Reviewed by Lisa R. (Chauvet Way)
+
+**🆕 NEW CATEGORIES THIS WEEK:**
+• Damage Assessment/Restoration
+• Water Filtration  
+• Moving Companies
+
+**Community Activity This Week**
+
+**Most-reviewed categories (relative %):**
+Based on new reviews submitted this week.
+• 45% - HVAC Services
+• 30% - Pool Services  
+• 25% - Landscaping
+
+**Most-searched categories (relative %):**
+Based on category page visits this week.
+• 40% - Plumbing
+• 35% - HVAC Services
+• 25% - Electrical
+
+**📊 COURTNEY'S LIST INSIGHTS:**
+Pool Services: 67% of CL users choose AquaTech Pool Service (4.8★ avg, 12 reviews)
+→ {{VIEW_PROVIDERS_LINK}}?category=Pool
+
+HVAC: Elite Air Solutions preferred by 45% of users (4.9★ avg, 8 reviews)  
+→ {{VIEW_PROVIDERS_LINK}}?category=HVAC
+
+Landscaping: Green Thumb Pros serves 38% of CL users (4.7★ avg, 11 reviews)
+→ {{VIEW_PROVIDERS_LINK}}?category=Landscaping
+
+**Invite neighbors and earn points!**
+
+Get 10 points for each neighbor you refer when they join and submit their first review. There's no limit to how many points you can earn, so spread the word!
+
+Just send along your personal referral link:
+Available on your Profile page
+
+You can also send invites and check out your point balance any time from your profile page.
+
+**🎁 Monthly $200 Vendor Credit Raffle!**
+
+Every point you earn = 1 raffle entry for our monthly $200 vendor credit drawing! Use it with any vendor in {COMMUNITY_NAME}.
+
+**Points = Chances:** Reviews (+5 pts each) • Invites (+10 pts each) • Vendor submissions (+5 pts each)
+
+Check where you stand in the new Profile section leaderboard!
+
+**Browse & Rate**
+{{VIEW_PROVIDERS_BUTTON}}
+
+---
+
+Happy neighbor helping!
+The Courtney's List Team
+
+Don't want to receive these notifications?
+You can always update your notification preferences here.
+
+{COMMUNITY_NAME} Community
+© 2025 Courtney's List`
+  },
+  {
     id: "custom",
     name: "Custom Email",
     description: "Create your own custom email from scratch",
