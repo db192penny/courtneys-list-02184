@@ -109,71 +109,67 @@ With help (David, Justin, Ryan, and Penny poodle)
   {
     id: "weekly-update",
     name: "📊 Weekly Update",
-    description: "Weekly community activity report with reviews, insights, and raffle info",
+    description: "Weekly community activity report with real reviews, insights, and raffle info",
     subject: "Boca Bridges Weekly Update - 5-star reviews & $200 raffle",
     body: `Hey {{FIRST_NAME}},
 
-Here's your weekly recap of service provider activity.
+Here's your weekly recap of service provider activity in Boca Bridges.
 
-**News from your community**
+📊 COMMUNITY REVIEWS THIS WEEK
 
-**5-Star Reviews This Week**
-⭐ HVAC - Elite Air Solutions
-Reviewed by Sarah M. (Rosella Rd)
+🌟 5-STAR REVIEWS:
+[REPLACE WITH QUERY RESULTS - Run this query weekly:]
+• HVAC: Elite Air Solutions (reviewed by Sarah M. on Rosella Rd)
+• Pool Service: Crystal Clear Pools (reviewed by Mike T. on Abruzzo Ave)  
+• Landscaping: Green Thumb Pros (reviewed by Lisa R. on Chauvet Way)
 
-⭐ Pool Service - Crystal Clear Pools  
-Reviewed by Mike T. (Abruzzo Ave)
+⚠️ AREAS NEEDING ATTENTION (3 stars and below):
+[REPLACE WITH QUERY RESULTS - Run this query weekly:]
+• Pool Service: ABC Pool Co (3 stars - service delays reported)
+• Electrical: Quick Fix Electric (2 stars - pricing concerns)
 
-⭐ Landscaping - Green Thumb Pros
-Reviewed by Lisa R. (Chauvet Way)
-
-**🆕 NEW CATEGORIES THIS WEEK:**
+🆕 NEW CATEGORIES THIS WEEK:
+• Water Filtration
+• Moving Companies  
 • Damage Assessment/Restoration
-• Water Filtration  
-• Moving Companies
 
-**Community Activity This Week**
+📈 COMMUNITY ACTIVITY
 
-**Most-reviewed categories (relative %):**
-Based on new reviews submitted this week.
+Most-reviewed categories this week:
+[REPLACE WITH QUERY RESULTS - Run this query weekly:]
 • 45% - HVAC Services
 • 30% - Pool Services  
 • 25% - Landscaping
 
-**Most-searched categories (relative %):**
-Based on category page visits this week.
-• 40% - Plumbing
-• 35% - HVAC Services
-• 25% - Electrical
+📊 COURTNEY'S LIST INSIGHTS
 
-**📊 COURTNEY'S LIST INSIGHTS:**
-Pool Services: 67% of CL users choose AquaTech Pool Service (4.8★ avg, 12 reviews)
-→ {{VIEW_PROVIDERS_LINK}}?category=Pool
+Top service providers by category (min 5 reviews):
+[REPLACE WITH QUERY RESULTS - Run this query weekly:]
 
-HVAC: Elite Air Solutions preferred by 45% of users (4.9★ avg, 8 reviews)  
-→ {{VIEW_PROVIDERS_LINK}}?category=HVAC
+Pool Services: AquaTech Pool Service
+→ Used by 67% of CL users (4.8 stars, 12 reviews)
 
-Landscaping: Green Thumb Pros serves 38% of CL users (4.7★ avg, 11 reviews)
-→ {{VIEW_PROVIDERS_LINK}}?category=Landscaping
+HVAC: Elite Air Solutions  
+→ Used by 45% of CL users (4.9 stars, 8 reviews)
 
-**Invite neighbors and earn points!**
+Landscaping: Green Thumb Pros
+→ Used by 38% of CL users (4.7 stars, 11 reviews)
 
-Get 10 points for each neighbor you refer when they join and submit their first review. There's no limit to how many points you can earn, so spread the word!
+💰 INVITE NEIGHBORS & EARN POINTS
 
-Just send along your personal referral link:
-Available on your Profile page
+Get 10 points for each neighbor you refer when they join and submit their first review. No limit to how many points you can earn!
 
-You can also send invites and check out your point balance any time from your profile page.
+Your personal referral link: Available on your Profile page
+Check your point balance: {{VIEW_PROVIDERS_LINK}}/neighborhood-cred
 
-**🎁 Monthly $200 Vendor Credit Raffle!**
+🎁 MONTHLY $200 VENDOR CREDIT RAFFLE
 
-Every point you earn = 1 raffle entry for our monthly $200 vendor credit drawing! Use it with any vendor in {COMMUNITY_NAME}.
+Every point = 1 raffle entry for our monthly $200 vendor credit drawing! Use it with any vendor in Boca Bridges.
 
-**Points = Chances:** Reviews (+5 pts each) • Invites (+10 pts each) • Vendor submissions (+5 pts each)
+Points = Chances: Reviews (+5 pts) • Invites (+10 pts) • Vendor submissions (+5 pts)
 
-Check where you stand in the new Profile section leaderboard!
+Check your leaderboard ranking: {{VIEW_PROVIDERS_LINK}}/neighborhood-cred
 
-**Browse & Rate**
 {{VIEW_PROVIDERS_BUTTON}}
 
 ---
@@ -181,11 +177,118 @@ Check where you stand in the new Profile section leaderboard!
 Happy neighbor helping!
 The Courtney's List Team
 
-Don't want to receive these notifications?
-You can always update your notification preferences here.
+Don't want these updates? Update preferences: {{VIEW_PROVIDERS_LINK}}/settings
+Boca Bridges Community © 2025 Courtney's List
 
-{COMMUNITY_NAME} Community
-© 2025 Courtney's List`
+/*
+DATABASE QUERIES TO RUN WEEKLY (replace [QUERY RESULTS] sections above):
+
+1. 5-STAR REVIEWS THIS WEEK:
+SELECT DISTINCT ON (v.category) 
+  v.category,
+  v.name as vendor_name,
+  CASE 
+    WHEN r.anonymous = false AND u.show_name_public = true AND u.name IS NOT NULL THEN 
+      split_part(trim(u.name), ' ', 1) || ' ' || 
+      CASE 
+        WHEN split_part(trim(u.name), ' ', 2) != '' THEN 
+          left(split_part(trim(u.name), ' ', 2), 1) || '.'
+        ELSE ''
+      END
+    ELSE 'Anonymous Neighbor'
+  END as reviewer_name,
+  CASE 
+    WHEN u.street_name IS NOT NULL AND trim(u.street_name) != '' THEN 
+      ' on ' || initcap(trim(u.street_name))
+    ELSE ''
+  END as street_info
+FROM reviews r
+JOIN vendors v ON v.id = r.vendor_id  
+LEFT JOIN users u ON u.id = r.user_id
+JOIN household_hoa h ON h.normalized_address = normalize_address(u.address)
+WHERE r.rating = 5 
+  AND r.created_at >= NOW() - INTERVAL '7 days'
+  AND LOWER(h.hoa_name) = 'boca bridges'
+ORDER BY v.category, r.created_at DESC
+LIMIT 3;
+
+2. 3-STAR AND BELOW REVIEWS THIS WEEK:
+SELECT 
+  v.category,
+  v.name as vendor_name,
+  r.rating,
+  CASE 
+    WHEN r.comments IS NOT NULL AND trim(r.comments) != '' THEN 
+      left(trim(r.comments), 50) || '...'
+    ELSE 'General concerns reported'
+  END as issue_summary
+FROM reviews r
+JOIN vendors v ON v.id = r.vendor_id  
+LEFT JOIN users u ON u.id = r.user_id
+JOIN household_hoa h ON h.normalized_address = normalize_address(u.address)
+WHERE r.rating <= 3 
+  AND r.created_at >= NOW() - INTERVAL '7 days'
+  AND LOWER(h.hoa_name) = 'boca bridges'
+ORDER BY r.created_at DESC
+LIMIT 3;
+
+3. MOST-REVIEWED CATEGORIES THIS WEEK:
+SELECT 
+  v.category, 
+  COUNT(*) as review_count,
+  ROUND(COUNT(*) * 100.0 / SUM(COUNT(*)) OVER(), 0) as percentage
+FROM reviews r 
+JOIN vendors v ON v.id = r.vendor_id
+LEFT JOIN users u ON u.id = r.user_id
+JOIN household_hoa h ON h.normalized_address = normalize_address(u.address)
+WHERE r.created_at >= NOW() - INTERVAL '7 days'
+  AND LOWER(h.hoa_name) = 'boca bridges'
+GROUP BY v.category 
+ORDER BY review_count DESC
+LIMIT 3;
+
+4. CL INSIGHTS - TOP VENDORS BY CATEGORY:
+WITH vendor_stats AS (
+  SELECT 
+    v.category,
+    v.name,
+    COUNT(DISTINCT r.user_id) as unique_users,
+    COUNT(r.id) as total_reviews,
+    ROUND(AVG(r.rating), 1) as avg_rating,
+    ROUND(
+      COUNT(DISTINCT r.user_id) * 100.0 / 
+      NULLIF(COUNT(DISTINCT r.user_id) OVER (PARTITION BY v.category), 0), 
+      0
+    ) as usage_percentage
+  FROM vendors v
+  JOIN reviews r ON r.vendor_id = v.id
+  LEFT JOIN users u ON u.id = r.user_id
+  JOIN household_hoa h ON h.normalized_address = normalize_address(u.address)
+  WHERE LOWER(h.hoa_name) = 'boca bridges'
+  GROUP BY v.category, v.id, v.name
+  HAVING COUNT(r.id) >= 5
+),
+top_by_category AS (
+  SELECT 
+    category,
+    name,
+    usage_percentage,
+    avg_rating,
+    total_reviews,
+    ROW_NUMBER() OVER (PARTITION BY category ORDER BY usage_percentage DESC) as rank
+  FROM vendor_stats
+)
+SELECT 
+  category,
+  name,
+  usage_percentage,
+  avg_rating,
+  total_reviews
+FROM top_by_category 
+WHERE rank = 1
+ORDER BY category
+LIMIT 3;
+*/`
   },
   {
     id: "custom",
