@@ -15,6 +15,7 @@ import Admin from "./pages/Admin";
 import Auth from "./pages/Auth";
 import SignIn from "./pages/SignIn";
 import CheckEmail from "./pages/CheckEmail";
+import QuickAccess from "./pages/QuickAccess";
 
 import NeighborhoodCred from "./pages/NeighborhoodCred";
 import Settings from "./pages/Settings";
@@ -149,6 +150,7 @@ function AppContent() {
         <Route path="/" element={<Navigate to="/communities/boca-bridges?welcome=true" replace />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/check-email" element={<CheckEmail />} />
+        <Route path="/quick-access" element={<QuickAccess />} />
         <Route path="/auth" element={<Auth />} />
         <Route path="/auth/signup" element={<Auth />} />
         
