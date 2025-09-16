@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Menu, Trophy, Coffee, Star, Award, Medal } from "lucide-react";
+import { Menu, Trophy, Coffee, Star, Award, Medal, Users, Settings, Shield, LogOut } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import useIsAdmin from "@/hooks/useIsAdmin";
 import { useUserProfile } from "@/hooks/useUserProfile";
@@ -123,6 +123,22 @@ const Header = () => {
     return () => subscription.unsubscribe();
   }, []);
 
+  // Function to get appropriate icon for each menu item
+  const getMenuIcon = (label: string) => {
+    switch (label) {
+      case "Service Providers":
+        return <Users className="h-4 w-4 text-blue-600" />;
+      case "Points & Rewards":
+        return <Trophy className="h-4 w-4 text-blue-600" />;
+      case "Settings":
+        return <Settings className="h-4 w-4 text-blue-600" />;
+      case "Admin":
+        return <Shield className="h-4 w-4 text-blue-600" />;
+      default:
+        return null;
+    }
+  };
+
   const navigationItems = authed ? [
     { to: "/communities/boca-bridges", label: "Service Providers" },
     { to: "/neighborhood-cred", label: "Points & Rewards" },
@@ -170,14 +186,10 @@ const Header = () => {
                         onClick={() => setMobileMenuOpen(false)}
                       >
                         <Link to={to}>
-                          {label === "Points & Rewards" ? (
-                            <span className="flex items-center gap-2">
-                              <Trophy className="h-4 w-4 text-blue-600" />
-                              <span>{label}</span>
-                            </span>
-                          ) : (
-                            label
-                          )}
+                          <span className="flex items-center gap-2">
+                            {getMenuIcon(label)}
+                            <span>{label}</span>
+                          </span>
                         </Link>
                       </Button>
                     ))}
@@ -190,7 +202,10 @@ const Header = () => {
                       className="justify-start text-left"
                       aria-label="Sign out"
                     >
-                      Sign out
+                      <span className="flex items-center gap-2">
+                        <LogOut className="h-4 w-4 text-blue-600" />
+                        <span>Sign out</span>
+                      </span>
                     </Button>
                   </div>
                 </SheetContent>
