@@ -115,9 +115,9 @@ const CommunityPreview = () => {
       />
 
       {/* Early Preview Banner */}
-      <div className={`bg-primary text-primary-foreground py-3 sticky top-0 z-40 transition-transform duration-300 ease-in-out ${
-        isScrollingDown ? '-translate-y-full' : 'translate-y-0'
-      }`}>
+      <div className={`bg-primary text-primary-foreground py-3 ${
+        isScrollingDown ? 'fixed -top-full' : 'sticky top-0'
+      } left-0 right-0 z-40 transition-all duration-300 ease-in-out`}>
         <div className="container text-center">
           <p className="text-sm font-medium">
             Hi - thanks so much for helping with this list. Please rate at least three vendors (more if you see them :)
