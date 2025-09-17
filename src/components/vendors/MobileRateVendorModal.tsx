@@ -249,7 +249,7 @@ export default function MobileRateVendorModal({ open, onOpenChange, vendor, onSu
       toast({ 
         title: "🎉 Review Added! +5 Points", 
         description,
-        duration: 6000, // Slightly longer to read navigation guidance
+        duration: 8000, // 8 seconds to read navigation guidance
         className: "bg-green-50 border-green-500 border-2 text-green-900"
       });
       
