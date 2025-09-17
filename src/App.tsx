@@ -86,7 +86,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 function AuthWatcher() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
   
   useEffect(() => {
     // Don't redirect while auth is still loading
@@ -99,6 +99,44 @@ function AuthWatcher() {
       }
     }
   }, [isAuthenticated, isLoading, navigate, location.pathname]);
+
+  // Clarity user identification
+  useEffect(() => {
+    // Only run if Clarity and user exist
+    if (typeof window !== 'undefined' && (window as any).clarity && user) {
+      try {
+        // Get full name from user metadata
+        const fullName = user.user_metadata?.full_name || user.user_metadata?.name || '';
+        
+        // Parse first name and last initial
+        let displayName = 'User';
+        if (fullName) {
+          const nameParts = fullName.trim().split(' ');
+          const firstName = nameParts[0] || '';
+          const lastName = nameParts[nameParts.length - 1] || '';
+          const lastInitial = lastName.charAt(0).toUpperCase();
+          
+          if (firstName && lastInitial) {
+            displayName = `${firstName} ${lastInitial}.`;
+          } else if (firstName) {
+            displayName = firstName;
+          }
+        }
+        
+        // Set Clarity custom identification
+        (window as any).clarity("set", "user_name", displayName);
+        (window as any).clarity("set", "user_status", user.email_confirmed_at ? "verified" : "unverified");
+        (window as any).clarity("set", "user_id_short", user.id.substring(0, 8));
+        
+        // Optional: Add community if available
+        const community = user.user_metadata?.community || 'unknown';
+        (window as any).clarity("set", "community", community);
+        
+      } catch (error) {
+        console.log('Clarity tracking setup skipped:', error);
+      }
+    }
+  }, [user]);
   
   return null;
 }
