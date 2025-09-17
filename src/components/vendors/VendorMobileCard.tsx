@@ -10,7 +10,8 @@ import { SectionHeader } from "@/components/ui/section-header";
 import { formatUSPhoneDisplay } from "@/utils/phone";
 import { getCategoryIcon } from "@/utils/categoryIcons";
 import { useUserReviews } from "@/hooks/useUserReviews";
-import { useVendorCosts } from "@/hooks/useVendorCosts";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useToast } from "@/hooks/use-toast";
 import ReviewsHover from "@/components/vendors/ReviewsHover";
@@ -76,7 +77,57 @@ export default function VendorMobileCard({
   isAuthenticated = false,
   communityName,
 }: VendorMobileCardProps) {
-  const { data: vendorCosts, isLoading: costsLoading } = useVendorCosts(vendor.id);
+  // Use a combined query that works for both authenticated and preview users
+  const { data: vendorCosts, isLoading: costsLoading } = useQuery({
+    queryKey: ["vendor-costs-combined", vendor.id],
+    queryFn: async () => {
+      let allCosts: any[] = [];
+      
+      // Try to fetch real costs (works for authenticated users)
+      try {
+        const { data: realCosts, error } = await supabase.rpc("list_vendor_costs", {
+          _vendor_id: vendor.id,
+        });
+        
+        if (!error && realCosts) {
+          allCosts = realCosts;
+        }
+      } catch (error) {
+        // Silently handle RLS errors for logged-out users
+        console.log("Cannot fetch real costs (user not authenticated)");
+      }
+
+      // Also fetch preview costs (always accessible)
+      try {
+        const { data: previewCosts, error: previewError } = await supabase
+          .from("preview_costs")
+          .select("*")
+          .eq("vendor_id", vendor.id);
+          
+        if (!previewError && previewCosts) {
+          // Convert preview costs to match real costs format
+          const formattedPreviewCosts = previewCosts.map(cost => ({
+            id: `preview-${cost.id}`,
+            vendor_id: cost.vendor_id,
+            amount: cost.amount,
+            period: cost.period,
+            unit: cost.unit,
+            cost_kind: cost.cost_kind,
+            notes: cost.notes,
+            created_at: cost.created_at,
+            anonymous: cost.anonymous,
+            currency: cost.currency || 'USD'
+          }));
+          allCosts = [...allCosts, ...formattedPreviewCosts];
+        }
+      } catch (error) {
+        console.error("Failed to fetch preview costs:", error);
+      }
+
+      return allCosts;
+    },
+    enabled: !!vendor.id,
+  });
   const { data: profile } = useUserProfile();
   const { toast } = useToast();
   const isVerified = !!profile?.isVerified;
