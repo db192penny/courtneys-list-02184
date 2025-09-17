@@ -112,18 +112,18 @@ export function WelcomeToolbar({ communitySlug }: WelcomeToolbarProps) {
       role="status"
       aria-live="polite"
     >
-      <Alert className="border-yellow-300 bg-yellow-50 relative shadow-md">
-        <PartyPopper className="h-5 w-5 text-yellow-600" />
+      <Alert className="border-green-500 bg-green-50 relative shadow-md">
+        <PartyPopper className="h-5 w-5 text-green-600" />
         <div className="pr-8">
-          <AlertDescription className="text-sm leading-relaxed text-yellow-800">
-            <strong>Welcome aboard!</strong> Please try to rate at least 3 vendors (and more if you're having fun!)
+          <AlertDescription className="text-sm leading-relaxed text-green-900">
+            <strong>Welcome aboard!</strong> Start rating providers to help neighbors and for a limited time, three reviews will earn you points for a $10 Starbucks gift card - coffee on us!
           </AlertDescription>
         </div>
         <Button
           variant="ghost"
           size="sm"
           onClick={() => handleDismiss(true)}
-          className="absolute right-2 top-2 h-8 w-8 p-0 hover:bg-yellow-100 text-yellow-700 focus:ring-2 focus:ring-yellow-400"
+          className="absolute right-2 top-2 h-8 w-8 p-0 hover:bg-green-100 text-green-700 focus:ring-2 focus:ring-green-400"
           aria-label="Dismiss welcome message"
         >
           <X className="h-4 w-4" />
