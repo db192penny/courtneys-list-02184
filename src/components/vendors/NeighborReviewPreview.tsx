@@ -91,8 +91,8 @@ export function NeighborReviewPreview({
 
   const truncateComment = (comment: string) => {
     const limit = isMobile ? 140 : 250;
-    if (!comment || comment.length <= limit) return comment;
-    return comment.substring(0, limit) + "...";
+    if (!comment || comment.length <= limit) return { text: comment, wasTruncated: false };
+    return { text: comment.substring(0, limit) + "...", wasTruncated: true };
   };
 
   const handleInteraction = (e: React.MouseEvent | React.KeyboardEvent) => {
@@ -193,8 +193,20 @@ export function NeighborReviewPreview({
       {selectedReview.comments && selectedReview.comments.trim() ? (
         <div className="bg-white/60 rounded-lg p-3 mb-3 border border-blue-100">
           <p className="text-sm text-blue-800 font-medium leading-snug mb-2 italic">
-            "{truncateComment(selectedReview.comments)}"
+            "{truncateComment(selectedReview.comments).text}"
           </p>
+          {/* Read more link for truncated content */}
+          {truncateComment(selectedReview.comments).wasTruncated && (
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                handleInteraction(e);
+              }}
+              className="text-xs text-blue-600 hover:text-blue-800 hover:underline cursor-pointer transition-colors mb-2 block"
+            >
+              Read more →
+            </button>
+          )}
           {/* Right-aligned attribution */}
           <div className="flex justify-end">
             <p className="text-xs font-medium text-blue-600">
@@ -226,11 +238,16 @@ export function NeighborReviewPreview({
         </div>
       )}
       
-      {/* Footer with CTA */}
-      <div className="mt-3 flex items-center justify-end">
-        <div className="flex items-center gap-1 text-blue-600 font-semibold group-hover:translate-x-1 transition-transform">
-          <span className="text-sm">View all reviews</span>
-          <span className="text-lg">→</span>
+      {/* Footer with CTA - More prominent */}
+      <div className="mt-3 bg-blue-100/50 rounded-lg p-2 border border-blue-200">
+        <div className="flex items-center justify-between">
+          <span className="text-xs text-blue-700 font-medium">
+            {totalReviews > 1 ? `See all ${totalReviews} reviews` : 'View full review'}
+          </span>
+          <div className="flex items-center gap-1 text-blue-600 font-bold hover:text-blue-800 transition-colors">
+            <span className="text-sm">View all</span>
+            <span className="text-lg">→</span>
+          </div>
         </div>
       </div>
     </div>
