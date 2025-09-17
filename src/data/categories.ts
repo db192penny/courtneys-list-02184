@@ -5,6 +5,7 @@ export const CATEGORIES = [
   "Electrical",
   "Handyman",
   "House Cleaning",
+  "House Manager",
   "HVAC",
   "Interior Design",
   "Landscaping",
