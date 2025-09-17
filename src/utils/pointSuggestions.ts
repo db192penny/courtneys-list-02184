@@ -71,7 +71,7 @@ export function generatePointSuggestion(currentPoints: number): PointSuggestion 
 
 export function getInviteGuidance(isMobile: boolean = false): string {
   if (isMobile) {
-    return "(Find 'Invite' in Menu → Points & Rewards)";
+    return "(Go to Points & Rewards → tap 'Invite' button)";
   }
   return "(Find 'Invite' in Points & Rewards)";
 }
