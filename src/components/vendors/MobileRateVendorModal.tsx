@@ -12,6 +12,7 @@ import ReviewPreview from "@/components/ReviewPreview";
 import { useQueryClient } from "@tanstack/react-query";
 import { extractStreetName } from "@/utils/address";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { generatePointSuggestion, getInviteGuidance } from "@/utils/pointSuggestions";
 
 type Props = {
   open: boolean;
@@ -235,17 +236,20 @@ export default function MobileRateVendorModal({ open, onOpenChange, vendor, onSu
         predicate: (query) => query.queryKey[0] === "community-stats" 
       });
       
-      // Calculate points to Starbucks for dynamic message
+      // Calculate smart suggestion for earning Starbucks points
       const newPointsTotal = currentUserPoints + 5; // They just earned 5 points
-      const pointsToStarbucks = Math.max(20 - newPointsTotal, 0);
-      const starbucksMessage = pointsToStarbucks > 0 
-        ? `${pointsToStarbucks} points to Starbucks gift card!` 
-        : "Starbucks card earned! ☕";
+      const suggestion = generatePointSuggestion(newPointsTotal);
+      
+      // Build the description with navigation guidance if needed
+      let description = suggestion.message;
+      if (suggestion.includeInviteGuidance) {
+        description += ` ${getInviteGuidance(true)}`; // true for mobile
+      }
       
       toast({ 
         title: "🎉 Review Added! +5 Points", 
-        description: `${starbucksMessage} • Help neighbors with more reviews!`,
-        duration: 5000,
+        description,
+        duration: 6000, // Slightly longer to read navigation guidance
         className: "bg-green-50 border-green-500 border-2 text-green-900"
       });
       
