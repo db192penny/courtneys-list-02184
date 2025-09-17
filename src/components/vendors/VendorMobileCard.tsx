@@ -193,6 +193,7 @@ export default function VendorMobileCard({
             vendorId={vendor.id} 
             vendor={vendor}
             onOpenModal={() => setIsReviewsModalOpen(true)}
+            onRate={() => onRate(vendor)}
             communityName={communityName}
           />
           

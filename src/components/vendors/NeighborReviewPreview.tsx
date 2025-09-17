@@ -17,6 +17,7 @@ interface NeighborReviewPreviewProps {
     hoa_rating_count?: number;
   };
   onOpenModal?: () => void;
+  onRate?: () => void;
   className?: string;
   communityName?: string;
 }
@@ -33,6 +34,7 @@ export function NeighborReviewPreview({
   vendorId, 
   vendor,
   onOpenModal,
+  onRate,
   className,
   communityName 
 }: NeighborReviewPreviewProps) {
@@ -212,9 +214,15 @@ export function NeighborReviewPreview({
           <div className="text-xs text-blue-600 mt-1">
             {new Date(selectedReview.created_at).toLocaleDateString()}
           </div>
-          <div className="text-xs text-blue-600 mt-2 italic">
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              onRate?.();
+            }}
+            className="text-xs text-blue-600 mt-2 italic hover:text-blue-800 hover:underline cursor-pointer transition-colors"
+          >
             Be the first to add a detailed review →
-          </div>
+          </button>
         </div>
       )}
       
