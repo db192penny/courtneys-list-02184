@@ -123,6 +123,21 @@ const Header = () => {
     return () => subscription.unsubscribe();
   }, []);
 
+  // Function to check if a route is active
+  const isActive = (to: string, label: string) => {
+    const currentPath = location.pathname;
+    
+    // Handle specific route matching logic
+    switch (label) {
+      case "Service Providers":
+        return currentPath.startsWith("/communities");
+      case "Admin":
+        return currentPath.startsWith("/admin");
+      default:
+        return currentPath === to;
+    }
+  };
+
   // Function to get appropriate icon for each menu item
   const getMenuIcon = (label: string) => {
     switch (label) {
@@ -182,7 +197,11 @@ const Header = () => {
                         key={to}
                         asChild 
                         variant="ghost" 
-                        className="justify-start text-left"
+                        className={`justify-start text-left ${
+                          isActive(to, label) 
+                            ? "bg-blue-50 text-blue-700 font-medium hover:bg-blue-100" 
+                            : "hover:bg-gray-50"
+                        }`}
                         onClick={() => setMobileMenuOpen(false)}
                       >
                         <Link to={to}>
@@ -223,7 +242,17 @@ const Header = () => {
                 <PointsBadge />
                 <div className="flex items-center gap-1">
                   {navigationItems.map(({ to, label }) => (
-                    <Button key={to} asChild variant="ghost" size="sm">
+                    <Button 
+                      key={to} 
+                      asChild 
+                      variant="ghost" 
+                      size="sm"
+                      className={
+                        isActive(to, label) 
+                          ? "bg-blue-50 text-blue-700 font-medium hover:bg-blue-100" 
+                          : ""
+                      }
+                    >
                       <Link to={to}>{label}</Link>
                     </Button>
                   ))}
