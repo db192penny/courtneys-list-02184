@@ -35,6 +35,7 @@ import { useUserHomeVendors } from "@/hooks/useUserHomeVendors";
 import { useUserReviews } from "@/hooks/useUserReviews";
 import { useUserCosts } from "@/hooks/useUserCosts";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useScrollDirection } from "@/hooks/useScrollDirection";
 
 import ReviewsHover from "@/components/vendors/ReviewsHover";
 import PreviewReviewsHover from "@/components/vendors/PreviewReviewsHover";
@@ -100,6 +101,7 @@ export default function CommunityVendorTable({
   // Always use mobile layout for desktop - removed isMobile detection
   const isMobile = true;
   const [showInitialAnimation, setShowInitialAnimation] = useState(true);
+  const { isScrollingDown } = useScrollDirection();
 
   // Initialize category from URL parameter
   useEffect(() => {
@@ -237,7 +239,9 @@ export default function CommunityVendorTable({
     <TooltipProvider>
       <div className="max-w-4xl mx-auto">
         {/* Sticky Filter Controls */}
-        <div className="sticky top-[120px] sm:top-[140px] z-30 backdrop-blur-md bg-background/95 border-b border-border/40 shadow-sm transition-all duration-200 mb-4 -mx-4 px-4 py-2 sm:py-3">
+        <div className={`sticky top-[120px] sm:top-[140px] z-30 backdrop-blur-md bg-background/95 border-b border-border/40 shadow-sm transition-all duration-300 ease-in-out mb-4 -mx-4 px-4 py-2 sm:py-3 ${
+          isScrollingDown ? '-translate-y-full opacity-0' : 'translate-y-0 opacity-100'
+        }`}>
           <div className="max-w-4xl mx-auto">
             <label className="text-xs text-primary font-semibold uppercase tracking-wide mb-1.5 sm:mb-2 block flex items-center gap-1.5">
               <Filter className="h-3 w-3" />

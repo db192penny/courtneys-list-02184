@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import CommunityVendorTable from "@/components/vendors/CommunityVendorTable";
 import { usePreviewSession } from "@/hooks/usePreviewSession";
 import EmailManagementPanel from "@/components/preview/EmailManagementPanel";
+import { useScrollDirection } from "@/hooks/useScrollDirection";
 
 
 function slugToName(slug: string): string {
@@ -23,6 +24,7 @@ const CommunityPreview = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { trackEvent } = usePreviewSession();
+  const { isScrollingDown } = useScrollDirection();
   
   const communityName = useMemo(() => (slug ? slugToName(slug) : ""), [slug]);
 
@@ -113,7 +115,9 @@ const CommunityPreview = () => {
       />
 
       {/* Early Preview Banner */}
-      <div className="bg-primary text-primary-foreground py-3">
+      <div className={`bg-primary text-primary-foreground py-3 sticky top-0 z-40 transition-transform duration-300 ease-in-out ${
+        isScrollingDown ? '-translate-y-full' : 'translate-y-0'
+      }`}>
         <div className="container text-center">
           <p className="text-sm font-medium">
             Hi - thanks so much for helping with this list. Please rate at least three vendors (more if you see them :)
