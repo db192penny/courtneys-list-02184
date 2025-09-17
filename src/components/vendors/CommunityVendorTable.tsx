@@ -250,7 +250,7 @@ export default function CommunityVendorTable({
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setFilterModalOpen(true)}
-                className={`flex-1 flex items-center justify-center px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg border-2 border-primary/20 bg-gradient-to-r from-primary/5 to-accent/5 hover:from-primary/10 hover:to-accent/10 transition-all duration-200 shadow-sm hover:shadow-md hover:scale-[1.01] active:scale-[0.99] ${showInitialAnimation ? 'animate-pulse' : ''} relative`}
+                className={`flex-1 flex items-center justify-center px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg border-2 border-primary/20 bg-gradient-to-r from-primary/5 to-accent/5 hover:from-primary/10 hover:to-accent/10 transition-all duration-200 shadow-sm hover:shadow-md hover:scale-[1.01] active:scale-[0.99] ${showInitialAnimation ? 'shadow-lg shadow-primary/20 border-primary/30' : ''} relative`}
               >
                 <div className="flex items-center gap-2">
                   <span className="text-lg sm:text-xl">{filterText.icon}</span>
