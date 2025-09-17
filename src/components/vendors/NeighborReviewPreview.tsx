@@ -50,11 +50,11 @@ export function NeighborReviewPreview({
     enabled: !!vendorId,
   });
 
-  // Smart review selection: prioritize recent reviews with substantial content
+  // Smart review selection: prioritize recent reviews with substantial content, then ratings-only
   const selectBestReview = (reviews: Review[]): Review | null => {
     if (!reviews || reviews.length === 0) return null;
     
-    // Sort by: substantial comments first, then by date
+    // Sort by: substantial comments first, then ratings-only by date
     const sorted = [...reviews].sort((a, b) => {
       const aHasComment = a.comments && a.comments.trim().length > 10;
       const bHasComment = b.comments && b.comments.trim().length > 10;
@@ -66,6 +66,25 @@ export function NeighborReviewPreview({
     });
     
     return sorted[0];
+  };
+
+  const formatAuthorDisplay = (authorLabel: string): string => {
+    // Handle pipe-separated format: "Name|Street" or "Neighbor|Street"
+    const parts = String(authorLabel).split('|');
+    if (parts.length !== 2) return authorLabel;
+    
+    const [nameOrNeighbor, street] = parts.map(p => p.trim());
+    const cleanStreet = street ? extractStreetName(street) : "";
+    const formattedStreet = cleanStreet ? capitalizeStreetName(cleanStreet) : "";
+    
+    // Check if anonymous (already says "Neighbor")
+    if (nameOrNeighbor === 'Neighbor' || nameOrNeighbor === '') {
+      return formattedStreet ? `Neighbor on ${formattedStreet}` : 'Neighbor';
+    }
+    
+    // Format real name as "FirstName L."
+    const formattedName = formatNameWithLastInitial(nameOrNeighbor);
+    return formattedStreet ? `${formattedName} on ${formattedStreet}` : formattedName;
   };
 
   const truncateComment = (comment: string) => {
@@ -168,8 +187,8 @@ export function NeighborReviewPreview({
         </div>
       </div>
 
-      {/* Comment Preview with Right-aligned Attribution */}
-      {selectedReview.comments && selectedReview.comments.trim() && (
+      {/* Comment Preview with Right-aligned Attribution or Rating-only Display */}
+      {selectedReview.comments && selectedReview.comments.trim() ? (
         <div className="bg-white/60 rounded-lg p-3 mb-3 border border-blue-100">
           <p className="text-sm text-blue-800 font-medium leading-snug mb-2 italic">
             "{truncateComment(selectedReview.comments)}"
@@ -177,8 +196,24 @@ export function NeighborReviewPreview({
           {/* Right-aligned attribution */}
           <div className="flex justify-end">
             <p className="text-xs font-medium text-blue-600">
-              — {selectedReview.author_label}
+              — {formatAuthorDisplay(selectedReview.author_label)}
             </p>
+          </div>
+        </div>
+      ) : (
+        <div className="bg-white/60 rounded-lg p-3 mb-3 border border-blue-100">
+          <div className="flex items-center gap-2 text-blue-800">
+            <div className="flex items-center gap-1">
+              <RatingStars rating={selectedReview.rating} size="sm" />
+              <span className="font-bold">{selectedReview.rating}/5</span>
+            </div>
+            <span className="text-sm">by {formatAuthorDisplay(selectedReview.author_label)}</span>
+          </div>
+          <div className="text-xs text-blue-600 mt-1">
+            {new Date(selectedReview.created_at).toLocaleDateString()}
+          </div>
+          <div className="text-xs text-blue-600 mt-2 italic">
+            Be the first to add a detailed review →
           </div>
         </div>
       )}
