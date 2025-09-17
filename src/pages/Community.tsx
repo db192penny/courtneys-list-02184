@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useAuth } from "@/hooks/useAuth";
 import { WelcomeToolbar } from "@/components/WelcomeToolbar";
+import { useScrollDirection } from "@/hooks/useScrollDirection";
 
 function slugToName(slug: string) {
   const cleaned = (slug || "")
@@ -28,6 +29,7 @@ export default function Community() {
   const [searchParams] = useSearchParams();
   const { data: profile } = useUserProfile();
   const { isAuthenticated: sessionAuthenticated } = useAuth();
+  const { isScrollingDown } = useScrollDirection();
   
   const communityName = useMemo(() => slugToName(slug), [slug]);
 
@@ -115,7 +117,7 @@ export default function Community() {
         <WelcomeToolbar communitySlug={slug} />
         
         {/* Sticky Community Header */}
-        <div className="sticky top-12 sm:top-14 z-40 backdrop-blur-md bg-background/95 border-b border-border/40 shadow-sm transition-all duration-200 -mx-4 sm:mx-0 px-4 sm:px-0 py-3 sm:py-4">
+        <div className={`sticky top-12 sm:top-14 z-40 backdrop-blur-md bg-background/95 border-b border-border/40 shadow-sm transition-transform duration-300 ease-in-out -mx-4 sm:mx-0 px-4 sm:px-0 py-3 sm:py-4 ${isScrollingDown ? '-translate-y-full' : 'translate-y-0'}`}>
           <header className="space-y-4">
               <div className="flex flex-col gap-4">
                  {/* Community info - mobile optimized layout */}
