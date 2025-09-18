@@ -199,16 +199,26 @@ export default function VendorMobileCard({
               )}
             </div>
           </div>
-          <Button
-            onClick={() => isAuthenticated ? onRate(vendor) : window.location.href = `/auth?community=${encodeURIComponent(communityName || '')}`}
-            className={`text-sm font-medium px-4 py-2 shrink-0 ${
-              userReviews?.has(vendor.id) 
-                ? "bg-blue-100 hover:bg-blue-200 text-blue-800 border border-blue-300" 
-                : "bg-blue-600 hover:bg-blue-700 text-white"
-            }`}
-          >
-            {userReviews?.has(vendor.id) ? "Rated ⭐ Edit" : "Rate"}
-          </Button>
+          <div className="flex items-center gap-2 shrink-0">
+            <Button
+              onClick={() => isAuthenticated ? onRate(vendor) : window.location.href = `/auth?community=${encodeURIComponent(communityName || '')}`}
+              className={`text-sm font-medium px-4 py-2 ${
+                userReviews?.has(vendor.id) 
+                  ? "bg-blue-100 hover:bg-blue-200 text-blue-800 border border-blue-300" 
+                  : "bg-blue-600 hover:bg-blue-700 text-white"
+              }`}
+            >
+              {userReviews?.has(vendor.id) ? "Rated ⭐" : "Rate"}
+            </Button>
+            {userReviews?.has(vendor.id) && (
+              <button
+                onClick={() => isAuthenticated ? onRate(vendor) : window.location.href = `/auth?community=${encodeURIComponent(communityName || '')}`}
+                className="text-xs text-blue-600 hover:text-blue-700 font-medium underline"
+              >
+                Edit
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Badges */}
@@ -282,16 +292,26 @@ export default function VendorMobileCard({
           <div className="flex items-center justify-between">
             <h5 className="text-xs font-medium text-gray-600">Cost Information</h5>
             {isVerified && (
-              <button
-                onClick={() => onCosts(vendor)}
-                className={`text-xs font-medium px-2 py-1 rounded transition-colors ${
-                  userCosts?.has(vendor.id)
-                    ? "bg-green-100 text-green-700 hover:bg-green-200 border border-green-300"
-                    : "text-blue-600 hover:text-blue-700"
-                }`}
-              >
-                {userCosts?.has(vendor.id) ? "Added ✓ Edit" : "+ Add"}
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => onCosts(vendor)}
+                  className={`text-xs font-medium px-2 py-1 rounded transition-colors ${
+                    userCosts?.has(vendor.id)
+                      ? "bg-green-100 text-green-700 hover:bg-green-200 border border-green-300"
+                      : "text-blue-600 hover:text-blue-700"
+                  }`}
+                >
+                  {userCosts?.has(vendor.id) ? "Added ✓" : "+ Add"}
+                </button>
+                {userCosts?.has(vendor.id) && (
+                  <button
+                    onClick={() => onCosts(vendor)}
+                    className="text-xs text-green-600 hover:text-green-700 font-medium underline"
+                  >
+                    Edit
+                  </button>
+                )}
+              </div>
             )}
           </div>
 
