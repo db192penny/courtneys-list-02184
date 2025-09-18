@@ -232,12 +232,11 @@ export default function MobileCostManagementModal({ open, onOpenChange, vendor, 
       }
 
       // Invalidate relevant caches to ensure fresh data
-      queryClient.invalidateQueries({ queryKey: ["community-stats"] });
-      queryClient.invalidateQueries({ queryKey: ["vendor-costs", vendor.id] });
-      queryClient.invalidateQueries({ queryKey: ["user-costs"] });
       queryClient.invalidateQueries({ 
         predicate: (query) => query.queryKey[0] === "community-stats" 
       });
+      queryClient.invalidateQueries({ queryKey: ["vendor-costs", vendor.id] });
+      queryClient.invalidateQueries({ queryKey: ["user-costs"] });
       
       toast({ title: "Saved", description: "Cost information updated successfully!" });
       onOpenChange(false);
