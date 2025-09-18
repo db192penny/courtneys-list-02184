@@ -60,6 +60,9 @@ export default function CostsHover({ vendorId, children }: Props) {
       return data as CostData[];
     },
     enabled: isVerified && !!vendorId,
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
+    staleTime: 0,
   });
 
   return (

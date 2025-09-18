@@ -167,6 +167,9 @@ export default function PreviewCostsHover({ vendorId, children }: Props) {
       return allCosts.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
     },
     enabled: !!vendorId,
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
+    staleTime: 0,
   });
 
   if (isLoading || !costs) {

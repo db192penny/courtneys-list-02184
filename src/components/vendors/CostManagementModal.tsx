@@ -234,12 +234,19 @@ export default function CostManagementModal({ open, onOpenChange, vendor, onSucc
         }
       }
 
-      // Invalidate relevant caches to ensure fresh data
-      queryClient.invalidateQueries({ 
-        predicate: (query) => query.queryKey[0] === "community-stats" 
+      // Invalidate ALL cost-related queries to ensure immediate refresh
+      await queryClient.invalidateQueries({
+        predicate: (query) => query.queryKey[0] === "community-stats"
       });
-      queryClient.invalidateQueries({ queryKey: ["vendor-costs", vendor.id] });
-      queryClient.invalidateQueries({ queryKey: ["user-costs"] });
+      await queryClient.invalidateQueries({
+        predicate: (query) => {
+          const key = query.queryKey[0];
+          return key === "vendor-costs" ||
+                 key === "mobile-vendor-costs" ||
+                 key === "preview-vendor-costs";
+        }
+      });
+      await queryClient.invalidateQueries({ queryKey: ["user-costs"] });
       
       toast({ title: "Saved", description: "Cost information updated successfully!" });
       onOpenChange(false);

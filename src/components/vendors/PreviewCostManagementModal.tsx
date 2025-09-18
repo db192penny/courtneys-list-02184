@@ -129,6 +129,23 @@ export default function PreviewCostManagementModal({ open, onOpenChange, vendor,
 
       if (error) throw error;
 
+      // Invalidate ALL cost-related queries to ensure immediate refresh
+      const queryClient = (globalThis as any).queryClient;
+      if (queryClient) {
+        await queryClient.invalidateQueries({
+          predicate: (query: any) => query.queryKey[0] === "community-stats"
+        });
+        await queryClient.invalidateQueries({
+          predicate: (query: any) => {
+            const key = query.queryKey[0];
+            return key === "vendor-costs" ||
+                   key === "mobile-vendor-costs" ||
+                   key === "preview-vendor-costs";
+          }
+        });
+        await queryClient.invalidateQueries({ queryKey: ["user-costs"] });
+      }
+
       // Track the event
       await trackEvent("add_cost", vendor.id, {
         cost_count: validCosts.length,

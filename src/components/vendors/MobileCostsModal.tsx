@@ -50,6 +50,9 @@ export function MobileCostsModal({ vendorId }: Props) {
       return data as CostData[];
     },
     enabled: !!vendorId,
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
+    staleTime: 0,
   });
 
   if (isLoading) {
