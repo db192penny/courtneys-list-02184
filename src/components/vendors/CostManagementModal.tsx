@@ -231,7 +231,8 @@ export default function CostManagementModal({ open, onOpenChange, vendor, onSucc
 
       // Invalidate relevant caches to ensure fresh data
       queryClient.invalidateQueries({ queryKey: ["community-stats"] });
-      queryClient.invalidateQueries({ queryKey: ["vendor-costs"] });
+      queryClient.invalidateQueries({ queryKey: ["vendor-costs", vendor.id] });
+      queryClient.invalidateQueries({ queryKey: ["user-costs"] });
       queryClient.invalidateQueries({ 
         predicate: (query) => query.queryKey[0] === "community-stats" 
       });
