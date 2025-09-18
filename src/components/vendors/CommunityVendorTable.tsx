@@ -166,7 +166,7 @@ export default function CommunityVendorTable({
   'Appliance Repair': '🔌',
   'Painters': '🖌️',
   'Grill Cleaning': '🔥',
-  'House Manager': '🏢',    ,    
+  'House Manager': '🏢',        
   'Power Washing': '🚿',
   'Water Filtration': '💧',
   'Interior Design': '🛋️',
