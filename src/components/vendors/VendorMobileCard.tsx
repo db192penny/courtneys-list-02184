@@ -174,7 +174,7 @@ export default function VendorMobileCard({
 
   return (
     <>
-    <Card className="w-full">
+    <Card className="w-full" data-vendor-id={vendor.id}>
       <CardContent className="p-3 space-y-3">
         <div className="flex justify-between items-start mb-3">
           <div className="flex items-center gap-2 flex-1">

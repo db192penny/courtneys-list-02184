@@ -323,14 +323,40 @@ export default function CommunityVendorTable({
               open={rateModalOpen} 
               onOpenChange={setRateModalOpen} 
               vendor={selectedVendor} 
-              onSuccess={() => { setRateModalOpen(false); }}
+              onSuccess={() => { 
+                setRateModalOpen(false);
+                // Scroll back to the vendor card after DOM updates
+                setTimeout(() => {
+                  const vendorCard = document.querySelector(`[data-vendor-id="${selectedVendor?.id}"]`);
+                  if (vendorCard) {
+                    vendorCard.scrollIntoView({ 
+                      behavior: 'smooth', 
+                      block: 'center',
+                      inline: 'nearest'
+                    });
+                  }
+                }, 150);
+              }}
               communityName={communityName}
             />
             <CostManagementModalWrapper 
               open={costModalOpen} 
               onOpenChange={setCostModalOpen} 
               vendor={selectedVendor} 
-              onSuccess={() => { setCostModalOpen(false); }}
+              onSuccess={() => { 
+                setCostModalOpen(false);
+                // Scroll back to the vendor card after DOM updates
+                setTimeout(() => {
+                  const vendorCard = document.querySelector(`[data-vendor-id="${selectedVendor?.id}"]`);
+                  if (vendorCard) {
+                    vendorCard.scrollIntoView({ 
+                      behavior: 'smooth', 
+                      block: 'center',
+                      inline: 'nearest'
+                    });
+                  }
+                }, 150);
+              }}
               communityName={communityName}
             />
           </>
