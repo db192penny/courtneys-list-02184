@@ -205,13 +205,20 @@ export default function VendorMobileCard({
           <div className="flex items-center gap-2 shrink-0">
             <Button
               onClick={() => isAuthenticated ? onRate(vendor) : window.location.href = `/auth?community=${encodeURIComponent(communityName || '')}`}
-              className={`text-sm font-medium px-4 py-2 ${
+              className={`rounded-full px-6 py-2 text-sm font-medium transition-all duration-200 ${
                 userReviews?.has(vendor.id) 
-                  ? "bg-blue-100 hover:bg-blue-200 text-blue-800 border border-blue-300" 
-                  : "bg-blue-600 hover:bg-blue-700 text-white"
+                  ? "bg-gradient-to-r from-green-100 to-blue-100 border border-green-200 text-green-800 hover:from-green-200 hover:to-blue-200 hover:scale-105" 
+                  : "bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700 hover:scale-105 hover:shadow-lg"
               }`}
             >
-              {userReviews?.has(vendor.id) ? "Rated ⭐" : "Rate"}
+              {userReviews?.has(vendor.id) ? (
+                "Rated ⭐"
+              ) : (
+                <div className="flex items-center gap-1">
+                  <Star className="h-4 w-4" />
+                  Rate
+                </div>
+              )}
             </Button>
             {userReviews?.has(vendor.id) && (
               <button
