@@ -9,6 +9,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { SectionHeader } from "@/components/ui/section-header";
 import { formatUSPhoneDisplay } from "@/utils/phone";
 import { getCategoryIcon } from "@/utils/categoryIcons";
+import { getCategoryEmoji } from "@/utils/categoryEmojis";
 import { useUserReviews } from "@/hooks/useUserReviews";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -25,30 +26,6 @@ import { MobileCostsModal } from "./MobileCostsModal";
 import type { CommunityVendorRow } from "@/components/vendors/CommunityVendorTable";
 import React, { useState } from "react";
 
-// Category emoji mapping (from CommunityVendorTable)
-const getCategoryEmoji = (category: string) => {
-  const categoryIcon = {
-    'HVAC': '🔧',
-    'Pool': '🏊',
-    'Landscaping': '🌱',
-    'Plumbing': '🚰',
-    'Electrical': '⚡',
-    'Pest Control': '🐛',
-    'House Cleaning': '🧹',
-    'Handyman': '🔨',
-    'Roofing': '🏠',
-    'General Contractor': '👷',
-    'Car Wash & Detail': '🚗',
-    'Pet Grooming': '🐕',
-    'Mobile Tire Repair': '🔧',
-    'Appliance Repair': '🔌',
-    'Painters': '🎨',
-    'Power Washing': '💧',
-    'Water Filtration': '💧',
-    'Interior Design': '🏡'
-  }[category] || '🏠';
-  return categoryIcon;
-};
 
 interface VendorMobileCardProps {
   vendor: CommunityVendorRow;

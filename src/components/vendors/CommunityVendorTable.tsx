@@ -31,6 +31,7 @@ import {
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { CATEGORIES } from "@/data/categories";
 import { getCategoryIcon } from "@/utils/categoryIcons";
+import { getCategoryEmoji } from "@/utils/categoryEmojis";
 import { useUserHomeVendors } from "@/hooks/useUserHomeVendors";
 import { useUserReviews } from "@/hooks/useUserReviews";
 import { useUserCosts } from "@/hooks/useUserCosts";
@@ -147,32 +148,7 @@ export default function CommunityVendorTable({
 
   // Dynamic filter button text
   const getFilterButtonText = () => {
-    const categoryIcon = {
-  'all': '🏠',
-  'HVAC': '🔧',
-  'Pool': '🏊',
-  'Landscaping': '🌱',
-  'Plumbing': '🚰',
-  'Electrical': '⚡',
-  'Pest Control': '🐛',
-  'House Cleaning': '🧹',
-  'Handyman': '🔨',
-  'Roofing': '🏠',
-  'General Contractor': '👷',
-  'Car Wash and Detail': '🚗',
-  'Car Wash & Detail': '🚗',
-  'Pet Grooming': '🐕',
-  'Mobile Tire Repair': '🔧',
-  'Appliance Repair': '🔌',
-  'Painters': '🖌️',
-  'Grill Cleaning': '🔥',
-  'House Manager': '🏢',        
-  'Power Washing': '🚿',
-  'Water Filtration': '💧',
-  'Interior Design': '🛋️',
-  'Moving Company': '🚚',
-  'Damage Assessment/Restoration': '🛠️'
-    }[category] || '🏠';
+    const categoryIcon = getCategoryEmoji(category);
     
     const sortLabel = {
       'homes': 'Most Used by Neighbors',
