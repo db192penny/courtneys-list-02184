@@ -30,6 +30,15 @@ export function buildDefaultCosts(category?: string): CostEntry[] {
     ];
   }
   
+  // Generator: Service Call + Installation + Yearly Maintenance Plan
+  if (c === "generator") {
+    return [
+      { cost_kind: "service_call", amount: null, unit: "visit", notes: null },
+      { cost_kind: "installation", amount: null, unit: "installation", notes: null },
+      { cost_kind: "yearly_plan", amount: null, period: "yearly", unit: "year", quantity: null, notes: null },
+    ];
+  }
+  
   // Water Filtration: Installation cost
   if (c === "water filtration") {
     return [

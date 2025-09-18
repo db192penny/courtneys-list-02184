@@ -10,6 +10,7 @@ export const categoryEmojiMap: Record<string, string> = {
   'Landscape Lighting': '💡',
   'Plumbing': '🚰',
   'Electrical': '⚡',
+  'Generator': '⚡',
   'Pest Control': '🐛',
   'House Cleaning': '🧹',
   'Handyman': '🔨',

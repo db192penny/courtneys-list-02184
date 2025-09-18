@@ -3,6 +3,7 @@ export const CATEGORIES = [
   "Car Wash & Detail",
   "Damage Assessment/Restoration",
   "Electrical",
+  "Generator",
   "Grill Cleaning",
   "Handyman",
   "House Cleaning",

@@ -37,6 +37,7 @@ export function MobileAddCostModal({
   const [visitsPerYear, setVisitsPerYear] = useState("");
   const [hourlyRate, setHourlyRate] = useState("");
   const [installationCost, setInstallationCost] = useState("");
+  const [generatorInstallation, setGeneratorInstallation] = useState("");
 
   const categoryLower = category.toLowerCase();
 
@@ -112,6 +113,43 @@ export function MobileAddCostModal({
             cost_kind: "monthly_plan",
             unit: "month",
             period: "annually",
+            quantity: visitsPerYear ? parseFloat(visitsPerYear) : 1
+          });
+        }
+      }
+      
+      // Generator
+      else if (categoryLower.includes("generator")) {
+        if (serviceCall) {
+          costsToInsert.push({
+            vendor_id: vendorId,
+            household_address: userProfile.address,
+            amount: parseFloat(serviceCall),
+            cost_kind: "service_call",
+            unit: "visit",
+            period: "one_time",
+            quantity: 1
+          });
+        }
+        if (generatorInstallation) {
+          costsToInsert.push({
+            vendor_id: vendorId,
+            household_address: userProfile.address,
+            amount: parseFloat(generatorInstallation),
+            cost_kind: "installation",
+            unit: "installation",
+            period: "one_time",
+            quantity: 1
+          });
+        }
+        if (yearlyPlan) {
+          costsToInsert.push({
+            vendor_id: vendorId,
+            household_address: userProfile.address,
+            amount: parseFloat(yearlyPlan),
+            cost_kind: "yearly_plan",
+            unit: "year",
+            period: "yearly",
             quantity: visitsPerYear ? parseFloat(visitsPerYear) : 1
           });
         }
@@ -276,6 +314,77 @@ export function MobileAddCostModal({
                 id="yearlyPlan"
                 type="number"
                 placeholder="400"
+                value={yearlyPlan}
+                onChange={(e) => setYearlyPlan(e.target.value)}
+                onFocus={handleInputFocus}
+                className="flex-1"
+                style={{ fontSize: '16px' }}
+              />
+              <span className="text-sm text-muted-foreground">/ Year</span>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="visitsYear">Visits per Year</Label>
+            <Input
+              id="visitsYear"
+              type="number"
+              placeholder="2"
+              value={visitsPerYear}
+              onChange={(e) => setVisitsPerYear(e.target.value)}
+              onFocus={handleInputFocus}
+              style={{ fontSize: '16px' }}
+            />
+          </div>
+        </div>
+      );
+    }
+
+    // Generator
+    if (categoryLower.includes("generator")) {
+      return (
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="serviceCall">Service Call</Label>
+            <div className="flex items-center space-x-2">
+              <span className="text-sm text-muted-foreground">$</span>
+              <Input
+                id="serviceCall"
+                type="number"
+                placeholder="200"
+                value={serviceCall}
+                onChange={(e) => setServiceCall(e.target.value)}
+                onFocus={handleInputFocus}
+                className="flex-1"
+                style={{ fontSize: '16px' }}
+              />
+              <span className="text-sm text-muted-foreground">/ Visit</span>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="generatorInstallation">Installation Cost</Label>
+            <div className="flex items-center space-x-2">
+              <span className="text-sm text-muted-foreground">$</span>
+              <Input
+                id="generatorInstallation"
+                type="number"
+                placeholder="8500"
+                value={generatorInstallation}
+                onChange={(e) => setGeneratorInstallation(e.target.value)}
+                onFocus={handleInputFocus}
+                className="flex-1"
+                style={{ fontSize: '16px' }}
+              />
+              <span className="text-sm text-muted-foreground">(one-time)</span>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="yearlyPlan">Maintenance Plan</Label>
+            <div className="flex items-center space-x-2">
+              <span className="text-sm text-muted-foreground">$</span>
+              <Input
+                id="yearlyPlan"
+                type="number"
+                placeholder="500"
                 value={yearlyPlan}
                 onChange={(e) => setYearlyPlan(e.target.value)}
                 onFocus={handleInputFocus}

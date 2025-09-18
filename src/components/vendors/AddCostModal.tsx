@@ -37,6 +37,7 @@ export function AddCostModal({
   const [visitsPerYear, setVisitsPerYear] = useState("");
   const [hourlyRate, setHourlyRate] = useState("");
   const [installationCost, setInstallationCost] = useState("");
+  const [generatorInstallation, setGeneratorInstallation] = useState("");
 
   const categoryLower = category.toLowerCase();
 
@@ -114,6 +115,46 @@ export function AddCostModal({
             cost_kind: "monthly_plan",
             unit: "month",
             period: "annually",
+            quantity: visitsPerYear ? parseFloat(visitsPerYear) : 1,
+            anonymous: !showName
+          });
+        }
+      }
+      
+      // Generator
+      else if (categoryLower.includes("generator")) {
+        if (serviceCall) {
+          costsToInsert.push({
+            vendor_id: vendorId,
+            household_address: userProfile.address,
+            amount: parseFloat(serviceCall),
+            cost_kind: "service_call",
+            unit: "visit",
+            period: "one_time",
+            quantity: 1,
+            anonymous: !showName
+          });
+        }
+        if (generatorInstallation) {
+          costsToInsert.push({
+            vendor_id: vendorId,
+            household_address: userProfile.address,
+            amount: parseFloat(generatorInstallation),
+            cost_kind: "installation",
+            unit: "installation",
+            period: "one_time",
+            quantity: 1,
+            anonymous: !showName
+          });
+        }
+        if (yearlyPlan) {
+          costsToInsert.push({
+            vendor_id: vendorId,
+            household_address: userProfile.address,
+            amount: parseFloat(yearlyPlan),
+            cost_kind: "yearly_plan",
+            unit: "year",
+            period: "yearly",
             quantity: visitsPerYear ? parseFloat(visitsPerYear) : 1,
             anonymous: !showName
           });
@@ -277,6 +318,66 @@ export function AddCostModal({
                 id="yearlyPlan"
                 type="number"
                 placeholder="400"
+                value={yearlyPlan}
+                onChange={(e) => setYearlyPlan(e.target.value)}
+              />
+              <span>/ Year</span>
+            </div>
+          </div>
+          <div>
+            <Label htmlFor="visitsYear">Visits per Year</Label>
+            <Input
+              id="visitsYear"
+              type="number"
+              placeholder="2"
+              value={visitsPerYear}
+              onChange={(e) => setVisitsPerYear(e.target.value)}
+            />
+          </div>
+        </div>
+      );
+    }
+
+    // Generator
+    if (categoryLower.includes("generator")) {
+      return (
+        <div className="space-y-4">
+          <div>
+            <Label htmlFor="serviceCall">Service Call</Label>
+            <div className="flex items-center space-x-2">
+              <span>$</span>
+              <Input
+                id="serviceCall"
+                type="number"
+                placeholder="200"
+                value={serviceCall}
+                onChange={(e) => setServiceCall(e.target.value)}
+              />
+              <span>/ Visit</span>
+            </div>
+          </div>
+          <div>
+            <Label htmlFor="generatorInstallation">Installation Cost</Label>
+            <div className="flex items-center space-x-2">
+              <span>$</span>
+              <Input
+                id="generatorInstallation"
+                type="number"
+                placeholder="8500"
+                value={generatorInstallation}
+                onChange={(e) => setGeneratorInstallation(e.target.value)}
+              />
+              <span>(one-time)</span>
+            </div>
+          </div>
+          <div>
+            <Label htmlFor="yearlyPlan">Maintenance Plan</Label>
+            <div className="flex items-center space-x-2">
+              <span>$</span>
+              <Input
+                id="yearlyPlan"
+                type="number"
+                placeholder="500"
                 value={yearlyPlan}
                 onChange={(e) => setYearlyPlan(e.target.value)}
               />
