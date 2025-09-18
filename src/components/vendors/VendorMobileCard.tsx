@@ -201,16 +201,14 @@ export default function VendorMobileCard({
           </div>
           <div className="flex items-center gap-2 shrink-0">
             <Button
-              variant={userReviews?.has(vendor.id) ? "secondary" : "default"}
-              size="sm"
               onClick={() => isAuthenticated ? onRate(vendor) : window.location.href = `/auth?community=${encodeURIComponent(communityName || '')}`}
-              className="rounded-full"
+              className={`text-sm font-medium px-4 py-2 ${
+                userReviews?.has(vendor.id) 
+                  ? "bg-blue-100 hover:bg-blue-200 text-blue-800 border border-blue-300" 
+                  : "bg-blue-600 hover:bg-blue-700 text-white"
+              }`}
             >
-              {userReviews?.has(vendor.id) ? (
-                <>⭐ Rated</>
-              ) : (
-                <><Star className="h-4 w-4" /> Rate</>
-              )}
+              {userReviews?.has(vendor.id) ? "Rated ⭐" : "Rate"}
             </Button>
             {userReviews?.has(vendor.id) && (
               <button
