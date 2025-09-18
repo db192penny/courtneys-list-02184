@@ -320,61 +320,48 @@ export default function VendorMobileCard({
 
           {vendorCosts && vendorCosts.length > 0 ? (
             <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-              {/* Show cost range if multiple costs */}
-              {vendorCosts.length > 1 ? (
-                <>
-                  <div className="mb-2">
-                    <span className="text-sm font-medium text-green-700">
-                      💰 ${Math.min(...vendorCosts.map(c => c.amount || 0))} - ${Math.max(...vendorCosts.map(c => c.amount || 0))}
-                      {vendorCosts[0]?.period ? `/${vendorCosts[0].period}` : ''}
-                    </span>
-                  </div>
-                  
-                  {/* Show first comment if available */}
-                  {vendorCosts.find(c => c.notes) && (
-                    <p className="text-xs text-green-600 italic">
-                      "{(() => {
-                        const note = vendorCosts.find(c => c.notes)?.notes || '';
-                        return note.length > 100 ? note.substring(0, 100) + '...' : note;
-                      })()}"
-                    </p>
-                  )}
-                  
-                  <div className="text-right mt-2">
-                    <button
-                      onClick={() => setCostModalOpen(true)}
-                      className="text-xs text-blue-600 hover:text-blue-700 font-medium"
-                    >
-                      View all cost details →
-                    </button>
-                  </div>
-                </>
-              ) : (
-                /* Single cost - show full details */
-                <>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm font-medium text-green-700">
-                      💰 ${vendorCosts[0].amount}
-                      {vendorCosts[0].period ? `/${vendorCosts[0].period}` : ''}
-                    </span>
-                  </div>
-                  {vendorCosts[0].notes && (
-                    <p className="text-xs text-green-600 italic mt-1">
-                      "{vendorCosts[0].notes.length > 100 ? vendorCosts[0].notes.substring(0, 100) + '...' : vendorCosts[0].notes}"
-                    </p>
-                  )}
-                  
-                  {/* Always show view all details link for single cost too */}
-                  <div className="text-right mt-2">
-                    <button
-                      onClick={() => setCostModalOpen(true)}
-                      className="text-xs text-blue-600 hover:text-blue-700 font-medium"
-                    >
-                      View all cost details →
-                    </button>
-                  </div>
-                </>
-              )}
+              {(() => {
+                // Filter costs with valid amounts (> 0)
+                const costsWithAmounts = vendorCosts.filter(c => c.amount && c.amount > 0);
+                const hasValidAmounts = costsWithAmounts.length > 0;
+                const firstComment = vendorCosts.find(c => c.notes)?.notes;
+                
+                return (
+                  <>
+                    {/* Show cost information only if there are valid amounts */}
+                    {hasValidAmounts && (
+                      <div className="mb-2">
+                        <span className="text-sm font-medium text-green-700">
+                          💰 {costsWithAmounts.length > 1 
+                            ? `$${Math.min(...costsWithAmounts.map(c => c.amount))} - $${Math.max(...costsWithAmounts.map(c => c.amount))}`
+                            : `$${costsWithAmounts[0].amount}`
+                          }
+                          {costsWithAmounts[0]?.period ? `/${costsWithAmounts[0].period}` : ''}
+                        </span>
+                      </div>
+                    )}
+                    
+                    {/* Show first comment if available */}
+                    {firstComment && (
+                      <p className="text-xs text-green-600 italic">
+                        "{firstComment.length > 100 ? firstComment.substring(0, 100) + '...' : firstComment}"
+                      </p>
+                    )}
+                    
+                    {/* Show view details link if there's any cost data (amounts or comments) */}
+                    {(hasValidAmounts || firstComment) && (
+                      <div className="text-right mt-2">
+                        <button
+                          onClick={() => setCostModalOpen(true)}
+                          className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+                        >
+                          View all cost details →
+                        </button>
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
             </div>
           ) : (
             <div className="text-center py-3 text-sm text-gray-500">
