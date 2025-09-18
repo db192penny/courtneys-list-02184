@@ -341,7 +341,7 @@ export default function RateVendorModal({ open, onOpenChange, vendor, onSuccess,
                 Comments {rating > 0 && <span className="text-red-500">*</span>}
                 {rating > 0 && (
                   <span className={`ml-2 text-sm ${hasEnoughWords ? 'text-green-600' : 'text-gray-500'}`}>
-                    ({wordCount}/5 words)
+                    {hasEnoughWords ? '✓ Perfect!' : `(${wordCount}/5 words)`}
                   </span>
                 )}
               </label>
