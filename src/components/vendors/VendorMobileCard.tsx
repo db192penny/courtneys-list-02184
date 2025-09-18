@@ -127,6 +127,9 @@ export default function VendorMobileCard({
       return allCosts;
     },
     enabled: !!vendor.id,
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
+    staleTime: 0,
   });
   const { data: profile } = useUserProfile();
   const { toast } = useToast();

@@ -244,10 +244,16 @@ export default function MobileCostManagementModal({ open, onOpenChange, vendor, 
           const key = query.queryKey[0];
           return key === "vendor-costs" ||
                  key === "mobile-vendor-costs" ||
-                 key === "preview-vendor-costs";
+                 key === "preview-vendor-costs" ||
+                 key === "vendor-costs-combined";
         }
       });
       await queryClient.invalidateQueries({ queryKey: ["user-costs"] });
+      
+      // Force immediate refetch for this specific vendor
+      await queryClient.refetchQueries({ queryKey: ["vendor-costs", vendor.id] });
+      await queryClient.refetchQueries({ queryKey: ["mobile-vendor-costs", vendor.id] });
+      await queryClient.refetchQueries({ queryKey: ["vendor-costs-combined", vendor.id] });
       
       toast({ title: "Saved", description: "Cost information updated successfully!" });
       onOpenChange(false);

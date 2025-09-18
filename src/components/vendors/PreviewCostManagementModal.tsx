@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { usePreviewSession } from "@/hooks/usePreviewSession";
+import { useQueryClient } from "@tanstack/react-query";
 import IdentityGateModal from "@/components/preview/IdentityGateModal";
 import CostInputs, { CostEntry, buildDefaultCosts } from "@/components/vendors/CostInputs";
 import CostPreview from "@/components/vendors/CostPreview";
@@ -20,6 +21,7 @@ interface Props {
 
 export default function PreviewCostManagementModal({ open, onOpenChange, vendor, onSuccess, communityName }: Props) {
   const { session, createSession, trackEvent, getAuthorLabel } = usePreviewSession();
+  const queryClient = useQueryClient();
   const [costs, setCosts] = useState<CostEntry[]>([]);
   const [loading, setLoading] = useState(false);
   const [showNameInCosts, setShowNameInCosts] = useState(true);
@@ -130,21 +132,23 @@ export default function PreviewCostManagementModal({ open, onOpenChange, vendor,
       if (error) throw error;
 
       // Invalidate ALL cost-related queries to ensure immediate refresh
-      const queryClient = (globalThis as any).queryClient;
-      if (queryClient) {
-        await queryClient.invalidateQueries({
-          predicate: (query: any) => query.queryKey[0] === "community-stats"
-        });
-        await queryClient.invalidateQueries({
-          predicate: (query: any) => {
-            const key = query.queryKey[0];
-            return key === "vendor-costs" ||
-                   key === "mobile-vendor-costs" ||
-                   key === "preview-vendor-costs";
-          }
-        });
-        await queryClient.invalidateQueries({ queryKey: ["user-costs"] });
-      }
+      await queryClient.invalidateQueries({
+        predicate: (query) => query.queryKey[0] === "community-stats"
+      });
+      await queryClient.invalidateQueries({
+        predicate: (query) => {
+          const key = query.queryKey[0];
+          return key === "vendor-costs" ||
+                 key === "mobile-vendor-costs" ||
+                 key === "preview-vendor-costs" ||
+                 key === "vendor-costs-combined";
+        }
+      });
+      await queryClient.invalidateQueries({ queryKey: ["user-costs"] });
+      
+      // Force immediate refetch for this specific vendor
+      await queryClient.refetchQueries({ queryKey: ["preview-vendor-costs", vendor.id] });
+      await queryClient.refetchQueries({ queryKey: ["vendor-costs-combined", vendor.id] });
 
       // Track the event
       await trackEvent("add_cost", vendor.id, {
