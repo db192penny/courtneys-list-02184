@@ -253,6 +253,7 @@ export default function MobileRateVendorModal({ open, onOpenChange, vendor, onSu
       queryClient.invalidateQueries({ queryKey: ["community-vendors"] });
       queryClient.invalidateQueries({ queryKey: ["vendor-costs"] });
       queryClient.invalidateQueries({ queryKey: ["user-home-vendors"] });
+      queryClient.invalidateQueries({ queryKey: ["user-reviews"] }); // This fixes the "Rated" button not appearing
       queryClient.invalidateQueries({ 
         predicate: (query) => query.queryKey[0] === "community-stats" 
       });
