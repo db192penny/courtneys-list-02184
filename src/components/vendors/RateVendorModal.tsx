@@ -37,6 +37,37 @@ export default function RateVendorModal({ open, onOpenChange, vendor, onSuccess,
   
   const [loading, setLoading] = useState(false);
 
+  // Word counting and validation functions
+  const countWords = (text: string): number => {
+    return text.trim().split(/\s+/).filter(word => word.length > 0).length;
+  };
+
+  const minWords = 5;
+
+  const getRatingPrompt = (rating: number): string => {
+    switch(rating) {
+      case 5: return "Tell neighbors why they'll love this vendor!";
+      case 4: return "What made this service good but not perfect?";
+      case 3: return "Help others understand your mixed experience";
+      case 2: return "What went wrong? Your neighbors need to know";
+      case 1: return "Warn your neighbors - what happened?";
+      default: return "";
+    }
+  };
+
+  const getEncouragementMessage = (wordsLeft: number): string => {
+    if (wordsLeft === 5) return "Just 5 words - you got this! 💪";
+    if (wordsLeft === 4) return "Only 4 more words!";
+    if (wordsLeft === 3) return "3 words to go!";
+    if (wordsLeft === 2) return "Almost there - 2 more!";
+    if (wordsLeft === 1) return "Just one more word!";
+    return "Perfect! Your neighbors thank you! 🎉";
+  };
+
+  const wordCount = countWords(comments);
+  const wordsLeft = Math.max(0, minWords - wordCount);
+  const hasEnoughWords = wordCount >= minWords;
+
   useEffect(() => {
     let isActive = true;
 
@@ -117,6 +148,16 @@ export default function RateVendorModal({ open, onOpenChange, vendor, onSuccess,
     }
     if (!rating || rating < 1 || rating > 5) {
       toast({ title: "Rating required", description: "Please select a rating from 1 to 5.", variant: "destructive" });
+      return;
+    }
+    
+    if (!hasEnoughWords) {
+      toast({ 
+        title: "Just a few words needed!", 
+        description: `Add ${wordsLeft} more word${wordsLeft === 1 ? '' : 's'} - even "Great service, fair price, recommended" works!`, 
+        variant: "destructive",
+        duration: 5000
+      });
       return;
     }
 
@@ -280,8 +321,30 @@ export default function RateVendorModal({ open, onOpenChange, vendor, onSuccess,
               <Label>Rating</Label>
               <StarRating value={rating} onChange={setRating} />
             </div>
+            {rating > 0 && (
+              <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                <div className="flex items-start gap-2">
+                  <span className="text-lg">💬</span>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-blue-900">
+                      {getRatingPrompt(rating)}
+                    </p>
+                    <p className="text-xs text-blue-700 mt-1">
+                      {getEncouragementMessage(wordsLeft)}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
             <div className="grid gap-2">
-              <Label>Comments (Additional Color)</Label>
+              <label className="block text-sm font-medium mb-2">
+                Comments {rating > 0 && <span className="text-red-500">*</span>}
+                {rating > 0 && (
+                  <span className={`ml-2 text-sm ${hasEnoughWords ? 'text-green-600' : 'text-gray-500'}`}>
+                    ({wordCount}/5 words)
+                  </span>
+                )}
+              </label>
               <Textarea 
                 value={comments} 
                 onChange={(e) => setComments(e.currentTarget.value)} 
@@ -292,13 +355,20 @@ export default function RateVendorModal({ open, onOpenChange, vendor, onSuccess,
                     e.target.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
                   }, 100);
                 }}
-                placeholder="Any helpful insights — pricing, professionalism, customer service, responsiveness — the more detailed the better for your neighbors."
+                placeholder={rating ? "Quick tip: 'Always on time, fair pricing' = 5 words!" : "Select a rating first"}
                 className="min-h-[100px]"
                 style={{ 
                   fontSize: '16px',
                   touchAction: 'manipulation'
                 }}
               />
+              {rating > 0 && !hasEnoughWords && wordCount > 0 && (
+                <p className="text-xs text-gray-600 mt-1">
+                  {wordsLeft === 1 ? 
+                    "So close! Add one more word like 'recommended' or 'avoid'" :
+                    `${wordsLeft} more words - you can do it!`}
+                </p>
+              )}
             </div>
             <div className="space-y-4">
               <div className="flex items-center space-x-2">
@@ -329,13 +399,13 @@ export default function RateVendorModal({ open, onOpenChange, vendor, onSuccess,
               </TrackingButton>
               <TrackingButton 
                 onClick={onSubmit} 
-                disabled={loading}
+                disabled={loading || !rating || !hasEnoughWords}
                 eventName="rate_vendor_submit"
                 vendorId={vendor.id}
                 category={vendor.category}
                 metadata={{ rating, hasComments: !!comments }}
               >
-                {loading ? "Saving..." : "Save"}
+                {loading ? "Saving..." : "Save Review"}
               </TrackingButton>
             </div>
           </div>
