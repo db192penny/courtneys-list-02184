@@ -201,9 +201,13 @@ export default function VendorMobileCard({
           </div>
           <Button
             onClick={() => isAuthenticated ? onRate(vendor) : window.location.href = `/auth?community=${encodeURIComponent(communityName || '')}`}
-            className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 shrink-0"
+            className={`text-sm font-medium px-4 py-2 shrink-0 ${
+              userReviews?.has(vendor.id) 
+                ? "bg-blue-100 hover:bg-blue-200 text-blue-800 border border-blue-300" 
+                : "bg-blue-600 hover:bg-blue-700 text-white"
+            }`}
           >
-            Rate
+            {userReviews?.has(vendor.id) ? "Rated ⭐ Edit" : "Rate"}
           </Button>
         </div>
 
@@ -280,9 +284,13 @@ export default function VendorMobileCard({
             {isVerified && (
               <button
                 onClick={() => onCosts(vendor)}
-                className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+                className={`text-xs font-medium px-2 py-1 rounded transition-colors ${
+                  userCosts?.has(vendor.id)
+                    ? "bg-green-100 text-green-700 hover:bg-green-200 border border-green-300"
+                    : "text-blue-600 hover:text-blue-700"
+                }`}
               >
-                + Add
+                {userCosts?.has(vendor.id) ? "Added ✓ Edit" : "+ Add"}
               </button>
             )}
           </div>

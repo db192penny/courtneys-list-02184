@@ -308,6 +308,7 @@ export default function CommunityVendorTable({
               onRate={openRate}
               onCosts={openCosts}
               userHomeVendors={userHomeVendors}
+              userReviews={userReviews}
               userCosts={userCosts.data}
               isAuthenticated={isAuthenticated}
               communityName={communityName}
