@@ -36,6 +36,7 @@ export function AddCostModal({
   const [yearlyPlan, setYearlyPlan] = useState("");
   const [visitsPerYear, setVisitsPerYear] = useState("");
   const [hourlyRate, setHourlyRate] = useState("");
+  const [installationCost, setInstallationCost] = useState("");
 
   const categoryLower = category.toLowerCase();
 
@@ -137,6 +138,34 @@ export function AddCostModal({
       
       // Handyman
       else if (categoryLower.includes("handyman")) {
+        if (hourlyRate) {
+          costsToInsert.push({
+            vendor_id: vendorId,
+            household_address: userProfile.address,
+            amount: parseFloat(hourlyRate),
+            cost_kind: "hourly",
+            unit: "hour",
+            period: "one_time",
+            quantity: 1,
+            anonymous: !showName
+          });
+        }
+      }
+      
+      // Landscape Lighting
+      else if (categoryLower.includes("landscape lighting")) {
+        if (installationCost) {
+          costsToInsert.push({
+            vendor_id: vendorId,
+            household_address: userProfile.address,
+            amount: parseFloat(installationCost),
+            cost_kind: "one_time",
+            unit: "installation",
+            period: "one_time",
+            quantity: 1,
+            anonymous: !showName
+          });
+        }
         if (hourlyRate) {
           costsToInsert.push({
             vendor_id: vendorId,
@@ -303,6 +332,42 @@ export function AddCostModal({
               onChange={(e) => setHourlyRate(e.target.value)}
             />
             <span>/ Hour</span>
+          </div>
+        </div>
+      );
+    }
+
+    // Landscape Lighting
+    if (categoryLower.includes("landscape lighting")) {
+      return (
+        <div className="space-y-4">
+          <div>
+            <Label htmlFor="installationCost">Installation Cost</Label>
+            <div className="flex items-center space-x-2">
+              <span>$</span>
+              <Input
+                id="installationCost"
+                type="number"
+                placeholder="2500"
+                value={installationCost}
+                onChange={(e) => setInstallationCost(e.target.value)}
+              />
+              <span>(one-time)</span>
+            </div>
+          </div>
+          <div>
+            <Label htmlFor="hourlyRate">Hourly Rate</Label>
+            <div className="flex items-center space-x-2">
+              <span>$</span>
+              <Input
+                id="hourlyRate"
+                type="number"
+                placeholder="85"
+                value={hourlyRate}
+                onChange={(e) => setHourlyRate(e.target.value)}
+              />
+              <span>/ Hour</span>
+            </div>
           </div>
         </div>
       );

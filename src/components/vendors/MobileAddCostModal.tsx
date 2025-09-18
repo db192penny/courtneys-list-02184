@@ -36,6 +36,7 @@ export function MobileAddCostModal({
   const [yearlyPlan, setYearlyPlan] = useState("");
   const [visitsPerYear, setVisitsPerYear] = useState("");
   const [hourlyRate, setHourlyRate] = useState("");
+  const [installationCost, setInstallationCost] = useState("");
 
   const categoryLower = category.toLowerCase();
 
@@ -133,6 +134,32 @@ export function MobileAddCostModal({
       
       // Handyman
       else if (categoryLower.includes("handyman")) {
+        if (hourlyRate) {
+          costsToInsert.push({
+            vendor_id: vendorId,
+            household_address: userProfile.address,
+            amount: parseFloat(hourlyRate),
+            cost_kind: "hourly",
+            unit: "hour",
+            period: "one_time",
+            quantity: 1
+          });
+        }
+      }
+      
+      // Landscape Lighting
+      else if (categoryLower.includes("landscape lighting")) {
+        if (installationCost) {
+          costsToInsert.push({
+            vendor_id: vendorId,
+            household_address: userProfile.address,
+            amount: parseFloat(installationCost),
+            cost_kind: "one_time",
+            unit: "installation",
+            period: "one_time",
+            quantity: 1
+          });
+        }
         if (hourlyRate) {
           costsToInsert.push({
             vendor_id: vendorId,
@@ -315,6 +342,48 @@ export function MobileAddCostModal({
               style={{ fontSize: '16px' }}
             />
             <span className="text-sm text-muted-foreground">/ Hour</span>
+          </div>
+        </div>
+      );
+    }
+
+    // Landscape Lighting
+    if (categoryLower.includes("landscape lighting")) {
+      return (
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="installationCost">Installation Cost</Label>
+            <div className="flex items-center space-x-2">
+              <span className="text-sm text-muted-foreground">$</span>
+              <Input
+                id="installationCost"
+                type="number"
+                placeholder="2500"
+                value={installationCost}
+                onChange={(e) => setInstallationCost(e.target.value)}
+                onFocus={handleInputFocus}
+                className="flex-1"
+                style={{ fontSize: '16px' }}
+              />
+              <span className="text-sm text-muted-foreground">(one-time)</span>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="hourlyRate">Hourly Rate</Label>
+            <div className="flex items-center space-x-2">
+              <span className="text-sm text-muted-foreground">$</span>
+              <Input
+                id="hourlyRate"
+                type="number"
+                placeholder="85"
+                value={hourlyRate}
+                onChange={(e) => setHourlyRate(e.target.value)}
+                onFocus={handleInputFocus}
+                className="flex-1"
+                style={{ fontSize: '16px' }}
+              />
+              <span className="text-sm text-muted-foreground">/ Hour</span>
+            </div>
           </div>
         </div>
       );
