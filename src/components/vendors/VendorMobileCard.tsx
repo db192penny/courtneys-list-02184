@@ -320,13 +320,10 @@ export default function VendorMobileCard({
               {/* Show cost range if multiple costs */}
               {vendorCosts.length > 1 ? (
                 <>
-                  <div className="flex justify-between items-center mb-2">
+                  <div className="mb-2">
                     <span className="text-sm font-medium text-green-700">
                       💰 ${Math.min(...vendorCosts.map(c => c.amount || 0))} - ${Math.max(...vendorCosts.map(c => c.amount || 0))}
                       {vendorCosts[0]?.period ? `/${vendorCosts[0].period}` : ''}
-                    </span>
-                    <span className="text-xs text-green-600">
-                      {vendorCosts.length} neighbors
                     </span>
                   </div>
                   
