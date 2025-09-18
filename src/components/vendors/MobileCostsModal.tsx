@@ -36,7 +36,7 @@ const formatCost = (amount: number | null, unit?: string | null, period?: string
 
 export function MobileCostsModal({ vendorId }: Props) {
   const { data: costs, isLoading } = useQuery({
-    queryKey: ["mobile-vendor-costs", vendorId],
+    queryKey: ["vendor-costs-combined", vendorId],
     queryFn: async () => {
       const { data, error } = await supabase.rpc("list_vendor_costs", {
         _vendor_id: vendorId,
