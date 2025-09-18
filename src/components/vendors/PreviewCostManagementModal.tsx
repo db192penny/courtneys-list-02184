@@ -53,7 +53,7 @@ export default function PreviewCostManagementModal({ open, onOpenChange, vendor,
           if (existingCosts && existingCosts.length > 0) {
             const mappedCosts: CostEntry[] = existingCosts.map(cost => ({
               cost_kind: cost.cost_kind as CostEntry["cost_kind"],
-              amount: Number(cost.amount),
+              amount: cost.amount ? Number(cost.amount) : null,
               period: cost.period,
               unit: cost.unit,
               quantity: cost.quantity ? Number(cost.quantity) : null,
@@ -86,12 +86,14 @@ export default function PreviewCostManagementModal({ open, onOpenChange, vendor,
   const onSubmit = async () => {
     if (!vendor || !session) return;
 
-    const validCosts = costs.filter(cost => cost.amount && cost.amount > 0);
+    const validCosts = costs.filter(cost => 
+      (cost.amount && cost.amount > 0) || (cost.notes && cost.notes.trim())
+    );
     
     if (validCosts.length === 0) {
       toast({
-        title: "Cost Required",
-        description: "Please enter at least one cost amount.",
+        title: "Information Required",
+        description: "Please enter at least one cost amount or comment.",
         variant: "destructive",
       });
       return;
@@ -111,7 +113,7 @@ export default function PreviewCostManagementModal({ open, onOpenChange, vendor,
       const costsToInsert = validCosts.map(cost => ({
         vendor_id: vendor.id,
         session_id: session.id,
-        amount: Number(cost.amount),
+        amount: cost.amount && cost.amount > 0 ? Number(cost.amount) : null,
         currency: "USD",
         cost_kind: cost.cost_kind,
         unit: cost.unit,
@@ -194,7 +196,7 @@ export default function PreviewCostManagementModal({ open, onOpenChange, vendor,
           <div className="border rounded-md p-4 bg-muted/30">
             <h4 className="text-sm font-medium mb-2">Preview:</h4>
             <CostPreview
-              costs={costs.filter(c => c.amount && c.amount > 0)}
+              costs={costs}
               showNameInCosts={showNameInCosts}
               authorLabel={showNameInCosts ? getAuthorLabel() : "Neighbor"}
             />
@@ -211,10 +213,12 @@ export default function PreviewCostManagementModal({ open, onOpenChange, vendor,
             </Button>
             <Button
               onClick={onSubmit}
-              disabled={loading || !costs.some(c => c.amount && c.amount > 0)}
+              disabled={loading || !costs.some(c => 
+                (c.amount && c.amount > 0) || (c.notes && c.notes.trim())
+              )}
               className="flex-1"
             >
-              {loading ? "Saving..." : "Save Costs"}
+              {loading ? "Saving..." : "Save Information"}
             </Button>
           </div>
         </div>

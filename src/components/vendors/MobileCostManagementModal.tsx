@@ -165,8 +165,10 @@ export default function MobileCostManagementModal({ open, onOpenChange, vendor, 
         .eq("created_by", userId)
         .is("deleted_at", null);
 
-      // Identify which cost kinds have been cleared (were in existing but now null/empty)
-      const currentCostKinds = new Set((costs || []).filter(c => c.amount != null).map(c => c.cost_kind));
+      // Identify which cost kinds have been cleared (both amount and comments empty)
+      const currentCostKinds = new Set((costs || []).filter(c => 
+        (c.amount != null && c.amount > 0) || (c.notes && c.notes.trim())
+      ).map(c => c.cost_kind));
       const clearedCosts = (existingCosts || []).filter(existing => 
         !currentCostKinds.has(existing.cost_kind as any)
       );
@@ -195,10 +197,12 @@ export default function MobileCostManagementModal({ open, onOpenChange, vendor, 
         }
       }
 
-      // Insert/update cost rows for this household
-      const payloads = (costs || []).filter(c => c.amount != null).map((c) => ({
+      // Insert/update cost rows for this household (include entries with amount OR comments)
+      const payloads = (costs || []).filter(c => 
+        (c.amount != null && c.amount > 0) || (c.notes && c.notes.trim())
+      ).map((c) => ({
         vendor_id: vendor.id,
-        amount: c.amount as number,
+        amount: c.amount && c.amount > 0 ? c.amount : null,
         currency: "USD",
         period: c.period ?? (c.cost_kind === "monthly_plan" ? "monthly" : null),
         unit: c.unit ?? undefined,
