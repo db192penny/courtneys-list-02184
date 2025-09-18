@@ -104,6 +104,17 @@ export default function MobileRateVendorModal({ open, onOpenChange, vendor, onSu
     };
   }, [vendor?.id]);
 
+  const getRatingPrompt = (rating: number): string => {
+    switch(rating) {
+      case 5: return "Tell neighbors why they'll love this vendor!";
+      case 4: return "What made this service good but not perfect?";
+      case 3: return "Help others understand your mixed experience";
+      case 2: return "What went wrong? Your neighbors need to know";
+      case 1: return "Warn your neighbors - what happened?";
+      default: return "";
+    }
+  };
+
   const handleTextareaFocus = (e: React.FocusEvent<HTMLTextAreaElement>) => {
     // Prevent iOS zoom by ensuring 16px font size
     e.target.style.fontSize = '16px';
@@ -314,6 +325,14 @@ export default function MobileRateVendorModal({ open, onOpenChange, vendor, onSu
                       </div>
                     </div>
                     
+                    {rating > 0 && (
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                        <div className="flex items-start gap-2 text-sm text-blue-700">
+                          <span className="text-base">💬</span>
+                          <span className="font-medium">{getRatingPrompt(rating)}</span>
+                        </div>
+                      </div>
+                    )}
                     
                     <div className="grid gap-3">
                       <label className="block text-sm font-medium mb-2">
