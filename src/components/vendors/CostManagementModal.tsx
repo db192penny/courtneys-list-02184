@@ -71,6 +71,7 @@ export default function CostManagementModal({ open, onOpenChange, vendor, onSucc
           .from("costs")
           .select("amount, period, unit, quantity, cost_kind, notes, created_at, anonymous")
           .eq("vendor_id", vendor.id)
+          .is("deleted_at", null)
           .order("created_at", { ascending: false });
 
         if (!isActive) return;

@@ -69,10 +69,11 @@ export default function MobileCostManagementModal({ open, onOpenChange, vendor, 
 
         // Prefill latest costs for this vendor limited to current user's household (RLS enforces it)
         const { data: costRows } = await supabase
-          .from("costs")
-          .select("amount, period, unit, quantity, cost_kind, notes, created_at, anonymous")
-          .eq("vendor_id", vendor.id)
-          .order("created_at", { ascending: false });
+           .from("costs")
+           .select("amount, period, unit, quantity, cost_kind, notes, created_at, anonymous")
+           .eq("vendor_id", vendor.id)
+           .is("deleted_at", null)
+           .order("created_at", { ascending: false });
 
         if (!isActive) return;
 
