@@ -323,14 +323,14 @@ export default function CommunityVendorTable({
               open={rateModalOpen} 
               onOpenChange={setRateModalOpen} 
               vendor={selectedVendor} 
-              onSuccess={() => { setRateModalOpen(false); refetch(); }}
+              onSuccess={() => { setRateModalOpen(false); }}
               communityName={communityName}
             />
             <CostManagementModalWrapper 
               open={costModalOpen} 
               onOpenChange={setCostModalOpen} 
               vendor={selectedVendor} 
-              onSuccess={() => { setCostModalOpen(false); refetch(); }}
+              onSuccess={() => { setCostModalOpen(false); }}
               communityName={communityName}
             />
           </>
