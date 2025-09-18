@@ -31,7 +31,7 @@ const SubmitVendor = () => {
   const [googlePlaceId, setGooglePlaceId] = useState<string>("");
   const [isManualEntry, setIsManualEntry] = useState<boolean>(false);
   const [costEntries, setCostEntries] = useState<CostEntry[]>(buildDefaultCosts());
-  const [rating, setRating] = useState<number>(4);
+  const [rating, setRating] = useState<number>(0);
   const [comments, setComments] = useState<string>("");
   const [showNameInReview, setShowNameInReview] = useState(true);
   const [useForHome, setUseForHome] = useState(true);
@@ -39,6 +39,7 @@ const SubmitVendor = () => {
   const [submitting, setSubmitting] = useState(false);
   const { data: isAdmin } = useIsAdmin();
   const { data: isHoaAdmin } = useIsHoaAdmin();
+  const isAdminUser = isAdmin || isHoaAdmin;
   const { data: userData } = useUserData();
 
   const canonical = typeof window !== "undefined" ? window.location.href : undefined;
@@ -165,9 +166,15 @@ const SubmitVendor = () => {
         return;
       }
     }
-    if (!vendorId && !rating) {
-      toast({ title: "Rating required", description: "Please select a rating from 1 to 5.", variant: "destructive" });
-      return;
+    if (!vendorId && !isAdminUser) {
+      if (!rating) {
+        toast({ title: "Rating required", description: "Please select a rating from 1 to 5.", variant: "destructive" });
+        return;
+      }
+      if (!comments || comments.trim().split(/\s+/).length < 5) {
+        toast({ title: "Comments required", description: "Please provide at least 5 words describing your experience with this vendor.", variant: "destructive" });
+        return;
+      }
     }
 
     setSubmitting(true);
@@ -258,7 +265,7 @@ const SubmitVendor = () => {
           if (reviewUpdateErr) {
             console.warn("[SubmitVendor] review update error (non-fatal):", reviewUpdateErr);
           }
-        } else if (rating) {
+        } else if (rating && !isAdminUser) {
           const { data: userData2 } = await supabase.auth.getUser();
           if (userData2?.user) {
             const { error: reviewInsertErr } = await supabase.from("reviews").insert([
@@ -395,18 +402,20 @@ const SubmitVendor = () => {
     console.log("[SubmitVendor] vendor created:", vendorIdNew);
 
     // 2) Insert initial review linked to this vendor
-    const { error: reviewErr } = await supabase.from("reviews").insert([
-      {
-        vendor_id: vendorIdNew,
-        user_id: userId,
-        rating: rating,
-        comments: comments.trim() || null,
-        anonymous: !showNameInReview,
-      },
-    ]);
+    if (rating > 0 && !isAdminUser) {
+      const { error: reviewErr } = await supabase.from("reviews").insert([
+        {
+          vendor_id: vendorIdNew,
+          user_id: userId,
+          rating: rating,
+          comments: comments.trim() || null,
+          anonymous: !showNameInReview,
+        },
+      ]);
 
-    if (reviewErr) {
-      console.warn("[SubmitVendor] review insert error (non-fatal):", reviewErr);
+      if (reviewErr) {
+        console.warn("[SubmitVendor] review insert error (non-fatal):", reviewErr);
+      }
     }
 
     // 3) Save cost entries to costs table
@@ -504,6 +513,14 @@ const SubmitVendor = () => {
           <h1 className="text-3xl font-bold tracking-tight">{vendorId ? "Edit Vendor" : "Submit a Vendor"}</h1>
         </header>
 
+        {isAdminUser && !vendorId && (
+          <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+            <p className="text-sm text-blue-800 dark:text-blue-200">
+              <strong>Admin Mode:</strong> You're seeding a vendor without ratings. Users will be able to add ratings and reviews later.
+            </p>
+          </div>
+        )}
+
         <form onSubmit={onSubmit} className="space-y-6">
           <div className="grid gap-4">
             <div className="grid gap-2">
@@ -547,13 +564,18 @@ const SubmitVendor = () => {
               <CostInputs category={category} value={costEntries} onChange={setCostEntries} />
             </div>
 
-            <div className="grid gap-2">
-              <Label htmlFor="rating">Rating</Label>
-              <StarRating value={rating} onChange={setRating} />
-            </div>
+            {(!isAdminUser || vendorId) && (
+              <div className="grid gap-2">
+                <Label htmlFor="rating">Rating {!vendorId && !isAdminUser && <span className="text-red-500">*</span>}</Label>
+                <StarRating value={rating} onChange={setRating} />
+              </div>
+            )}
 
             <div className="grid gap-2">
-              <Label htmlFor="comments">Comments (Additional Color)</Label>
+              <Label htmlFor="comments">
+                Comments (Additional Color)
+                {!vendorId && !isAdminUser && <span className="text-red-500">* (minimum 5 words)</span>}
+              </Label>
               <Textarea id="comments" placeholder="Any helpful insights — pricing, professionalism, customer service, responsiveness — the more detailed the better for your neighbors." value={comments} onChange={(e) => setComments(e.currentTarget.value)} />
             </div>
 
@@ -568,7 +590,7 @@ const SubmitVendor = () => {
                   <label className="text-sm font-medium">Show My Name in Review</label>
                 </div>
               )}
-              {rating > 0 && (
+              {rating > 0 && !isAdminUser && (
                 <ReviewPreview 
                   rating={rating}
                   showName={showNameInReview}
