@@ -82,11 +82,6 @@ export function CostDisplay({
                   <div className="px-2 py-1.5 rounded-md bg-blue-50 hover:bg-blue-100 transition-colors border border-blue-200 hover:border-blue-300 min-h-[28px] flex items-center group cursor-pointer">
                     <span className="text-xs font-medium underline decoration-dotted underline-offset-4">
                       {communityPrice}
-                      {communitySampleSize && (
-                        <span className="text-xs text-muted-foreground ml-1">
-                          ({communitySampleSize})
-                        </span>
-                      )}
                     </span>
                   </div>
                 </DialogTrigger>
@@ -110,11 +105,6 @@ export function CostDisplay({
                 <div className="px-2 py-1.5 rounded-md bg-blue-50 hover:bg-blue-100 transition-colors border border-blue-200 hover:border-blue-300 min-h-[28px] flex items-center group cursor-pointer">
                   <span className="text-xs font-medium underline decoration-dotted underline-offset-4">
                     {communityPrice}
-                    {communitySampleSize && (
-                      <span className="text-xs text-muted-foreground ml-1">
-                        ({communitySampleSize})
-                      </span>
-                    )}
                   </span>
                 </div>
               </CostsHover>
