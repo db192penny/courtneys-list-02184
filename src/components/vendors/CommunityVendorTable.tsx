@@ -165,7 +165,7 @@ export default function CommunityVendorTable({
   'Mobile Tire Repair': '🔧',
   'Appliance Repair': '🔌',
   'Painters': '🖌️',
-  'Grill Cleaning': '🔥'
+  'Grill Cleaning': '🔥',
   'House Manager': '🏢',    ,    
   'Power Washing': '🚿',
   'Water Filtration': '💧',
