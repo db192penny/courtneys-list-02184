@@ -18,6 +18,7 @@ import {
   Shield,
   Building2,
   Flame,
+  Lightbulb,
   LucideIcon 
 } from "lucide-react";
 import { Category } from "@/data/categories";
@@ -30,6 +31,7 @@ export const categoryIconMap: Record<Category, LucideIcon> = {
   "Plumbing": Droplets,
   "Painters": PaintBucket,
   "Landscaping": Trees,
+  "Landscape Lighting": Lightbulb,
   "Pest Control": Bug,
   "Power Washing": ShowerHead,
   "Car Wash & Detail": Car,

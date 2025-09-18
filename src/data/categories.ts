@@ -9,6 +9,7 @@ export const CATEGORIES = [
   "House Manager",
   "HVAC",
   "Interior Design",
+  "Landscape Lighting",
   "Landscaping",
   "Mobile Tire Repair",
   "Moving Company",
