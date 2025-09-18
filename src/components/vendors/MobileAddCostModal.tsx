@@ -38,6 +38,15 @@ export function MobileAddCostModal({
   const [hourlyRate, setHourlyRate] = useState("");
   const [installationCost, setInstallationCost] = useState("");
   const [generatorInstallation, setGeneratorInstallation] = useState("");
+  
+  // New categories
+  const [perRoomCost, setPerRoomCost] = useState("");
+  const [perItemCost, setPerItemCost] = useState("");
+  const [patioInstallation, setPatioInstallation] = useState("");
+  const [patioRepair, setPatioRepair] = useState("");
+  const [holidayInstallation, setHolidayInstallation] = useState("");
+  const [holidayRemoval, setHolidayRemoval] = useState("");
+  const [seasonalPackage, setSeasonalPackage] = useState("");
 
   const categoryLower = category.toLowerCase();
 
@@ -180,6 +189,106 @@ export function MobileAddCostModal({
             cost_kind: "hourly",
             unit: "hour",
             period: "one_time",
+            quantity: 1
+          });
+        }
+      }
+      
+      // Carpet & Sofa Cleaning
+      else if (categoryLower.includes("carpet & sofa cleaning")) {
+        if (serviceCall) {
+          costsToInsert.push({
+            vendor_id: vendorId,
+            household_address: userProfile.address,
+            amount: parseFloat(serviceCall),
+            cost_kind: "service_call",
+            unit: "visit",
+            period: "one_time",
+            quantity: 1
+          });
+        }
+        if (perRoomCost) {
+          costsToInsert.push({
+            vendor_id: vendorId,
+            household_address: userProfile.address,
+            amount: parseFloat(perRoomCost),
+            cost_kind: "hourly",
+            unit: "room",
+            period: "one_time",
+            quantity: 1
+          });
+        }
+        if (perItemCost) {
+          costsToInsert.push({
+            vendor_id: vendorId,
+            household_address: userProfile.address,
+            amount: parseFloat(perItemCost),
+            cost_kind: "one_time",
+            unit: "item",
+            period: "one_time",
+            quantity: 1
+          });
+        }
+      }
+      
+      // Patio Screening
+      else if (categoryLower.includes("patio screening")) {
+        if (patioInstallation) {
+          costsToInsert.push({
+            vendor_id: vendorId,
+            household_address: userProfile.address,
+            amount: parseFloat(patioInstallation),
+            cost_kind: "installation",
+            unit: "sq ft",
+            period: "one_time",
+            quantity: 1
+          });
+        }
+        if (patioRepair) {
+          costsToInsert.push({
+            vendor_id: vendorId,
+            household_address: userProfile.address,
+            amount: parseFloat(patioRepair),
+            cost_kind: "service_call",
+            unit: "panel",
+            period: "one_time",
+            quantity: 1
+          });
+        }
+      }
+      
+      // Holiday Lighting
+      else if (categoryLower.includes("holiday lighting")) {
+        if (holidayInstallation) {
+          costsToInsert.push({
+            vendor_id: vendorId,
+            household_address: userProfile.address,
+            amount: parseFloat(holidayInstallation),
+            cost_kind: "installation",
+            unit: "linear ft",
+            period: "one_time",
+            quantity: 1
+          });
+        }
+        if (holidayRemoval) {
+          costsToInsert.push({
+            vendor_id: vendorId,
+            household_address: userProfile.address,
+            amount: parseFloat(holidayRemoval),
+            cost_kind: "service_call",
+            unit: "visit",
+            period: "one_time",
+            quantity: 1
+          });
+        }
+        if (seasonalPackage) {
+          costsToInsert.push({
+            vendor_id: vendorId,
+            household_address: userProfile.address,
+            amount: parseFloat(seasonalPackage),
+            cost_kind: "yearly_plan",
+            unit: "season",
+            period: "yearly",
             quantity: 1
           });
         }
@@ -428,6 +537,166 @@ export function MobileAddCostModal({
               style={{ fontSize: '16px' }}
             />
             <span className="text-sm text-muted-foreground">/ Visit</span>
+          </div>
+        </div>
+      );
+    }
+
+    // Carpet & Sofa Cleaning
+    if (categoryLower.includes("carpet & sofa cleaning")) {
+      return (
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="serviceCall">Service Call</Label>
+            <div className="flex items-center space-x-2">
+              <span className="text-sm text-muted-foreground">$</span>
+              <Input
+                id="serviceCall"
+                type="number"
+                placeholder="150"
+                value={serviceCall}
+                onChange={(e) => setServiceCall(e.target.value)}
+                onFocus={handleInputFocus}
+                className="flex-1"
+                style={{ fontSize: '16px' }}
+              />
+              <span className="text-sm text-muted-foreground">/ Visit</span>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="perRoomCost">Per Room Cost</Label>
+            <div className="flex items-center space-x-2">
+              <span className="text-sm text-muted-foreground">$</span>
+              <Input
+                id="perRoomCost"
+                type="number"
+                placeholder="75"
+                value={perRoomCost}
+                onChange={(e) => setPerRoomCost(e.target.value)}
+                onFocus={handleInputFocus}
+                className="flex-1"
+                style={{ fontSize: '16px' }}
+              />
+              <span className="text-sm text-muted-foreground">/ Room</span>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="perItemCost">Per Item Cost</Label>
+            <div className="flex items-center space-x-2">
+              <span className="text-sm text-muted-foreground">$</span>
+              <Input
+                id="perItemCost"
+                type="number"
+                placeholder="50"
+                value={perItemCost}
+                onChange={(e) => setPerItemCost(e.target.value)}
+                onFocus={handleInputFocus}
+                className="flex-1"
+                style={{ fontSize: '16px' }}
+              />
+              <span className="text-sm text-muted-foreground">/ Item</span>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Patio Screening
+    if (categoryLower.includes("patio screening")) {
+      return (
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="patioInstallation">Installation Cost</Label>
+            <div className="flex items-center space-x-2">
+              <span className="text-sm text-muted-foreground">$</span>
+              <Input
+                id="patioInstallation"
+                type="number"
+                placeholder="15"
+                value={patioInstallation}
+                onChange={(e) => setPatioInstallation(e.target.value)}
+                onFocus={handleInputFocus}
+                className="flex-1"
+                style={{ fontSize: '16px' }}
+              />
+              <span className="text-sm text-muted-foreground">/ Sq Ft</span>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="patioRepair">Repair Cost</Label>
+            <div className="flex items-center space-x-2">
+              <span className="text-sm text-muted-foreground">$</span>
+              <Input
+                id="patioRepair"
+                type="number"
+                placeholder="250"
+                value={patioRepair}
+                onChange={(e) => setPatioRepair(e.target.value)}
+                onFocus={handleInputFocus}
+                className="flex-1"
+                style={{ fontSize: '16px' }}
+              />
+              <span className="text-sm text-muted-foreground">/ Panel</span>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Holiday Lighting
+    if (categoryLower.includes("holiday lighting")) {
+      return (
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="holidayInstallation">Installation Cost</Label>
+            <div className="flex items-center space-x-2">
+              <span className="text-sm text-muted-foreground">$</span>
+              <Input
+                id="holidayInstallation"
+                type="number"
+                placeholder="8"
+                value={holidayInstallation}
+                onChange={(e) => setHolidayInstallation(e.target.value)}
+                onFocus={handleInputFocus}
+                className="flex-1"
+                style={{ fontSize: '16px' }}
+              />
+              <span className="text-sm text-muted-foreground">/ Linear Ft</span>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="holidayRemoval">Removal Cost</Label>
+            <div className="flex items-center space-x-2">
+              <span className="text-sm text-muted-foreground">$</span>
+              <Input
+                id="holidayRemoval"
+                type="number"
+                placeholder="300"
+                value={holidayRemoval}
+                onChange={(e) => setHolidayRemoval(e.target.value)}
+                onFocus={handleInputFocus}
+                className="flex-1"
+                style={{ fontSize: '16px' }}
+              />
+              <span className="text-sm text-muted-foreground">/ Visit</span>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="seasonalPackage">Seasonal Package</Label>
+            <div className="flex items-center space-x-2">
+              <span className="text-sm text-muted-foreground">$</span>
+              <Input
+                id="seasonalPackage"
+                type="number"
+                placeholder="1500"
+                value={seasonalPackage}
+                onChange={(e) => setSeasonalPackage(e.target.value)}
+                onFocus={handleInputFocus}
+                className="flex-1"
+                style={{ fontSize: '16px' }}
+              />
+              <span className="text-sm text-muted-foreground">/ Season</span>
+            </div>
           </div>
         </div>
       );

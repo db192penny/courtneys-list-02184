@@ -28,7 +28,10 @@ export const categoryEmojiMap: Record<string, string> = {
   'Water Filtration': '💧',
   'Interior Design': '🛋️',
   'Moving Company': '🚚',
-  'Damage Assessment/Restoration': '🛠️'
+  'Damage Assessment/Restoration': '🛠️',
+  'Carpet & Sofa Cleaning': '🧽',
+  'Patio Screening': '🏠',
+  'Holiday Lighting': '✨'
 };
 
 export function getCategoryEmoji(category: string): string {

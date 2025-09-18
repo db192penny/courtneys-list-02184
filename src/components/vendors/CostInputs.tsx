@@ -99,6 +99,32 @@ export function buildDefaultCosts(category?: string): CostEntry[] {
       { cost_kind: "project_fee", amount: null, unit: "project", notes: null },
     ];
   }
+
+  // Carpet & Sofa Cleaning: Service call + per room + per item
+  if (c === "carpet & sofa cleaning") {
+    return [
+      { cost_kind: "service_call", amount: null, unit: "visit", notes: null },
+      { cost_kind: "hourly", amount: null, unit: "room", notes: null },
+      { cost_kind: "one_time", amount: null, unit: "item", notes: null },
+    ];
+  }
+
+  // Patio Screening: Installation per sq ft + repair per panel
+  if (c === "patio screening") {
+    return [
+      { cost_kind: "installation", amount: null, unit: "sq ft", notes: null },
+      { cost_kind: "service_call", amount: null, unit: "panel", notes: null },
+    ];
+  }
+
+  // Holiday Lighting: Installation per linear ft + removal + seasonal package
+  if (c === "holiday lighting") {
+    return [
+      { cost_kind: "installation", amount: null, unit: "linear ft", notes: null },
+      { cost_kind: "service_call", amount: null, unit: "visit", notes: null },
+      { cost_kind: "yearly_plan", amount: null, period: "yearly", unit: "season", quantity: null, notes: null },
+    ];
+  }
   
   // Power Washing/Car Wash & Detail: Per visit with yearly quantity
   if (c === "power washing" || c === "car wash & detail") {
@@ -168,26 +194,26 @@ export default function CostInputs({
     return entries.map((entry, idx) => {
       const label =
         entry.cost_kind === "service_call" ? "Service Call" :
-        entry.cost_kind === "hourly" ? "Hourly Rate" :
-        entry.cost_kind === "yearly_plan" ? "Maintenance Plan" :
+        entry.cost_kind === "hourly" ? (entry.unit === "room" ? "Per Room Cost" : "Hourly Rate") :
+        entry.cost_kind === "yearly_plan" ? (entry.unit === "season" ? "Seasonal Package" : "Maintenance Plan") :
         entry.cost_kind === "installation" ? "Installation Cost" :
         entry.cost_kind === "project_fee" ? "Project Fee" :
         entry.cost_kind === "base_fee" ? "Base Move Fee" :
         entry.cost_kind === "assessment_fee" ? "Assessment/Inspection Fee" :
         entry.cost_kind === "monthly_fee" ? "Monthly Fee" :
-        entry.cost_kind === "one_time" ? "Installation Cost" :
+        entry.cost_kind === "one_time" ? (entry.unit === "item" ? "Per Item Cost" : "Installation Cost") :
         "Maintenance Plan";
 
       const unitDisplay = 
-        entry.cost_kind === "service_call" ? " per Visit" :
-        entry.cost_kind === "hourly" ? " per Hour" :
-        entry.cost_kind === "yearly_plan" ? " per Year" :
-        entry.cost_kind === "installation" ? " (one-time)" :
+        entry.cost_kind === "service_call" ? (entry.unit === "panel" ? " per Panel" : " per Visit") :
+        entry.cost_kind === "hourly" ? (entry.unit === "room" ? " per Room" : " per Hour") :
+        entry.cost_kind === "yearly_plan" ? (entry.unit === "season" ? " per Season" : " per Year") :
+        entry.cost_kind === "installation" ? (entry.unit === "sq ft" ? " per Sq Ft" : entry.unit === "linear ft" ? " per Linear Ft" : " (one-time)") :
         entry.cost_kind === "project_fee" ? " per Project" :
         entry.cost_kind === "base_fee" ? " per Move" :
         entry.cost_kind === "assessment_fee" ? " per Visit" :
         entry.cost_kind === "monthly_fee" ? " per Month" :
-        entry.cost_kind === "one_time" ? " (one-time)" :
+        entry.cost_kind === "one_time" ? (entry.unit === "item" ? " per Item" : " (one-time)") :
         " per Month";
 
       return (

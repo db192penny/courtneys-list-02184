@@ -21,6 +21,9 @@ export const CATEGORIES = [
   "Pool",
   "Power Washing",
   "Water Filtration",
+  "Carpet & Sofa Cleaning",
+  "Patio Screening",
+  "Holiday Lighting",
 ] as const;
 
 export type Category = (typeof CATEGORIES)[number];
