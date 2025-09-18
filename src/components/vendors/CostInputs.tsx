@@ -216,9 +216,12 @@ export default function CostInputs({
             placeholder="Share additional details about pricing for neighbors..."
             value={entries[0]?.notes ?? ""}
             onChange={(e) => {
-              // Update all entries with the same notes
+              // Only update the first entry with notes to prevent duplication
               setEntries((prev) => {
-                const next = prev.map(entry => ({ ...entry, notes: e.target.value || null }));
+                const next = [...prev];
+                if (next.length > 0) {
+                  next[0] = { ...next[0], notes: e.target.value || null };
+                }
                 onChange(next);
                 return next;
               });

@@ -33,16 +33,20 @@ export default function CostPreview({ costs, showNameInCosts, authorLabel }: Pro
     return null;
   }
 
+  // Get unique comment text to avoid duplicates
+  const uniqueComment = validCosts.find(c => c.notes && c.notes.trim())?.notes || null;
+
   return (
     <Card className="border-dashed">
       <CardContent className="pt-4">
         <div className="space-y-2">
           <h4 className="text-sm font-medium text-muted-foreground">Cost Preview</h4>
           <div className="space-y-1">
-            {validCosts.map((cost, index) => (
-              <div key={index} className="text-sm space-y-1">
-                <div className="flex items-center gap-2">
-                  {formatCost(cost.amount, cost.unit, cost.period) ? (
+            {validCosts
+              .filter(cost => cost.amount != null && cost.amount > 0)
+              .map((cost, index) => (
+                <div key={index} className="text-sm space-y-1">
+                  <div className="flex items-center gap-2">
                     <div className="font-medium">
                       {formatCost(cost.amount, cost.unit, cost.period)}
                       {cost.cost_kind && (
@@ -51,7 +55,19 @@ export default function CostPreview({ costs, showNameInCosts, authorLabel }: Pro
                         </span>
                       )}
                     </div>
-                  ) : null}
+                    <Badge variant="outline" className="text-xs px-2 py-0.5 bg-blue-50 text-blue-700 border-blue-200">
+                      {showNameInCosts ? authorLabel : (() => {
+                        const streetMatch = authorLabel.match(/ on (.+)$/);
+                        const cleanStreet = streetMatch ? extractStreetName(streetMatch[1]) : null;
+                        return cleanStreet ? `Neighbor on ${capitalizeStreetName(cleanStreet)}` : "Neighbor";
+                      })()}
+                    </Badge>
+                  </div>
+                </div>
+              ))}
+            {uniqueComment && (
+              <div className="text-sm space-y-1">
+                <div className="flex items-center gap-2">
                   <Badge variant="outline" className="text-xs px-2 py-0.5 bg-blue-50 text-blue-700 border-blue-200">
                     {showNameInCosts ? authorLabel : (() => {
                       const streetMatch = authorLabel.match(/ on (.+)$/);
@@ -60,13 +76,11 @@ export default function CostPreview({ costs, showNameInCosts, authorLabel }: Pro
                     })()}
                   </Badge>
                 </div>
-                {cost.notes && (
-                  <div className="text-xs text-muted-foreground pl-2">
-                    {cost.notes}
-                  </div>
-                )}
+                <div className="text-xs text-muted-foreground pl-2">
+                  {uniqueComment}
+                </div>
               </div>
-            ))}
+            )}
           </div>
         </div>
       </CardContent>

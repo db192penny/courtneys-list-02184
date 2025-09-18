@@ -60,11 +60,26 @@ export function MobileCostsModal({ vendorId }: Props) {
     return <div className="text-sm text-muted-foreground p-4">No cost submissions yet.</div>;
   }
 
+  // Group costs by unique combination of author_label and notes to avoid duplicates
+  const uniqueCosts = costs.filter((cost, index, array) => {
+    // Keep cost if it has an amount, or if it's the first occurrence of a comment from this author
+    if (cost.amount != null && cost.amount > 0) return true;
+    if (cost.notes && cost.notes.trim()) {
+      const firstOccurrence = array.findIndex(c => 
+        c.author_label === cost.author_label && 
+        c.notes === cost.notes &&
+        (c.amount == null || c.amount === 0)
+      );
+      return firstOccurrence === index;
+    }
+    return false;
+  });
+
   return (
     <div className="max-h-96 overflow-y-auto space-y-3 p-4">
       <h4 className="font-medium text-gray-700">What neighbors are paying:</h4>
       <div className="space-y-3">
-        {costs.map((cost) => (
+        {uniqueCosts.map((cost) => (
           <div key={cost.id} className="bg-gray-50 border border-gray-200 rounded-lg p-3">
             {formatCost(cost.amount, cost.unit, cost.period) ? (
               <div className="flex justify-between items-center mb-1">

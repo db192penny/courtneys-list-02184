@@ -89,7 +89,19 @@ export default function CostsHover({ vendorId, children }: Props) {
           )}
           {isVerified && costs && costs.length > 0 && (
             <div className="space-y-2">
-              {costs.map((cost) => (
+              {costs.filter((cost, index, array) => {
+                // Keep cost if it has an amount, or if it's the first occurrence of a comment from this author
+                if (cost.amount != null && cost.amount > 0) return true;
+                if (cost.notes && cost.notes.trim()) {
+                  const firstOccurrence = array.findIndex(c => 
+                    c.author_label === cost.author_label && 
+                    c.notes === cost.notes &&
+                    (c.amount == null || c.amount === 0)
+                  );
+                  return firstOccurrence === index;
+                }
+                return false;
+              }).map((cost) => (
                 <div key={cost.id} className="border rounded-md p-2">
                   <div className="text-xs text-foreground flex items-center justify-between">
                     <div className="flex items-center gap-2">
