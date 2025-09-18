@@ -8,7 +8,7 @@ type Props = {
 
 type CostData = {
   id: string;
-  amount: number;
+  amount: number | null;
   unit: string | null;
   period: string | null;
   cost_kind: string | null;
@@ -17,7 +17,11 @@ type CostData = {
   author_label: string;
 };
 
-const formatCost = (amount: number, unit?: string | null, period?: string | null) => {
+const formatCost = (amount: number | null, unit?: string | null, period?: string | null) => {
+  if (amount === null || amount === undefined) {
+    return null;
+  }
+  
   const formattedAmount = amount % 1 === 0 ? amount.toString() : amount.toFixed(2);
   
   let unitDisplay = "";
@@ -62,19 +66,27 @@ export function MobileCostsModal({ vendorId }: Props) {
       <div className="space-y-3">
         {costs.map((cost) => (
           <div key={cost.id} className="bg-gray-50 border border-gray-200 rounded-lg p-3">
-            <div className="flex justify-between items-center mb-1">
-              <span className="font-medium text-gray-700">
-                ${cost.amount}{cost.period ? `/${cost.period}` : ''}
-                {cost.cost_kind && cost.cost_kind !== "one_time" && (
-                  <span className="text-gray-600 ml-1 text-xs">
-                    ({cost.cost_kind.replace("_", " ")})
-                  </span>
-                )}
-              </span>
-              <span className="text-xs text-gray-500">
-                {new Date(cost.created_at).toLocaleDateString()}
-              </span>
-            </div>
+            {formatCost(cost.amount, cost.unit, cost.period) ? (
+              <div className="flex justify-between items-center mb-1">
+                <span className="font-medium text-gray-700">
+                  {formatCost(cost.amount, cost.unit, cost.period)}
+                  {cost.cost_kind && cost.cost_kind !== "one_time" && (
+                    <span className="text-gray-600 ml-1 text-xs">
+                      ({cost.cost_kind.replace("_", " ")})
+                    </span>
+                  )}
+                </span>
+                <span className="text-xs text-gray-500">
+                  {new Date(cost.created_at).toLocaleDateString()}
+                </span>
+              </div>
+            ) : (
+              <div className="flex justify-between items-center mb-1">
+                <span className="text-xs text-gray-500">
+                  {new Date(cost.created_at).toLocaleDateString()}
+                </span>
+              </div>
+            )}
             {cost.notes && (
               <p className="text-sm text-gray-600 italic mt-1">
                 "{cost.notes}"

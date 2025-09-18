@@ -15,10 +15,11 @@ type Props = {
 
 type PreviewCost = {
   id: string;
-  amount: number;
+  amount: number | null;
   unit: string | null;
   period: string | null;
   cost_kind: string | null;
+  notes: string | null;
   created_at: string;
   session_id: string;
   anonymous: boolean;
@@ -30,7 +31,11 @@ type PreviewSession = {
   street_name?: string;
 };
 
-const formatCost = (amount: number, unit?: string | null, period?: string | null) => {
+const formatCost = (amount: number | null, unit?: string | null, period?: string | null) => {
+  if (amount === null || amount === undefined) {
+    return null;
+  }
+  
   const formattedAmount = amount % 1 === 0 ? amount.toString() : amount.toFixed(2);
   
   let unitDisplay = "";
@@ -164,7 +169,16 @@ export default function PreviewCostsHover({ vendorId, children }: Props) {
     enabled: !!vendorId,
   });
 
-  if (isLoading || !costs || costs.length === 0) {
+  if (isLoading || !costs) {
+    return <>{children}</>;
+  }
+
+  // Show costs that have either an amount or comments
+  const displayableCosts = costs.filter(cost => 
+    (cost.amount != null && cost.amount > 0) || (cost.notes && cost.notes.trim())
+  );
+
+  if (displayableCosts.length === 0) {
     return <>{children}</>;
   }
 
@@ -180,18 +194,20 @@ export default function PreviewCostsHover({ vendorId, children }: Props) {
         <div className="space-y-3">
           <h4 className="text-sm font-semibold">Community Cost Submissions</h4>
           <div className="space-y-2">
-            {costs.map((cost) => (
+            {displayableCosts.map((cost) => (
               <div key={cost.id} className="border rounded-md p-2">
                 <div className="text-xs text-foreground flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <div className="font-medium">
-                      {formatCost(cost.amount, cost.unit, cost.period)}
-                      {cost.cost_kind && cost.cost_kind !== "one_time" && (
-                        <span className="text-muted-foreground ml-1">
-                          ({cost.cost_kind.replace("_", " ")})
-                        </span>
-                      )}
-                    </div>
+                    {formatCost(cost.amount, cost.unit, cost.period) ? (
+                      <div className="font-medium">
+                        {formatCost(cost.amount, cost.unit, cost.period)}
+                        {cost.cost_kind && cost.cost_kind !== "one_time" && (
+                          <span className="text-muted-foreground ml-1">
+                            ({cost.cost_kind.replace("_", " ")})
+                          </span>
+                        )}
+                      </div>
+                    ) : null}
                     <Badge variant="outline" className="text-xs px-2 py-0.5 bg-blue-50 text-blue-700 border-blue-200">
                       {cost.author_label}
                     </Badge>

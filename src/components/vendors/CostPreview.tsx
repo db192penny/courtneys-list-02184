@@ -9,7 +9,11 @@ type Props = {
   authorLabel: string;
 };
 
-const formatCost = (amount: number, unit?: string, period?: string) => {
+const formatCost = (amount: number | null, unit?: string, period?: string) => {
+  if (amount === null || amount === undefined) {
+    return null;
+  }
+  
   const formattedAmount = amount % 1 === 0 ? amount.toString() : amount.toFixed(2);
   
   let unitDisplay = "";
@@ -23,7 +27,7 @@ const formatCost = (amount: number, unit?: string, period?: string) => {
 };
 
 export default function CostPreview({ costs, showNameInCosts, authorLabel }: Props) {
-  const validCosts = costs.filter(c => c.amount != null && c.amount > 0);
+  const validCosts = costs.filter(c => (c.amount != null && c.amount > 0) || (c.notes && c.notes.trim()));
   
   if (validCosts.length === 0) {
     return null;
@@ -38,14 +42,16 @@ export default function CostPreview({ costs, showNameInCosts, authorLabel }: Pro
             {validCosts.map((cost, index) => (
               <div key={index} className="text-sm space-y-1">
                 <div className="flex items-center gap-2">
-                  <div className="font-medium">
-                    {formatCost(cost.amount as number, cost.unit, cost.period)}
-                    {cost.cost_kind && (
-                      <span className="text-muted-foreground ml-1">
-                        ({cost.cost_kind.replace("_", " ")})
-                      </span>
-                    )}
-                  </div>
+                  {formatCost(cost.amount, cost.unit, cost.period) ? (
+                    <div className="font-medium">
+                      {formatCost(cost.amount, cost.unit, cost.period)}
+                      {cost.cost_kind && (
+                        <span className="text-muted-foreground ml-1">
+                          ({cost.cost_kind.replace("_", " ")})
+                        </span>
+                      )}
+                    </div>
+                  ) : null}
                   <Badge variant="outline" className="text-xs px-2 py-0.5 bg-blue-50 text-blue-700 border-blue-200">
                     {showNameInCosts ? authorLabel : (() => {
                       const streetMatch = authorLabel.match(/ on (.+)$/);
