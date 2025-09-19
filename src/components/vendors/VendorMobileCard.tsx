@@ -175,13 +175,14 @@ export default function VendorMobileCard({
           </div>
           <Button
             onClick={() => isAuthenticated ? onRate(vendor) : window.location.href = `/auth?community=${encodeURIComponent(communityName || '')}`}
-            className={`rounded-full px-6 py-2 font-medium shrink-0 ${
+            className={`rounded-lg px-4 py-2 font-medium shrink-0 flex items-center gap-2 ${
               userReviews?.has(vendor.id) 
                 ? "bg-green-100 text-green-800 hover:bg-green-200 border border-green-200" 
                 : "bg-blue-600 text-white hover:bg-blue-700"
             }`}
           >
-            {userReviews?.has(vendor.id) ? "Rated ⭐" : "Rate"}
+            <Star size={16} className={userReviews?.has(vendor.id) ? "fill-current" : ""} />
+            {userReviews?.has(vendor.id) ? "Rated" : "Rate"}
           </Button>
         </div>
 
