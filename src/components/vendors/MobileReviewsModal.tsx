@@ -95,7 +95,7 @@ export function MobileReviewsModal({ open, onOpenChange, vendor, onRate }) {
                 <div className="text-sm text-blue-600 mb-2">
                   {r.author_label}
                 </div>
-                <RatingStars rating={r.rating} size="md" className="justify-center" />
+                <RatingStars rating={r.rating} size="md" showValue className="justify-center" />
               </div>
             )}
           </div>
