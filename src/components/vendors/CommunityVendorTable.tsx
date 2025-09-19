@@ -216,8 +216,8 @@ export default function CommunityVendorTable({
   return (
     <TooltipProvider>
       <div className="max-w-4xl mx-auto">
-        {/* Sticky Filter Controls - Fixed to just below header */}
-        <div className={`sticky top-12 sm:top-14 z-30 backdrop-blur-md bg-background/95 border-b border-border/40 shadow-sm transition-all duration-300 ease-in-out mb-4 -mx-4 px-4 py-2 sm:py-3 ${
+        {/* Sticky Filter Controls */}
+        <div className={`sticky top-[120px] sm:top-[140px] z-30 backdrop-blur-md bg-background/95 border-b border-border/40 shadow-sm transition-all duration-300 ease-in-out mb-4 -mx-4 px-4 py-2 sm:py-3 ${
           isScrollingDown ? '-translate-y-full opacity-0' : 'translate-y-0 opacity-100'
         }`}>
           <div className="max-w-4xl mx-auto">
