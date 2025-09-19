@@ -135,9 +135,6 @@ const CommunityPreview = () => {
               className="w-full h-full rounded-lg object-cover border"
               loading="lazy"
             />
-            <div className="absolute top-2 left-2">
-              <h1 className="text-white text-sm font-semibold tracking-tight drop-shadow-lg">{communityName}</h1>
-            </div>
           </div>
           <p className="text-muted-foreground">
             Neighbor-recommended service providers
