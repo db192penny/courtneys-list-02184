@@ -10,6 +10,7 @@ import { Link } from "react-router-dom";
 import { AdminQuickAccess } from "@/components/admin/AdminQuickAccess";
 import EmailTemplatePanel from "@/components/admin/EmailTemplatePanel";
 import WeeklyEmailSender from "@/components/admin/WeeklyEmailSender";
+import { RatingMovements } from "@/components/analytics/RatingMovements";
 
 interface PendingRow {
   household_address: string;
@@ -313,6 +314,8 @@ const [householdLoading, setHouseholdLoading] = useState<Record<string, boolean>
                 Use these tools to manage the platform and seed initial vendor data for communities.
               </p>
             </div>
+
+            <RatingMovements />
 
             <div className="rounded-md border border-border p-4">
               <h2 className="font-medium mb-3">Pending Users ({pendingUsers.length})</h2>
