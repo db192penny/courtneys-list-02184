@@ -122,9 +122,17 @@ export default function Community() {
               <div className="flex flex-col gap-4">
                  {/* Community info - mobile optimized layout */}
                  <div className="flex gap-3 items-center">
-                   <div className="h-8 w-8 sm:h-12 sm:w-12 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm sm:text-lg">
-                     BB
-                   </div>
+                    {asset?.photo_path ? (
+                      <img 
+                        src={photoUrl} 
+                        alt={`${communityName} community photo`}
+                        className="h-8 w-8 sm:h-12 sm:w-12 rounded-lg object-cover"
+                      />
+                    ) : (
+                      <div className="h-8 w-8 sm:h-12 sm:w-12 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm sm:text-lg">
+                        BB
+                      </div>
+                    )}
                    <div className="flex-1">
                      <h1 className="text-lg sm:text-xl font-semibold tracking-tight">{communityName}</h1>
                      <p className="text-xs sm:text-sm text-muted-foreground">{homesLabel} Homes</p>
