@@ -129,7 +129,28 @@ export function NeighborReviewPreview({
 
   if (!selectedReview) {
     return (
-      <div className={cn("bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-4", className)}>
+      <div 
+        className={cn("bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-4 cursor-pointer hover:scale-[1.02] hover:shadow-md hover:border-blue-300 transition-all duration-200 active:scale-[0.98]", className)}
+        onClick={() => {
+          if (isAuthenticated && onRate) {
+            onRate();
+          } else if (!isAuthenticated && onSignUp) {
+            onSignUp();
+          }
+        }}
+        role="button"
+        tabIndex={0}
+        onKeyPress={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            if (isAuthenticated && onRate) {
+              onRate();
+            } else if (!isAuthenticated && onSignUp) {
+              onSignUp();
+            }
+          }
+        }}
+      >
         {/* Header with Rating Summary */}
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-3">
@@ -153,16 +174,7 @@ export function NeighborReviewPreview({
         </div>
         
         {/* Call to Action */}
-        <div 
-          className="bg-white/60 rounded-lg p-3 border border-blue-100 cursor-pointer hover:bg-white/80 transition-colors" 
-          onClick={() => {
-            if (isAuthenticated && onRate) {
-              onRate();
-            } else if (!isAuthenticated && onSignUp) {
-              onSignUp();
-            }
-          }}
-        >
+        <div className="bg-white/60 rounded-lg p-3 border border-blue-100 hover:bg-white/80 transition-colors">
           <div className="flex items-center gap-2 text-blue-800">
             <span className="text-lg">⭐</span>
             <span className="text-sm font-semibold">Be the first neighbor to review this vendor!</span>
