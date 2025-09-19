@@ -103,49 +103,6 @@ export default function CommunityVendorTable({
   const isMobile = true;
   const [showInitialAnimation, setShowInitialAnimation] = useState(true);
   const { isScrollingDown } = useScrollDirection();
-  const [stickyOffset, setStickyOffset] = useState(160);
-
-  // Calculate proper sticky offset based on actual header height
-  useEffect(() => {
-    const calculateOffset = () => {
-      // Get the actual height of all elements above the sticky bar
-      const header = document.querySelector('header') as HTMLElement;
-      const banner = document.querySelector('[data-preview-banner]') as HTMLElement;
-      const communityHeader = document.querySelector('[data-community-header]') as HTMLElement;
-      
-      let totalHeight = 0;
-      
-      if (header) {
-        totalHeight += header.offsetHeight;
-      }
-      
-      if (banner) {
-        totalHeight += banner.offsetHeight;
-      }
-      
-      if (communityHeader) {
-        totalHeight += communityHeader.offsetHeight;
-      }
-      
-      // Add some padding for better visual appearance
-      totalHeight += 16;
-      
-      // Update the sticky offset
-      setStickyOffset(totalHeight || 160); // Fallback to 160px if calculation fails
-    };
-
-    // Calculate on mount and window resize
-    calculateOffset();
-    window.addEventListener('resize', calculateOffset);
-    
-    // Also recalculate after a short delay to account for image loading
-    const timer = setTimeout(calculateOffset, 500);
-    
-    return () => {
-      window.removeEventListener('resize', calculateOffset);
-      clearTimeout(timer);
-    };
-  }, [communityName]);
 
   // Initialize category from URL parameter
   useEffect(() => {
@@ -259,13 +216,10 @@ export default function CommunityVendorTable({
   return (
     <TooltipProvider>
       <div className="max-w-4xl mx-auto">
-        {/* Sticky Filter Controls - Fixed positioning */}
-        <div 
-          className={`sticky z-30 backdrop-blur-md bg-background/95 border-b border-border/40 shadow-sm transition-all duration-300 ease-in-out mb-4 -mx-4 px-4 py-2 sm:py-3 ${
-            isScrollingDown ? '-translate-y-full opacity-0' : 'translate-y-0 opacity-100'
-          }`}
-          style={{ top: `${stickyOffset}px` }}
-        >
+        {/* Sticky Filter Controls - Fixed to just below header */}
+        <div className={`sticky top-12 sm:top-14 z-30 backdrop-blur-md bg-background/95 border-b border-border/40 shadow-sm transition-all duration-300 ease-in-out mb-4 -mx-4 px-4 py-2 sm:py-3 ${
+          isScrollingDown ? '-translate-y-full opacity-0' : 'translate-y-0 opacity-100'
+        }`}>
           <div className="max-w-4xl mx-auto">
             <label className="text-xs text-primary font-semibold uppercase tracking-wide mb-1.5 sm:mb-2 block flex items-center gap-1.5">
               <Filter className="h-3 w-3" />
