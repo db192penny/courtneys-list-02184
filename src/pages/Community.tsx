@@ -120,24 +120,25 @@ export default function Community() {
         <div className={`sticky top-12 sm:top-14 z-40 backdrop-blur-md bg-background/95 border-b border-border/40 shadow-sm transition-transform duration-300 ease-in-out -mx-4 sm:mx-0 px-4 sm:px-0 py-3 sm:py-4 ${isScrollingDown ? '-translate-y-full' : 'translate-y-0'}`}>
           <header className="space-y-4">
               <div className="flex flex-col gap-4">
-                 {/* Community info - full-width image with name below */}
-                 <div className="space-y-2">
-                    {/* Full-width community image - smaller than original */}
+                 {/* Community info - full-width image with text overlay */}
+                 <div className="relative">
+                    {/* Full-width community image with text overlay */}
                     {asset?.photo_path ? (
-                      <img 
-                        src={photoUrl} 
-                        alt={`${communityName} community photo`}
-                        className="w-full h-16 sm:h-20 rounded-lg object-cover"
-                      />
+                      <div className="relative">
+                        <img 
+                          src={photoUrl} 
+                          alt={`${communityName} community photo`}
+                          className="w-full h-16 sm:h-20 rounded-lg object-cover"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent rounded-lg flex items-end justify-center pb-2">
+                          <h1 className="text-white text-lg sm:text-xl font-semibold tracking-tight text-center drop-shadow-lg">{communityName}</h1>
+                        </div>
+                      </div>
                     ) : (
                       <div className="w-full h-16 sm:h-20 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-xl sm:text-2xl">
-                        {communityName.split(' ').map(word => word[0]).join('')}
+                        {communityName}
                       </div>
                     )}
-                    {/* Community name centered below */}
-                    <div className="text-center">
-                      <h1 className="text-lg sm:text-xl font-semibold tracking-tight">{communityName}</h1>
-                    </div>
                  </div>
 
                 {/* For logged out users - compact call to action */}

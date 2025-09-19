@@ -126,20 +126,24 @@ const CommunityPreview = () => {
       </div>
 
       <div className="container py-8 space-y-8">
-        {/* Logo and Header */}
+        {/* Logo and Header with Text Overlay */}
         <header className="text-center space-y-4">
-          <img
-            src={photoUrl}
-            alt={`${communityName} community photo`}
-            className="h-24 w-24 rounded-lg object-cover border mx-auto"
-            loading="lazy"
-          />
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">{communityName}</h1>
-            <p className="text-muted-foreground mt-2">
-              Neighbor-recommended service providers
-            </p>
+          <div className="relative mx-auto w-24 h-24">
+            <img
+              src={photoUrl}
+              alt={`${communityName} community photo`}
+              className="w-full h-full rounded-lg object-cover border"
+              loading="lazy"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent rounded-lg flex items-end justify-center pb-1">
+              <h1 className="text-white text-xs font-bold text-center leading-tight drop-shadow-lg">
+                {communityName}
+              </h1>
+            </div>
           </div>
+          <p className="text-muted-foreground">
+            Neighbor-recommended service providers
+          </p>
         </header>
 
         {/* Community Info */}
