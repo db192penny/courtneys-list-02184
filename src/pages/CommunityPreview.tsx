@@ -135,7 +135,7 @@ const CommunityPreview = () => {
               className="w-full h-full rounded-lg object-cover border"
               loading="lazy"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent rounded-lg flex items-end justify-center pb-1">
+            <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-transparent rounded-lg flex items-start justify-center pt-1">
               <h1 className="text-white text-xs font-bold text-center leading-tight drop-shadow-lg">
                 {communityName}
               </h1>
