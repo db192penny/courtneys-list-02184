@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect, useRef, useLayoutEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Link, useSearchParams } from "react-router-dom";
@@ -103,6 +103,10 @@ export default function CommunityVendorTable({
   const isMobile = true;
   const [showInitialAnimation, setShowInitialAnimation] = useState(true);
   const { isScrollingDown } = useScrollDirection();
+  
+  // Dynamic positioning for sticky filter bar
+  const headerRef = useRef<HTMLDivElement>(null);
+  const [stickyOffset, setStickyOffset] = useState(120);
 
   // Initialize category from URL parameter
   useEffect(() => {
@@ -111,6 +115,29 @@ export default function CommunityVendorTable({
       setCategory(urlCategory);
     }
   }, [searchParams]);
+
+  // Calculate dynamic sticky offset based on actual header height
+  useLayoutEffect(() => {
+    const calculateOffset = () => {
+      if (headerRef.current) {
+        const rect = headerRef.current.getBoundingClientRect();
+        const headerHeight = rect.top + window.scrollY + rect.height;
+        setStickyOffset(Math.max(headerHeight, 80)); // Minimum 80px fallback
+      }
+    };
+
+    // Calculate on mount and resize
+    calculateOffset();
+    window.addEventListener('resize', calculateOffset);
+    
+    // Small delay to account for image loading
+    const timer = setTimeout(calculateOffset, 100);
+    
+    return () => {
+      window.removeEventListener('resize', calculateOffset);
+      clearTimeout(timer);
+    };
+  }, []);
 
   // Remove animation after initial attention
   useEffect(() => {
@@ -215,11 +242,14 @@ export default function CommunityVendorTable({
 
   return (
     <TooltipProvider>
+      {/* Header reference div for measuring offset */}
+      <div ref={headerRef} className="absolute -top-4 left-0 right-0 pointer-events-none" />
+      
       <div className="max-w-4xl mx-auto">
         {/* Sticky Filter Controls */}
-        <div className={`sticky top-[120px] sm:top-[140px] z-30 backdrop-blur-md bg-background/95 border-b border-border/40 shadow-sm transition-all duration-300 ease-in-out mb-4 -mx-4 px-4 py-2 sm:py-3 ${
+        <div className={`sticky z-30 backdrop-blur-md bg-background/95 border-b border-border/40 shadow-sm transition-all duration-300 ease-in-out mb-4 -mx-4 px-4 py-2 sm:py-3 ${
           isScrollingDown ? '-translate-y-full opacity-0' : 'translate-y-0 opacity-100'
-        }`}>
+        }`} style={{ top: `${stickyOffset}px` }}>
           <div className="max-w-4xl mx-auto">
             <label className="text-xs text-primary font-semibold uppercase tracking-wide mb-1.5 sm:mb-2 block flex items-center gap-1.5">
               <Filter className="h-3 w-3" />
