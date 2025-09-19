@@ -1,11 +1,13 @@
 export const CATEGORIES = [
   "Appliance Repair",
   "Car Wash & Detail",
+  "Carpet & Sofa Cleaning",
   "Damage Assessment/Restoration",
   "Electrical",
   "Generator",
   "Grill Cleaning",
   "Handyman",
+  "Holiday Lighting",
   "House Cleaning",
   "House Manager",
   "HVAC",
@@ -15,15 +17,13 @@ export const CATEGORIES = [
   "Mobile Tire Repair",
   "Moving Company",
   "Painters",
+  "Patio Screening",
   "Pest Control",
   "Pet Grooming",
   "Plumbing",
   "Pool",
   "Power Washing",
   "Water Filtration",
-  "Carpet & Sofa Cleaning",
-  "Patio Screening",
-  "Holiday Lighting",
 ] as const;
 
 export type Category = (typeof CATEGORIES)[number];
