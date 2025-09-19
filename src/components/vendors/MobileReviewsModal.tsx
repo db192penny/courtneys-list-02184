@@ -64,14 +64,17 @@ export function MobileReviewsModal({ open, onOpenChange, vendor, onRate }) {
       <div className="flex-1 max-h-96 overflow-y-auto space-y-4 p-4">
         {data.map((r) => (
           <div key={r.id} className="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-4">
-            {/* Header with just date */}
-            {r.created_at && (
-              <div className="flex justify-end mb-3">
+            {/* Header with neighbor info and date */}
+            <div className="flex justify-between items-center mb-3">
+              <div className="text-xs text-blue-600 font-medium">
+                {r.author_label}
+              </div>
+              {r.created_at && (
                 <div className="text-xs text-blue-600">
                   {new Date(r.created_at).toLocaleDateString()}
                 </div>
-              </div>
-            )}
+              )}
+            </div>
             
             {/* Comment with elegant styling to match preview */}
             {r.comments && r.comments.trim() ? (
