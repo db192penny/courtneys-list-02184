@@ -10,6 +10,34 @@ import { useUserProfile } from "@/hooks/useUserProfile";
 import { useBadgeLevels, getUserCurrentBadge, getUserNextBadge } from "@/hooks/useBadgeLevels";
 import { Badge } from "@/components/ui/badge";
 
+// New Logo Components
+function NewLogoDesktop() {
+  return (
+    <div className="flex flex-col items-start">
+      <div className="flex items-center gap-2">
+        <span className="text-xl sm:text-2xl">🏘️</span>
+        <span className="font-bold text-lg sm:text-xl bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          Courtney's List
+        </span>
+      </div>
+      <p className="text-xs sm:text-sm text-muted-foreground ml-6 sm:ml-8">
+        Trusted Provider Reviews by Neighbors
+      </p>
+    </div>
+  );
+}
+
+function NewLogoMobile() {
+  return (
+    <div className="flex items-center gap-2">
+      <span className="text-lg">🏘️</span>
+      <span className="font-bold text-base bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+        Courtney's List
+      </span>
+    </div>
+  );
+}
+
 // Points Badge Component
 function PointsBadge() {
   const navigate = useNavigate();
@@ -164,7 +192,7 @@ const Header = () => {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <nav className="container flex h-12 sm:h-14 items-center justify-between">
-        <span className="font-semibold text-base sm:text-lg cursor-default">Courtney's List</span>
+        {isMobile ? <NewLogoMobile /> : <NewLogoDesktop />}
         
         {isMobile ? (
           <div className="flex items-center gap-2">
