@@ -5,6 +5,7 @@ import { Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { ReviewSourceIcon } from "./ReviewSourceIcon";
+import { RatingStars } from "@/components/ui/rating-stars";
 
 export function MobileReviewsModal({ open, onOpenChange, vendor, onRate }) {
   const { data: profile } = useUserProfile();
@@ -66,12 +67,9 @@ export function MobileReviewsModal({ open, onOpenChange, vendor, onRate }) {
             {/* Header with rating and date */}
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
-                <div className="flex items-center gap-1">
-                  <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                  <span className="font-bold text-blue-800">{r.rating}/5</span>
-                </div>
+                <RatingStars rating={r.rating} size="sm" showValue />
                 <Badge variant="outline" className="text-xs px-2 py-0.5 bg-blue-50 text-blue-700 border-blue-200 font-medium">
-                  {r.author_label}
+                  Neighbor
                 </Badge>
               </div>
               {r.created_at && (
@@ -97,9 +95,8 @@ export function MobileReviewsModal({ open, onOpenChange, vendor, onRate }) {
             ) : (
               /* Rating-only display when no comment */
               <div className="bg-white/60 rounded-lg p-3 border border-blue-100 text-center">
-                <div className="flex items-center justify-center gap-1 text-blue-800 mb-2">
-                  <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                  <span className="font-bold text-lg">{r.rating}/5</span>
+                <div className="flex items-center justify-center gap-2 text-blue-800 mb-2">
+                  <RatingStars rating={r.rating} size="md" />
                 </div>
                 <div className="text-sm text-blue-600">
                   by {r.author_label}
