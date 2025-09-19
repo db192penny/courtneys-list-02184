@@ -34,61 +34,28 @@ export function RatingMovements() {
 
         const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
         
-        // Execute raw SQL query directly
-        const { data, error } = await supabase.rpc('query' as any, {
-          query_text: `
-            SELECT 
-              vendor_name,
-              vendor_category,
-              COUNT(*) FILTER (WHERE old_rating IS NULL) as new_ratings,
-              COUNT(*) FILTER (WHERE old_rating IS NOT NULL AND new_rating > old_rating) as upgrades,
-              COUNT(*) FILTER (WHERE old_rating IS NOT NULL AND new_rating < old_rating) as downgrades,
-              COUNT(*) as total_changes,
-              ROUND(AVG(new_rating), 1) as avg_rating,
-              JSON_AGG(
-                JSON_BUILD_OBJECT(
-                  'id', id,
-                  'changed_at', changed_at,
-                  'old_rating', old_rating,
-                  'new_rating', new_rating
-                ) ORDER BY changed_at DESC
-              ) FILTER (WHERE id IS NOT NULL) as recent_changes
-            FROM rating_history
-            WHERE changed_at >= $1
-              AND change_type IN ('create', 'update')
-            GROUP BY vendor_name, vendor_category
-            ORDER BY COUNT(*) DESC
-          `,
-          params: [sevenDaysAgo]
-        }).catch(() => {
-          // If raw query doesn't work, try a simpler approach
-          return supabase
-            .from('rating_history' as any)
-            .select('*')
-            .gte('changed_at', sevenDaysAgo)
-            .order('changed_at', { ascending: false });
-        });
+        // Try to fetch from rating_history table using type casting
+        const { data, error } = await (supabase
+          .from('rating_history' as any)
+          .select('*')
+          .gte('changed_at', sevenDaysAgo)
+          .order('changed_at', { ascending: false }) as any);
 
         if (error) {
-          // If the table doesn't exist, show a helpful message
-          console.log('Rating history table not accessible yet');
+          console.log('Rating history not available yet:', error);
           setVendorGroups([]);
           return;
         }
 
-        if (data) {
-          // Process the data
-          if (Array.isArray(data)) {
-            const groups = processRawData(data as any[]);
-            setVendorGroups(groups);
-          } else {
-            setVendorGroups([]);
-          }
+        if (data && Array.isArray(data)) {
+          const groups = processRawData(data);
+          setVendorGroups(groups);
+        } else {
+          setVendorGroups([]);
         }
 
       } catch (err) {
         console.error('Error fetching rating history:', err);
-        // Don't show error, just show empty state
         setVendorGroups([]);
       } finally {
         setLoading(false);
@@ -96,21 +63,6 @@ export function RatingMovements() {
     };
 
     function processRawData(records: any[]): VendorMovementGroup[] {
-      // If data has the aggregated format
-      if (records.length > 0 && 'new_ratings' in records[0]) {
-        return records.map(row => ({
-          vendor_name: row.vendor_name || 'Unknown',
-          vendor_category: row.vendor_category || 'Unknown',
-          new_ratings: Number(row.new_ratings) || 0,
-          upgrades: Number(row.upgrades) || 0,
-          downgrades: Number(row.downgrades) || 0,
-          total_changes: Number(row.total_changes) || 0,
-          avg_rating: Number(row.avg_rating) || 0,
-          recent_changes: Array.isArray(row.recent_changes) ? row.recent_changes.slice(0, 3) : []
-        }));
-      }
-      
-      // Otherwise process individual records
       const groupsMap = new Map<string, VendorMovementGroup>();
       
       records.forEach(record => {
@@ -134,7 +86,7 @@ export function RatingMovements() {
         const group = groupsMap.get(key)!;
         group.total_changes++;
         
-        // Add to recent changes
+        // Add to recent changes (keep only first 3)
         if (group.recent_changes.length < 3) {
           group.recent_changes.push({
             id: record.id,
@@ -145,7 +97,7 @@ export function RatingMovements() {
         }
         
         // Count movement types
-        if (record.old_rating === null) {
+        if (record.old_rating === null || record.old_rating === undefined) {
           group.new_ratings++;
         } else if (record.new_rating > record.old_rating) {
           group.upgrades++;
@@ -156,13 +108,17 @@ export function RatingMovements() {
 
       // Calculate average ratings and convert to array
       const groupsArray = Array.from(groupsMap.values()).map(group => {
-        const ratings = records.filter(r => 
+        // Calculate average from the records we have for this vendor
+        const vendorRecords = records.filter(r => 
           r.vendor_name === group.vendor_name && 
-          r.vendor_category === group.vendor_category
-        ).map(r => r.new_rating);
+          (r.vendor_category || 'Unknown') === group.vendor_category
+        );
         
-        const sum = ratings.reduce((acc, r) => acc + (r || 0), 0);
-        group.avg_rating = ratings.length > 0 ? sum / ratings.length : 0;
+        const sum = vendorRecords.reduce((acc, r) => acc + (r.new_rating || 0), 0);
+        group.avg_rating = vendorRecords.length > 0 
+          ? Math.round(sum / vendorRecords.length * 10) / 10 
+          : 0;
+        
         return group;
       });
 
@@ -214,9 +170,11 @@ export function RatingMovements() {
                     <h4 className="font-medium">{group.vendor_name}</h4>
                     <p className="text-sm text-muted-foreground">{group.vendor_category}</p>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <RatingStars rating={group.avg_rating} size="sm" showValue />
-                  </div>
+                  {group.avg_rating > 0 && (
+                    <div className="flex items-center gap-2">
+                      <RatingStars rating={group.avg_rating} size="sm" showValue />
+                    </div>
+                  )}
                 </div>
                 
                 <div className="flex flex-wrap items-center gap-4 text-sm">
@@ -254,12 +212,12 @@ export function RatingMovements() {
                       Recent activity:
                     </div>
                     <div className="mt-1 space-y-1">
-                      {group.recent_changes.map((change) => (
-                        <div key={change.id} className="text-xs flex items-center gap-2">
+                      {group.recent_changes.map((change, idx) => (
+                        <div key={`${change.id}-${idx}`} className="text-xs flex items-center gap-2">
                           <span className="text-muted-foreground">
                             {new Date(change.changed_at).toLocaleDateString()}
                           </span>
-                          {change.old_rating === null ? (
+                          {!change.old_rating ? (
                             <span className="text-blue-600">New rating: {change.new_rating}★</span>
                           ) : change.new_rating > change.old_rating ? (
                             <span className="text-green-600">
