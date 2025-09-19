@@ -128,11 +128,8 @@ export default function Community() {
                         <img 
                           src={photoUrl} 
                           alt={`${communityName} community photo`}
-                          className="w-full h-16 sm:h-20 rounded-lg object-cover"
+                          className="w-full h-16 sm:h-20 rounded-lg object-cover object-center sm:object-top"
                         />
-                        <div className="absolute top-3 left-3 bg-white/95 backdrop-blur-sm rounded-full px-4 py-2 shadow-md border border-white/20">
-                          <h1 className="text-gray-900 text-sm sm:text-base font-semibold tracking-tight text-center">{communityName}</h1>
-                        </div>
                       </div>
                     ) : (
                       <div className="w-full h-16 sm:h-20 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-xl sm:text-2xl">
