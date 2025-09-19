@@ -210,7 +210,12 @@ export default function VendorMobileCard({
             vendor={vendor}
             onOpenModal={() => setIsReviewsModalOpen(true)}
             onRate={() => onRate(vendor)}
+            onSignUp={() => {
+              const communitySlug = communityName?.toLowerCase().replace(/\s+/g, '-');
+              window.location.href = `/auth?community=${communityName}`;
+            }}
             communityName={communityName}
+            isAuthenticated={isAuthenticated}
           />
           
           {vendor.google_rating_count && vendor.google_rating_count > 0 && (

@@ -18,8 +18,10 @@ interface NeighborReviewPreviewProps {
   };
   onOpenModal?: () => void;
   onRate?: () => void;
+  onSignUp?: () => void;
   className?: string;
   communityName?: string;
+  isAuthenticated?: boolean;
 }
 
 interface Review {
@@ -35,8 +37,10 @@ export function NeighborReviewPreview({
   vendor,
   onOpenModal,
   onRate,
+  onSignUp,
   className,
-  communityName 
+  communityName,
+  isAuthenticated = false
 }: NeighborReviewPreviewProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const isMobile = useIsMobile();
@@ -149,7 +153,16 @@ export function NeighborReviewPreview({
         </div>
         
         {/* Call to Action */}
-        <div className="bg-white/60 rounded-lg p-3 border border-blue-100">
+        <div 
+          className="bg-white/60 rounded-lg p-3 border border-blue-100 cursor-pointer hover:bg-white/80 transition-colors" 
+          onClick={() => {
+            if (isAuthenticated && onRate) {
+              onRate();
+            } else if (!isAuthenticated && onSignUp) {
+              onSignUp();
+            }
+          }}
+        >
           <div className="flex items-center gap-2 text-blue-800">
             <span className="text-lg">⭐</span>
             <span className="text-sm font-semibold">Be the first neighbor to review this vendor!</span>
