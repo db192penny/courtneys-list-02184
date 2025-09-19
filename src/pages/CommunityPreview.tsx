@@ -135,7 +135,7 @@ const CommunityPreview = () => {
               className="w-full h-full rounded-lg object-cover border"
               loading="lazy"
             />
-            <div className="absolute bottom-0 left-0 right-0 bg-white/60 backdrop-blur-sm rounded-b-lg shadow-sm">
+            <div className="absolute bottom-0 left-0 right-0 bg-white/30 backdrop-blur-sm rounded-b-lg shadow-sm">
               <h1 className="text-gray-900 text-xs font-bold text-center py-2 px-1 leading-tight">
                 {communityName}
               </h1>
