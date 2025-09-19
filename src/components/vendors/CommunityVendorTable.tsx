@@ -109,9 +109,9 @@ export default function CommunityVendorTable({
   useEffect(() => {
     const calculateOffset = () => {
       // Get the actual height of all elements above the sticky bar
-      const header = document.querySelector('header');
-      const banner = document.querySelector('[data-preview-banner]');
-      const communityHeader = document.querySelector('[data-community-header]');
+      const header = document.querySelector('header') as HTMLElement;
+      const banner = document.querySelector('[data-preview-banner]') as HTMLElement;
+      const communityHeader = document.querySelector('[data-community-header]') as HTMLElement;
       
       let totalHeight = 0;
       
