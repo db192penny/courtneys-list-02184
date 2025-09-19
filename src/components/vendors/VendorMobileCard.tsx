@@ -152,25 +152,25 @@ export default function VendorMobileCard({
   return (
     <>
     <Card className="w-full" data-vendor-id={vendor.id}>
-      <CardContent className="p-3 space-y-3">
+      <CardContent className="p-3 space-y-3 relative">
+        {/* Ranking badge positioned at top-left corner */}
+        <span className="absolute top-2 left-2 bg-blue-500 text-white text-sm font-semibold px-3 py-1 rounded-lg z-10">
+          #{rank}
+        </span>
+        
         {/* Header Section */}
-        <div className="flex justify-between items-start mb-4 gap-3">
-          <div className="flex items-center gap-3 flex-1 min-w-0">
-            <span className="bg-blue-500 text-white text-sm font-semibold px-3 py-1 rounded-lg shrink-0">
-              #{rank}
-            </span>
-            <div className="flex-1 min-w-0">
-              <h3 className="text-lg font-bold break-words leading-tight mb-2">{vendor.name}</h3>
-              <div className="flex items-center gap-3">
-                <Badge variant="secondary" className="text-sm px-3 py-1">
-                  {getCategoryEmoji(vendor.category)} {vendor.category}
-                </Badge>
-                {vendor.homes_serviced > 0 && (
-                  <span className="text-sm text-muted-foreground">
-                    👥 {vendor.homes_serviced} neighbor{vendor.homes_serviced !== 1 ? 's' : ''}
-                  </span>
-                )}
-              </div>
+        <div className="flex justify-between items-start mb-4 gap-3 pt-8">
+          <div className="flex-1 min-w-0">
+            <h3 className="text-lg font-bold break-words leading-tight mb-2">{vendor.name}</h3>
+            <div className="flex items-center gap-3">
+              <Badge variant="secondary" className="text-sm px-3 py-1">
+                {getCategoryEmoji(vendor.category)} {vendor.category}
+              </Badge>
+              {vendor.homes_serviced > 0 && (
+                <span className="text-sm text-muted-foreground">
+                  👥 {vendor.homes_serviced} neighbor{vendor.homes_serviced !== 1 ? 's' : ''}
+                </span>
+              )}
             </div>
           </div>
           <Button

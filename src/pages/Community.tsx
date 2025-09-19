@@ -120,23 +120,25 @@ export default function Community() {
         <div className={`sticky top-12 sm:top-14 z-40 backdrop-blur-md bg-background/95 border-b border-border/40 shadow-sm transition-transform duration-300 ease-in-out -mx-4 sm:mx-0 px-4 sm:px-0 py-3 sm:py-4 ${isScrollingDown ? '-translate-y-full' : 'translate-y-0'}`}>
           <header className="space-y-4">
               <div className="flex flex-col gap-4">
-                 {/* Community info - mobile optimized layout */}
-                 <div className="flex gap-3 items-center">
+                 {/* Community info - mobile optimized layout with full-width image */}
+                 <div className="space-y-3">
+                    {/* Full-width community image */}
                     {asset?.photo_path ? (
                       <img 
                         src={photoUrl} 
                         alt={`${communityName} community photo`}
-                        className="h-8 w-8 sm:h-12 sm:w-12 rounded-lg object-cover"
+                        className="w-full h-24 sm:h-32 rounded-lg object-cover"
                       />
                     ) : (
-                      <div className="h-8 w-8 sm:h-12 sm:w-12 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm sm:text-lg">
-                        BB
+                      <div className="w-full h-24 sm:h-32 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-2xl sm:text-3xl">
+                        {communityName.split(' ').map(word => word[0]).join('')}
                       </div>
                     )}
-                   <div className="flex-1">
-                     <h1 className="text-lg sm:text-xl font-semibold tracking-tight">{communityName}</h1>
-                     <p className="text-xs sm:text-sm text-muted-foreground">{homesLabel} Homes</p>
-                   </div>
+                    {/* Community name and homes below image */}
+                    <div className="text-center space-y-1">
+                      <h1 className="text-xl sm:text-2xl font-semibold tracking-tight">{communityName}</h1>
+                      <p className="text-sm sm:text-base text-muted-foreground">{homesLabel} Homes</p>
+                    </div>
                  </div>
 
                 {/* For logged out users - prominent call to action */}
