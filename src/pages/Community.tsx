@@ -120,22 +120,23 @@ export default function Community() {
         <div className={`sticky top-12 sm:top-14 z-40 backdrop-blur-md bg-background/95 border-b border-border/40 shadow-sm transition-transform duration-300 ease-in-out -mx-4 sm:mx-0 px-4 sm:px-0 py-3 sm:py-4 ${isScrollingDown ? '-translate-y-full' : 'translate-y-0'}`}>
           <header className="space-y-4">
               <div className="flex flex-col gap-4">
-                 {/* Community info - compact side-by-side layout */}
-                 <div className="flex gap-3 items-center">
+                 {/* Community info - full-width image with name below */}
+                 <div className="space-y-2">
+                    {/* Full-width community image - smaller than original */}
                     {asset?.photo_path ? (
                       <img 
                         src={photoUrl} 
                         alt={`${communityName} community photo`}
-                        className="h-10 w-10 sm:h-12 sm:w-12 rounded-lg object-cover shrink-0"
+                        className="w-full h-16 sm:h-20 rounded-lg object-cover"
                       />
                     ) : (
-                      <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm sm:text-lg shrink-0">
+                      <div className="w-full h-16 sm:h-20 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-xl sm:text-2xl">
                         {communityName.split(' ').map(word => word[0]).join('')}
                       </div>
                     )}
-                    <div className="flex-1">
+                    {/* Community name centered below */}
+                    <div className="text-center">
                       <h1 className="text-lg sm:text-xl font-semibold tracking-tight">{communityName}</h1>
-                      <p className="text-sm sm:text-base text-muted-foreground">{homesLabel} Homes</p>
                     </div>
                  </div>
 
