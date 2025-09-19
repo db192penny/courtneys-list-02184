@@ -256,7 +256,11 @@ export default function VendorMobileCard({
                     {hasValidAmounts && (
                       <div className="text-lg font-bold text-blue-800">
                         💰 {costsWithAmounts.length > 1 
-                          ? `$${Math.min(...costsWithAmounts.map(c => c.amount))} - $${Math.max(...costsWithAmounts.map(c => c.amount))}`
+                          ? (() => {
+                              const min = Math.min(...costsWithAmounts.map(c => c.amount));
+                              const max = Math.max(...costsWithAmounts.map(c => c.amount));
+                              return min === max ? `$${min}` : `$${min} - $${max}`;
+                            })()
                           : `$${costsWithAmounts[0].amount}`
                         }
                         {costsWithAmounts[0]?.period ? `/${costsWithAmounts[0].period}` : ''}
