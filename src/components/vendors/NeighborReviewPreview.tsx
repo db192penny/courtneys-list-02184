@@ -137,12 +137,12 @@ export function NeighborReviewPreview({
           </div>
           <div className="text-right">
             <div className="flex items-center gap-1">
-              <RatingStars rating={vendor?.hoa_rating || 0} size="sm" />
-              <span className="text-sm font-bold text-blue-800">
+              <RatingStars rating={vendor?.hoa_rating || 0} />
+              <span className="text-base font-bold text-blue-800">
                 {vendor?.hoa_rating?.toFixed(1) || '0.0'}
               </span>
             </div>
-            <div className="text-xs text-blue-600 font-medium">
+            <div className="text-sm text-blue-600 font-medium">
               {vendor?.hoa_rating_count || 0} review{(vendor?.hoa_rating_count || 0) !== 1 ? 's' : ''}
             </div>
           </div>
@@ -178,12 +178,12 @@ export function NeighborReviewPreview({
         </div>
         <div className="text-right">
           <div className="flex items-center gap-1">
-            <RatingStars rating={vendor?.hoa_rating || 0} size="sm" />
-            <span className="text-sm font-bold text-blue-800">
+            <RatingStars rating={vendor?.hoa_rating || 0} />
+            <span className="text-base font-bold text-blue-800">
               {vendor?.hoa_rating?.toFixed(1) || '0.0'}
             </span>
           </div>
-          <div className="text-xs text-blue-600 font-medium">
+          <div className="text-sm text-blue-600 font-medium">
             {vendor?.hoa_rating_count || 0} review{(vendor?.hoa_rating_count || 0) !== 1 ? 's' : ''}
           </div>
         </div>
@@ -192,7 +192,7 @@ export function NeighborReviewPreview({
       {/* Comment Preview with Right-aligned Attribution or Rating-only Display */}
       {selectedReview.comments && selectedReview.comments.trim() ? (
         <div className="bg-white/60 rounded-lg p-3 mb-3 border border-blue-100">
-          <p className="text-sm text-blue-800 font-medium leading-snug mb-2 italic">
+          <p className="text-base text-blue-800 font-medium leading-snug mb-2 italic">
             "{truncateComment(selectedReview.comments).text}"
           </p>
           {/* Read more link for truncated content */}
@@ -209,45 +209,29 @@ export function NeighborReviewPreview({
           )}
           {/* Right-aligned attribution */}
           <div className="flex justify-end">
-            <p className="text-xs font-medium text-blue-600">
+            <p className="text-sm font-semibold text-blue-700">
               — {formatAuthorDisplay(selectedReview.author_label)}
             </p>
           </div>
         </div>
       ) : (
-        <div className="bg-white/60 rounded-lg p-3 mb-3 border border-blue-100">
-          <div className="flex items-center gap-2 text-blue-800">
-            <div className="flex items-center gap-1">
-              <RatingStars rating={selectedReview.rating} size="sm" />
-              <span className="font-bold">{selectedReview.rating}/5</span>
-            </div>
-            <span className="text-sm">by {formatAuthorDisplay(selectedReview.author_label)}</span>
+        <div className="bg-white/60 rounded-lg p-3 mb-3 border border-blue-100 text-center">
+          <div className="flex items-center justify-center gap-1 text-blue-800 mb-2">
+            <RatingStars rating={selectedReview.rating} />
+            <span className="font-bold text-lg">{selectedReview.rating}/5</span>
           </div>
-          <div className="text-xs text-blue-600 mt-1">
-            {new Date(selectedReview.created_at).toLocaleDateString()}
+          <div className="text-sm text-blue-600">
+            by {formatAuthorDisplay(selectedReview.author_label)}
           </div>
-          <button 
-            onClick={(e) => {
-              e.stopPropagation();
-              onRate?.();
-            }}
-            className="text-xs text-blue-600 mt-2 italic hover:text-blue-800 hover:underline cursor-pointer transition-colors"
-          >
-            Be the first to add a detailed review →
-          </button>
         </div>
       )}
       
-      {/* Footer with CTA - More prominent */}
+      {/* Footer with CTA - Simplified */}
       <div className="mt-3 bg-blue-100/50 rounded-lg p-2 border border-blue-200">
-        <div className="flex items-center justify-between">
-          <span className="text-xs text-blue-700 font-medium">
-            {totalReviews > 1 ? `See all ${totalReviews} reviews` : 'View full review'}
+        <div className="flex items-center justify-center">
+          <span className="text-sm font-medium text-blue-700">
+            {totalReviews > 1 ? `See all ${totalReviews} reviews →` : 'View full review →'}
           </span>
-          <div className="flex items-center gap-1 text-blue-600 font-bold hover:text-blue-800 transition-colors">
-            <span className="text-sm">View all</span>
-            <span className="text-lg">→</span>
-          </div>
         </div>
       </div>
     </div>
