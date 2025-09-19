@@ -153,94 +153,57 @@ export default function VendorMobileCard({
     <>
     <Card className="w-full" data-vendor-id={vendor.id}>
       <CardContent className="p-3 space-y-3">
-        <div className="flex justify-between items-start mb-3 gap-3">
-          <div className="flex items-center gap-2 flex-1 min-w-0">
-            <span className="bg-blue-500 text-white text-xs font-semibold px-2 py-1 rounded shrink-0">
+        {/* Header Section */}
+        <div className="flex justify-between items-start mb-4 gap-3">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <span className="bg-blue-500 text-white text-sm font-semibold px-3 py-1 rounded-lg shrink-0">
               #{rank}
             </span>
             <div className="flex-1 min-w-0">
-              <h3 className="text-base font-semibold break-words leading-tight">{vendor.name}</h3>
-              
-              {/* Category Badge with Emoji */}
-              <div className="flex items-center mt-1 mb-2">
-                <Badge variant="secondary" className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-700">
+              <h3 className="text-lg font-bold break-words leading-tight mb-2">{vendor.name}</h3>
+              <div className="flex items-center gap-3">
+                <Badge variant="secondary" className="text-sm px-3 py-1">
                   {getCategoryEmoji(vendor.category)} {vendor.category}
                 </Badge>
+                {vendor.homes_serviced > 0 && (
+                  <span className="text-sm text-muted-foreground">
+                    👥 {vendor.homes_serviced} neighbor{vendor.homes_serviced !== 1 ? 's' : ''}
+                  </span>
+                )}
               </div>
-              
-              {/* Interactive Neighbor Count Button */}
-              {vendor.homes_serviced > 0 && (
-                <button
-                  onClick={() => setIsReviewsModalOpen(true)}
-                  className="flex items-center gap-1 text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded-full font-medium hover:bg-blue-100 transition-colors cursor-pointer"
-                >
-                  👥 {vendor.homes_serviced} neighbor{vendor.homes_serviced !== 1 ? 's' : ''}
-                </button>
-              )}
             </div>
           </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <Button
-              onClick={() => isAuthenticated ? onRate(vendor) : window.location.href = `/auth?community=${encodeURIComponent(communityName || '')}`}
-              className={`rounded-full px-6 py-2 text-sm font-medium transition-all duration-200 ${
-                userReviews?.has(vendor.id) 
-                  ? "bg-gradient-to-r from-green-100 to-blue-100 border border-green-200 text-green-800 hover:from-green-200 hover:to-blue-200 hover:scale-105" 
-                  : "bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700 hover:scale-105 hover:shadow-lg"
-              }`}
-            >
-              {userReviews?.has(vendor.id) ? (
-                "Rated ⭐"
-              ) : (
-                <div className="flex items-center gap-1">
-                  <Star className="h-4 w-4" />
-                  Rate
-                </div>
-              )}
-            </Button>
-            {userReviews?.has(vendor.id) && (
-              <button
-                onClick={() => isAuthenticated ? onRate(vendor) : window.location.href = `/auth?community=${encodeURIComponent(communityName || '')}`}
-                className="text-xs text-blue-600 hover:text-blue-700 font-medium underline"
-              >
-                Edit
-              </button>
+          <Button
+            onClick={() => isAuthenticated ? onRate(vendor) : window.location.href = `/auth?community=${encodeURIComponent(communityName || '')}`}
+            className={`rounded-full px-6 py-2 font-medium shrink-0 ${
+              userReviews?.has(vendor.id) 
+                ? "bg-green-100 text-green-800 hover:bg-green-200 border border-green-200" 
+                : "bg-blue-600 text-white hover:bg-blue-700"
+            }`}
+          >
+            {userReviews?.has(vendor.id) ? "Rated ⭐" : "Rate"}
+          </Button>
+        </div>
+
+        {/* Status Badges */}
+        {(vendor.homes_serviced === 0 || userHomeVendors?.has(vendor.id)) && (
+          <div className="flex gap-2 mb-4">
+            {vendor.homes_serviced === 0 && (
+              <Badge variant="secondary" className="bg-orange-100 text-orange-800">
+                🆕 New Provider
+              </Badge>
+            )}
+            {userHomeVendors?.has(vendor.id) && (
+              <Badge variant="secondary" className="bg-green-100 text-green-800">
+                ✅ Your Provider
+              </Badge>
             )}
           </div>
-        </div>
-
-        {/* Badges */}
-        <div className="flex flex-wrap gap-1 mb-2">
-          {vendor.homes_serviced === 0 && (
-            <Badge 
-              variant="secondary" 
-              className="text-[10px] px-1 py-0 bg-orange-100 text-orange-800 hover:bg-orange-200 whitespace-nowrap"
-            >
-              New
-            </Badge>
-          )}
-          {(() => {
-            const hasVendor = userHomeVendors?.has(vendor.id);
-            console.log(`[VendorMobileCard] Checking vendor ${vendor.name} (${vendor.id}):`, {
-              hasVendor,
-              userHomeVendorsSize: userHomeVendors?.size,
-              userHomeVendorsArray: userHomeVendors ? Array.from(userHomeVendors) : []
-            });
-            return hasVendor;
-          })() && (
-            <Badge 
-              variant="secondary" 
-              className="text-[10px] px-1 py-0 bg-green-100 text-green-800 hover:bg-green-200 whitespace-nowrap"
-            >
-              Your Provider
-            </Badge>
-          )}
-        </div>
+        )}
 
 
-        {/* Community Reviews Section */}
-        <div className="space-y-3">
-          
-          {/* Enhanced Neighbor Review Preview - Primary BB Section */}
+        {/* Reviews Section */}
+        <div className="space-y-4">
           <NeighborReviewPreview 
             vendorId={vendor.id} 
             vendor={vendor}
@@ -249,155 +212,120 @@ export default function VendorMobileCard({
             communityName={communityName}
           />
           
-          {/* Google Reviews - Separate External Reviews */}
           {vendor.google_rating_count && vendor.google_rating_count > 0 && (
-            <div>
-              <div className="mb-2">
-                <h5 className="text-xs font-medium text-gray-600">External Reviews</h5>
-              </div>
-              <button 
-                onClick={() => setGoogleReviewsModalOpen(true)}
-                className="w-full flex items-center justify-between bg-green-50 border border-green-200 rounded-lg px-3 py-2 hover:bg-green-100 transition-colors border-b-2 border-b-green-300 hover:border-b-green-400"
-              >
-                <div className="flex items-center gap-2">
-                  <ReviewSourceIcon source="google" size="sm" />
-                  <span className="text-sm font-medium text-gray-700">Google Reviews</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <RatingStars rating={vendor.google_rating || 0} size="sm" />
-                  <span className="text-sm text-gray-600">
-                    {vendor.google_rating?.toFixed(1)} ({vendor.google_rating_count})
-                  </span>
-                </div>
-              </button>
-            </div>
+            <button 
+              onClick={() => setGoogleReviewsModalOpen(true)}
+              className="text-sm text-blue-600 hover:text-blue-800 hover:underline cursor-pointer transition-colors"
+            >
+              See Google Reviews ⭐ {vendor.google_rating?.toFixed(1)} ({vendor.google_rating_count} reviews)
+            </button>
           )}
         </div>
 
         {/* Cost Information */}
-        <div className="space-y-2">
+        <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <h5 className="text-xs font-medium text-gray-600">Cost Information</h5>
+            <h4 className="font-semibold text-foreground">Cost Information</h4>
             {isVerified && (
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => onCosts(vendor)}
-                  className={`text-xs font-medium px-2 py-1 rounded transition-colors ${
-                    userCosts?.has(vendor.id)
-                      ? "bg-green-100 text-green-700 hover:bg-green-200 border border-green-300"
-                      : "text-blue-600 hover:text-blue-700"
-                  }`}
-                >
-                  {userCosts?.has(vendor.id) ? "Added ✓" : "+ Add"}
-                </button>
-                {userCosts?.has(vendor.id) && (
-                  <button
-                    onClick={() => onCosts(vendor)}
-                    className="text-xs text-green-600 hover:text-green-700 font-medium underline"
-                  >
-                    Edit
-                  </button>
-                )}
-              </div>
+              <Button
+                variant={userCosts?.has(vendor.id) ? "secondary" : "outline"}
+                size="sm"
+                onClick={() => onCosts(vendor)}
+                className={userCosts?.has(vendor.id) ? "bg-green-100 text-green-700 border-green-200" : ""}
+              >
+                {userCosts?.has(vendor.id) ? "✓ Added" : "+ Add Cost"}
+              </Button>
             )}
           </div>
 
           {vendorCosts && vendorCosts.length > 0 ? (
-            <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-3">
               {(() => {
-                // Filter costs with valid amounts (> 0)
                 const costsWithAmounts = vendorCosts.filter(c => c.amount && c.amount > 0);
                 const hasValidAmounts = costsWithAmounts.length > 0;
                 const firstComment = vendorCosts.find(c => c.notes)?.notes;
                 
                 return (
                   <>
-                    {/* Show cost information only if there are valid amounts */}
                     {hasValidAmounts && (
-                      <div className="mb-2">
-                        <span className="text-sm font-medium text-green-700">
-                          💰 {costsWithAmounts.length > 1 
-                            ? `$${Math.min(...costsWithAmounts.map(c => c.amount))} - $${Math.max(...costsWithAmounts.map(c => c.amount))}`
-                            : `$${costsWithAmounts[0].amount}`
-                          }
-                          {costsWithAmounts[0]?.period ? `/${costsWithAmounts[0].period}` : ''}
-                        </span>
+                      <div className="text-lg font-bold text-blue-800">
+                        💰 {costsWithAmounts.length > 1 
+                          ? `$${Math.min(...costsWithAmounts.map(c => c.amount))} - $${Math.max(...costsWithAmounts.map(c => c.amount))}`
+                          : `$${costsWithAmounts[0].amount}`
+                        }
+                        {costsWithAmounts[0]?.period ? `/${costsWithAmounts[0].period}` : ''}
                       </div>
                     )}
                     
-                    {/* Show first comment if available */}
                     {firstComment && (
-                      <p className="text-xs text-green-600 italic">
-                        "{firstComment.length > 100 ? firstComment.substring(0, 100) + '...' : firstComment}"
-                      </p>
+                      <blockquote className="text-base italic text-blue-700 bg-white/50 p-3 rounded border-l-4 border-blue-400">
+                        "{firstComment}"
+                      </blockquote>
                     )}
                     
-                    {/* Show view details link if there's any cost data (amounts or comments) */}
-                    {(hasValidAmounts || firstComment) && (
-                      <div className="text-right mt-2">
-                        <button
-                          onClick={() => setCostModalOpen(true)}
-                          className="text-xs text-blue-600 hover:text-blue-700 font-medium"
-                        >
-                          View all cost details →
-                        </button>
-                      </div>
+                    {(hasValidAmounts || firstComment) && vendorCosts.length > 1 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setCostModalOpen(true)}
+                        className="text-blue-700 hover:text-blue-800"
+                      >
+                        View all details ({vendorCosts.length} entries) →
+                      </Button>
                     )}
                   </>
                 );
               })()}
             </div>
           ) : (
-            <div className="text-center py-3 text-sm text-gray-500">
-              No cost information yet
+            <div className="text-center py-3 text-muted-foreground bg-gray-50 rounded-lg border border-dashed">
+              <p className="text-sm">No cost information yet</p>
             </div>
           )}
         </div>
 
         {/* Contact Section */}
         {showContact && vendor.contact_info && (
-          <div className="space-y-2 mt-3">
-            <div className="text-center">
-              <span className="text-xs text-gray-600 font-medium">Contact: </span>
-              <Popover open={contactPopoverOpen} onOpenChange={setContactPopoverOpen}>
-                <PopoverTrigger asChild>
-                  <button className="text-base font-medium text-blue-600 underline hover:text-blue-800 transition-colors">
-                    {formatUSPhoneDisplay(vendor.contact_info)}
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-2">
-                  <div className="flex flex-col gap-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={handleCall}
-                      className="flex items-center gap-2 justify-start text-sm"
-                    >
-                      <Phone size={16} />
-                      Call
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={handleText}
-                      className="flex items-center gap-2 justify-start text-sm"
-                    >
-                      <MessageSquare size={16} />
-                      Text
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={handleCopyNumber}
-                      className="flex items-center gap-2 justify-start text-sm"
-                    >
-                      <Copy size={16} />
-                      Copy Number
-                    </Button>
-                  </div>
-                </PopoverContent>
-              </Popover>
-            </div>
+          <div className="bg-gray-50 rounded-lg p-4">
+            <Popover open={contactPopoverOpen} onOpenChange={setContactPopoverOpen}>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="text-base font-medium flex items-center gap-2">
+                  <Phone size={16} />
+                  {formatUSPhoneDisplay(vendor.contact_info)}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-2">
+                <div className="flex flex-col gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleCall}
+                    className="flex items-center gap-2 justify-start"
+                  >
+                    <Phone size={16} />
+                    Call
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleText}
+                    className="flex items-center gap-2 justify-start"
+                  >
+                    <MessageSquare size={16} />
+                    Text
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleCopyNumber}
+                    className="flex items-center gap-2 justify-start"
+                  >
+                    <Copy size={16} />
+                    Copy Number
+                  </Button>
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
         )}
       </CardContent>
