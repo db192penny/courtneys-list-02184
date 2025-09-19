@@ -86,7 +86,7 @@ export function MobileCostsModal({ vendorId }: Props) {
           <div key={cost.id} className="bg-gray-50 border border-gray-200 rounded-lg p-3">
             {formatCost(cost.amount, cost.unit, cost.period) ? (
               <div className="flex justify-between items-center mb-1">
-                <span className="font-medium text-gray-700">
+                <span className="text-gray-700">
                   {formatCost(cost.amount, cost.unit, cost.period)}
                   {cost.cost_kind && cost.cost_kind !== "one_time" && (
                     <span className="text-gray-600 ml-1 text-xs">
@@ -106,7 +106,7 @@ export function MobileCostsModal({ vendorId }: Props) {
               </div>
             )}
             {cost.notes && (
-              <p className="text-sm text-gray-600 italic mt-1">
+              <p className="text-xs text-gray-600 italic mt-1">
                 "{cost.notes}"
               </p>
             )}

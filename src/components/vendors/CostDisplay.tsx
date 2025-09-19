@@ -80,7 +80,7 @@ export function CostDisplay({
               <Dialog>
                 <DialogTrigger asChild>
                   <div className="px-2 py-1.5 rounded-md bg-blue-50 hover:bg-blue-100 transition-colors border border-blue-200 hover:border-blue-300 min-h-[28px] flex items-center group cursor-pointer">
-                    <span className="text-xs font-medium underline decoration-dotted underline-offset-4">
+                    <span className="text-xs font-normal underline decoration-dotted underline-offset-4">
                       {communityPrice}
                     </span>
                   </div>
@@ -103,7 +103,7 @@ export function CostDisplay({
             ) : (
               <CostsHover vendorId={vendorId}>
                 <div className="px-2 py-1.5 rounded-md bg-blue-50 hover:bg-blue-100 transition-colors border border-blue-200 hover:border-blue-300 min-h-[28px] flex items-center group cursor-pointer">
-                  <span className="text-xs font-medium underline decoration-dotted underline-offset-4">
+                  <span className="text-xs font-normal underline decoration-dotted underline-offset-4">
                     {communityPrice}
                   </span>
                 </div>
@@ -115,7 +115,7 @@ export function CostDisplay({
               onClick={onOpenCostModal}
             >
               {communityPrice ? (
-                <span className="text-xs font-medium underline decoration-dotted underline-offset-4">{communityPrice}</span>
+                <span className="text-xs font-normal underline decoration-dotted underline-offset-4">{communityPrice}</span>
               ) : (
                 <span className="text-xs text-muted-foreground underline decoration-dotted underline-offset-4">Share cost info</span>
               )}
