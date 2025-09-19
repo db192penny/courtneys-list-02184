@@ -37,6 +37,7 @@ import AdminPreviewUsers from "./pages/AdminPreviewUsers";
 import AdminUsers from "./pages/AdminUsers";
 import { AdminAnalytics } from "./pages/AdminAnalytics";
 import MockupPreview from "./pages/MockupPreview";
+import LogoMockup from "./pages/LogoMockup";
 import Header from "./components/Header";
 import { AdminProtectedRoute } from "./components/AdminProtectedRoute";
 import { AnalyticsTracker } from "./components/AnalyticsTracker";
@@ -221,6 +222,7 @@ function AppContent() {
         <Route path="/communities/request" element={<CommunityRequest />} />
         <Route path="/community-preview/:slug" element={<CommunityPreview />} />
         <Route path="/mockup-preview" element={<MockupPreview />} />
+        <Route path="/logo-mockup" element={<LogoMockup />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </>
