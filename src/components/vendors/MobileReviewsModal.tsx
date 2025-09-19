@@ -60,27 +60,51 @@ export function MobileReviewsModal({ open, onOpenChange, vendor, onRate }) {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex-1 max-h-96 overflow-y-auto space-y-3 p-4">
+      <div className="flex-1 max-h-96 overflow-y-auto space-y-4 p-4">
         {data.map((r) => (
-          <div key={r.id} className="border rounded-md p-4 mb-3">
-            <div className="text-xs text-foreground flex items-center justify-between mb-2">
+          <div key={r.id} className="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-4">
+            {/* Header with rating and date */}
+            <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <div className="flex items-center gap-1">
-                  <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
-                  <span className="font-medium">{r.rating}/5</span>
+                  <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                  <span className="font-bold text-blue-800">{r.rating}/5</span>
                 </div>
                 <Badge variant="outline" className="text-xs px-2 py-0.5 bg-blue-50 text-blue-700 border-blue-200 font-medium">
                   {r.author_label}
                 </Badge>
               </div>
               {r.created_at && (
-                <div className="text-[10px] text-muted-foreground">
+                <div className="text-xs text-blue-600">
                   {new Date(r.created_at).toLocaleDateString()}
                 </div>
               )}
             </div>
-            {r.comments && (
-              <p className="text-sm text-muted-foreground">{r.comments}</p>
+            
+            {/* Comment with elegant styling to match preview */}
+            {r.comments && r.comments.trim() ? (
+              <div className="bg-white/60 rounded-lg p-3 border border-blue-100">
+                <p className="text-base text-blue-800 font-medium leading-snug mb-2 italic">
+                  "{r.comments}"
+                </p>
+                {/* Right-aligned attribution */}
+                <div className="flex justify-end">
+                  <p className="text-sm font-semibold text-blue-700">
+                    — {r.author_label}
+                  </p>
+                </div>
+              </div>
+            ) : (
+              /* Rating-only display when no comment */
+              <div className="bg-white/60 rounded-lg p-3 border border-blue-100 text-center">
+                <div className="flex items-center justify-center gap-1 text-blue-800 mb-2">
+                  <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                  <span className="font-bold text-lg">{r.rating}/5</span>
+                </div>
+                <div className="text-sm text-blue-600">
+                  by {r.author_label}
+                </div>
+              </div>
             )}
           </div>
         ))}
