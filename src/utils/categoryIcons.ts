@@ -22,6 +22,7 @@ import {
   Sofa,
   Grid3x3,
   Star,
+  Layers,
   LucideIcon 
 } from "lucide-react";
 import { Category } from "@/data/categories";
@@ -52,6 +53,7 @@ export const categoryIconMap: Record<Category, LucideIcon> = {
   "Carpet & Sofa Cleaning": Sofa,
   "Patio Screening": Grid3x3,
   "Holiday Lighting": Star,
+  "Tile Installation": Layers,
 };
 
 export function getCategoryIcon(category: Category): LucideIcon {

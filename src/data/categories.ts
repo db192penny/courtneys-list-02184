@@ -23,6 +23,7 @@ export const CATEGORIES = [
   "Plumbing",
   "Pool",
   "Power Washing",
+  "Tile Installation",
   "Water Filtration",
 ] as const;
 
