@@ -144,7 +144,7 @@ export default function Community() {
                 {showSignUpPrompt && (
                   <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg py-2 px-4 text-center text-white">
                     <p className="text-sm font-medium mb-1">
-                      Join neighbors sharing vendor reviews & costs
+                      Join 100+ neighbors sharing reviews & costs
                     </p>
                     <Button
                       onClick={() => {
