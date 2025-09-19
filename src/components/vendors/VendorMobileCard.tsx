@@ -153,13 +153,13 @@ export default function VendorMobileCard({
     <>
     <Card className="w-full" data-vendor-id={vendor.id}>
       <CardContent className="p-3 space-y-3">
-        <div className="flex justify-between items-start mb-3">
-          <div className="flex items-center gap-2 flex-1">
-            <span className="bg-blue-500 text-white text-xs font-semibold px-2 py-1 rounded">
+        <div className="flex justify-between items-start mb-3 gap-3">
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            <span className="bg-blue-500 text-white text-xs font-semibold px-2 py-1 rounded shrink-0">
               #{rank}
             </span>
-            <div className="flex-1">
-              <h3 className="text-base font-semibold">{vendor.name}</h3>
+            <div className="flex-1 min-w-0">
+              <h3 className="text-base font-semibold break-words leading-tight">{vendor.name}</h3>
               
               {/* Category Badge with Emoji */}
               <div className="flex items-center mt-1 mb-2">
