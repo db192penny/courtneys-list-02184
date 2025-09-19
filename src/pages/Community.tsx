@@ -130,7 +130,9 @@ export default function Community() {
                           alt={`${communityName} community photo`}
                           className="w-full h-16 sm:h-20 rounded-lg object-cover"
                         />
-                        <div className="absolute top-3 left-3 w-6 h-6 bg-white/95 backdrop-blur-sm rounded-none shadow-md border border-white/20"></div>
+                        <div className="absolute top-3 left-3">
+                          <h1 className="text-white text-sm font-semibold tracking-tight drop-shadow-lg">{communityName}</h1>
+                        </div>
                       </div>
                     ) : (
                       <div className="w-full h-16 sm:h-20 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-xl sm:text-2xl">
