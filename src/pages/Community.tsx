@@ -130,8 +130,8 @@ export default function Community() {
                           alt={`${communityName} community photo`}
                           className="w-full h-16 sm:h-20 rounded-lg object-cover"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-transparent rounded-lg flex items-start justify-center pt-2">
-                          <h1 className="text-white text-lg sm:text-xl font-semibold tracking-tight text-center drop-shadow-lg">{communityName}</h1>
+                        <div className="absolute bottom-0 left-0 right-0 bg-white/90 backdrop-blur-sm rounded-b-lg shadow-sm">
+                          <h1 className="text-gray-900 text-lg sm:text-xl font-semibold tracking-tight text-center py-3 px-4">{communityName}</h1>
                         </div>
                       </div>
                     ) : (
