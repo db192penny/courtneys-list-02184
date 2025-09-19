@@ -20,7 +20,7 @@ function NewLogoDesktop() {
           Courtney's List
         </span>
       </div>
-      <p className="text-xs sm:text-sm text-muted-foreground ml-6 sm:ml-8 mt-0.5">
+      <p className="text-xs sm:text-sm text-muted-foreground ml-6 sm:ml-8">
         Trusted Provider Reviews by Neighbors
       </p>
     </div>
