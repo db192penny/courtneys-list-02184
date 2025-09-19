@@ -259,7 +259,7 @@ export default function VendorMobileCard({
                     
                     {firstComment && (
                       <blockquote className="text-base italic text-blue-700 bg-white/50 p-3 rounded border-l-4 border-blue-400">
-                        "{firstComment}"
+                        "{firstComment.length > 150 ? `${firstComment.substring(0, 150)}...` : firstComment}"
                       </blockquote>
                     )}
                     
