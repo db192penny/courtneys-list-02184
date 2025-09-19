@@ -360,13 +360,13 @@ const Auth = () => {
   ) : (
     <main className="min-h-screen bg-background">
       <SEO
-        title={communityName ? `Join ${communityName.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}` : "Join Courtney's List"}
+        title={communityName ? `Join ${communityName.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}` : "Join Boca Bridges"}
         description="Join the invite only test family - automatically verified access to exclusive vendor info."
         canonical={canonical}
       />
       
         <section className="container max-w-xl py-4 sm:py-6 px-4 sm:px-6">
-          <h1 className="text-3xl font-semibold mb-4 sm:mb-6">{communityName ? `Join ${communityName.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}` : "Join Courtney's List"}</h1>
+          <h1 className="text-3xl font-semibold mb-4 sm:mb-6">{communityName ? `Join ${communityName.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}` : "Join Boca Bridges"}</h1>
           <Card>
             <CardContent className="space-y-4 pt-6">
               <form onSubmit={onSubmit} className="space-y-4">
