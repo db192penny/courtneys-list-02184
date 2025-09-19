@@ -5,62 +5,110 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowUp, ArrowDown, Star, TrendingUp } from "lucide-react";
 import { RatingStars } from "@/components/ui/rating-stars";
 
-interface ReviewWithHistory {
+interface RatingHistoryRecord {
   id: string;
+  review_id: string;
+  user_id: string;
   vendor_id: string;
-  rating: number;
-  created_at: string;
-  vendor_name?: string;
-  vendor_category?: string;
+  old_rating: number | null;
+  new_rating: number;
+  old_comments: string | null;
+  new_comments: string | null;
+  changed_at: string;
+  change_type: 'create' | 'update' | 'delete';
+  user_email: string;
+  vendor_name: string;
+  vendor_category: string;
+}
+
+interface VendorMovementGroup {
+  vendor_name: string;
+  vendor_category: string;
+  new_ratings: number;
+  upgrades: number;
+  downgrades: number;
+  total_changes: number;
+  avg_rating: number;
+  records: RatingHistoryRecord[];
 }
 
 export function RatingMovements() {
-  const [recentReviews, setRecentReviews] = useState<ReviewWithHistory[]>([]);
+  const [vendorGroups, setVendorGroups] = useState<VendorMovementGroup[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchRecentRatings = async () => {
+    const fetchRatingHistory = async () => {
       try {
         setLoading(true);
         setError(null);
 
-        // Get recent reviews from the last 7 days with vendor info
         const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
         
         const { data, error } = await supabase
-          .from('reviews')
-          .select(`
-            id,
-            vendor_id,
-            rating,
-            created_at,
-            vendors!inner(name, category)
-          `)
-          .gte('created_at', sevenDaysAgo)
-          .order('created_at', { ascending: false })
-          .limit(20);
+          .from('rating_history')
+          .select('*')
+          .gte('changed_at', sevenDaysAgo)
+          .order('changed_at', { ascending: false });
 
         if (error) throw error;
 
-        // Transform the data to include vendor info
-        const transformedData = (data || []).map(review => ({
-          ...review,
-          vendor_name: (review.vendors as any)?.name || 'Unknown Vendor',
-          vendor_category: (review.vendors as any)?.category || 'Unknown Category'
-        }));
+        const records = (data || []) as RatingHistoryRecord[];
 
-        setRecentReviews(transformedData);
+        // Group by vendor and calculate stats
+        const groupsMap = new Map<string, VendorMovementGroup>();
+        
+        records.forEach(record => {
+          const key = `${record.vendor_name}::${record.vendor_category}`;
+          
+          if (!groupsMap.has(key)) {
+            groupsMap.set(key, {
+              vendor_name: record.vendor_name,
+              vendor_category: record.vendor_category,
+              new_ratings: 0,
+              upgrades: 0,
+              downgrades: 0,
+              total_changes: 0,
+              avg_rating: 0,
+              records: []
+            });
+          }
+          
+          const group = groupsMap.get(key)!;
+          group.records.push(record);
+          group.total_changes++;
+          
+          // Count movement types
+          if (record.old_rating === null) {
+            group.new_ratings++;
+          } else if (record.new_rating > record.old_rating) {
+            group.upgrades++;
+          } else if (record.new_rating < record.old_rating) {
+            group.downgrades++;
+          }
+        });
+
+        // Calculate average ratings
+        const groupsArray = Array.from(groupsMap.values()).map(group => {
+          const sum = group.records.reduce((acc, r) => acc + r.new_rating, 0);
+          group.avg_rating = group.records.length > 0 ? sum / group.records.length : 0;
+          return group;
+        });
+
+        // Sort by total activity
+        groupsArray.sort((a, b) => b.total_changes - a.total_changes);
+        
+        setVendorGroups(groupsArray);
 
       } catch (err) {
-        console.error('Error fetching rating movements:', err);
+        console.error('Error fetching rating history:', err);
         setError(err instanceof Error ? err.message : 'Failed to load rating movements');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchRecentRatings();
+    fetchRatingHistory();
   }, []);
 
   if (loading) {
@@ -95,20 +143,6 @@ export function RatingMovements() {
     );
   }
 
-  // Group reviews by vendor
-  const vendorGroups = recentReviews.reduce((acc, review) => {
-    const key = review.vendor_name || 'Unknown';
-    if (!acc[key]) {
-      acc[key] = {
-        vendor_name: review.vendor_name || 'Unknown',
-        category: review.vendor_category || 'Unknown',
-        reviews: [],
-      };
-    }
-    acc[key].reviews.push(review);
-    return acc;
-  }, {} as Record<string, { vendor_name: string; category: string; reviews: ReviewWithHistory[] }>);
-
   return (
     <Card>
       <CardHeader>
@@ -118,38 +152,78 @@ export function RatingMovements() {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {recentReviews.length === 0 ? (
-          <div className="text-sm text-muted-foreground">No rating activity in the last 7 days.</div>
+        {vendorGroups.length === 0 ? (
+          <div className="text-sm text-muted-foreground">No rating changes in the last 7 days.</div>
         ) : (
           <div className="space-y-4">
-            {Object.values(vendorGroups).map((group) => {
-              const avgRating = group.reviews.reduce((sum, r) => sum + r.rating, 0) / group.reviews.length;
-              return (
-                <div key={group.vendor_name} className="border rounded-lg p-4">
-                  <div className="flex items-start justify-between mb-3">
-                    <div>
-                      <h4 className="font-medium">{group.vendor_name}</h4>
-                      <p className="text-sm text-muted-foreground">{group.category}</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <RatingStars rating={avgRating} size="sm" showValue />
-                    </div>
+            {vendorGroups.map((group) => (
+              <div key={`${group.vendor_name}-${group.vendor_category}`} className="border rounded-lg p-4">
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <h4 className="font-medium">{group.vendor_name}</h4>
+                    <p className="text-sm text-muted-foreground">{group.vendor_category}</p>
                   </div>
-                  
-                  <div className="flex items-center gap-4 text-sm">
-                    <div className="flex items-center gap-1">
-                      <span className="text-muted-foreground">New Reviews:</span>
-                      <Badge variant="outline">{group.reviews.length}</Badge>
-                    </div>
-                    
-                    <div className="flex items-center gap-1 text-blue-600">
-                      <Star className="h-3 w-3 fill-current" />
-                      <span>Recent Activity</span>
-                    </div>
+                  <div className="flex items-center gap-2">
+                    <RatingStars rating={group.avg_rating} size="sm" showValue />
                   </div>
                 </div>
-              );
-            })}
+                
+                <div className="flex flex-wrap items-center gap-4 text-sm">
+                  <div className="flex items-center gap-1">
+                    <span className="text-muted-foreground">Total Changes:</span>
+                    <Badge variant="outline">{group.total_changes}</Badge>
+                  </div>
+                  
+                  {group.new_ratings > 0 && (
+                    <div className="flex items-center gap-1 text-blue-600">
+                      <Star className="h-3 w-3 fill-current" />
+                      <span>{group.new_ratings} new</span>
+                    </div>
+                  )}
+                  
+                  {group.upgrades > 0 && (
+                    <div className="flex items-center gap-1 text-green-600">
+                      <ArrowUp className="h-3 w-3" />
+                      <span>{group.upgrades} upgraded</span>
+                    </div>
+                  )}
+                  
+                  {group.downgrades > 0 && (
+                    <div className="flex items-center gap-1 text-red-600">
+                      <ArrowDown className="h-3 w-3" />
+                      <span>{group.downgrades} downgraded</span>
+                    </div>
+                  )}
+                </div>
+                
+                {/* Optional: Show recent changes timeline */}
+                <div className="mt-3 pt-3 border-t">
+                  <div className="text-xs text-muted-foreground">
+                    Recent activity:
+                  </div>
+                  <div className="mt-1 space-y-1">
+                    {group.records.slice(0, 3).map((record) => (
+                      <div key={record.id} className="text-xs flex items-center gap-2">
+                        <span className="text-muted-foreground">
+                          {new Date(record.changed_at).toLocaleDateString()}
+                        </span>
+                        {record.old_rating === null ? (
+                          <span className="text-blue-600">New rating: {record.new_rating}★</span>
+                        ) : record.new_rating > record.old_rating ? (
+                          <span className="text-green-600">
+                            {record.old_rating}★ → {record.new_rating}★
+                          </span>
+                        ) : (
+                          <span className="text-red-600">
+                            {record.old_rating}★ → {record.new_rating}★
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </CardContent>
