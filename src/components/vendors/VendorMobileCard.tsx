@@ -247,7 +247,11 @@ export default function VendorMobileCard({
           {vendorCosts && vendorCosts.length > 0 ? (
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-3">
               {(() => {
-                const costsWithAmounts = vendorCosts.filter(c => c.amount && c.amount > 0);
+                const costsWithAmounts = vendorCosts.filter(c => 
+                  c.amount !== null && 
+                  c.amount !== undefined && 
+                  c.amount > 0
+                );
                 const hasValidAmounts = costsWithAmounts.length > 0;
                 const firstComment = vendorCosts.find(c => c.notes)?.notes;
                 

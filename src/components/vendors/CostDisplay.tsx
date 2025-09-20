@@ -41,7 +41,9 @@ const formatUnit = (unit?: string) => {
 };
 
 const formatPrice = (amount?: number, unit?: string) => {
-  if (!amount) return null;
+  if (amount === undefined || amount === null || amount === 0) {
+    return null;
+  }
   const formatted = amount % 1 === 0 ? `$${amount}` : `$${amount.toFixed(2)}`;
   return `${formatted}${formatUnit(unit)}`;
 };
