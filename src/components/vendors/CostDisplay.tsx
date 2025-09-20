@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useUserProfile } from "@/hooks/useUserProfile";
+import { useNavigate } from "react-router-dom";
 import { EditMarketPriceModal } from "./EditMarketPriceModal";
 import CostsHover from "./CostsHover";
 import { MobileCostsModal } from "./MobileCostsModal";
@@ -62,6 +63,7 @@ export function CostDisplay({
   const { data: isAdmin } = useIsAdmin();
   const { data: profile } = useUserProfile();
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
   const [showEditMarket, setShowEditMarket] = useState(false);
   
   const isVerified = !!profile?.isVerified;
@@ -91,8 +93,16 @@ export function CostDisplay({
                   </DialogHeader>
                   <div className="mt-4">
                     {!isVerified ? (
-                      <div className="text-sm text-muted-foreground p-4">
-                        Costs are shared just within our neighborhood circle. Sign up to view them.
+                      <div className="space-y-4 p-4">
+                        <div className="text-sm text-muted-foreground">
+                          Costs are shared just within our neighborhood circle. Sign up to view them.
+                        </div>
+                        <Button 
+                          onClick={() => navigate('/auth/signup')}
+                          className="w-full"
+                        >
+                          Sign Up to View Costs
+                        </Button>
                       </div>
                     ) : (
                       <MobileCostsModal vendorId={vendorId} />

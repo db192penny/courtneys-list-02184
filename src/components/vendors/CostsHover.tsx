@@ -1,7 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { MobileCostsModal } from "./MobileCostsModal";
@@ -42,6 +44,7 @@ const formatCost = (amount: number | null, unit?: string | null, period?: string
 
 export default function CostsHover({ vendorId, children }: Props) {
   const { data: profile } = useUserProfile();
+  const navigate = useNavigate();
   const isVerified = !!profile?.isVerified;
   const [detailsModalOpen, setDetailsModalOpen] = useState(false);
 
@@ -74,13 +77,22 @@ export default function CostsHover({ vendorId, children }: Props) {
         </span>
       </HoverCardTrigger>
       <HoverCardContent className="w-80">
-        <div className="space-y-3">
-          <h4 className="text-sm font-semibold">Community Cost Submissions</h4>
-          {!isVerified && (
-            <div className="text-sm text-muted-foreground">
-              Costs are shared just within our neighborhood circle. Sign up to view them.
-            </div>
-          )}
+          <div className="space-y-3">
+            <h4 className="text-sm font-semibold">Community Cost Submissions</h4>
+            {!isVerified && (
+              <div className="space-y-3">
+                <div className="text-sm text-muted-foreground">
+                  Costs are shared just within our neighborhood circle. Sign up to view them.
+                </div>
+                <Button 
+                  onClick={() => navigate('/auth/signup')}
+                  size="sm"
+                  className="w-full"
+                >
+                  Sign Up to View Costs
+                </Button>
+              </div>
+            )}
           {isVerified && isLoading && (
             <div className="text-sm text-muted-foreground">Loading costs...</div>
           )}

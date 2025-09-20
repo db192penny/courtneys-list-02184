@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Star } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { ReviewSourceIcon } from "./ReviewSourceIcon";
@@ -9,6 +10,7 @@ import { RatingStars } from "@/components/ui/rating-stars";
 
 export function MobileReviewsModal({ open, onOpenChange, vendor, onRate }) {
   const { data: profile } = useUserProfile();
+  const navigate = useNavigate();
   const isVerified = !!profile?.isVerified;
   
   const { data, isLoading, error } = useQuery({
@@ -26,8 +28,16 @@ export function MobileReviewsModal({ open, onOpenChange, vendor, onRate }) {
 
   if (!isVerified) {
     return (
-      <div className="text-sm text-muted-foreground p-4">
-        Reviews are shared just within our neighborhood circle. Sign up to view them.
+      <div className="space-y-4 p-4">
+        <div className="text-sm text-muted-foreground">
+          Reviews are shared just within our neighborhood circle. Sign up to view them.
+        </div>
+        <Button 
+          onClick={() => navigate('/auth/signup')}
+          className="w-full"
+        >
+          Sign Up to View Reviews
+        </Button>
       </div>
     );
   }
