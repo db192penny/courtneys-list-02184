@@ -36,7 +36,6 @@ import AdminPreviewLinks from "./pages/AdminPreviewLinks";
 import AdminPreviewUsers from "./pages/AdminPreviewUsers";
 import AdminUsers from "./pages/AdminUsers";
 import { AdminAnalytics } from "./pages/AdminAnalytics";
-import MessageBoardHelper from "@/components/admin/MessageBoardHelper";
 import MockupPreview from "./pages/MockupPreview";
 import LogoMockup from "./pages/LogoMockup";
 import Header from "./components/Header";
@@ -216,7 +215,6 @@ function AppContent() {
         <Route path="/admin/preview-users" element={<AdminProtectedRoute><AdminPreviewUsers /></AdminProtectedRoute>} />
         <Route path="/admin/users" element={<AdminProtectedRoute><AdminUsers /></AdminProtectedRoute>} />
         <Route path="/admin/analytics" element={<AdminProtectedRoute><AdminAnalytics /></AdminProtectedRoute>} />
-        <Route path="/admin/message-board" element={<AdminProtectedRoute><MessageBoardHelper /></AdminProtectedRoute>} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/contact" element={<Contact />} />
