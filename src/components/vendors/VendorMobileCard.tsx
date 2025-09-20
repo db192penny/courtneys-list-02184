@@ -270,11 +270,20 @@ export default function VendorMobileCard({
           {hasValidAmounts && (
             <div className="text-xl mb-2">
               <span className="font-normal">
-                💰 {costsWithAmounts.length > 1 
-                  ? `$${Math.min(...costsWithAmounts.map(c => c.amount))} - $${Math.max(...costsWithAmounts.map(c => c.amount))}`
-                  : `$${costsWithAmounts[0].amount}`
-                }
-                {costsWithAmounts[0]?.period ? `/${costsWithAmounts[0].period}` : ''}
+                {(() => {
+                  const amounts = costsWithAmounts.map(c => c.amount);
+                  const minAmount = Math.min(...amounts);
+                  const maxAmount = Math.max(...amounts);
+                  const period = costsWithAmounts[0]?.period ? `/${costsWithAmounts[0].period}` : '';
+                  
+                  // If all costs are the same, show single value
+                  if (minAmount === maxAmount) {
+                    return `💰 $${minAmount}${period}`;
+                  }
+                  
+                  // Otherwise show range
+                  return `💰 $${minAmount} - $${maxAmount}${period}`;
+                })()}
               </span>
             </div>
           )}
