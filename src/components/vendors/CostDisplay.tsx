@@ -83,11 +83,9 @@ export function CostDisplay({
             isMobile ? (
               <Dialog>
                 <DialogTrigger asChild>
-                  <div className="px-2 py-1.5 rounded-md bg-blue-50 hover:bg-blue-100 transition-colors border border-blue-200 hover:border-blue-300 min-h-[28px] flex items-center group cursor-pointer">
-                    <span className="text-xs font-normal underline decoration-dotted underline-offset-4">
-                      {communityPrice}
-                    </span>
-                  </div>
+                  <span className="text-xs font-normal underline decoration-dotted underline-offset-4 cursor-pointer">
+                    {communityPrice}
+                  </span>
                 </DialogTrigger>
                 <DialogContent className="max-w-sm">
                   <DialogHeader>
@@ -95,16 +93,8 @@ export function CostDisplay({
                   </DialogHeader>
                   <div className="mt-4">
                     {!isVerified ? (
-                      <div className="space-y-4 p-4">
-                        <div className="text-sm text-muted-foreground">
-                          Costs are shared just within our neighborhood circle. Sign up to view them.
-                        </div>
-                        <Button 
-                          onClick={() => navigate('/auth/signup')}
-                          className="w-full"
-                        >
-                          Sign Up to View Costs
-                        </Button>
+                      <div className="text-sm text-muted-foreground p-4">
+                        Costs are shared just within our neighborhood circle. Sign up to view them.
                       </div>
                     ) : (
                       <MobileCostsModal vendorId={vendorId} />
@@ -114,150 +104,43 @@ export function CostDisplay({
               </Dialog>
             ) : (
               <CostsHover vendorId={vendorId}>
-                <div className="px-2 py-1.5 rounded-md bg-blue-50 hover:bg-blue-100 transition-colors border border-blue-200 hover:border-blue-300 min-h-[28px] flex items-center group cursor-pointer">
-                  <span className="text-xs font-normal underline decoration-dotted underline-offset-4">
-                    {communityPrice}
-                  </span>
-                </div>
+                <span className="text-xs font-normal underline decoration-dotted underline-offset-4 cursor-pointer">
+                  {communityPrice}
+                </span>
               </CostsHover>
             )
           ) : (
-            <div 
-              className="px-2 py-1.5 rounded-md bg-blue-50 hover:bg-blue-100 transition-colors border border-blue-200 hover:border-blue-300 min-h-[28px] flex items-center group cursor-pointer"
+            <span 
+              className="text-xs text-muted-foreground underline decoration-dotted underline-offset-4 cursor-pointer"
               onClick={onOpenCostModal}
             >
-              {communityPrice ? (
-                <span className="text-xs font-normal underline decoration-dotted underline-offset-4">{communityPrice}</span>
-              ) : (
-                <span className="text-xs text-muted-foreground underline decoration-dotted underline-offset-4">Share cost info</span>
-              )}
-            </div>
+              {communityPrice || "Share cost info"}
+            </span>
           )}
         </div>
 
-        {/* Area Average Price Line */}
-        {SHOW_AREA_AVERAGE && (
+        {/* Area Average Price Line - if enabled */}
+        {SHOW_AREA_AVERAGE && marketPrice && (
           <div className="flex items-center gap-1">
             <span className="text-xs text-muted-foreground min-w-[70px]">Area Average:</span>
-            {isMobile ? (
-              <Dialog>
-                <DialogTrigger asChild>
-                  <div className="px-2 py-1.5 rounded-md bg-orange-50 hover:bg-orange-100 transition-colors border border-orange-200 hover:border-orange-300 min-h-[28px] flex items-center group cursor-pointer">
-                    {marketPrice ? (
-                      <div className="flex items-center gap-1">
-                        <span className="text-xs font-medium underline decoration-dotted underline-offset-4">{marketPrice}</span>
-                        <Info className="h-3 w-3 text-muted-foreground" />
-                        {isAdmin && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-auto p-0 text-muted-foreground hover:text-foreground"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setShowEditMarket(true);
-                            }}
-                          >
-                            <Pencil className="h-3 w-3" />
-                          </Button>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-1">
-                        <span className="text-xs font-medium text-muted-foreground underline decoration-dotted underline-offset-4">—</span>
-                        <Info className="h-3 w-3 text-muted-foreground" />
-                        {isAdmin && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-auto p-0 text-muted-foreground hover:text-foreground"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setShowEditMarket(true);
-                            }}
-                          >
-                            <Pencil className="h-3 w-3" />
-                          </Button>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </DialogTrigger>
-                <DialogContent className="max-w-sm">
-                  <DialogHeader>
-                    <DialogTitle>Area Average Calculation</DialogTitle>
-                  </DialogHeader>
-                  <div className="mt-4 space-y-2">
-                    <p className="text-sm text-muted-foreground">
-                      Average cost for similar services in your area, based on industry pricing data, home prices, and data from HomeAdvisor.
-                    </p>
-                  </div>
-                </DialogContent>
-              </Dialog>
-            ) : (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="px-2 py-1.5 rounded-md bg-orange-50 hover:bg-orange-100 transition-colors border border-orange-200 hover:border-orange-300 min-h-[28px] flex items-center group cursor-pointer">
-                    {marketPrice ? (
-                      <div className="flex items-center gap-1">
-                        <span className="text-xs font-medium underline decoration-dotted underline-offset-4">{marketPrice}</span>
-                        <Info className="h-3 w-3 text-muted-foreground" />
-                        {isAdmin && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-auto p-0 text-muted-foreground hover:text-foreground"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setShowEditMarket(true);
-                            }}
-                          >
-                            <Pencil className="h-3 w-3" />
-                          </Button>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-1">
-                        <span className="text-xs font-medium text-muted-foreground underline decoration-dotted underline-offset-4">—</span>
-                        <Info className="h-3 w-3 text-muted-foreground" />
-                        {isAdmin && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-auto p-0 text-muted-foreground hover:text-foreground"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setShowEditMarket(true);
-                            }}
-                          >
-                            <Pencil className="h-3 w-3" />
-                          </Button>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p className="text-sm">
-                    Average cost for similar services in your area, based on industry pricing data, home prices, and data from HomeAdvisor.
-                  </p>
-                </TooltipContent>
-              </Tooltip>
-            )}
+            <span className="text-xs font-normal underline decoration-dotted underline-offset-4">
+              {marketPrice}
+            </span>
           </div>
         )}
-
-        {/* Modals */}
-        {showEditMarket && (
-          <EditMarketPriceModal
-            open={showEditMarket}
-            onOpenChange={setShowEditMarket}
-            vendorId={vendorId}
-            vendorName={vendorName}
-            currentAmount={marketAmount}
-            currentUnit={marketUnit}
-          />
-        )}
       </div>
+
+      {/* Edit Market Price Modal */}
+      {showEditMarket && (
+        <EditMarketPriceModal
+          open={showEditMarket}
+          onOpenChange={setShowEditMarket}
+          vendorId={vendorId}
+          vendorName={vendorName}
+          currentAmount={marketAmount}
+          currentUnit={marketUnit}
+        />
+      )}
     </TooltipProvider>
   );
 }

@@ -245,7 +245,7 @@ export default function VendorMobileCard({
           </div>
 
 {vendorCosts && vendorCosts.length > 0 ? (
-  <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+  <div className="text-sm space-y-2">
     {(() => {
       const costsWithAmounts = vendorCosts.filter(c => 
         c.amount !== null && 
@@ -267,8 +267,8 @@ export default function VendorMobileCard({
       return (
         <>
           {hasValidAmounts && (
-            <div className="mb-2">
-              <span className="text-sm font-medium text-green-700">
+            <div className="text-sm">
+              <span className="font-normal">
                 💰 {costsWithAmounts.length > 1 
                   ? `$${Math.min(...costsWithAmounts.map(c => c.amount))} - $${Math.max(...costsWithAmounts.map(c => c.amount))}`
                   : `$${costsWithAmounts[0].amount}`
@@ -279,7 +279,7 @@ export default function VendorMobileCard({
           )}
           
           {firstComment && (
-            <p className="text-xs text-green-600 italic">
+            <p className="text-xs text-muted-foreground italic">
               "{firstComment.length > 100 ? firstComment.substring(0, 100) + '...' : firstComment}"
             </p>
           )}
@@ -287,7 +287,7 @@ export default function VendorMobileCard({
           <div className="text-right mt-2">
             <button
               onClick={() => setCostModalOpen(true)}
-              className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+              className="text-xs text-blue-600 hover:text-blue-700 font-medium underline decoration-dotted underline-offset-4"
             >
               View all cost details →
             </button>
