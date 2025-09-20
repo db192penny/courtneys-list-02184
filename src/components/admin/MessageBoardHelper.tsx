@@ -45,7 +45,7 @@ const CATEGORIES = [
   'Painters'
 ];
 
-export function MessageBoardHelper() {
+export default function MessageBoardHelper() {
   const [recipientName, setRecipientName] = useState('there');
   const [copiedCategory, setCopiedCategory] = useState<string | null>(null);
   const { data: isAdmin, isLoading: adminLoading } = useIsAdmin();

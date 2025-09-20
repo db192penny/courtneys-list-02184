@@ -36,7 +36,7 @@ import AdminPreviewLinks from "./pages/AdminPreviewLinks";
 import AdminPreviewUsers from "./pages/AdminPreviewUsers";
 import AdminUsers from "./pages/AdminUsers";
 import { AdminAnalytics } from "./pages/AdminAnalytics";
-import { MessageBoardHelper } from "@/components/admin/MessageBoardHelper";
+import MessageBoardHelper from "@/components/admin/MessageBoardHelper";
 import MockupPreview from "./pages/MockupPreview";
 import LogoMockup from "./pages/LogoMockup";
 import Header from "./components/Header";
