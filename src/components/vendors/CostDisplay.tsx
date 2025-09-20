@@ -83,9 +83,11 @@ export function CostDisplay({
             isMobile ? (
               <Dialog>
                 <DialogTrigger asChild>
-                  <span className="text-xs font-normal underline decoration-dotted underline-offset-4 cursor-pointer">
-                    {communityPrice}
-                  </span>
+                  <div className="px-2 py-1.5 rounded-md bg-blue-50 hover:bg-blue-100 transition-colors border border-blue-200 hover:border-blue-300 min-h-[28px] flex items-center group cursor-pointer">
+                    <span className="text-xs font-normal underline decoration-dotted underline-offset-4">
+                      {communityPrice}
+                    </span>
+                  </div>
                 </DialogTrigger>
                 <DialogContent className="max-w-sm">
                   <DialogHeader>
@@ -112,18 +114,24 @@ export function CostDisplay({
               </Dialog>
             ) : (
               <CostsHover vendorId={vendorId}>
-                <span className="text-xs font-normal underline decoration-dotted underline-offset-4 cursor-pointer">
-                  {communityPrice}
-                </span>
+                <div className="px-2 py-1.5 rounded-md bg-blue-50 hover:bg-blue-100 transition-colors border border-blue-200 hover:border-blue-300 min-h-[28px] flex items-center group cursor-pointer">
+                  <span className="text-xs font-normal underline decoration-dotted underline-offset-4">
+                    {communityPrice}
+                  </span>
+                </div>
               </CostsHover>
             )
           ) : (
-            <span 
-              className={`text-xs underline decoration-dotted underline-offset-4 cursor-pointer ${communityPrice ? 'font-normal' : 'text-muted-foreground'}`}
+            <div 
+              className="px-2 py-1.5 rounded-md bg-blue-50 hover:bg-blue-100 transition-colors border border-blue-200 hover:border-blue-300 min-h-[28px] flex items-center group cursor-pointer"
               onClick={onOpenCostModal}
             >
-              {communityPrice || "Share cost info"}
-            </span>
+              {communityPrice ? (
+                <span className="text-xs font-normal underline decoration-dotted underline-offset-4">{communityPrice}</span>
+              ) : (
+                <span className="text-xs text-muted-foreground underline decoration-dotted underline-offset-4">Share cost info</span>
+              )}
+            </div>
           )}
         </div>
 
@@ -134,9 +142,45 @@ export function CostDisplay({
             {isMobile ? (
               <Dialog>
                 <DialogTrigger asChild>
-                  <span className="text-xs font-normal underline decoration-dotted underline-offset-4 cursor-pointer">
-                    {marketPrice || "No data"}
-                  </span>
+                  <div className="px-2 py-1.5 rounded-md bg-orange-50 hover:bg-orange-100 transition-colors border border-orange-200 hover:border-orange-300 min-h-[28px] flex items-center group cursor-pointer">
+                    {marketPrice ? (
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs font-medium underline decoration-dotted underline-offset-4">{marketPrice}</span>
+                        <Info className="h-3 w-3 text-muted-foreground" />
+                        {isAdmin && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-auto p-0 text-muted-foreground hover:text-foreground"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setShowEditMarket(true);
+                            }}
+                          >
+                            <Pencil className="h-3 w-3" />
+                          </Button>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs font-medium text-muted-foreground underline decoration-dotted underline-offset-4">—</span>
+                        <Info className="h-3 w-3 text-muted-foreground" />
+                        {isAdmin && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-auto p-0 text-muted-foreground hover:text-foreground"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setShowEditMarket(true);
+                            }}
+                          >
+                            <Pencil className="h-3 w-3" />
+                          </Button>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </DialogTrigger>
                 <DialogContent className="max-w-sm">
                   <DialogHeader>
@@ -152,9 +196,45 @@ export function CostDisplay({
             ) : (
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <span className="text-xs font-normal underline decoration-dotted underline-offset-4 cursor-pointer">
-                    {marketPrice || "No data"}
-                  </span>
+                  <div className="px-2 py-1.5 rounded-md bg-orange-50 hover:bg-orange-100 transition-colors border border-orange-200 hover:border-orange-300 min-h-[28px] flex items-center group cursor-pointer">
+                    {marketPrice ? (
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs font-medium underline decoration-dotted underline-offset-4">{marketPrice}</span>
+                        <Info className="h-3 w-3 text-muted-foreground" />
+                        {isAdmin && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-auto p-0 text-muted-foreground hover:text-foreground"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setShowEditMarket(true);
+                            }}
+                          >
+                            <Pencil className="h-3 w-3" />
+                          </Button>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs font-medium text-muted-foreground underline decoration-dotted underline-offset-4">—</span>
+                        <Info className="h-3 w-3 text-muted-foreground" />
+                        {isAdmin && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-auto p-0 text-muted-foreground hover:text-foreground"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setShowEditMarket(true);
+                            }}
+                          >
+                            <Pencil className="h-3 w-3" />
+                          </Button>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </TooltipTrigger>
                 <TooltipContent>
                   <p className="text-sm">
