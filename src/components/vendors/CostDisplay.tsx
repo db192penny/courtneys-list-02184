@@ -77,13 +77,13 @@ export function CostDisplay({
     <TooltipProvider>
       <div className="text-sm space-y-1">
         {/* Community Price Line */}
-        <div className="flex items-center gap-1">
-          <span className="text-xs text-muted-foreground min-w-[70px]">{communityName || "Community"}:</span>
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-muted-foreground min-w-[80px]">{communityName || "Community"}:</span>
           {communitySampleSize && communitySampleSize > 0 ? (
             isMobile ? (
               <Dialog>
                 <DialogTrigger asChild>
-                  <span className="text-xs font-normal underline decoration-dotted underline-offset-4 cursor-pointer">
+                  <span className="text-sm font-normal underline decoration-dotted underline-offset-4 cursor-pointer">
                     {communityPrice}
                   </span>
                 </DialogTrigger>
@@ -104,14 +104,14 @@ export function CostDisplay({
               </Dialog>
             ) : (
               <CostsHover vendorId={vendorId}>
-                <span className="text-xs font-normal underline decoration-dotted underline-offset-4 cursor-pointer">
+                <span className="text-sm font-normal underline decoration-dotted underline-offset-4 cursor-pointer">
                   {communityPrice}
                 </span>
               </CostsHover>
             )
           ) : (
             <span 
-              className="text-xs text-muted-foreground underline decoration-dotted underline-offset-4 cursor-pointer"
+              className="text-sm text-muted-foreground underline decoration-dotted underline-offset-4 cursor-pointer"
               onClick={onOpenCostModal}
             >
               {communityPrice || "Share cost info"}
@@ -121,9 +121,9 @@ export function CostDisplay({
 
         {/* Area Average Price Line - if enabled */}
         {SHOW_AREA_AVERAGE && marketPrice && (
-          <div className="flex items-center gap-1">
-            <span className="text-xs text-muted-foreground min-w-[70px]">Area Average:</span>
-            <span className="text-xs font-normal underline decoration-dotted underline-offset-4">
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground min-w-[80px]">Area Average:</span>
+            <span className="text-sm font-normal underline decoration-dotted underline-offset-4">
               {marketPrice}
             </span>
           </div>

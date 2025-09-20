@@ -228,9 +228,9 @@ export default function PreviewCostsHover({ vendorId, children }: Props) {
             ))}
             <button
               onClick={() => setDetailsModalOpen(true)}
-              className="w-full text-xs text-blue-600 hover:text-blue-700 font-medium mt-2 text-center"
+              className="text-sm text-blue-600 hover:text-blue-700 mt-2"
             >
-              View all cost details →
+              See details
             </button>
           </div>
         </div>
