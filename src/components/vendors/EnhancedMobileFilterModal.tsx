@@ -31,11 +31,6 @@ const SORT_OPTIONS = [
     value: 'most_reviews', 
     label: 'Most Reviews', 
     description: 'Most neighbor feedback' 
-  },
-  { 
-    value: 'recently_added', 
-    label: 'Recently Added', 
-    description: 'Newest provider recommendations' 
   }
 ];
 
