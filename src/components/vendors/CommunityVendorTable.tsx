@@ -150,15 +150,9 @@ export default function CommunityVendorTable({
   const getFilterButtonText = () => {
     const categoryIcon = getCategoryEmoji(category);
     
-    const sortLabel = {
-      'homes': 'Most Used by Neighbors',
-      'hoa_rating': 'Highest Rated',
-      'google_rating': 'Most Reviews'
-    }[sortBy] || 'Most Used by Neighbors';
+    const categoryLabel = category === 'all' ? 'All Categories' : category;
     
-    const categoryLabel = category === 'all' ? '' : category;
-    
-    return { icon: categoryIcon, category: categoryLabel, sort: sortLabel };
+    return { icon: categoryIcon, category: categoryLabel };
   };
 
   const filterText = getFilterButtonText();
@@ -233,7 +227,7 @@ export default function CommunityVendorTable({
                 <div className="flex items-center gap-2">
                   <span className="text-lg sm:text-xl">{filterText.icon}</span>
                   <span className="text-sm sm:text-base font-semibold text-foreground">
-                    {filterText.category ? `${filterText.category} - ${filterText.sort}` : `All Categories - ${filterText.sort}`}
+                    {filterText.category}
                   </span>
                 </div>
                 <ChevronDown className="h-4 w-4 sm:h-5 sm:w-5 text-primary absolute right-3" />
@@ -345,18 +339,7 @@ export default function CommunityVendorTable({
           open={filterModalOpen}
           onOpenChange={setFilterModalOpen}
           selectedCategory={category}
-          selectedSort={sortBy === 'homes' ? 'neighbors_using' : sortBy === 'hoa_rating' ? 'highest_rated' : 'most_reviews'}
           onCategoryChange={handleCategoryChange}
-          onSortChange={(sort) => {
-            const mappedSort = 
-              sort === 'neighbors_using' ? 'homes' : 
-              sort === 'highest_rated' ? 'hoa_rating' : 
-              sort === 'most_reviews' ? 'hoa_review_count' :
-              'homes';
-            setSortBy(mappedSort as any);
-            // Scroll to top when sort order changes
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }}
           categories={[...CATEGORIES]}
         />
       </div>
