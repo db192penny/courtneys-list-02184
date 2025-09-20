@@ -30,7 +30,7 @@ export function MobileReviewsModal({ open, onOpenChange, vendor, onRate }) {
     return (
       <div className="space-y-4 p-4">
         <div className="text-sm text-muted-foreground">
-          Reviews are shared just within our neighborhood circle. Sign up to view them.
+          Full reviews are shared just within our neighborhood circle. Sign up to view them.
         </div>
         <Button 
           onClick={() => navigate('/auth/signup')}

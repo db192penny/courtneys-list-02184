@@ -226,7 +226,21 @@ export default function CostInputs({
               inputMode="decimal"
               placeholder="e.g., 150"
               value={entry.amount ?? ""}
-              onChange={(e) => onField(idx, { amount: e.currentTarget.value === "" ? null : Number(e.currentTarget.value) })}
+              onChange={(e) => {
+                const value = e.currentTarget.value;
+                if (value === "") {
+                  onField(idx, { amount: null });
+                  return;
+                }
+                const numValue = Number(value);
+                if (numValue === 0) {
+                  onField(idx, { amount: null });
+                  return;
+                }
+                if (numValue > 0) {
+                  onField(idx, { amount: numValue });
+                }
+              }}
             />
             <span className="text-sm text-muted-foreground">{unitDisplay}</span>
           </div>

@@ -348,7 +348,11 @@ export default function CommunityVendorTable({
           selectedSort={sortBy === 'homes' ? 'neighbors_using' : sortBy === 'hoa_rating' ? 'highest_rated' : 'most_reviews'}
           onCategoryChange={handleCategoryChange}
           onSortChange={(sort) => {
-            const mappedSort = sort === 'neighbors_using' ? 'homes' : sort === 'highest_rated' ? 'hoa_rating' : 'google_rating';
+            const mappedSort = 
+              sort === 'neighbors_using' ? 'homes' : 
+              sort === 'highest_rated' ? 'hoa_rating' : 
+              sort === 'most_reviews' ? 'hoa_review_count' :
+              'homes';
             setSortBy(mappedSort as any);
             // Scroll to top when sort order changes
             window.scrollTo({ top: 0, behavior: 'smooth' });

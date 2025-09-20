@@ -197,9 +197,13 @@ export default function CostManagementModal({ open, onOpenChange, vendor, onSucc
       }
 
       // Insert/update cost rows for this household (include entries with amount OR comments)
-      const payloads = (costs || []).filter(c => 
-        (c.amount != null && c.amount > 0) || (c.notes && c.notes.trim())
-      ).map((c) => ({
+      const payloads = (costs || []).filter(c => {
+        const hasValidAmount = c.amount !== null && 
+                              c.amount !== undefined && 
+                              c.amount > 0;
+        const hasNotes = c.notes && c.notes.trim().length > 0;
+        return hasValidAmount || hasNotes;
+      }).map((c) => ({
         vendor_id: vendor.id,
         amount: c.amount && c.amount > 0 ? c.amount : null,
         currency: "USD",
