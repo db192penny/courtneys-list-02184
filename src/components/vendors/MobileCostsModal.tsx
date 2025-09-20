@@ -66,7 +66,7 @@ export function MobileCostsModal({ vendorId }: Props) {
     return (
       <div className="space-y-4 p-4">
         <div className="text-sm text-muted-foreground">
-          Cost information is shared just within our neighborhood circle. Sign up to view it.
+          Full cost information is shared just within our neighborhood circle. Sign up to view it.
         </div>
         <Button 
           onClick={() => navigate('/auth/signup')}
