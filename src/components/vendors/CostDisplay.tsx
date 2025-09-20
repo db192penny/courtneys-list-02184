@@ -78,12 +78,12 @@ export function CostDisplay({
       <div className="text-sm space-y-1">
         {/* Community Price Line */}
         <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground min-w-[80px]">{communityName || "Community"}:</span>
+          <span className="text-xl text-muted-foreground min-w-[80px]">{communityName || "Community"}:</span>
           {communitySampleSize && communitySampleSize > 0 ? (
             isMobile ? (
               <Dialog>
                 <DialogTrigger asChild>
-                  <span className="text-sm font-normal underline decoration-dotted underline-offset-4 cursor-pointer">
+                  <span className="text-xl font-normal underline decoration-dotted underline-offset-4 cursor-pointer">
                     {communityPrice}
                   </span>
                 </DialogTrigger>
@@ -104,14 +104,14 @@ export function CostDisplay({
               </Dialog>
             ) : (
               <CostsHover vendorId={vendorId}>
-                <span className="text-sm font-normal underline decoration-dotted underline-offset-4 cursor-pointer">
+                <span className="text-xl font-normal underline decoration-dotted underline-offset-4 cursor-pointer">
                   {communityPrice}
                 </span>
               </CostsHover>
             )
           ) : (
             <span 
-              className="text-sm text-muted-foreground underline decoration-dotted underline-offset-4 cursor-pointer"
+              className="text-xl text-muted-foreground underline decoration-dotted underline-offset-4 cursor-pointer"
               onClick={onOpenCostModal}
             >
               {communityPrice || "Share cost info"}
@@ -122,8 +122,8 @@ export function CostDisplay({
         {/* Area Average Price Line - if enabled */}
         {SHOW_AREA_AVERAGE && marketPrice && (
           <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground min-w-[80px]">Area Average:</span>
-            <span className="text-sm font-normal underline decoration-dotted underline-offset-4">
+            <span className="text-xl text-muted-foreground min-w-[80px]">Area Average:</span>
+            <span className="text-xl font-normal underline decoration-dotted underline-offset-4">
               {marketPrice}
             </span>
           </div>

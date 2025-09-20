@@ -267,7 +267,7 @@ export default function VendorMobileCard({
       return (
         <>
           {hasValidAmounts && (
-            <div className="text-sm mb-2">
+            <div className="text-xl mb-2">
               <span className="font-normal">
                 💰 {costsWithAmounts.length > 1 
                   ? `$${Math.min(...costsWithAmounts.map(c => c.amount))} - $${Math.max(...costsWithAmounts.map(c => c.amount))}`
