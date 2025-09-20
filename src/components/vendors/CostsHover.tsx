@@ -103,54 +103,56 @@ export default function CostsHover({ vendorId, children }: Props) {
             <div className="text-sm text-muted-foreground">No cost submissions yet.</div>
           )}
           {isVerified && costs && costs.length > 0 && (
-            <div className="space-y-2">
-              {costs.filter((cost, index, array) => {
-                // Keep cost if it has an amount, or if it's the first occurrence of a comment from this author
-                if (cost.amount != null && cost.amount > 0) return true;
-                if (cost.notes && cost.notes.trim()) {
-                  const firstOccurrence = array.findIndex(c => 
-                    c.author_label === cost.author_label && 
-                    c.notes === cost.notes &&
-                    (c.amount == null || c.amount === 0)
+            <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+              {(() => {
+                const costsWithAmounts = costs.filter(c => 
+                  c.amount !== null && 
+                  c.amount !== undefined && 
+                  c.amount > 0
+                );
+                
+                const hasValidAmounts = costsWithAmounts.length > 0;
+                const firstComment = costs.find(c => c.notes && c.notes.trim())?.notes;
+                
+                if (!hasValidAmounts && !firstComment) {
+                  return (
+                    <div className="text-center py-3 text-sm text-gray-500">
+                      No cost information yet
+                    </div>
                   );
-                  return firstOccurrence === index;
                 }
-                return false;
-              }).map((cost) => (
-                <div key={cost.id} className="border rounded-md p-2">
-                  <div className="text-xs text-foreground flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      {formatCost(cost.amount, cost.unit, cost.period) ? (
-                        <div className="font-medium">
-                          {formatCost(cost.amount, cost.unit, cost.period)}
-                          {cost.cost_kind && cost.cost_kind !== "one_time" && (
-                            <span className="text-muted-foreground ml-1">
-                              ({cost.cost_kind.replace("_", " ")})
-                            </span>
-                          )}
-                        </div>
-                      ) : null}
-                      <Badge variant="outline" className="text-xs px-2 py-0.5 bg-blue-50 text-blue-700 border-blue-200">
-                        {cost.author_label}
-                      </Badge>
+                
+                return (
+                  <>
+                    {hasValidAmounts && (
+                      <div className="mb-2">
+                        <span className="text-sm font-medium text-green-700">
+                          💰 {costsWithAmounts.length > 1 
+                            ? `$${Math.min(...costsWithAmounts.map(c => c.amount))} - $${Math.max(...costsWithAmounts.map(c => c.amount))}`
+                            : `$${costsWithAmounts[0].amount}`
+                          }
+                          {costsWithAmounts[0]?.period ? `/${costsWithAmounts[0].period}` : ''}
+                        </span>
+                      </div>
+                    )}
+                    
+                    {firstComment && (
+                      <p className="text-xs text-green-600 italic">
+                        "{firstComment.length > 100 ? firstComment.substring(0, 100) + '...' : firstComment}"
+                      </p>
+                    )}
+                    
+                    <div className="text-right mt-2">
+                      <button
+                        onClick={() => setDetailsModalOpen(true)}
+                        className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+                      >
+                        View all cost details →
+                      </button>
                     </div>
-                    <div className="text-[10px] text-muted-foreground">
-                      {new Date(cost.created_at).toLocaleDateString()}
-                    </div>
-                  </div>
-                  {cost.notes && (
-                    <div className="mt-2 text-xs text-muted-foreground">
-                      {cost.notes.length > 100 ? cost.notes.substring(0, 100) + '...' : cost.notes}
-                    </div>
-                  )}
-                </div>
-              ))}
-              <button
-                onClick={() => setDetailsModalOpen(true)}
-                className="w-full text-xs text-blue-600 hover:text-blue-700 font-medium mt-2 text-center"
-              >
-                View all cost details →
-              </button>
+                  </>
+                );
+              })()}
             </div>
           )}
         </div>
