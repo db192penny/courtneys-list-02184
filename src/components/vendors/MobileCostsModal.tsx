@@ -1,6 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useUserProfile } from "@/hooks/useUserProfile";
 
 type Props = {
   vendorId: string;
@@ -35,6 +38,10 @@ const formatCost = (amount: number | null, unit?: string | null, period?: string
 };
 
 export function MobileCostsModal({ vendorId }: Props) {
+  const { data: profile } = useUserProfile();
+  const navigate = useNavigate();
+  const isVerified = !!profile?.isVerified;
+  
   const { data: costs, isLoading } = useQuery({
     queryKey: ["vendor-costs-combined", vendorId],
     queryFn: async () => {
@@ -49,11 +56,27 @@ export function MobileCostsModal({ vendorId }: Props) {
       
       return data as CostData[];
     },
-    enabled: !!vendorId,
+    enabled: isVerified && !!vendorId,
     refetchOnWindowFocus: true,
     refetchOnMount: true,
     staleTime: 0,
   });
+
+  if (!isVerified) {
+    return (
+      <div className="space-y-4 p-4">
+        <div className="text-sm text-muted-foreground">
+          Cost information is shared just within our neighborhood circle. Sign up to view it.
+        </div>
+        <Button 
+          onClick={() => navigate('/auth/signup')}
+          className="w-full"
+        >
+          Sign Up to View Costs
+        </Button>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return <div className="text-sm text-muted-foreground p-4">Loading cost details…</div>;
