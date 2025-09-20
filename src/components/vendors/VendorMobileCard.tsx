@@ -38,6 +38,7 @@ interface VendorMobileCardProps {
   userReviews?: Map<string, { rating: number; id: string }>;
   userCosts?: Map<string, boolean>;
   isAuthenticated?: boolean;
+  isVerified?: boolean;
   communityName?: string;
 }
 
@@ -52,6 +53,7 @@ export default function VendorMobileCard({
   userReviews,
   userCosts,
   isAuthenticated = false,
+  isVerified = false,
   communityName,
 }: VendorMobileCardProps) {
   // Use a combined query that works for both authenticated and preview users
@@ -110,7 +112,6 @@ export default function VendorMobileCard({
   });
   const { data: profile } = useUserProfile();
   const { toast } = useToast();
-  const isVerified = !!profile?.isVerified;
   const [costModalOpen, setCostModalOpen] = useState(false);
   const [googleReviewsModalOpen, setGoogleReviewsModalOpen] = useState(false);
   const [isReviewsModalOpen, setIsReviewsModalOpen] = useState(false);
@@ -371,7 +372,28 @@ export default function VendorMobileCard({
         <DialogHeader>
           <DialogTitle>Cost Details</DialogTitle>
         </DialogHeader>
-        <MobileCostsModal vendorId={vendor.id} />
+        {isAuthenticated && isVerified ? (
+          <MobileCostsModal vendorId={vendor.id} />
+        ) : (
+          <div className="space-y-4">
+            <div className="text-center space-y-2">
+              <h3 className="text-lg font-semibold">{communityName || "Boca Bridges"}</h3>
+              <p className="text-sm text-muted-foreground">
+                Full cost details are shared just within our neighborhood circle. Sign up to view them.
+              </p>
+            </div>
+            <Button 
+              onClick={() => {
+                const communitySlug = communityName?.toLowerCase().replace(/\s+/g, '-');
+                window.location.href = `/auth?community=${communityName}`;
+                setCostModalOpen(false);
+              }}
+              className="w-full"
+            >
+              Sign Up to View Costs
+            </Button>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
 

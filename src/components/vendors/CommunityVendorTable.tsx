@@ -289,6 +289,7 @@ export default function CommunityVendorTable({
               userReviews={userReviews}
               userCosts={userCosts.data}
               isAuthenticated={isAuthenticated}
+              isVerified={isVerified}
               communityName={communityName}
             />
           ))}
