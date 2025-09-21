@@ -37,6 +37,7 @@ import { useUserReviews } from "@/hooks/useUserReviews";
 import { useUserCosts } from "@/hooks/useUserCosts";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useScrollDirection } from "@/hooks/useScrollDirection";
+import { GATracking } from "@/components/analytics/GoogleAnalytics";
 
 import ReviewsHover from "@/components/vendors/ReviewsHover";
 import PreviewReviewsHover from "@/components/vendors/PreviewReviewsHover";
@@ -164,6 +165,7 @@ export default function CommunityVendorTable({
   const filterText = getFilterButtonText();
 
   const handleCategoryChange = (newCategory: string) => {
+    GATracking.trackCategoryChange(category, newCategory);
     setCategory(newCategory);
     // Update URL parameter
     const newSearchParams = new URLSearchParams(searchParams);

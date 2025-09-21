@@ -9,6 +9,7 @@ import CostPreview from "./CostPreview";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { extractStreetName, capitalizeStreetName } from "@/utils/address";
+import { GATracking } from "@/components/analytics/GoogleAnalytics";
 
 type Props = {
   open: boolean;
@@ -257,6 +258,12 @@ export default function CostManagementModal({ open, onOpenChange, vendor, onSucc
       await queryClient.refetchQueries({ queryKey: ["vendor-costs", vendor.id] });
       await queryClient.refetchQueries({ queryKey: ["mobile-vendor-costs", vendor.id] });
       await queryClient.refetchQueries({ queryKey: ["vendor-costs-combined", vendor.id] });
+      
+      // Track cost submission - get the first valid amount
+      const validCosts = costs.filter(c => c.amount !== null && c.amount !== undefined && c.amount > 0);
+      if (validCosts.length > 0) {
+        GATracking.trackCostSubmit(vendor, validCosts[0].amount!);
+      }
       
       toast({ title: "Saved", description: "Cost information updated successfully!" });
       onOpenChange(false);

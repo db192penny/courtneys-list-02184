@@ -25,6 +25,7 @@ import { NeighborReviewPreview } from "./NeighborReviewPreview";
 import { MobileCostsModal } from "./MobileCostsModal";
 import type { CommunityVendorRow } from "@/components/vendors/CommunityVendorTable";
 import React, { useState } from "react";
+import { GATracking } from "@/components/analytics/GoogleAnalytics";
 
 
 interface VendorMobileCardProps {
@@ -152,7 +153,7 @@ export default function VendorMobileCard({
 
   return (
     <>
-    <Card className="w-full" data-vendor-id={vendor.id}>
+    <Card className="w-full" data-vendor-id={vendor.id} data-vendor-name={vendor.name}>
       <CardContent className="p-3 space-y-3">
         {/* Header Section - Rank and Name on same line */}
         <div className="flex items-center gap-3 mb-2">
@@ -175,7 +176,18 @@ export default function VendorMobileCard({
             )}
           </div>
           <Button
-            onClick={() => isAuthenticated ? onRate(vendor) : window.location.href = `/auth?community=${encodeURIComponent(communityName || '')}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              GATracking.trackButtonClick('rate_vendor', { 
+                vendor_id: vendor.id,
+                vendor_name: vendor.name 
+              });
+              if (isAuthenticated) {
+                onRate(vendor);
+              } else {
+                window.location.href = `/auth?community=${encodeURIComponent(communityName || '')}`;
+              }
+            }}
             className={`rounded-lg px-3 py-1.5 font-medium shrink-0 flex items-center gap-1.5 ${
               userReviews?.has(vendor.id) 
                 ? "bg-green-100 text-green-800 hover:bg-green-200 border border-green-200" 
@@ -209,7 +221,13 @@ export default function VendorMobileCard({
           <NeighborReviewPreview 
             vendorId={vendor.id} 
             vendor={vendor}
-            onOpenModal={() => setIsReviewsModalOpen(true)}
+            onOpenModal={() => {
+              GATracking.trackModalOpen('reviews_modal', { 
+                vendor_id: vendor.id,
+                vendor_name: vendor.name 
+              });
+              setIsReviewsModalOpen(true);
+            }}
             onRate={() => onRate(vendor)}
             onSignUp={() => {
               const communitySlug = communityName?.toLowerCase().replace(/\s+/g, '-');
@@ -221,7 +239,13 @@ export default function VendorMobileCard({
           
           {vendor.google_rating_count > 0 && (
             <button 
-              onClick={() => setGoogleReviewsModalOpen(true)}
+              onClick={() => {
+                GATracking.trackButtonClick('google_reviews', { 
+                  vendor_id: vendor.id,
+                  vendor_name: vendor.name 
+                });
+                setGoogleReviewsModalOpen(true);
+              }}
               className="text-sm text-blue-600 hover:text-blue-800 hover:underline cursor-pointer transition-colors"
             >
               See Google Reviews ⭐ {vendor.google_rating?.toFixed(1)} ({vendor.google_rating_count} reviews)
@@ -237,7 +261,14 @@ export default function VendorMobileCard({
               <Button
                 variant={userCosts?.has(vendor.id) ? "secondary" : "outline"}
                 size="sm"
-                onClick={() => onCosts(vendor)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  GATracking.trackModalOpen('cost_modal', { 
+                    vendor_id: vendor.id,
+                    vendor_name: vendor.name 
+                  });
+                  onCosts(vendor);
+                }}
                 className={userCosts?.has(vendor.id) ? "bg-green-100 text-green-700 border-green-200" : ""}
               >
                 {userCosts?.has(vendor.id) ? "✓ Added" : "+ Add Cost"}
@@ -296,7 +327,13 @@ export default function VendorMobileCard({
           
           <div className="text-left mt-2">
             <button
-              onClick={() => setCostModalOpen(true)}
+              onClick={() => {
+                GATracking.trackModalOpen('cost_details_modal', { 
+                  vendor_id: vendor.id,
+                  vendor_name: vendor.name 
+                });
+                setCostModalOpen(true);
+              }}
               className="text-sm text-blue-600 hover:text-blue-700 underline decoration-dotted underline-offset-4"
             >
               See details

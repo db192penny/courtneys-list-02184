@@ -15,6 +15,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { extractStreetName } from "@/utils/address";
 import { generatePointSuggestion, getInviteGuidance } from "@/utils/pointSuggestions";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { GATracking } from "@/components/analytics/GoogleAnalytics";
 
 type Props = {
   open: boolean;
@@ -272,6 +273,9 @@ export default function RateVendorModal({ open, onOpenChange, vendor, onSuccess,
       if (suggestion.includeInviteGuidance) {
         description += ` ${getInviteGuidance(isMobile)}`;
       }
+      
+      // Track review submission
+      GATracking.trackReviewSubmit(vendor, rating);
       
       toast({ 
         title: "🎉 Review Added! +5 Points", 

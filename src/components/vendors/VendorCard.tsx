@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import useIsAdmin from "@/hooks/useIsAdmin";
 import useIsHoaAdmin from "@/hooks/useIsHoaAdmin";
+import { GATracking } from "@/components/analytics/GoogleAnalytics";
 
 type Vendor = {
   id: string;
@@ -27,7 +28,7 @@ export default function VendorCard({
   const { data: isHoaAdmin } = useIsHoaAdmin();
   const canEdit = !!isAdmin || !!isHoaAdmin;
   return (
-    <Card>
+    <Card data-vendor-id={vendor.id} data-vendor-name={vendor.name}>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="space-y-1">

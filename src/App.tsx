@@ -43,6 +43,7 @@ import Header from "./components/Header";
 import { AdminProtectedRoute } from "./components/AdminProtectedRoute";
 import { AnalyticsTracker } from "./components/AnalyticsTracker";
 import { useActivityTimeout } from "./hooks/useActivityTimeout";
+import GoogleAnalytics from "./components/analytics/GoogleAnalytics";
 
 const queryClient = new QueryClient();
 
@@ -158,7 +159,7 @@ function ActivityTimeoutManager() {
 }
 
 function AppContent() {
-  const { isProcessingMagicLink } = useAuth();
+  const { isProcessingMagicLink, user } = useAuth();
   const location = useLocation();
   
   // Extract community name from URL path
@@ -184,6 +185,7 @@ function AppContent() {
     <>
       <AuthWatcher />
       <AnalyticsTracker />
+      <GoogleAnalytics user={user} />
       <ActivityTimeoutManager />
       <ConditionalHeader />
       <Routes>
