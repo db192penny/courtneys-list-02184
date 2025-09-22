@@ -1,5 +1,6 @@
 export const CATEGORIES = [
   "Appliance Repair",
+  "Bartenders",
   "Car Wash & Detail",
   "Carpet/Upholstery Cleaning",
   "Damage Assessment/Restoration",

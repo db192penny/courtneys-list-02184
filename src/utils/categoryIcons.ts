@@ -23,6 +23,7 @@ import {
   Grid3x3,
   Star,
   Layers,
+  Wine,
   LucideIcon 
 } from "lucide-react";
 import { Category } from "@/data/categories";
@@ -46,6 +47,7 @@ export const categoryIconMap: Record<Category, LucideIcon> = {
   "House Manager": Building2,
   "Mobile Tire Repair": Car,
   "Appliance Repair": Settings,
+  "Bartenders": Wine,
   "Water Filtration": Filter,
   "Interior Design": Palette,
   "Moving Company": Truck,
