@@ -30,7 +30,7 @@ import { Category } from "@/data/categories";
 export const categoryIconMap: Record<Category, LucideIcon> = {
   "Pool": Waves,
   "HVAC": Thermometer,
-  "Electrical": Zap,
+  "Electrician": Zap,
   "Grill Cleaning": Flame,
   "Plumbing": Droplets,
   "Painters": PaintBucket,
