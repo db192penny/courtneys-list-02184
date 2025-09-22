@@ -84,6 +84,14 @@ export function buildDefaultCosts(category?: string): CostEntry[] {
     ];
   }
 
+  // Bartenders: Hourly rate + Event fee
+  if (c === "bartenders") {
+    return [
+      { cost_kind: "hourly", amount: null, unit: "hour", notes: null },
+      { cost_kind: "one_time", amount: null, unit: "event", notes: null },
+    ];
+  }
+
   // House Manager: Monthly fee
   if (c === "house manager") {
     return [
@@ -213,7 +221,7 @@ export default function CostInputs({
         entry.cost_kind === "base_fee" ? " per Move" :
         entry.cost_kind === "assessment_fee" ? " per Visit" :
         entry.cost_kind === "monthly_fee" ? " per Month" :
-        entry.cost_kind === "one_time" ? (entry.unit === "item" ? " per Item" : " (one-time)") :
+        entry.cost_kind === "one_time" ? (entry.unit === "item" ? " per Item" : entry.unit === "event" ? " per Event" : " (one-time)") :
         " per Month";
 
       return (
