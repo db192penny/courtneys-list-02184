@@ -1,7 +1,7 @@
 export const CATEGORIES = [
   "Appliance Repair",
   "Car Wash & Detail",
-  "Carpet & Sofa Cleaning",
+  "Carpet/Upholstery Cleaning",
   "Damage Assessment/Restoration",
   "Electrical",
   "Generator",

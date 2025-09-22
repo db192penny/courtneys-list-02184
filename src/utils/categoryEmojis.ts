@@ -29,7 +29,7 @@ export const categoryEmojiMap: Record<string, string> = {
   'Interior Design': '🛋️',
   'Moving Company': '🚚',
   'Damage Assessment/Restoration': '🛠️',
-  'Carpet & Sofa Cleaning': '🧽',
+  'Carpet/Upholstery Cleaning': '🧽',
   'Patio Screening': '🏠',
   'Holiday Lighting': '✨',
   'Tile Installation': '🟫'

@@ -50,7 +50,7 @@ export const categoryIconMap: Record<Category, LucideIcon> = {
   "Interior Design": Palette,
   "Moving Company": Truck,
   "Damage Assessment/Restoration": Shield,
-  "Carpet & Sofa Cleaning": Sofa,
+  "Carpet/Upholstery Cleaning": Sofa,
   "Patio Screening": Grid3x3,
   "Holiday Lighting": Star,
   "Tile Installation": Layers,
