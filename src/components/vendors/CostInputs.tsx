@@ -209,7 +209,7 @@ export default function CostInputs({
         entry.cost_kind === "base_fee" ? "Base Move Fee" :
         entry.cost_kind === "assessment_fee" ? "Assessment/Inspection Fee" :
         entry.cost_kind === "monthly_fee" ? "Monthly Fee" :
-        entry.cost_kind === "one_time" ? (entry.unit === "item" ? "Per Item Cost" : "Installation Cost") :
+        entry.cost_kind === "one_time" ? (entry.unit === "item" ? "Per Item Cost" : entry.unit === "event" ? "Event Fee" : "Installation Cost") :
         "Maintenance Plan";
 
       const unitDisplay = 
