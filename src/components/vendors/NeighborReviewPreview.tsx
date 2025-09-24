@@ -45,10 +45,11 @@ export function NeighborReviewPreview({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const isMobile = useIsMobile();
   const { data: reviews, isLoading, error } = useQuery({
-    queryKey: ["vendor-reviews", vendorId],
+    queryKey: ["vendor-reviews", vendorId, isAuthenticated],
     queryFn: async () => {
+      const functionName = isAuthenticated ? 'list_vendor_reviews' : 'list_vendor_reviews_preview';
       const { data, error } = await supabase
-        .rpc("list_vendor_reviews", { _vendor_id: vendorId });
+        .rpc(functionName as any, { _vendor_id: vendorId });
       
       if (error) throw error;
       return data as Review[];
