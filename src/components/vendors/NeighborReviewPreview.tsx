@@ -97,7 +97,21 @@ export function NeighborReviewPreview({
   const truncateComment = (comment: string) => {
     const limit = isMobile ? 140 : 250;
     if (!comment || comment.length <= limit) return { text: comment, wasTruncated: false };
-    return { text: comment.substring(0, limit) + "...", wasTruncated: true };
+    
+    // Find a good breaking point near the limit (prefer word boundaries)
+    let breakPoint = limit;
+    for (let i = limit; i > limit - 20 && i < comment.length; i++) {
+      if (comment[i] === ' ') {
+        breakPoint = i;
+        break;
+      }
+    }
+    
+    return { 
+      text: comment.substring(0, breakPoint), 
+      wasTruncated: true,
+      remainingLength: comment.length - breakPoint
+    };
   };
 
   const handleInteraction = (e: React.MouseEvent | React.KeyboardEvent) => {
@@ -219,20 +233,19 @@ export function NeighborReviewPreview({
       {selectedReview.comments && selectedReview.comments.trim() ? (
         <div className="bg-white/60 rounded-lg p-3 mb-3 border border-blue-100">
           <p className="text-base text-blue-800 font-medium leading-snug mb-2 italic">
-            "{truncateComment(selectedReview.comments).text}"
+            "{truncateComment(selectedReview.comments).text}
+            {truncateComment(selectedReview.comments).wasTruncated && (
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleInteraction(e);
+                }}
+                className="inline text-blue-600 hover:text-blue-800 hover:underline cursor-pointer transition-colors ml-1"
+              >
+                read more →
+              </button>
+            )}"
           </p>
-          {/* Read more link for truncated content */}
-          {truncateComment(selectedReview.comments).wasTruncated && (
-            <button 
-              onClick={(e) => {
-                e.stopPropagation();
-                handleInteraction(e);
-              }}
-              className="text-xs text-blue-600 hover:text-blue-800 hover:underline cursor-pointer transition-colors mb-2 block"
-            >
-              Read more →
-            </button>
-          )}
           {/* Right-aligned attribution */}
           <div className="flex justify-end">
             <p className="text-sm font-semibold text-blue-700">
@@ -252,12 +265,17 @@ export function NeighborReviewPreview({
         </div>
       )}
       
-      {/* Footer with CTA - Simplified */}
-      <div className="mt-3 bg-blue-100/50 rounded-lg p-2 border border-blue-200">
-        <div className="flex items-center justify-center">
-          <span className="text-sm font-medium text-blue-700">
-            {totalReviews > 1 ? `See all ${totalReviews} reviews →` : 'View full review →'}
+      {/* Footer with CTA - Enhanced */}
+      <div className="mt-3 bg-gradient-to-r from-blue-200 to-indigo-200 rounded-lg p-3 border border-blue-300 hover:from-blue-300 hover:to-indigo-300 transition-all duration-200 shadow-sm">
+        <div className="flex items-center justify-center gap-2">
+          <span className="text-2xl">👀</span>
+          <span className="text-sm font-bold text-blue-900">
+            {totalReviews > 1 ? `View all ${totalReviews} reviews` : 'View full review'}
           </span>
+          <span className="text-blue-800">→</span>
+        </div>
+        <div className="text-xs text-blue-700 text-center mt-1 font-medium">
+          See what neighbors are saying
         </div>
       </div>
     </div>
