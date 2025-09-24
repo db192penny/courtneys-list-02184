@@ -24,6 +24,7 @@ import {
   Star,
   Layers,
   Wine,
+  Scroll,
   LucideIcon 
 } from "lucide-react";
 import { Category } from "@/data/categories";
@@ -56,6 +57,7 @@ export const categoryIconMap: Record<Category, LucideIcon> = {
   "Patio Screening": Grid3x3,
   "Holiday Lighting": Star,
   "Tile Installation": Layers,
+  "Wallpaper Installation": Scroll,
 };
 
 export function getCategoryIcon(category: Category): LucideIcon {
