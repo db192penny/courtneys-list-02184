@@ -149,6 +149,14 @@ export function buildDefaultCosts(category?: string): CostEntry[] {
     ];
   }
 
+  // Turf Installation: Installation per sq ft + hourly rate
+  if (c === "turf installation") {
+    return [
+      { cost_kind: "installation", amount: null, unit: "sq ft", notes: null },
+      { cost_kind: "hourly", amount: null, unit: "hour", notes: null },
+    ];
+  }
+
   // Wallpaper Installation: Installation per sq ft + hourly rate  
   if (c === "wallpaper installation") {
     return [
