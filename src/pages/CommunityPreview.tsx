@@ -24,7 +24,7 @@ const CommunityPreview = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { trackEvent } = usePreviewSession();
-  const { isScrollingDown } = useScrollDirection();
+  const { isScrollingDown, hasScrolled } = useScrollDirection();
   
   const communityName = useMemo(() => (slug ? slugToName(slug) : ""), [slug]);
 
@@ -127,19 +127,21 @@ const CommunityPreview = () => {
 
       <div className="container py-8 space-y-8">
         {/* Logo and Header with Text Overlay */}
-        <header className="text-center space-y-4">
-          <div className="relative mx-auto w-24 h-24">
-            <img
-              src={photoUrl}
-              alt={`${communityName} community photo`}
-              className="w-full h-full rounded-lg object-cover border"
-              loading="lazy"
-            />
-          </div>
-          <p className="text-muted-foreground">
-            Neighbor-recommended service providers
-          </p>
-        </header>
+        {!hasScrolled && (
+          <header className="text-center space-y-4">
+            <div className="relative mx-auto w-24 h-24">
+              <img
+                src={photoUrl}
+                alt={`${communityName} community photo`}
+                className="w-full h-full rounded-lg object-cover border"
+                loading="lazy"
+              />
+            </div>
+            <p className="text-muted-foreground">
+              Neighbor-recommended service providers
+            </p>
+          </header>
+        )}
 
         {/* Community Info */}
         {!communityLoading && community && (
