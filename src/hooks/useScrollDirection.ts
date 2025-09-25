@@ -10,12 +10,18 @@ export function useScrollDirection() {
     const updateScrollDirection = () => {
       const scrollY = window.scrollY;
       
-      if (Math.abs(scrollY - lastScrollY) < 10) {
+      if (Math.abs(scrollY - lastScrollY) < 5) {
         ticking = false;
         return;
       }
       
-      setIsScrollingDown(scrollY > lastScrollY && scrollY > 100);
+      // Show controls immediately when scrolling up, hide after 25px when scrolling down
+      if (scrollY < lastScrollY) {
+        setIsScrollingDown(false);
+      } else if (scrollY > lastScrollY && scrollY > 25) {
+        setIsScrollingDown(true);
+      }
+      
       setLastScrollY(scrollY);
       ticking = false;
     };
