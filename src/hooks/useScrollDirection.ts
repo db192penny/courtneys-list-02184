@@ -21,7 +21,8 @@ export function useScrollDirection() {
         return;
       }
       
-      setIsScrollingDown(scrollY > lastScrollY && scrollY > 100);
+      // Show immediately when scrolling up (no threshold), hide only when scrolling down past 25px
+      setIsScrollingDown(scrollY > lastScrollY && scrollY > 25);
       setLastScrollY(scrollY);
       ticking = false;
     };
