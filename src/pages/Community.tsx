@@ -1,4 +1,4 @@
-import { useMemo, useEffect } from "react";
+import { useMemo, useEffect, useState } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
@@ -30,6 +30,10 @@ export default function Community() {
   const { data: profile } = useUserProfile();
   const { isAuthenticated: sessionAuthenticated } = useAuth();
   const { isScrollingDown, hasScrolled } = useScrollDirection();
+  const [hideHeader, setHideHeader] = useState(false);
+  useEffect(() => {
+    if (hasScrolled) setHideHeader(true);
+  }, [hasScrolled]);
   
   const communityName = useMemo(() => slugToName(slug), [slug]);
 
@@ -121,7 +125,7 @@ export default function Community() {
           <header className="space-y-4">
               <div className="flex flex-col gap-4">
                  {/* Community info - full-width image with text overlay - only show if user hasn't scrolled yet */}
-                 {!hasScrolled && (
+                 {!hideHeader && (
                    <div className="relative animate-fade-in">
                       {/* Full-width community image with text overlay */}
                       {asset?.photo_path ? (

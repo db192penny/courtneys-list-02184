@@ -1,4 +1,4 @@
-import { useMemo, useEffect } from "react";
+import { useMemo, useEffect, useState } from "react";
 import { useParams, useSearchParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import SEO from "@/components/SEO";
@@ -25,6 +25,10 @@ const CommunityPreview = () => {
   const navigate = useNavigate();
   const { trackEvent } = usePreviewSession();
   const { isScrollingDown, hasScrolled } = useScrollDirection();
+  const [hideHeader, setHideHeader] = useState(false);
+  useEffect(() => {
+    if (hasScrolled) setHideHeader(true);
+  }, [hasScrolled]);
   
   const communityName = useMemo(() => (slug ? slugToName(slug) : ""), [slug]);
 
@@ -127,7 +131,7 @@ const CommunityPreview = () => {
 
       <div className="container py-8 space-y-8">
         {/* Logo and Header with Text Overlay */}
-        {!hasScrolled && (
+        {!hideHeader && (
           <header className="text-center space-y-4">
             <div className="relative mx-auto w-24 h-24">
               <img
