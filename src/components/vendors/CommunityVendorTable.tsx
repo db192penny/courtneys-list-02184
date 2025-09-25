@@ -99,7 +99,7 @@ export default function CommunityVendorTable({
   const [searchParams, setSearchParams] = useSearchParams();
   const [category, setCategory] = useState<string>("Pool");
   const SORTS = getSorts(communityName);
-  const [sortBy, setSortBy] = useState<typeof SORTS[number]["key"]>("homes");
+  const [sortBy, setSortBy] = useState<typeof SORTS[number]["key"]>("hoa_rating");
   const { toast } = useToast();
   // Always use mobile layout for desktop - removed isMobile detection
   const isMobile = true;
