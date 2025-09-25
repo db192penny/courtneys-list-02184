@@ -46,7 +46,8 @@ import RateVendorModalWrapper from "@/components/vendors/RateVendorModalWrapper"
 import VendorMobileCard from "@/components/vendors/VendorMobileCard";
 import CostManagementModalWrapper from "@/components/vendors/CostManagementModalWrapper";
 import { CostDisplay } from "@/components/vendors/CostDisplay";
-import { EnhancedMobileFilterModal } from "./EnhancedMobileFilterModal";
+import { HorizontalSortControls } from "./HorizontalSortControls";
+import { HorizontalCategoryPills } from "./HorizontalCategoryPills";
 import { formatUSPhoneDisplay } from "@/utils/phone";
 
 export type CommunityVendorRow = {
@@ -144,25 +145,8 @@ export default function CommunityVendorTable({
   // Modal states
   const [rateModalOpen, setRateModalOpen] = useState(false);
   const [costModalOpen, setCostModalOpen] = useState(false);
-  const [filterModalOpen, setFilterModalOpen] = useState(false);
   const [selectedVendor, setSelectedVendor] = useState<{ id: string; name: string; category: string } | null>(null);
 
-  // Dynamic filter button text
-  const getFilterButtonText = () => {
-    const categoryIcon = getCategoryEmoji(category);
-    
-    const sortLabel = {
-      'homes': 'Most Used by Neighbors',
-      'hoa_rating': 'Highest Rated',
-      'google_rating': 'Most Reviews'
-    }[sortBy] || 'Most Used by Neighbors';
-    
-    const categoryLabel = category === 'all' ? '' : category;
-    
-    return { icon: categoryIcon, category: categoryLabel, sort: sortLabel };
-  };
-
-  const filterText = getFilterButtonText();
 
   const handleCategoryChange = (newCategory: string) => {
     GATracking.trackCategoryChange(category, newCategory);
@@ -218,38 +202,45 @@ export default function CommunityVendorTable({
   return (
     <TooltipProvider>
       <div className="max-w-4xl mx-auto">
-        {/* Sticky Filter Controls */}
-        <div className={`sticky top-[120px] sm:top-[140px] z-30 backdrop-blur-md bg-background/95 border-b border-border/40 shadow-sm transition-all duration-300 ease-in-out mb-4 -mx-4 px-4 py-2 sm:py-3 ${
-          isScrollingDown ? '-translate-y-full opacity-0' : 'translate-y-0 opacity-100'
+        {/* Mobile-Optimized Filter Controls - Two Rows */}
+        <div className={`transition-all duration-300 ease-in-out mb-6 ${
+          isScrollingDown ? 'opacity-75' : 'opacity-100'
         }`}>
-          <div className="max-w-4xl mx-auto">
-            <label className="text-xs text-primary font-semibold uppercase tracking-wide mb-1.5 sm:mb-2 block flex items-center gap-1.5">
-              <Filter className="h-3 w-3" />
-              Choose Category
-            </label>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setFilterModalOpen(true)}
-                className={`flex-1 flex items-center justify-center px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg border-2 border-primary/20 bg-gradient-to-r from-primary/5 to-accent/5 hover:from-primary/10 hover:to-accent/10 transition-all duration-200 shadow-sm hover:shadow-md hover:scale-[1.01] active:scale-[0.99] ${showInitialAnimation ? 'shadow-lg shadow-primary/20 border-primary/30' : ''} relative`}
-              >
-                <div className="flex items-center gap-2">
-                  <span className="text-lg sm:text-xl">{filterText.icon}</span>
-                  <span className="text-sm sm:text-base font-semibold text-foreground">
-                    {filterText.category ? `${filterText.category} - ${filterText.sort}` : `All Categories - ${filterText.sort}`}
-                  </span>
-                </div>
-                <ChevronDown className="h-4 w-4 sm:h-5 sm:w-5 text-primary absolute right-3" />
-              </button>
+          {/* Row 1: Category Dropdown + Share Button */}
+          <div className="flex items-end gap-3 mb-4">
+            <div className="flex-1 flex flex-col justify-end">
+              <HorizontalCategoryPills
+                selectedCategory={category}
+                onCategoryChange={handleCategoryChange}
+                categories={[...CATEGORIES]}
+              />
+            </div>
+            
+            <div className="flex flex-col justify-end">
+              <label className="text-xs text-muted-foreground font-medium uppercase tracking-wide mb-2 block text-right sm:text-left">
+                Share
+              </label>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={handleShareCategory}
-                className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-2.5 sm:py-3 h-auto text-xs sm:text-sm"
+                className="h-12 w-12 p-0 flex items-center justify-center"
               >
-                <Share className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                <span className="hidden xs:inline">Share</span>
+                <Share className="h-4 w-4" />
               </Button>
             </div>
+          </div>
+          
+          {/* Row 2: Sort Controls */}
+          <div className="mb-4">
+            <HorizontalSortControls
+              selectedSort={sortBy}
+              onSortChange={(sort) => {
+                setSortBy(sort as any);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              communityName={communityName}
+            />
           </div>
         </div>
 
@@ -343,25 +334,6 @@ export default function CommunityVendorTable({
           </>
         )}
 
-        {/* Enhanced Mobile Filter Modal */}
-        <EnhancedMobileFilterModal
-          open={filterModalOpen}
-          onOpenChange={setFilterModalOpen}
-          selectedCategory={category}
-          selectedSort={sortBy === 'homes' ? 'neighbors_using' : sortBy === 'hoa_rating' ? 'highest_rated' : 'most_reviews'}
-          onCategoryChange={handleCategoryChange}
-          onSortChange={(sort) => {
-            const mappedSort = 
-              sort === 'neighbors_using' ? 'homes' : 
-              sort === 'highest_rated' ? 'hoa_rating' : 
-              sort === 'most_reviews' ? 'hoa_review_count' :
-              'homes';
-            setSortBy(mappedSort as any);
-            // Scroll to top when sort order changes
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }}
-          categories={[...CATEGORIES]}
-        />
       </div>
     </TooltipProvider>
   );
