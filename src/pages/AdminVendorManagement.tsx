@@ -21,8 +21,6 @@ interface Vendor {
   google_place_id: string | null;
   google_rating: number | null;
   google_rating_count: number | null;
-  hoa_rating: number | null;
-  hoa_rating_count: number | null;
   created_at: string;
   created_by: string;
 }
@@ -39,70 +37,19 @@ const AdminVendorManagement = () => {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [communityFilter, setCommunityFilter] = useState("all");
 
+
   const canonical = typeof window !== "undefined" ? window.location.href : undefined;
 
-  // Load vendors with rating stats
+  // Load vendors
   const loadVendors = async () => {
     try {
-      // Get all unique communities first
-      const { data: communitiesData, error: communitiesError } = await supabase
+      const { data, error } = await supabase
         .from("vendors")
-        .select("community")
-        .order("community");
+        .select("*")
+        .order("created_at", { ascending: false });
 
-      if (communitiesError) throw communitiesError;
-
-      const uniqueCommunities = [...new Set(communitiesData?.map(v => v.community) || [])];
-      
-      // Fetch vendor stats for each community
-      const allVendors: Vendor[] = [];
-      
-      for (const community of uniqueCommunities) {
-        const { data, error } = await supabase
-          .rpc('list_vendor_stats', { _hoa_name: community });
-
-        if (error) {
-          console.error(`Failed to load vendors for ${community}:`, error);
-          continue;
-        }
-
-        if (data) {
-          const vendorsWithCommunity = data.map((vendor: any) => ({
-            id: vendor.vendor_id,
-            name: vendor.vendor_name,
-            category: vendor.category,
-            contact_info: vendor.contact_info || '',
-            community: community,
-            google_place_id: vendor.google_place_id,
-            google_rating: vendor.google_rating,
-            google_rating_count: vendor.google_rating_count,
-            hoa_rating: vendor.hoa_rating,
-            hoa_rating_count: vendor.hoa_rating_count,
-            created_at: vendor.created_at || new Date().toISOString(),
-            created_by: vendor.created_by || '',
-          }));
-          allVendors.push(...vendorsWithCommunity);
-        }
-      }
-
-      // Remove duplicates (vendors might appear in multiple communities)
-      const uniqueVendors = allVendors.reduce((acc: Vendor[], vendor) => {
-        const existingIndex = acc.findIndex(v => v.id === vendor.id);
-        if (existingIndex === -1) {
-          acc.push(vendor);
-        } else {
-          // If vendor exists in multiple communities, keep the one with Boca Bridges if it exists
-          if (vendor.community === "Boca Bridges" && acc[existingIndex].community !== "Boca Bridges") {
-            acc[existingIndex] = vendor;
-          }
-        }
-        return acc;
-      }, []);
-
-      // Sort by created date (newest first)
-      uniqueVendors.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-      
-      setVendors(uniqueVendors);
+      if (error) throw error;
+      setVendors(data || []);
     } catch (error) {
       console.error("Failed to load vendors:", error);
       toast({
@@ -148,6 +95,7 @@ const AdminVendorManagement = () => {
   const openEditPage = (vendor: Vendor) => {
     navigate(`/admin/vendors/edit?vendor_id=${vendor.id}`);
   };
+
 
   // Delete vendor
   const deleteVendor = async (vendor: Vendor) => {
@@ -264,7 +212,6 @@ const AdminVendorManagement = () => {
                 <TableHead>Community</TableHead>
                 <TableHead>Contact</TableHead>
                 <TableHead>Google Rating</TableHead>
-                <TableHead>Boca Bridges Rating</TableHead>
                 <TableHead>Created</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
@@ -272,7 +219,7 @@ const AdminVendorManagement = () => {
             <TableBody>
               {filteredVendors.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center text-muted-foreground">
+                  <TableCell colSpan={7} className="text-center text-muted-foreground">
                     No vendors found.
                   </TableCell>
                 </TableRow>
@@ -293,13 +240,6 @@ const AdminVendorManagement = () => {
                   <TableCell>
                     {vendor.google_rating ? (
                       <span>{vendor.google_rating} ({vendor.google_rating_count})</span>
-                    ) : (
-                      "—"
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {vendor.hoa_rating && vendor.hoa_rating_count ? (
-                      <span>{vendor.hoa_rating.toFixed(1)} ({vendor.hoa_rating_count} {vendor.hoa_rating_count === 1 ? 'review' : 'reviews'})</span>
                     ) : (
                       "—"
                     )}
