@@ -26,6 +26,7 @@ import {
   Wine,
   Scroll,
   Sprout,
+  Square,
   LucideIcon 
 } from "lucide-react";
 import { Category } from "@/data/categories";
@@ -61,6 +62,7 @@ export const categoryIconMap: Record<Category, LucideIcon> = {
   "Tile Installation": Layers,
   "Turf Installation": Sprout,
   "Wallpaper Installation": Scroll,
+  "Window Treatment": Square,
 };
 
 export function getCategoryIcon(category: Category): LucideIcon {

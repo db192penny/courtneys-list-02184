@@ -172,6 +172,14 @@ export function buildDefaultCosts(category?: string): CostEntry[] {
       { cost_kind: "one_time", amount: null, unit: "vehicle", notes: null },
     ];
   }
+
+  // Window Treatment: Consultation + installation per window
+  if (c === "window treatment") {
+    return [
+      { cost_kind: "service_call", amount: null, unit: "visit", notes: null },
+      { cost_kind: "installation", amount: null, unit: "window", notes: null },
+    ];
+  }
   
   // Roofing/General Contractor: No structured fields
   if (c === "roofing" || c === "general contractor") {
@@ -236,7 +244,7 @@ export default function CostInputs({
         entry.cost_kind === "service_call" ? "Service Call" :
         entry.cost_kind === "hourly" ? (entry.unit === "room" ? "Per Room Cost" : entry.unit === "mile" ? "Per Mile Rate" : "Hourly Rate") :
         entry.cost_kind === "yearly_plan" ? (entry.unit === "season" ? "Seasonal Package" : "Maintenance Plan") :
-        entry.cost_kind === "installation" ? "Installation Cost" :
+        entry.cost_kind === "installation" ? (entry.unit === "window" ? "Installation per Window" : "Installation Cost") :
         entry.cost_kind === "project_fee" ? "Project Fee" :
         entry.cost_kind === "base_fee" ? "Base Move Fee" :
         entry.cost_kind === "assessment_fee" ? "Assessment/Inspection Fee" :
@@ -248,7 +256,7 @@ export default function CostInputs({
         entry.cost_kind === "service_call" ? (entry.unit === "panel" ? " per Panel" : " per Visit") :
         entry.cost_kind === "hourly" ? (entry.unit === "room" ? " per Room" : entry.unit === "mile" ? " per Mile" : " per Hour") :
         entry.cost_kind === "yearly_plan" ? (entry.unit === "season" ? " per Season" : " per Year") :
-        entry.cost_kind === "installation" ? (entry.unit === "sq ft" ? " per Sq Ft" : entry.unit === "linear ft" ? " per Linear Ft" : " (one-time)") :
+        entry.cost_kind === "installation" ? (entry.unit === "sq ft" ? " per Sq Ft" : entry.unit === "linear ft" ? " per Linear Ft" : entry.unit === "window" ? " per Window" : " (one-time)") :
         entry.cost_kind === "project_fee" ? " per Project" :
         entry.cost_kind === "base_fee" ? " per Move" :
         entry.cost_kind === "assessment_fee" ? " per Visit" :

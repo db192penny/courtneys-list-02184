@@ -29,6 +29,7 @@ export const CATEGORIES = [
   "Turf Installation",
   "Wallpaper Installation",
   "Water Filtration",
+  "Window Treatment",
 ] as const;
 
 export type Category = (typeof CATEGORIES)[number];
