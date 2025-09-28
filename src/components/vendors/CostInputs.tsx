@@ -164,6 +164,14 @@ export function buildDefaultCosts(category?: string): CostEntry[] {
       { cost_kind: "hourly", amount: null, unit: "hour", notes: null },
     ];
   }
+
+  // Auto Transport: Per mile rate + flat rate per vehicle
+  if (c === "auto transport") {
+    return [
+      { cost_kind: "hourly", amount: null, unit: "mile", notes: null },
+      { cost_kind: "one_time", amount: null, unit: "vehicle", notes: null },
+    ];
+  }
   
   // Roofing/General Contractor: No structured fields
   if (c === "roofing" || c === "general contractor") {
@@ -226,26 +234,26 @@ export default function CostInputs({
     return entries.map((entry, idx) => {
       const label =
         entry.cost_kind === "service_call" ? "Service Call" :
-        entry.cost_kind === "hourly" ? (entry.unit === "room" ? "Per Room Cost" : "Hourly Rate") :
+        entry.cost_kind === "hourly" ? (entry.unit === "room" ? "Per Room Cost" : entry.unit === "mile" ? "Per Mile Rate" : "Hourly Rate") :
         entry.cost_kind === "yearly_plan" ? (entry.unit === "season" ? "Seasonal Package" : "Maintenance Plan") :
         entry.cost_kind === "installation" ? "Installation Cost" :
         entry.cost_kind === "project_fee" ? "Project Fee" :
         entry.cost_kind === "base_fee" ? "Base Move Fee" :
         entry.cost_kind === "assessment_fee" ? "Assessment/Inspection Fee" :
         entry.cost_kind === "monthly_fee" ? "Monthly Fee" :
-        entry.cost_kind === "one_time" ? (entry.unit === "item" ? "Per Item Cost" : entry.unit === "event" ? "Event Fee" : "Installation Cost") :
+        entry.cost_kind === "one_time" ? (entry.unit === "item" ? "Per Item Cost" : entry.unit === "event" ? "Event Fee" : entry.unit === "vehicle" ? "Flat Rate per Vehicle" : "Installation Cost") :
         "Maintenance Plan";
 
       const unitDisplay = 
         entry.cost_kind === "service_call" ? (entry.unit === "panel" ? " per Panel" : " per Visit") :
-        entry.cost_kind === "hourly" ? (entry.unit === "room" ? " per Room" : " per Hour") :
+        entry.cost_kind === "hourly" ? (entry.unit === "room" ? " per Room" : entry.unit === "mile" ? " per Mile" : " per Hour") :
         entry.cost_kind === "yearly_plan" ? (entry.unit === "season" ? " per Season" : " per Year") :
         entry.cost_kind === "installation" ? (entry.unit === "sq ft" ? " per Sq Ft" : entry.unit === "linear ft" ? " per Linear Ft" : " (one-time)") :
         entry.cost_kind === "project_fee" ? " per Project" :
         entry.cost_kind === "base_fee" ? " per Move" :
         entry.cost_kind === "assessment_fee" ? " per Visit" :
         entry.cost_kind === "monthly_fee" ? " per Month" :
-        entry.cost_kind === "one_time" ? (entry.unit === "item" ? " per Item" : entry.unit === "event" ? " per Event" : " (one-time)") :
+        entry.cost_kind === "one_time" ? (entry.unit === "item" ? " per Item" : entry.unit === "event" ? " per Event" : entry.unit === "vehicle" ? " per Vehicle" : " (one-time)") :
         " per Month";
 
       return (

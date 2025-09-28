@@ -49,6 +49,7 @@ export const categoryIconMap: Record<Category, LucideIcon> = {
   "House Manager": Building2,
   "Mobile Tire Repair": Car,
   "Appliance Repair": Settings,
+  "Auto Transport": Truck,
   "Bartenders": Wine,
   "Water Filtration": Filter,
   "Interior Design": Palette,
