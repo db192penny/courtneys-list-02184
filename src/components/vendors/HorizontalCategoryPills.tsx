@@ -40,7 +40,7 @@ export const HorizontalCategoryPills: React.FC<HorizontalCategoryPillsProps> = (
             </span>
           </SelectValue>
         </SelectTrigger>
-        <SelectContent className="max-h-[60vh] overflow-y-auto">
+        <SelectContent className="max-h-[60vh] overflow-y-auto touch-pan-y overscroll-contain">
           {sortedCategories.map((category) => {
             const displayName = category === 'all' ? 'All Categories' : category;
             const emoji = getCategoryEmoji(category);
