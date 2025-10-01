@@ -28,6 +28,20 @@ export default function Community() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
+  // Early return for The Bridges - show empty state
+  if (slug === 'the-bridges') {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-3xl font-bold">The Bridges</h1>
+        </div>
+        <div className="text-center py-12">
+          <p className="text-lg text-muted-foreground">No vendors yet for The Bridges.</p>
+          <p className="text-sm text-muted-foreground mt-2">Be the first to recommend a trusted service provider!</p>
+        </div>
+      </div>
+    );
+  }
   const { data: profile } = useUserProfile();
   const { isAuthenticated: sessionAuthenticated } = useAuth();
   const { isScrollingDown, hasScrolled } = useScrollDirection();
