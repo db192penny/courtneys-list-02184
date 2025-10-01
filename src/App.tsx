@@ -13,6 +13,8 @@ import Dashboard from "./pages/Dashboard";
 import SubmitVendor from "./pages/SubmitVendor";
 import Admin from "./pages/Admin";
 import Auth from "./pages/Auth";
+import AuthCallback from "./pages/AuthCallback";
+import CompleteProfile from "./pages/CompleteProfile";
 import SignIn from "./pages/SignIn";
 import CheckEmail from "./pages/CheckEmail";
 import QuickAccess from "./pages/QuickAccess";
@@ -195,6 +197,8 @@ function AppContent() {
         <Route path="/quick-access" element={<QuickAccess />} />
         <Route path="/auth" element={<Auth />} />
         <Route path="/auth/signup" element={<Auth />} />
+        <Route path="/auth/callback" element={<AuthCallback />} />
+        <Route path="/complete-profile" element={<ProtectedRoute><CompleteProfile /></ProtectedRoute>} />
         
         <Route path="/dashboard" element={<ProtectedRoute><Navigate to="/communities/boca-bridges" replace /></ProtectedRoute>} />
         <Route path="/submit" element={<ProtectedRoute><SubmitVendor /></ProtectedRoute>} />
