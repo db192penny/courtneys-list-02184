@@ -33,16 +33,17 @@ export const HorizontalCategoryPills: React.FC<HorizontalCategoryPillsProps> = (
   // Mobile: Use native HTML select for perfect scrolling
   if (isMobile) {
     return (
-      <div className="w-full min-w-0">
+      <div>
         <label className="text-xs text-muted-foreground font-medium uppercase tracking-wide mb-2 block">
           Choose Category
         </label>
         
-        <div className="relative w-full">
+        <div className="relative">
           <select
             value={selectedCategory}
             onChange={(e) => onCategoryChange(e.target.value)}
-            className="w-full h-12 px-3 pr-10 rounded-md border border-input bg-background text-sm appearance-none focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 max-w-full"
+            className="w-full max-w-full min-w-0 h-12 px-3 pr-10 rounded-md border border-input bg-background text-sm appearance-none focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+            style={{ willChange: 'auto' }}
           >
             {sortedCategories.map((category) => {
               const displayName = category === 'all' ? '🏠 All Categories' : `${getCategoryEmoji(category)} ${category}`;
