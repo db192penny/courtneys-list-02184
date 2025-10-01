@@ -9,6 +9,18 @@ import { ShieldCheck, Send, Search, CheckCircle } from "lucide-react";
 import { toSlug } from "@/utils/slug";
 import heroPoolImage from "@/assets/hero-pool-image.jpeg";
 
+const getCommunitySlug = (communityName: string): string => {
+  const slugMap: { [key: string]: string } = {
+    'Boca Bridges': 'boca-bridges',
+    'The Bridges': 'the-bridges',
+    'The Oaks': 'the-oaks',
+    'St. Andrews Country Club': 'st-andrews-country-club',
+    'Woodfield Country Club': 'woodfield-country-club',
+    'Seven Bridges': 'seven-bridges',
+    'Lotus': 'lotus'
+  };
+  return slugMap[communityName] || communityName.toLowerCase().replace(/\s+/g, '-');
+};
 
 const Index = () => {
   const canonical = typeof window !== "undefined" ? window.location.href : undefined;
@@ -20,8 +32,9 @@ const Index = () => {
     e?.preventDefault();
     console.log("Index: Submit clicked", { hoa });
     try {
-      console.log("Index: Navigating to community:", toSlug(hoa));
-      navigate(`/communities/${toSlug(hoa)}`);
+      const communitySlug = getCommunitySlug(hoa);
+      console.log("Index: Navigating to community:", communitySlug);
+      navigate(`/communities/${communitySlug}`);
     } catch (e) {
       console.error("[Index] submit error:", e);
     }
