@@ -227,6 +227,7 @@ function AppContent() {
         <Route path="/community-preview/:slug" element={<CommunityPreview />} />
         <Route path="/mockup-preview" element={<MockupPreview />} />
         <Route path="/logo-mockup" element={<LogoMockup />} />
+        <Route path="/homepage" element={<Index />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </>
