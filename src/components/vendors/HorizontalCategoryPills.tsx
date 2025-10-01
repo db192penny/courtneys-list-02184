@@ -42,8 +42,11 @@ export const HorizontalCategoryPills: React.FC<HorizontalCategoryPillsProps> = (
         </SelectTrigger>
         <SelectContent 
           data-category-select="true"
-          style={{ maxHeight: 'min(60vh, 600px)' }}
-          className="max-h-[60vh] overflow-y-auto"
+          className="overflow-y-auto overscroll-contain"
+          style={{ 
+            maxHeight: 'min(70vh, 600px)',
+            WebkitOverflowScrolling: 'touch'
+          }}
         >
           {sortedCategories.map((category) => {
             const displayName = category === 'all' ? 'All Categories' : category;
