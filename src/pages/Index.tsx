@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 
 import { ShieldCheck, Send, Search, CheckCircle } from "lucide-react";
 import { toSlug } from "@/utils/slug";
+import heroPoolImage from "@/assets/hero-pool-image.jpeg";
 
 
 const Index = () => {
@@ -43,7 +44,9 @@ const Index = () => {
         <div
           className="absolute inset-0 z-0"
           style={{
-            backgroundColor: '#f0f4f8',
+            backgroundImage: `url(${heroPoolImage})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
             opacity: 0.35
           }}
           aria-hidden="true"
