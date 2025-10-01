@@ -20,13 +20,8 @@ const Index = () => {
     e?.preventDefault();
     console.log("Index: Submit clicked", { hoa });
     try {
-      if (hoa === "request-community") {
-        console.log("Index: Navigating to community request page");
-        navigate("/communities/request");
-      } else {
-        console.log("Index: Navigating to community:", toSlug(hoa));
-        navigate(`/communities/${toSlug(hoa)}`);
-      }
+      console.log("Index: Navigating to community:", toSlug(hoa));
+      navigate(`/communities/${toSlug(hoa)}`);
     } catch (e) {
       console.error("[Index] submit error:", e);
     }
@@ -86,9 +81,6 @@ const Index = () => {
                       <SelectItem value="Woodfield Country Club" disabled className="text-muted-foreground">Woodfield Country Club (Coming Soon)</SelectItem>
                       <SelectItem value="Seven Bridges" disabled className="text-muted-foreground">Seven Bridges (Coming Soon)</SelectItem>
                       <SelectItem value="Lotus" disabled className="text-muted-foreground">Lotus (Coming Soon)</SelectItem>
-                      <SelectItem value="request-community" className="font-medium text-primary border-t mt-2 pt-2">
-                        ➕ Don't see your community? Request it here
-                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -100,6 +92,14 @@ const Index = () => {
                 </Button>
               </div>
             </form>
+            <div className="mt-4 text-center">
+              <button
+                onClick={() => navigate("/communities/request")}
+                className="text-sm text-primary hover:text-primary/80 underline underline-offset-4 font-medium transition-colors"
+              >
+                ➕ Don't see your community? Request it here
+              </button>
+            </div>
           </div>
               {/* How It Works moved below hero */}
             </div>
