@@ -115,6 +115,13 @@ All colors MUST be HSL.
   z-index: 9999 !important;
 }
 
+/* Category dropdown scroll fix for mobile */
+[data-category-select="true"] {
+  max-height: min(60vh, 600px) !important;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
 /* Prevent mobile zoom on input focus */
 @media (max-width: 768px) {
   input[type="text"],
