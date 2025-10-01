@@ -89,13 +89,19 @@ const SelectContent = React.forwardRef<
       <SelectScrollUpButton />
       <SelectPrimitive.Viewport
         className={cn(
-          "p-1",
+          "p-1 overflow-y-auto overscroll-contain",
           position === "popper" &&
             "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]"
         )}
+        style={{
+          // Ensure the viewport is the scroll container and respects parent maxHeight
+          maxHeight: (props.style as React.CSSProperties | undefined)?.maxHeight ?? 'min(24rem, 70vh)',
+          WebkitOverflowScrolling: 'touch',
+        }}
       >
         {children}
-      </SelectPrimitive.Viewport>
+      </SelectPrimitive.Viewport
+      >
       <SelectScrollDownButton />
     </SelectPrimitive.Content>
   </SelectPrimitive.Portal>
