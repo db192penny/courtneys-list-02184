@@ -146,10 +146,21 @@ const AdminUsers = () => {
           return;
         }
 
-        const { error } = await supabase.rpc("admin_soft_delete_user", {
-          _user_id: userId,
-          _reason: "admin_panel_delete"
-        });
+        // Delete in this order to avoid foreign key errors
+        await supabase.from('address_change_log').delete().eq('user_id', userId);
+        await supabase.from('user_point_history').delete().eq('user_id', userId);
+        await supabase.from('home_vendors').delete().eq('user_id', userId);
+        await supabase.from('simple_invites').delete().eq('inviter_id', userId);
+        await supabase.from('simple_invites').delete().eq('used_by', userId);
+        await supabase.from('reviews').delete().eq('user_id', userId);
+        await supabase.from('costs').delete().eq('created_by', userId);
+        await supabase.from('vendors').delete().eq('created_by', userId);
+        await supabase.from('approved_households').delete().eq('approved_by', userId);
+        await supabase.from('hoa_admins').delete().eq('user_id', userId);
+        await supabase.from('user_roles').delete().eq('user_id', userId);
+        
+        // Finally delete the user record
+        const { error } = await supabase.from('users').delete().eq('id', userId);
 
         if (error) throw error;
         toast({ title: "User deleted", description: "User and their data have been completely removed." });
