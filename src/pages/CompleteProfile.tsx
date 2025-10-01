@@ -2,6 +2,7 @@ import { FormEvent, useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
@@ -14,9 +15,10 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Info } from "lucide-react";
 
 const CompleteProfile = () => {
+  const [name, setName] = useState("");
   const [address, setAddress] = useState("");
   const [resident, setResident] = useState<"yes" | "no">("yes");
-  const [errors, setErrors] = useState<{ address?: boolean; resident?: boolean }>({});
+  const [errors, setErrors] = useState<{ name?: boolean; address?: boolean; resident?: boolean }>({});
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -29,11 +31,19 @@ const CompleteProfile = () => {
     .join(' ');
 
   useEffect(() => {
-    // Check if user is authenticated
+    // Check if user is authenticated and pre-fill name from Google
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         navigate("/auth", { replace: true });
+        return;
+      }
+
+      // Pre-fill name from Google metadata
+      const googleName = session.user.user_metadata?.full_name || 
+                        session.user.user_metadata?.name || "";
+      if (googleName) {
+        setName(googleName);
       }
     };
     checkAuth();
@@ -52,6 +62,7 @@ const CompleteProfile = () => {
     }
 
     const fieldErrors = {
+      name: !name.trim(),
       address: !address.trim(),
       resident: !resident,
     };
@@ -79,14 +90,17 @@ const CompleteProfile = () => {
       }
 
       const streetName = extractStreetName(address.trim());
+      const communitySlug = searchParams.get('community') || 'boca-bridges';
 
-      // Update user profile with address
+      // Update user profile with address and auto-approve Google sign-ups
       const { error: updateError } = await supabase
         .from("users")
         .update({
+          name: name.trim(),
           address: address.trim(),
           street_name: streetName,
-          signup_source: `community:${toSlug(communityName)}`
+          is_verified: true, // Auto-approve Google sign-ups
+          signup_source: `community:${communitySlug}`
         })
         .eq("id", user.id);
 
@@ -158,6 +172,20 @@ const CompleteProfile = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <form onSubmit={onSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">
+                  Name <span className="text-foreground" aria-hidden>*</span>
+                </Label>
+                <Input
+                  id="name"
+                  value={name}
+                  onChange={(e) => setName(e.currentTarget.value)}
+                  placeholder="Your full name"
+                  required
+                  className={errors.name ? "border-destructive focus-visible:ring-destructive" : undefined}
+                />
+              </div>
+
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <Label htmlFor="address">
