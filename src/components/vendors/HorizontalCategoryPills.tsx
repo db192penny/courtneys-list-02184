@@ -42,7 +42,8 @@ export const HorizontalCategoryPills: React.FC<HorizontalCategoryPillsProps> = (
           <select
             value={selectedCategory}
             onChange={(e) => onCategoryChange(e.target.value)}
-            className="w-full h-12 px-3 pr-10 rounded-md border border-input bg-background text-sm appearance-none focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+            className="w-full max-w-full min-w-0 h-12 px-3 pr-10 rounded-md border border-input bg-background text-sm appearance-none focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+            style={{ willChange: 'auto' }}
           >
             {sortedCategories.map((category) => {
               const displayName = category === 'all' ? '🏠 All Categories' : `${getCategoryEmoji(category)} ${category}`;

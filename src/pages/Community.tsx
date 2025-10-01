@@ -109,7 +109,7 @@ export default function Community() {
   const homesLabel = typeof homesCount === "number" ? homesCount.toLocaleString() : "500";
 
   return (
-    <main className="min-h-screen bg-background">
+    <main className="min-h-screen bg-background overflow-x-hidden">
       <SEO
         title={pageTitle}
         description={`Trusted vendors recommended by ${communityName} residents. View ratings, costs, and contact information.`}
