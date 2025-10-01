@@ -12,6 +12,7 @@ import { useUserProfile } from "@/hooks/useUserProfile";
 import { useAuth } from "@/hooks/useAuth";
 import { WelcomeToolbar } from "@/components/WelcomeToolbar";
 import { useScrollDirection } from "@/hooks/useScrollDirection";
+import { useVendors } from "@/hooks/useVendors";
 
 function slugToName(slug: string) {
   const cleaned = (slug || "")
@@ -64,19 +65,7 @@ export default function Community() {
   const isVerified = !!profile?.isVerified;
   const showSignUpPrompt = !isAuthenticated;
 
-  const { data, isLoading, error } = useQuery({
-    queryKey: ["community-vendor-stats", communityName],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .rpc("list_vendor_stats", {
-          _hoa_name: communityName,
-          _limit: 100
-        });
-      if (error) throw error;
-      return data || [];
-    },
-    enabled: !!communityName,
-  });
+  const { data: vendors, isLoading: vendorsLoading, error: vendorsError } = useVendors(undefined, undefined, slug);
 
   // Community asset (photo and address)
   type CommunityAsset = { hoa_name: string; photo_path: string | null; address_line: string | null; contact_phone: string | null; total_homes?: number | null };
@@ -174,18 +163,18 @@ export default function Community() {
             </header>
         </div>
 
-        {isLoading && <div className="text-sm text-muted-foreground">Loading providers…</div>}
-        {error && <div className="text-sm text-muted-foreground">Unable to load providers.</div>}
+        {vendorsLoading && <div className="text-sm text-muted-foreground">Loading providers…</div>}
+        {vendorsError && <div className="text-sm text-muted-foreground">Unable to load providers.</div>}
 
         {/* Show demo data only when no real data exists */}
-        {!!data && data.length === 0 && !isLoading && (
+        {!!vendors && vendors.length === 0 && !vendorsLoading && (
           <div className="mt-2 sm:mt-6">
             <CommunityDemoTable communityName={communityName} />
           </div>
         )}
 
         {/* Show real data when it exists */}
-        {!!data && data.length > 0 && (
+        {!!vendors && vendors.length > 0 && (
           <div className="mt-2 sm:mt-6 space-y-2 sm:space-y-3">
             <CommunityVendorTable 
               communityName={communityName} 
