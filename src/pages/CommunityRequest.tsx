@@ -77,8 +77,8 @@ const CommunityRequest = () => {
     }
 
     toast({
-      title: "Request submitted",
-      description: "Thanks! We’ll review and email you when your community is added.",
+      title: "Thank you, we will review your request!",
+      description: "We'll be in touch soon about adding your community.",
     });
     setCommunityName("");
     setLocation("");
@@ -86,7 +86,7 @@ const CommunityRequest = () => {
     setRequestorEmail("");
     setResident("");
     setNotes("");
-    setTimeout(() => navigate("/signin"), 600);
+    setTimeout(() => navigate("/"), 600);
   };
 
   return (
@@ -100,7 +100,7 @@ const CommunityRequest = () => {
         <Card>
           <CardHeader>
             <CardTitle>Request Your Community</CardTitle>
-            <CardDescription>Tell us about your neighborhood and we’ll consider adding it.</CardDescription>
+            <CardDescription>Tell us about your neighborhood and we'll consider adding it.</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={onSubmit} className="space-y-4">
@@ -172,7 +172,7 @@ const CommunityRequest = () => {
                 <Button type="submit" disabled={submitting} className="min-w-[160px]">
                   {submitting ? "Submitting..." : "Submit Request"}
                 </Button>
-                <Button type="button" variant="secondary" onClick={() => navigate("/signin")}>
+                <Button type="button" variant="secondary" onClick={() => navigate("/")}>
                   Cancel
                 </Button>
               </div>
