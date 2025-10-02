@@ -78,6 +78,7 @@ const Index = () => {
               <p className="text-lg md:text-xl text-foreground/90 font-medium" style={{ textShadow: '0 1px 4px rgba(0,0,0,0.2)' }}>Say goodbye to "Could you recommend a plumber?" Facebook posts</p>
           
           <div className="mx-auto mt-6 w-full max-w-2xl">
+            <p className="text-center text-lg font-semibold mb-3">Choose your community</p>
             <form onSubmit={onSubmit} className="flex flex-col sm:flex-row gap-3 items-center justify-center">
               <Select value={hoa} onValueChange={setHoa}>
                 <SelectTrigger className="w-full sm:w-64 bg-background/95 backdrop-blur">
@@ -101,8 +102,10 @@ const Index = () => {
                 See Providers
               </Button>
             </form>
-            <p className="text-center text-sm text-muted-foreground mt-4">
-              Select your community to see trusted service providers
+            <p className="text-center text-sm mt-4">
+              <a href="/community-request" className="text-primary hover:underline">
+                ➕ Don't see your community? Request it here
+              </a>
             </p>
           </div>
               {/* How It Works moved below hero */}
