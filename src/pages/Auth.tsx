@@ -368,17 +368,12 @@ const Auth = () => {
     try {
       setLoading(true);
       
-      // For OAuth, we pass the current context
-      // The callback will determine if user exists and handle accordingly
-      let communityContext = params.get("community") || 
-                            communityName || 
-                            "";
+      let communityContext = params.get("community") || communityName || "";
       
-      // If no community context and on homepage, require selection
       if (!communityContext) {
         toast({
           title: "Please select a community first",
-          description: "Choose your community before signing in",
+          description: "Choose your community before signing up",
           variant: "destructive"
         });
         setLoading(false);
@@ -388,7 +383,7 @@ const Auth = () => {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback?context=${communityContext}`,
+          redirectTo: `${window.location.origin}/auth/callback?context=${communityContext}&action=signup`,
           queryParams: {
             access_type: 'offline',
             prompt: 'consent',
