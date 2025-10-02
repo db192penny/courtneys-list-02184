@@ -65,7 +65,7 @@ export default function Community() {
   const isVerified = !!profile?.isVerified;
   const showSignUpPrompt = !isAuthenticated;
 
-  const { data: rawData, isLoading, error } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ["community-vendor-stats", communityName],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -78,14 +78,6 @@ export default function Community() {
     },
     enabled: !!communityName,
   });
-
-  // Filter based on community - The Bridges has no vendors yet
-  const data = useMemo(() => {
-    if (slug === 'the-bridges') {
-      return [];
-    }
-    return rawData;
-  }, [slug, rawData]);
 
   // Community asset (photo and address)
   type CommunityAsset = { hoa_name: string; photo_path: string | null; address_line: string | null; contact_phone: string | null; total_homes?: number | null };
