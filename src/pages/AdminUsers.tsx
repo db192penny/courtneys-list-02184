@@ -146,15 +146,21 @@ const AdminUsers = () => {
           return;
         }
 
-        // Delete in this order to avoid foreign key errors
-        await supabase.from('address_change_log').delete().eq('user_id', userId);
-        await supabase.from('reviews').delete().eq('user_id', userId);
-        await supabase.from('costs').delete().eq('created_by', userId);
-        await supabase.from('vendors').delete().eq('created_by', userId);
-        const { error } = await supabase.from('users').delete().eq('id', userId);
+        // Use the database function that handles everything properly
+        const { error } = await supabase.rpc("admin_soft_delete_user", {
+          _user_id: userId,
+          _reason: "admin_panel_delete"
+        });
 
-        if (error) throw error;
-        toast({ title: "User deleted", description: "User and their data have been completely removed." });
+        if (error) {
+          // If the function fails, show the actual error
+          throw error;
+        }
+
+        toast({ 
+          title: "User deleted successfully", 
+          description: "User and all their data have been completely removed." 
+        });
       } else if (action === "cleanup") {
         const confirmed = confirm("This will permanently remove this orphaned user from the system. Continue?");
         if (!confirmed) {
@@ -186,11 +192,13 @@ const AdminUsers = () => {
         });
       }
 
-      refetch();
+      // Refresh the user list after any action
+      await refetch();
     } catch (error: any) {
+      console.error(`[AdminUsers] ${action} error:`, error);
       toast({ 
-        title: "Action failed", 
-        description: error.message, 
+        title: `Failed to ${action} user`, 
+        description: error.message || "An unexpected error occurred", 
         variant: "destructive" 
       });
     } finally {
