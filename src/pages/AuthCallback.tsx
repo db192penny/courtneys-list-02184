@@ -13,10 +13,8 @@ const AuthCallback = () => {
   useEffect(() => {
     const handleCallback = async () => {
       try {
-        // Get context from URL params (what page they were on)
         const contextParam = searchParams.get("context") || searchParams.get("community");
         
-        // Get the current session
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
         if (sessionError) {
@@ -31,52 +29,54 @@ const AuthCallback = () => {
           return;
         }
 
-        // CRITICAL FIX: Check if this is a Google OAuth user
-        const isGoogleUser = session.user.app_metadata?.provider === 'google';
-        
-        // CHECK IF THIS EMAIL IS REGISTERED IN YOUR SYSTEM
+        // CRITICAL FIX: Check if user is registered
         const { data: existingUser, error: userError } = await supabase
           .from("users")
           .select("id, signup_source, address, name, is_verified")
           .eq("email", session.user.email)
           .maybeSingle();
 
-        // If no user record exists, they need to sign up first
-        if (!existingUser) {
-          console.log("No user account found for:", session.user.email);
+        // CHECK IF THIS IS A GOOGLE OAUTH USER
+        const isGoogleUser = session.user.app_metadata?.provider === 'google';
+
+        // If no user record exists and this is Google OAuth, reject them
+        if (!existingUser && isGoogleUser) {
+          console.log("Google OAuth attempted by non-registered user:", session.user.email);
           
-          // Sign out the user immediately
+          // Sign out immediately
           await supabase.auth.signOut();
           
-          if (isGoogleUser) {
-            // For Google OAuth users without an account
-            toast({
-              title: "Account not found",
-              description: "No account exists for this Google account. Please sign up first to request access.",
-              variant: "destructive"
-            });
-            
-            // Redirect to sign-up page with context if available
-            const signupUrl = contextParam 
-              ? `/auth?community=${contextParam}` 
-              : '/auth';
-            navigate(signupUrl, { replace: true });
-            return;
-          } else {
-            // For magic link users without an account
-            toast({
-              title: "Account not found",
-              description: "We couldn't find an account with that email. Please sign up to request access.",
-              variant: "destructive"
-            });
-            
-            navigate('/auth', { replace: true });
-            return;
-          }
+          toast({
+            title: "Account not found",
+            description: "No account exists for " + session.user.email + ". Please sign up first.",
+            variant: "destructive",
+            duration: 5000
+          });
+          
+          // Redirect to sign-up with community context if available
+          const signupUrl = contextParam 
+            ? `/auth?community=${contextParam}` 
+            : '/auth';
+          navigate(signupUrl, { replace: true });
+          return;
         }
 
-        // Check if user is deactivated/blocked
-        if (existingUser.is_verified === false) {
+        // If no user record for magic link (shouldn't happen but safety check)
+        if (!existingUser && !isGoogleUser) {
+          await supabase.auth.signOut();
+          
+          toast({
+            title: "Account not found",
+            description: "Please sign up to request access.",
+            variant: "destructive"
+          });
+          
+          navigate('/auth', { replace: true });
+          return;
+        }
+
+        // Check if user is deactivated
+        if (existingUser && existingUser.is_verified === false) {
           await supabase.auth.signOut();
           
           toast({
@@ -89,52 +89,16 @@ const AuthCallback = () => {
           return;
         }
 
-        // EXISTING USER: Has a record in users table
-        console.log("Existing user found:", session.user.email);
-        
-        // Use their stored signup_source community (ignore context parameter)
+        // User is valid - proceed with navigation
         if (existingUser.signup_source && existingUser.signup_source.startsWith("community:")) {
           const userCommunity = existingUser.signup_source.replace("community:", "");
           const communitySlug = userCommunity.toLowerCase().replace(/\s+/g, '-');
-          const displayName = userCommunity
-            .split('-')
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(' ');
-          setCommunityName(displayName);
-          
+          setCommunityName(userCommunity);
           navigate(`/communities/${communitySlug}?welcome=true`, { replace: true });
           return;
         }
 
-        // Fallback: Try to get community from their address mapping
-        if (existingUser.address && existingUser.address !== "Address Not Provided") {
-          try {
-            const { data: normalizedAddr } = await supabase.rpc("normalize_address", { 
-              _addr: existingUser.address 
-            });
-            
-            const { data: mapping } = await supabase
-              .from("household_hoa")
-              .select("hoa_name")
-              .eq("household_address", normalizedAddr)
-              .order("created_at", { ascending: false })
-              .limit(1)
-              .maybeSingle();
-
-            if (mapping?.hoa_name) {
-              const communitySlug = mapping.hoa_name.toLowerCase().replace(/\s+/g, '-');
-              const displayName = mapping.hoa_name;
-              setCommunityName(displayName);
-              
-              navigate(`/communities/${communitySlug}?welcome=true`, { replace: true });
-              return;
-            }
-          } catch (e) {
-            console.log("Could not determine community from address");
-          }
-        }
-
-        // Last resort for existing users
+        // Fallback
         setCommunityName("Boca Bridges");
         navigate(`/communities/boca-bridges?welcome=true`, { replace: true });
         

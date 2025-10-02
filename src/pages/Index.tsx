@@ -77,41 +77,18 @@ const Index = () => {
               </div>
               <p className="text-lg md:text-xl text-foreground/90 font-medium" style={{ textShadow: '0 1px 4px rgba(0,0,0,0.2)' }}>Say goodbye to "Could you recommend a plumber?" Facebook posts</p>
           
-          <div className="mx-auto mt-6 w-full max-w-2xl rounded-xl bg-background/70 supports-[backdrop-filter]:bg-background/60 backdrop-blur shadow-lg p-4 md:p-6">
-            <form onSubmit={onSubmit} className="w-full">
-              <p className="text-sm font-medium text-center mb-3">Choose your community</p>
-              <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-4">
-                <div className="flex-1">
-                  <Select value={hoa} onValueChange={setHoa}>
-                    <SelectTrigger aria-label="HOA Name" className="w-full">
-                      <SelectValue placeholder="HOA Name" />
-                    </SelectTrigger>
-                    <SelectContent className="z-50 bg-background">
-                      <SelectItem value="Boca Bridges">Boca Bridges</SelectItem>
-                      <SelectItem value="The Bridges">The Bridges</SelectItem>
-                      <SelectItem value="The Oaks" disabled className="text-muted-foreground">The Oaks (Coming Soon)</SelectItem>
-                      <SelectItem value="St. Andrews Country Club" disabled className="text-muted-foreground">St. Andrews Country Club (Coming Soon)</SelectItem>
-                      <SelectItem value="Woodfield Country Club" disabled className="text-muted-foreground">Woodfield Country Club (Coming Soon)</SelectItem>
-                      <SelectItem value="Seven Bridges" disabled className="text-muted-foreground">Seven Bridges (Coming Soon)</SelectItem>
-                      <SelectItem value="Lotus" disabled className="text-muted-foreground">Lotus (Coming Soon)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <Button 
-                  type="submit" 
-                  className="w-full md:w-auto md:min-w-[160px] bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700"
-                >
-                  View Providers
-                </Button>
-              </div>
-            </form>
-            <div className="mt-4 text-center">
-              <button
-                onClick={() => navigate("/communities/request")}
-                className="text-sm text-primary hover:text-primary/80 underline underline-offset-4 font-medium transition-colors"
+          <div className="mx-auto mt-6 w-full max-w-2xl">
+            <div className="flex flex-col gap-4 items-center">
+              <Button 
+                size="lg"
+                onClick={() => navigate('/communities')}
+                className="w-full sm:w-auto bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700"
               >
-                ➕ Don't see your community? Request it here
-              </button>
+                Browse Communities
+              </Button>
+              <p className="text-sm text-muted-foreground">
+                Select your community to join or sign in
+              </p>
             </div>
           </div>
               {/* How It Works moved below hero */}

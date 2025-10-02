@@ -368,32 +368,24 @@ const Auth = () => {
     try {
       setLoading(true);
       
+      // MUST have community context for sign-up
       let communityContext = params.get("community") || communityName || "";
       
-      // ENFORCE: Must have community context for sign-up
       if (!communityContext) {
         toast({
-          title: "Please select a community first",
-          description: "You'll be redirected to choose your community",
+          title: "Select your community first",
+          description: "Please choose your community before signing up",
           variant: "destructive"
         });
-        
-        // Navigate to communities page after 1.5 seconds
-        setTimeout(() => {
-          navigate('/');
-        }, 1500);
-        
         setLoading(false);
-        return; // Don't proceed with OAuth
+        setTimeout(() => navigate('/communities'), 1500);
+        return;
       }
-      
-      // Store community for the OAuth flow
-      localStorage.setItem('signup_community', communityContext);
       
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback?context=${communityContext}&action=signup`,
+          redirectTo: `${window.location.origin}/auth/callback?context=${communityContext}`,
           queryParams: {
             access_type: 'offline',
             prompt: 'consent',
