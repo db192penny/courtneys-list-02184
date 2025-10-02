@@ -253,6 +253,7 @@ export default function MobileRateVendorModal({ open, onOpenChange, vendor, onSu
       await queryClient.invalidateQueries({ queryKey: ["community-stats"] });
       await queryClient.invalidateQueries({ queryKey: ["vendor-details"] });
       await queryClient.invalidateQueries({ queryKey: ["vendors"] });
+      await queryClient.invalidateQueries({ queryKey: ["user-reviews"] });
 
       // Force refetch the specific vendor's reviews
       await queryClient.refetchQueries({ queryKey: ["neighbor-reviews", vendor.id] });
