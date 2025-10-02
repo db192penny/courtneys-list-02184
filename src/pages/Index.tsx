@@ -101,7 +101,7 @@ const Index = () => {
                   type="submit" 
                   className="w-full md:w-auto md:min-w-[160px] bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700"
                 >
-                  View Dashboard
+                  View Providers
                 </Button>
               </div>
             </form>
