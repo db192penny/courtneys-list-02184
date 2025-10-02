@@ -203,7 +203,7 @@ export default function CommunityVendorTable({
     <TooltipProvider>
       <div className="max-w-4xl mx-auto">
         {/* Mobile-Optimized Filter Controls - Two Rows */}
-        <div className={`sticky ${isAuthenticated ? 'top-16' : 'top-28'} sm:top-16 z-40 bg-background/80 backdrop-blur-sm transition-transform duration-300 ease-out mb-3 sm:mb-6 ${
+        <div className={`sticky ${isAuthenticated ? 'top-2' : 'top-28'} sm:top-16 z-40 bg-background/80 backdrop-blur-sm transition-transform duration-300 ease-out mb-3 sm:mb-6 ${
           isScrollingDown ? '-translate-y-full' : 'translate-y-0'
         }`}>
           {/* Row 1: Category Dropdown + Share Button */}
