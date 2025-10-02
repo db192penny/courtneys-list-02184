@@ -29,76 +29,77 @@ const AuthCallback = () => {
           return;
         }
 
-        // Check if user exists and get their data
-        const { data: userData, error: userError } = await supabase
+        // Check if user exists in users table by email (not by ID)
+        const { data: existingUser, error: userError } = await supabase
           .from("users")
-          .select("address, name, signup_source")
-          .eq("id", session.user.id)
+          .select("signup_source, address, name")
+          .eq("email", session.user.email)
           .maybeSingle();
 
-        // NEW USER: No address or incomplete profile
-        if (!userError && (!userData || !userData.address || userData.address === "Address Not Provided")) {
-          // Use context from URL for new user
-          const community = contextParam || "boca-bridges";
-          const displayName = community
-            .split('-')
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(' ');
-          setCommunityName(displayName);
+        // EXISTING USER: Has a record in users table
+        if (existingUser && !userError) {
+          console.log("Existing user found:", session.user.email);
           
-          navigate(`/complete-profile?community=${community}`, { replace: true });
-          return;
-        }
-
-        // EXISTING USER: Has complete profile
-        // Priority 1: Use their signup_source community (ignore context)
-        if (userData?.signup_source && userData.signup_source.startsWith("community:")) {
-          const userCommunity = userData.signup_source.replace("community:", "");
-          const communitySlug = userCommunity.toLowerCase().replace(/\s+/g, '-');
-          const displayName = userCommunity
-            .split('-')
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(' ');
-          setCommunityName(displayName);
-          
-          navigate(`/communities/${communitySlug}?welcome=true`, { replace: true });
-          return;
-        }
-
-        // Priority 2: Try to get community from their address mapping
-        if (userData?.address && userData.address !== "Address Not Provided") {
-          try {
-            const { data: normalizedAddr } = await supabase.rpc("normalize_address", { 
-              _addr: userData.address 
-            });
+          // Use their stored signup_source community (ignore context parameter)
+          if (existingUser.signup_source && existingUser.signup_source.startsWith("community:")) {
+            const userCommunity = existingUser.signup_source.replace("community:", "");
+            const communitySlug = userCommunity.toLowerCase().replace(/\s+/g, '-');
+            const displayName = userCommunity
+              .split('-')
+              .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+              .join(' ');
+            setCommunityName(displayName);
             
-            const { data: mapping } = await supabase
-              .from("household_hoa")
-              .select("hoa_name")
-              .eq("household_address", normalizedAddr)
-              .order("created_at", { ascending: false })
-              .limit(1)
-              .maybeSingle();
-
-            if (mapping?.hoa_name) {
-              const communitySlug = mapping.hoa_name.toLowerCase().replace(/\s+/g, '-');
-              const displayName = mapping.hoa_name
-                .split('-')
-                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-                .join(' ');
-              setCommunityName(displayName);
-              
-              navigate(`/communities/${communitySlug}?welcome=true`, { replace: true });
-              return;
-            }
-          } catch (e) {
-            console.log("Could not determine community from address");
+            navigate(`/communities/${communitySlug}?welcome=true`, { replace: true });
+            return;
           }
+
+          // Fallback: Try to get community from their address mapping
+          if (existingUser.address && existingUser.address !== "Address Not Provided") {
+            try {
+              const { data: normalizedAddr } = await supabase.rpc("normalize_address", { 
+                _addr: existingUser.address 
+              });
+              
+              const { data: mapping } = await supabase
+                .from("household_hoa")
+                .select("hoa_name")
+                .eq("household_address", normalizedAddr)
+                .order("created_at", { ascending: false })
+                .limit(1)
+                .maybeSingle();
+
+              if (mapping?.hoa_name) {
+                const communitySlug = mapping.hoa_name.toLowerCase().replace(/\s+/g, '-');
+                const displayName = mapping.hoa_name;
+                setCommunityName(displayName);
+                
+                navigate(`/communities/${communitySlug}?welcome=true`, { replace: true });
+                return;
+              }
+            } catch (e) {
+              console.log("Could not determine community from address");
+            }
+          }
+
+          // Last resort for existing users
+          setCommunityName("Boca Bridges");
+          navigate(`/communities/boca-bridges?welcome=true`, { replace: true });
+          return;
         }
 
-        // Fallback - use default
-        setCommunityName("Boca Bridges");
-        navigate(`/communities/boca-bridges?welcome=true`, { replace: true });
+        // NEW USER: No record in users table
+        console.log("New user detected:", session.user.email);
+        
+        // Use context from URL for new user (which page they were on)
+        const community = contextParam || "boca-bridges";
+        const displayName = community
+          .split('-')
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(' ');
+        setCommunityName(displayName);
+        
+        navigate(`/complete-profile?community=${community}`, { replace: true });
         
       } catch (error) {
         console.error("Callback error:", error);
