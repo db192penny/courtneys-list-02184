@@ -2,11 +2,13 @@ import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { MagicLinkLoader } from "@/components/MagicLinkLoader";
+import { useToast } from "@/hooks/use-toast";
 
 const AuthCallback = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [communityName, setCommunityName] = useState<string>("");
+  const { toast } = useToast();
 
   useEffect(() => {
     const handleCallback = async () => {
@@ -29,77 +31,94 @@ const AuthCallback = () => {
           return;
         }
 
-        // Check if user exists in users table by email (not by ID)
+        // CHECK IF THIS EMAIL IS REGISTERED IN YOUR SYSTEM
         const { data: existingUser, error: userError } = await supabase
           .from("users")
-          .select("signup_source, address, name")
+          .select("id, signup_source, address, name, is_verified")
           .eq("email", session.user.email)
           .maybeSingle();
 
-        // EXISTING USER: Has a record in users table
-        if (existingUser && !userError) {
-          console.log("Existing user found:", session.user.email);
+        // If no user record exists, they need to sign up first
+        if (!existingUser) {
+          console.log("No user account found for:", session.user.email);
           
-          // Use their stored signup_source community (ignore context parameter)
-          if (existingUser.signup_source && existingUser.signup_source.startsWith("community:")) {
-            const userCommunity = existingUser.signup_source.replace("community:", "");
-            const communitySlug = userCommunity.toLowerCase().replace(/\s+/g, '-');
-            const displayName = userCommunity
-              .split('-')
-              .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-              .join(' ');
-            setCommunityName(displayName);
-            
-            navigate(`/communities/${communitySlug}?welcome=true`, { replace: true });
-            return;
-          }
-
-          // Fallback: Try to get community from their address mapping
-          if (existingUser.address && existingUser.address !== "Address Not Provided") {
-            try {
-              const { data: normalizedAddr } = await supabase.rpc("normalize_address", { 
-                _addr: existingUser.address 
-              });
-              
-              const { data: mapping } = await supabase
-                .from("household_hoa")
-                .select("hoa_name")
-                .eq("household_address", normalizedAddr)
-                .order("created_at", { ascending: false })
-                .limit(1)
-                .maybeSingle();
-
-              if (mapping?.hoa_name) {
-                const communitySlug = mapping.hoa_name.toLowerCase().replace(/\s+/g, '-');
-                const displayName = mapping.hoa_name;
-                setCommunityName(displayName);
-                
-                navigate(`/communities/${communitySlug}?welcome=true`, { replace: true });
-                return;
-              }
-            } catch (e) {
-              console.log("Could not determine community from address");
-            }
-          }
-
-          // Last resort for existing users
-          setCommunityName("Boca Bridges");
-          navigate(`/communities/boca-bridges?welcome=true`, { replace: true });
+          // Sign them out of the auth session
+          await supabase.auth.signOut();
+          
+          // Show the same message as email sign-in
+          toast({
+            title: "Account not found",
+            description: "We couldn't find an account with that email. Please sign up to request access.",
+            variant: "destructive"
+          });
+          
+          // Redirect to sign-up page
+          navigate('/auth', { replace: true });
           return;
         }
 
-        // NEW USER: No record in users table
-        console.log("New user detected:", session.user.email);
+        // Check if user is deactivated/blocked
+        if (existingUser.is_verified === false) {
+          await supabase.auth.signOut();
+          
+          toast({
+            title: "Account disabled",
+            description: "Your account has been disabled. Please contact support.",
+            variant: "destructive"
+          });
+          
+          navigate('/signin', { replace: true });
+          return;
+        }
+
+        // EXISTING USER: Has a record in users table
+        console.log("Existing user found:", session.user.email);
         
-        // Use context from URL for new user (which page they were on)
-        const community = contextParam || "boca-bridges";
-        const displayName = community
-          .split('-')
-          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-          .join(' ');
-        setCommunityName(displayName);
-        
-        navigate(`/complete-profile?community=${community}`, { replace: true });
+        // Use their stored signup_source community (ignore context parameter)
+        if (existingUser.signup_source && existingUser.signup_source.startsWith("community:")) {
+          const userCommunity = existingUser.signup_source.replace("community:", "");
+          const communitySlug = userCommunity.toLowerCase().replace(/\s+/g, '-');
+          const displayName = userCommunity
+            .split('-')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ');
+          setCommunityName(displayName);
+          
+          navigate(`/communities/${communitySlug}?welcome=true`, { replace: true });
+          return;
+        }
+
+        // Fallback: Try to get community from their address mapping
+        if (existingUser.address && existingUser.address !== "Address Not Provided") {
+          try {
+            const { data: normalizedAddr } = await supabase.rpc("normalize_address", { 
+              _addr: existingUser.address 
+            });
+            
+            const { data: mapping } = await supabase
+              .from("household_hoa")
+              .select("hoa_name")
+              .eq("household_address", normalizedAddr)
+              .order("created_at", { ascending: false })
+              .limit(1)
+              .maybeSingle();
+
+            if (mapping?.hoa_name) {
+              const communitySlug = mapping.hoa_name.toLowerCase().replace(/\s+/g, '-');
+              const displayName = mapping.hoa_name;
+              setCommunityName(displayName);
+              
+              navigate(`/communities/${communitySlug}?welcome=true`, { replace: true });
+              return;
+            }
+          } catch (e) {
+            console.log("Could not determine community from address");
+          }
+        }
+
+        // Last resort for existing users
+        setCommunityName("Boca Bridges");
+        navigate(`/communities/boca-bridges?welcome=true`, { replace: true });
         
       } catch (error) {
         console.error("Callback error:", error);
@@ -108,7 +127,7 @@ const AuthCallback = () => {
     };
 
     handleCallback();
-  }, [navigate, searchParams]);
+  }, [navigate, searchParams, toast]);
 
   return <MagicLinkLoader communityName={communityName || undefined} />;
 };
