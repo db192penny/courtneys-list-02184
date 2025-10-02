@@ -169,9 +169,8 @@ const SignIn = () => {
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
-              <div>
+            <div>
                 <CardTitle>Sign In to {communityName || "Courtney's List"}</CardTitle>
-                <CardDescription>Enter your email to receive a magic link.</CardDescription>
               </div>
               <Button
                 variant="ghost"
