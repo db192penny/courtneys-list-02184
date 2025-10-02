@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -24,6 +24,14 @@ const SignIn = () => {
 
   const community = searchParams.get("community");
   const communityName = community ? community.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : null;
+
+  useEffect(() => {
+    // Redirect to Boca Bridges if no community parameter in URL
+    if (!community) {
+      console.log('⚠️ No community in signin URL, redirecting to Boca Bridges');
+      navigate('/communities/boca-bridges', { replace: true });
+    }
+  }, [community, navigate]);
 
   const handleBack = () => {
     // Try to go back in history first
@@ -175,7 +183,7 @@ const SignIn = () => {
 
               <div className="pt-2 text-center">
                 <Link 
-                  to={community ? `/auth?community=${community}` : "/auth"} 
+                  to={community ? `/auth?community=${community}` : "/communities/boca-bridges"} 
                   className="underline underline-offset-4"
                 >
                   New to {communityName || "Courtney's List"}? Sign Up

@@ -85,7 +85,14 @@ export default function CostsHover({ vendorId, children }: Props) {
                   Costs are shared just within our neighborhood circle. Sign up to view them.
                 </div>
                 <Button 
-                  onClick={() => navigate('/auth/signup')}
+                  onClick={() => {
+                    const currentPath = window.location.pathname;
+                    const communityMatch = currentPath.match(/\/communities\/([^\/]+)/);
+                    const community = communityMatch 
+                      ? communityMatch[1].split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+                      : 'Boca Bridges';
+                    navigate(`/auth?community=${community}`);
+                  }}
                   size="sm"
                   className="w-full"
                 >
