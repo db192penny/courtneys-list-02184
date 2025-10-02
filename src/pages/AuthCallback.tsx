@@ -13,8 +13,7 @@ const AuthCallback = () => {
   useEffect(() => {
     const handleCallback = async () => {
       try {
-        // Get context from URL params
-        const action = searchParams.get("action");  // "signup" or "signin"
+        // Get context from URL params (what page they were on)
         const contextParam = searchParams.get("context") || searchParams.get("community");
         
         // Get the current session
@@ -32,54 +31,51 @@ const AuthCallback = () => {
           return;
         }
 
-        // CHECK IF USER EXISTS IN THE SYSTEM
+        // CRITICAL FIX: Check if this is a Google OAuth user
+        const isGoogleUser = session.user.app_metadata?.provider === 'google';
+        
+        // CHECK IF THIS EMAIL IS REGISTERED IN YOUR SYSTEM
         const { data: existingUser, error: userError } = await supabase
           .from("users")
           .select("id, signup_source, address, name, is_verified")
           .eq("email", session.user.email)
           .maybeSingle();
 
-        // NO USER RECORD EXISTS
+        // If no user record exists, they need to sign up first
         if (!existingUser) {
           console.log("No user account found for:", session.user.email);
           
-          // Check if this is a sign-in attempt (not a sign-up)
-          if (action === "signin") {
-            // This is a SIGN-IN attempt for non-existent user - BLOCK IT
-            console.log("Sign-in attempted by non-existent user:", session.user.email);
+          // Sign out the user immediately
+          await supabase.auth.signOut();
+          
+          if (isGoogleUser) {
+            // For Google OAuth users without an account
+            toast({
+              title: "Account not found",
+              description: "No account exists for this Google account. Please sign up first to request access.",
+              variant: "destructive"
+            });
             
-            // Sign them out immediately
-            await supabase.auth.signOut();
-            
-            // Clear session storage
-            localStorage.clear();
-            sessionStorage.clear();
-            
-            // Show error and redirect to sign-up
+            // Redirect to sign-up page with context if available
+            const signupUrl = contextParam 
+              ? `/auth?community=${contextParam}` 
+              : '/auth';
+            navigate(signupUrl, { replace: true });
+            return;
+          } else {
+            // For magic link users without an account
             toast({
               title: "Account not found",
               description: "We couldn't find an account with that email. Please sign up to request access.",
               variant: "destructive"
             });
             
-            // Redirect to sign-up page
-            window.location.href = '/auth';
+            navigate('/auth', { replace: true });
             return;
           }
-          
-          // This is a SIGN-UP - allow them to complete profile
-          const community = contextParam || "boca-bridges";
-          const displayName = community
-            .split('-')
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(' ');
-          setCommunityName(displayName);
-          
-          navigate(`/complete-profile?community=${community}`, { replace: true });
-          return;
         }
 
-        // USER EXISTS - Check if they're verified
+        // Check if user is deactivated/blocked
         if (existingUser.is_verified === false) {
           await supabase.auth.signOut();
           
@@ -93,10 +89,10 @@ const AuthCallback = () => {
           return;
         }
 
-        // EXISTING VERIFIED USER - Route to their community
+        // EXISTING USER: Has a record in users table
         console.log("Existing user found:", session.user.email);
         
-        // Use their stored signup_source community
+        // Use their stored signup_source community (ignore context parameter)
         if (existingUser.signup_source && existingUser.signup_source.startsWith("community:")) {
           const userCommunity = existingUser.signup_source.replace("community:", "");
           const communitySlug = userCommunity.toLowerCase().replace(/\s+/g, '-');
