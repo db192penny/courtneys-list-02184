@@ -226,8 +226,8 @@ function AppContent() {
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/community-request" element={<CommunityRequest />} />
         <Route path="/communities/:slug" element={<Community />} />
-        <Route path="/communities/request" element={<CommunityRequest />} />
         <Route path="/community-preview/:slug" element={<CommunityPreview />} />
         <Route path="/mockup-preview" element={<MockupPreview />} />
         <Route path="/logo-mockup" element={<LogoMockup />} />
