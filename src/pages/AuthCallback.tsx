@@ -12,20 +12,23 @@ const AuthCallback = () => {
 
   useEffect(() => {
     const handleCallback = async () => {
+      // Define contextParam at the top so it's available in catch block
+      const contextParam = searchParams.get("context") || searchParams.get("community");
+      
       try {
-        const contextParam = searchParams.get("context") || searchParams.get("community");
-        
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
         if (sessionError) {
           console.error("Session error:", sessionError);
-          navigate("/auth", { replace: true });
+          const authUrl = contextParam ? `/auth?community=${contextParam}` : '/communities/boca-bridges';
+          navigate(authUrl, { replace: true });
           return;
         }
 
         if (!session) {
           console.error("No session found");
-          navigate("/auth", { replace: true });
+          const authUrl = contextParam ? `/auth?community=${contextParam}` : '/communities/boca-bridges';
+          navigate(authUrl, { replace: true });
           return;
         }
 
@@ -71,7 +74,8 @@ const AuthCallback = () => {
             variant: "destructive"
           });
           
-          navigate('/auth', { replace: true });
+          const authUrl = contextParam ? `/auth?community=${contextParam}` : '/communities/boca-bridges';
+          navigate(authUrl, { replace: true });
           return;
         }
 
@@ -104,7 +108,8 @@ const AuthCallback = () => {
         
       } catch (error) {
         console.error("Callback error:", error);
-        navigate("/auth", { replace: true });
+        const authUrl = contextParam ? `/auth?community=${contextParam}` : '/communities/boca-bridges';
+        navigate(authUrl, { replace: true });
       }
     };
 

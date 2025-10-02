@@ -134,11 +134,18 @@ const Header = () => {
   // Determine if we're on homepage to set default community context
   const isHomepage = location.pathname === "/";
   const isAuthPage = location.pathname === "/auth" || location.pathname === "/signin";
-  const signInLink = isHomepage ? "/signin?community=boca-bridges" : "/signin";
+  
+  // Extract community from current URL path to preserve context
+  const communityMatch = location.pathname.match(/\/communities\/([^\/]+)/);
+  const communitySlug = communityMatch ? communityMatch[1] : 'boca-bridges';
+  const signInLink = `/signin?community=${communitySlug}`;
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
-    navigate("/signin");
+    // Preserve community context when signing out
+    const communityMatch = location.pathname.match(/\/communities\/([^\/]+)/);
+    const communitySlug = communityMatch ? communityMatch[1] : 'boca-bridges';
+    navigate(`/signin?community=${communitySlug}`);
   };
 
   useEffect(() => {

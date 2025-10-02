@@ -33,7 +33,14 @@ export function MobileReviewsModal({ open, onOpenChange, vendor, onRate }) {
           Full reviews are shared just within our neighborhood circle. Sign up to view them.
         </div>
         <Button 
-          onClick={() => navigate('/auth/signup')}
+          onClick={() => {
+            const currentPath = window.location.pathname;
+            const communityMatch = currentPath.match(/\/communities\/([^\/]+)/);
+            const community = communityMatch 
+              ? communityMatch[1].split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+              : 'Boca Bridges';
+            navigate(`/auth?community=${community}`);
+          }}
           className="w-full"
         >
           Sign Up to View Reviews

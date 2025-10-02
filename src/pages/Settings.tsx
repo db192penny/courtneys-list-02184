@@ -77,7 +77,11 @@ const Settings = () => {
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
-    navigate("/signin");
+    // Preserve community context when signing out
+    const currentPath = window.location.pathname;
+    const communityMatch = currentPath.match(/\/communities\/([^\/]+)/);
+    const communitySlug = communityMatch ? communityMatch[1] : 'boca-bridges';
+    navigate(`/signin?community=${communitySlug}`);
   };
 
   const handleRequestAddressChange = () => {

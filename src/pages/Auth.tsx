@@ -46,6 +46,14 @@ const Auth = () => {
     return params.get("verified") === "true";
   }, [params]);
 
+  useEffect(() => {
+    // Redirect to Boca Bridges community page if no community in URL and not processing magic link
+    if (!communityName && !hasMagicLink) {
+      console.log('⚠️ No community parameter in URL, redirecting to Boca Bridges');
+      navigate('/communities/boca-bridges', { replace: true });
+    }
+  }, [communityName, hasMagicLink, navigate]);
+
   const handleBack = () => {
     if (window.history.length > 1) {
       navigate(-1);
