@@ -368,16 +368,27 @@ const Auth = () => {
     try {
       setLoading(true);
       
-      // Preserve community through OAuth flow - use exact community from URL
-      let community = communityName || params.get("community") || "boca-bridges";
+      // For OAuth, we pass the current context
+      // The callback will determine if user exists and handle accordingly
+      let communityContext = params.get("community") || 
+                            communityName || 
+                            "";
       
-      // Store community in localStorage to preserve through OAuth redirect
-      localStorage.setItem('pending_community', community);
+      // If no community context and on homepage, require selection
+      if (!communityContext) {
+        toast({
+          title: "Please select a community first",
+          description: "Choose your community before signing in",
+          variant: "destructive"
+        });
+        setLoading(false);
+        return;
+      }
       
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback?community=${community}`,
+          redirectTo: `${window.location.origin}/auth/callback?context=${communityContext}`,
           queryParams: {
             access_type: 'offline',
             prompt: 'consent',
