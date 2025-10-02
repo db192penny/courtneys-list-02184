@@ -117,14 +117,14 @@ export default function Community() {
         canonical={canonical}
       />
 
-      <section className="container py-2 sm:py-10 space-y-2 sm:space-y-6">
+      <section className="container pt-0 sm:py-10 pb-2 space-y-2 sm:space-y-6">
         {/* Welcome toolbar for new users */}
         <WelcomeToolbar communitySlug={slug} />
         
         {/* Sticky Community Header */}
-        <div className={`sticky ${hideHeader ? 'top-0 sm:top-2' : 'top-12 sm:top-14'} z-40 backdrop-blur-md bg-background/95 border-b border-border/40 shadow-sm transition-transform duration-300 ease-in-out -mx-4 sm:mx-0 px-4 sm:px-0 py-1.5 sm:py-4 ${isScrollingDown ? '-translate-y-full' : 'translate-y-0'}`}>
+        <div className={`sticky ${hideHeader ? 'top-0 sm:top-2' : 'top-12 sm:top-14'} z-40 backdrop-blur-md bg-background/95 border-b border-border/40 shadow-sm transition-transform duration-300 ease-in-out -mx-4 sm:mx-0 px-4 sm:px-0 pb-1.5 sm:py-4 ${isScrollingDown ? '-translate-y-full' : 'translate-y-0'}`}>
           <header className="space-y-4">
-              <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-2 sm:gap-4">
                  {/* Community info - full-width image with text overlay - only show if user hasn't scrolled yet */}
                  {!hideHeader && (
                    <div className="relative animate-fade-in hidden sm:block">
