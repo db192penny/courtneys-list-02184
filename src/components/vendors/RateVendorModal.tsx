@@ -250,7 +250,7 @@ export default function RateVendorModal({ open, onOpenChange, vendor, onSuccess,
         }
       }
 
-      // Force invalidate ALL review-related queries
+      // Step 1: Invalidate all queries immediately
       await queryClient.invalidateQueries({ queryKey: ["neighbor-reviews"] });
       await queryClient.invalidateQueries({ queryKey: ["vendor-reviews"] });
       await queryClient.invalidateQueries({ queryKey: ["mobile-reviews"] });
@@ -258,15 +258,28 @@ export default function RateVendorModal({ open, onOpenChange, vendor, onSuccess,
       await queryClient.invalidateQueries({ queryKey: ["community-stats"] });
       await queryClient.invalidateQueries({ queryKey: ["vendor-details"] });
       await queryClient.invalidateQueries({ queryKey: ["vendors"] });
+      await queryClient.invalidateQueries({ queryKey: ["user-reviews"] });
 
-      // Force refetch the specific vendor's reviews
-      await queryClient.refetchQueries({ queryKey: ["neighbor-reviews", vendor.id] });
-      await queryClient.refetchQueries({ queryKey: ["vendor-reviews", vendor.id] });
+      // Step 2: Force immediate refetch of vendor-specific reviews
+      await queryClient.refetchQueries({ 
+        queryKey: ["neighbor-reviews", vendor.id],
+        exact: false 
+      });
+      await queryClient.refetchQueries({ 
+        queryKey: ["vendor-reviews", vendor.id],
+        exact: false 
+      });
 
-      // Small delay to ensure database has committed
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Step 3: Wait for database aggregates to recalculate (increased from 500ms to 800ms)
+      await new Promise(resolve => setTimeout(resolve, 800));
 
-      // One more invalidation to be sure
+      // Step 4: CRITICAL FIX - Force refetch of community-stats after database updates
+      await queryClient.refetchQueries({ 
+        queryKey: ["community-stats"],
+        type: 'active'
+      });
+
+      // Step 5: One final invalidation to catch anything else
       await queryClient.invalidateQueries();
       
       // Calculate smart suggestion for earning Starbucks points
