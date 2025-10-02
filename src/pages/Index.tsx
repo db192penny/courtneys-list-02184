@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import SEO from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
@@ -102,11 +102,6 @@ const Index = () => {
                 See Providers
               </Button>
             </form>
-            <p className="text-center text-sm mt-4">
-              <Link to="/community-request" className="text-primary hover:underline">
-                ➕ Don't see your community? Request it here
-              </Link>
-            </p>
           </div>
               {/* How It Works moved below hero */}
             </div>
