@@ -13,7 +13,8 @@ const AuthCallback = () => {
   useEffect(() => {
     const handleCallback = async () => {
       try {
-        // Get context from URL params (what page they were on)
+        // Get context from URL params
+        const action = searchParams.get("action");  // "signup" or "signin"
         const contextParam = searchParams.get("context") || searchParams.get("community");
         
         // Get the current session
@@ -31,33 +32,54 @@ const AuthCallback = () => {
           return;
         }
 
-        // CHECK IF THIS EMAIL IS REGISTERED IN YOUR SYSTEM
+        // CHECK IF USER EXISTS IN THE SYSTEM
         const { data: existingUser, error: userError } = await supabase
           .from("users")
           .select("id, signup_source, address, name, is_verified")
           .eq("email", session.user.email)
           .maybeSingle();
 
-        // If no user record exists, they need to sign up first
+        // NO USER RECORD EXISTS
         if (!existingUser) {
           console.log("No user account found for:", session.user.email);
           
-          // Sign them out of the auth session
-          await supabase.auth.signOut();
+          // Check if this is a sign-in attempt (not a sign-up)
+          if (action === "signin") {
+            // This is a SIGN-IN attempt for non-existent user - BLOCK IT
+            console.log("Sign-in attempted by non-existent user:", session.user.email);
+            
+            // Sign them out immediately
+            await supabase.auth.signOut();
+            
+            // Clear session storage
+            localStorage.clear();
+            sessionStorage.clear();
+            
+            // Show error and redirect to sign-up
+            toast({
+              title: "Account not found",
+              description: "We couldn't find an account with that email. Please sign up to request access.",
+              variant: "destructive"
+            });
+            
+            // Redirect to sign-up page
+            window.location.href = '/auth';
+            return;
+          }
           
-          // Show the same message as email sign-in
-          toast({
-            title: "Account not found",
-            description: "We couldn't find an account with that email. Please sign up to request access.",
-            variant: "destructive"
-          });
+          // This is a SIGN-UP - allow them to complete profile
+          const community = contextParam || "boca-bridges";
+          const displayName = community
+            .split('-')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ');
+          setCommunityName(displayName);
           
-          // Redirect to sign-up page
-          navigate('/auth', { replace: true });
+          navigate(`/complete-profile?community=${community}`, { replace: true });
           return;
         }
 
-        // Check if user is deactivated/blocked
+        // USER EXISTS - Check if they're verified
         if (existingUser.is_verified === false) {
           await supabase.auth.signOut();
           
@@ -71,10 +93,10 @@ const AuthCallback = () => {
           return;
         }
 
-        // EXISTING USER: Has a record in users table
+        // EXISTING VERIFIED USER - Route to their community
         console.log("Existing user found:", session.user.email);
         
-        // Use their stored signup_source community (ignore context parameter)
+        // Use their stored signup_source community
         if (existingUser.signup_source && existingUser.signup_source.startsWith("community:")) {
           const userCommunity = existingUser.signup_source.replace("community:", "");
           const communitySlug = userCommunity.toLowerCase().replace(/\s+/g, '-');
