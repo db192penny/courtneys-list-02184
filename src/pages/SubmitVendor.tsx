@@ -23,6 +23,7 @@ const SubmitVendor = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const communityParam = searchParams.get("community") || "Boca Bridges";
 
   // form state
   const [category, setCategory] = useState<string>("");
@@ -184,7 +185,7 @@ const SubmitVendor = () => {
     if (!vendorId) {
       const { data: duplicates } = await supabase.rpc("check_vendor_duplicate", {
         _name: name.trim(),
-        _community: "Boca Bridges"
+        _community: communityParam
       });
       
       if (duplicates && duplicates.length > 0) {
@@ -361,6 +362,7 @@ const SubmitVendor = () => {
     const vendorData: any = {
       name: name.trim(),
       category,
+      community: communityParam,
       contact_info: contact.trim(),
       typical_cost: costNum,
       created_by: userId,
