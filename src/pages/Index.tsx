@@ -78,7 +78,7 @@ const Index = () => {
               <p className="text-lg md:text-xl text-foreground/90 font-medium" style={{ textShadow: '0 1px 4px rgba(0,0,0,0.2)' }}>Say goodbye to "Could you recommend a plumber?" Facebook posts</p>
           
           <div className="mx-auto mt-6 w-full max-w-2xl">
-            <form onSubmit={onSubmit} className="flex flex-col sm:flex-row gap-3 items-center">
+            <form onSubmit={onSubmit} className="flex flex-col sm:flex-row gap-3 items-center justify-center">
               <Select value={hoa} onValueChange={setHoa}>
                 <SelectTrigger className="w-full sm:w-64 bg-background/95 backdrop-blur">
                   <SelectValue placeholder="Select your community" />
@@ -86,11 +86,11 @@ const Index = () => {
                 <SelectContent>
                   <SelectItem value="Boca Bridges">Boca Bridges</SelectItem>
                   <SelectItem value="The Bridges">The Bridges</SelectItem>
-                  <SelectItem value="The Oaks">The Oaks</SelectItem>
-                  <SelectItem value="St. Andrews Country Club">St. Andrews Country Club</SelectItem>
-                  <SelectItem value="Woodfield Country Club">Woodfield Country Club</SelectItem>
-                  <SelectItem value="Seven Bridges">Seven Bridges</SelectItem>
-                  <SelectItem value="Lotus">Lotus</SelectItem>
+                  <SelectItem value="The Oaks" disabled>The Oaks (coming soon)</SelectItem>
+                  <SelectItem value="St. Andrews Country Club" disabled>St. Andrews Country Club (coming soon)</SelectItem>
+                  <SelectItem value="Woodfield Country Club" disabled>Woodfield Country Club (coming soon)</SelectItem>
+                  <SelectItem value="Seven Bridges" disabled>Seven Bridges (coming soon)</SelectItem>
+                  <SelectItem value="Lotus" disabled>Lotus (coming soon)</SelectItem>
                 </SelectContent>
               </Select>
               <Button 
