@@ -127,7 +127,7 @@ export default function Community() {
               <div className="flex flex-col gap-4">
                  {/* Community info - full-width image with text overlay - only show if user hasn't scrolled yet */}
                  {!hideHeader && (
-                   <div className="relative animate-fade-in">
+                   <div className="relative animate-fade-in hidden sm:block">
                       {/* Full-width community image with text overlay */}
                       {asset?.photo_path ? (
                         <div className="relative">
