@@ -125,25 +125,23 @@ export default function Community() {
         <div className={`sticky ${hideHeader ? 'top-0 sm:top-2' : 'top-8 sm:top-14'} z-40 backdrop-blur-md bg-background/95 border-b border-border/40 shadow-sm transition-transform duration-300 ease-in-out -mx-4 sm:mx-0 px-4 sm:px-0 pb-1.5 sm:py-4 ${isScrollingDown ? '-translate-y-full' : 'translate-y-0'}`}>
           <header className="space-y-4">
               <div className="flex flex-col gap-2 sm:gap-4">
-                 {/* Community info - full-width image with text overlay - only show if user hasn't scrolled yet */}
-                 {!hideHeader && (
-                   <div className="relative animate-fade-in hidden sm:block">
-                      {/* Full-width community image with text overlay */}
-                      {asset?.photo_path ? (
-                        <div className="relative">
-                          <img 
-                            src={photoUrl} 
-                            alt={`${communityName} community photo`}
-                            className="w-full h-16 sm:h-20 rounded-lg object-cover"
-                          />
-                        </div>
-                      ) : (
-                        <div className="w-full h-16 sm:h-20 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-xl sm:text-2xl">
-                          {communityName}
-                        </div>
-                      )}
-                   </div>
-                 )}
+                 {/* Community info - full-width image with text overlay - hidden on mobile, always visible on desktop */}
+                 <div className="relative animate-fade-in hidden sm:block">
+                    {/* Full-width community image with text overlay */}
+                    {asset?.photo_path ? (
+                      <div className="relative">
+                        <img 
+                          src={photoUrl} 
+                          alt={`${communityName} community photo`}
+                          className="w-full h-16 sm:h-20 rounded-lg object-cover"
+                        />
+                      </div>
+                    ) : (
+                      <div className="w-full h-16 sm:h-20 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-xl sm:text-2xl">
+                        {communityName}
+                      </div>
+                    )}
+                 </div>
 
                 {/* For logged out users - compact call to action */}
                 {showSignUpPrompt && (
