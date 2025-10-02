@@ -86,7 +86,7 @@ const CommunityRequest = () => {
     setRequestorEmail("");
     setResident("");
     setNotes("");
-    setTimeout(() => navigate("/", { replace: true }), 600);
+    setTimeout(() => navigate("/homepage", { replace: true }), 600);
   };
 
   return (
@@ -172,7 +172,7 @@ const CommunityRequest = () => {
                 <Button type="submit" disabled={submitting} className="min-w-[160px]">
                   {submitting ? "Submitting..." : "Submit Request"}
                 </Button>
-                <Button type="button" variant="secondary" onClick={() => navigate("/", { replace: true })}>
+                <Button type="button" variant="secondary" onClick={() => navigate("/homepage", { replace: true })}>
                   Cancel
                 </Button>
               </div>
