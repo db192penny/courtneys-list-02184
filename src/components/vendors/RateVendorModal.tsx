@@ -250,19 +250,24 @@ export default function RateVendorModal({ open, onOpenChange, vendor, onSuccess,
         }
       }
 
-      // Invalidate relevant caches to ensure fresh data
-      queryClient.invalidateQueries({ queryKey: ["reviews-hover"] });
-      queryClient.invalidateQueries({ queryKey: ["vendor-reviews"] });
-      queryClient.invalidateQueries({ queryKey: ["mobile-reviews"] });
-      queryClient.invalidateQueries({ queryKey: ["community-stats"] });
-      queryClient.invalidateQueries({ queryKey: ["community-vendors"] });
-      queryClient.invalidateQueries({ queryKey: ["vendor-costs"] });
-      queryClient.invalidateQueries({ queryKey: ["user-home-vendors"] });
-      queryClient.invalidateQueries({ queryKey: ["user-reviews"] }); // This fixes the "Rated" button not appearing
-      // Use wildcard to invalidate all community-specific queries
-      queryClient.invalidateQueries({ 
-        predicate: (query) => query.queryKey[0] === "community-stats" 
-      });
+      // Force invalidate ALL review-related queries
+      await queryClient.invalidateQueries({ queryKey: ["neighbor-reviews"] });
+      await queryClient.invalidateQueries({ queryKey: ["vendor-reviews"] });
+      await queryClient.invalidateQueries({ queryKey: ["mobile-reviews"] });
+      await queryClient.invalidateQueries({ queryKey: ["reviews-hover"] });
+      await queryClient.invalidateQueries({ queryKey: ["community-stats"] });
+      await queryClient.invalidateQueries({ queryKey: ["vendor-details"] });
+      await queryClient.invalidateQueries({ queryKey: ["vendors"] });
+
+      // Force refetch the specific vendor's reviews
+      await queryClient.refetchQueries({ queryKey: ["neighbor-reviews", vendor.id] });
+      await queryClient.refetchQueries({ queryKey: ["vendor-reviews", vendor.id] });
+
+      // Small delay to ensure database has committed
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // One more invalidation to be sure
+      await queryClient.invalidateQueries();
       
       // Calculate smart suggestion for earning Starbucks points
       const newPointsTotal = currentUserPoints + 5; // They just earned 5 points
