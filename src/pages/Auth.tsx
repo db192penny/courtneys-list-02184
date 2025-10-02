@@ -58,14 +58,6 @@ const Auth = () => {
   };
 
   useEffect(() => {
-    // Redirect to Boca Bridges community page if no community in URL and not processing magic link
-    if (!communityName && !hasMagicLink) {
-      console.log('⚠️ No community parameter in URL, redirecting to Boca Bridges');
-      navigate('/communities/boca-bridges', { replace: true });
-    }
-  }, [communityName, hasMagicLink, navigate]);
-
-  useEffect(() => {
     const addrParam = (params.get("address") || "").trim();
     if (!address && addrParam) {
       setAddress(addrParam);
