@@ -78,18 +78,32 @@ const Index = () => {
               <p className="text-lg md:text-xl text-foreground/90 font-medium" style={{ textShadow: '0 1px 4px rgba(0,0,0,0.2)' }}>Say goodbye to "Could you recommend a plumber?" Facebook posts</p>
           
           <div className="mx-auto mt-6 w-full max-w-2xl">
-            <div className="flex flex-col gap-4 items-center">
+            <form onSubmit={onSubmit} className="flex flex-col sm:flex-row gap-3 items-center">
+              <Select value={hoa} onValueChange={setHoa}>
+                <SelectTrigger className="w-full sm:w-64 bg-background/95 backdrop-blur">
+                  <SelectValue placeholder="Select your community" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Boca Bridges">Boca Bridges</SelectItem>
+                  <SelectItem value="The Bridges">The Bridges</SelectItem>
+                  <SelectItem value="The Oaks">The Oaks</SelectItem>
+                  <SelectItem value="St. Andrews Country Club">St. Andrews Country Club</SelectItem>
+                  <SelectItem value="Woodfield Country Club">Woodfield Country Club</SelectItem>
+                  <SelectItem value="Seven Bridges">Seven Bridges</SelectItem>
+                  <SelectItem value="Lotus">Lotus</SelectItem>
+                </SelectContent>
+              </Select>
               <Button 
+                type="submit" 
                 size="lg"
-                onClick={() => navigate('/communities')}
                 className="w-full sm:w-auto bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:from-blue-600 hover:to-purple-700"
               >
-                Browse Communities
+                See Providers
               </Button>
-              <p className="text-sm text-muted-foreground">
-                Select your community to join or sign in
-              </p>
-            </div>
+            </form>
+            <p className="text-center text-sm text-muted-foreground mt-4">
+              Select your community to see trusted service providers
+            </p>
           </div>
               {/* How It Works moved below hero */}
             </div>
