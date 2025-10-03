@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { CATEGORIES } from "@/data/categories";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { toSlug } from "@/utils/slug";
 import CostInputs, { buildDefaultCosts, type CostEntry } from "@/components/vendors/CostInputs";
 import useIsAdmin from "@/hooks/useIsAdmin";
 import useIsHoaAdmin from "@/hooks/useIsHoaAdmin";
@@ -499,8 +500,9 @@ const SubmitVendor = () => {
       description: "You earned 5 points! Thanks for contributing - your full access should be unlocked now.",
     });
 
-    // Navigate to dashboard (full access will reflect after trigger)
-    navigate("/dashboard");
+    // Navigate back to the community page with the category
+    const communitySlug = toSlug(communityParam);
+    navigate(`/pool/${communitySlug}?category=${category}`);
   };
 
   return (

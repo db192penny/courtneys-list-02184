@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -97,6 +97,7 @@ export default function CommunityVendorTable({
   isVerified?: boolean;
 }) {
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [category, setCategory] = useState<string>("Pool");
   const SORTS = getSorts(communityName);
   const [sortBy, setSortBy] = useState<typeof SORTS[number]["key"]>("hoa_rating");
@@ -279,7 +280,7 @@ export default function CommunityVendorTable({
                 {category} Providers
               </h3>
               <button
-                onClick={() => window.location.href = `/submit?community=${communityName}&category=${category}`}
+                onClick={() => navigate(`/submit?community=${communityName}&category=${category}`)}
                 className="text-sm font-medium text-blue-600 hover:text-blue-700 flex items-center gap-1"
               >
                 <Plus className="h-3 w-3" />
