@@ -115,7 +115,7 @@ export default function Community() {
   const { data: communityStats } = useQuery({
     queryKey: ["community-stats", communityName],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc('get_community_stats', { _hoa_name: communityName });
+      const { data, error } = await supabase.rpc('get_community_stats' as any, { _hoa_name: communityName });
       if (error) throw error;
       return data?.[0] || { total_reviews: 0, active_users: 0 };
     },
