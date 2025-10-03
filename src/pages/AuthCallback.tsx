@@ -8,6 +8,7 @@ const AuthCallback = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [communityName, setCommunityName] = useState<string>("");
+  const [communityPhotoUrl, setCommunityPhotoUrl] = useState<string>("");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -98,12 +99,42 @@ const AuthCallback = () => {
           const userCommunity = existingUser.signup_source.replace("community:", "");
           const communitySlug = userCommunity.toLowerCase().replace(/\s+/g, '-');
           setCommunityName(userCommunity);
+          
+          // Fetch community photo
+          const { data: communityAssets } = await supabase
+            .from("community_assets")
+            .select("photo_path")
+            .eq("hoa_name", userCommunity)
+            .maybeSingle();
+          
+          if (communityAssets?.photo_path) {
+            const { data: urlData } = supabase.storage
+              .from("community-assets")
+              .getPublicUrl(communityAssets.photo_path);
+            setCommunityPhotoUrl(urlData.publicUrl);
+          }
+          
           navigate(`/communities/${communitySlug}?welcome=true`, { replace: true });
           return;
         }
 
         // Fallback
         setCommunityName("Boca Bridges");
+        
+        // Fetch Boca Bridges photo
+        const { data: bbAssets } = await supabase
+          .from("community_assets")
+          .select("photo_path")
+          .eq("hoa_name", "Boca Bridges")
+          .maybeSingle();
+        
+        if (bbAssets?.photo_path) {
+          const { data: urlData } = supabase.storage
+            .from("community-assets")
+            .getPublicUrl(bbAssets.photo_path);
+          setCommunityPhotoUrl(urlData.publicUrl);
+        }
+        
         navigate(`/communities/boca-bridges?welcome=true`, { replace: true });
         
       } catch (error) {
@@ -116,7 +147,7 @@ const AuthCallback = () => {
     handleCallback();
   }, [navigate, searchParams, toast]);
 
-  return <MagicLinkLoader communityName={communityName || undefined} />;
+  return <MagicLinkLoader communityName={communityName || undefined} communityPhotoUrl={communityPhotoUrl || undefined} />;
 };
 
 export default AuthCallback;
