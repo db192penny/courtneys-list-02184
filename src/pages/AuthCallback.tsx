@@ -109,7 +109,7 @@ const AuthCallback = () => {
           
           if (communityAssets?.photo_path) {
             const { data: urlData } = supabase.storage
-              .from("community-assets")
+              .from("community-photos")
               .getPublicUrl(communityAssets.photo_path);
             setCommunityPhotoUrl(urlData.publicUrl);
           }
@@ -130,7 +130,7 @@ const AuthCallback = () => {
         
         if (bbAssets?.photo_path) {
           const { data: urlData } = supabase.storage
-            .from("community-assets")
+            .from("community-photos")
             .getPublicUrl(bbAssets.photo_path);
           setCommunityPhotoUrl(urlData.publicUrl);
         }
