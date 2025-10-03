@@ -41,12 +41,42 @@ const AuthCallback = () => {
 
         // CHECK IF THIS IS A GOOGLE OAUTH USER
         const isGoogleUser = session.user.app_metadata?.provider === 'google';
+        const intent = searchParams.get("intent"); // 'signup' or 'signin'
 
-        // If no user record exists and this is Google OAuth, reject them
+        // If no user record exists and this is Google OAuth
         if (!existingUser && isGoogleUser) {
-          console.log("Google OAuth attempted by non-registered user:", session.user.email);
+          if (intent === 'signin') {
+            // User tried to SIGN IN but has no account
+            console.log("Sign-in attempted by non-registered user:", session.user.email);
+            
+            await supabase.auth.signOut();
+            
+            toast({
+              title: "No account found",
+              description: "You don't have an account yet. Please sign up first.",
+              variant: "destructive",
+              duration: 5000
+            });
+            
+            const signupUrl = contextParam 
+              ? `/auth?community=${contextParam}` 
+              : '/auth';
+            navigate(signupUrl, { replace: true });
+            return;
+          }
           
-          // Sign out immediately
+          if (intent === 'signup') {
+            // User is signing up with Google - allow them to complete profile
+            console.log("New Google signup:", session.user.email);
+            
+            const community = contextParam || "boca-bridges";
+            navigate(`/complete-profile?community=${community}`, { replace: true });
+            return;
+          }
+          
+          // Fallback: no intent specified, treat as unauthorized sign-in attempt
+          console.log("Google OAuth attempted by non-registered user (no intent):", session.user.email);
+          
           await supabase.auth.signOut();
           
           toast({
@@ -56,7 +86,6 @@ const AuthCallback = () => {
             duration: 5000
           });
           
-          // Redirect to sign-up with community context if available
           const signupUrl = contextParam 
             ? `/auth?community=${contextParam}` 
             : '/auth';
