@@ -97,6 +97,24 @@ All colors MUST be HSL.
     --badge-success: 142 76% 36%;
     --badge-warning: 48 96% 53%;
     --badge-locked: 215 20% 65%;
+
+    /* CTA action colors */
+    --cta-primary: 270 95% 65%;
+    --cta-primary-glow: 280 90% 70%;
+    --cta-success: 142 76% 36%;
+  }
+
+  :root {
+    /* Badge system colors */
+    --badge-glow: 210 100% 70%;
+    --badge-success: 142 76% 36%;
+    --badge-warning: 48 96% 53%;
+    --badge-locked: 215 20% 65%;
+
+    /* CTA action colors */
+    --cta-primary: 270 95% 65%;
+    --cta-primary-glow: 280 90% 70%;
+    --cta-success: 142 76% 36%;
   }
 }
 

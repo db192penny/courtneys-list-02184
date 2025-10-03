@@ -75,6 +75,11 @@ export default {
 					success: 'hsl(var(--badge-success))',
 					warning: 'hsl(var(--badge-warning))',
 					locked: 'hsl(var(--badge-locked))'
+				},
+				cta: {
+					primary: 'hsl(var(--cta-primary))',
+					'primary-glow': 'hsl(var(--cta-primary-glow))',
+					success: 'hsl(var(--cta-success))'
 				}
 			},
 			borderRadius: {

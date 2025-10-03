@@ -188,13 +188,13 @@ export default function VendorMobileCard({
                 window.location.href = `/auth?community=${encodeURIComponent(communityName || '')}`;
               }
             }}
-            className={`rounded-lg px-3 py-1.5 font-medium shrink-0 flex items-center gap-1.5 ${
+            className={`rounded-lg px-3 py-1.5 font-medium shrink-0 flex items-center gap-1.5 transition-all ${
               userReviews?.has(vendor.id) 
                 ? "bg-green-100 text-green-800 hover:bg-green-200 border border-green-200" 
-                : "bg-blue-600 text-white hover:bg-blue-700"
+                : "bg-gradient-to-r from-cta-primary to-cta-primary-glow text-white hover:shadow-lg hover:shadow-cta-primary/50 hover:scale-105"
             }`}
           >
-            <Star size={14} className={`text-yellow-500 ${userReviews?.has(vendor.id) ? "fill-current" : ""}`} />
+            <Star size={14} className={`text-yellow-400 ${userReviews?.has(vendor.id) ? "fill-current" : ""}`} />
             {userReviews?.has(vendor.id) ? "Rated!" : "Rate!"}
           </Button>
         </div>
