@@ -10,6 +10,7 @@ import { WelcomeBackModal } from "@/components/WelcomeBackModal";
 import { toast } from "@/hooks/use-toast";
 import { toSlug } from "@/utils/slug";
 import { ArrowLeft, Loader2 } from "lucide-react";
+import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
 
 const SignIn = () => {
   const [searchParams] = useSearchParams();
@@ -74,6 +75,60 @@ const SignIn = () => {
       toast({ title: "Resend failed", description: "Please try again.", variant: "destructive" });
     } finally {
       setResendLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    try {
+      setLoading(true);
+      
+      // Get community context
+      const communityContext = community || "";
+      
+      // Safety check - only allow for The Bridges
+      if (!communityContext.toLowerCase().includes('the-bridges') && 
+          !(communityContext.toLowerCase().includes('bridges') && !communityContext.toLowerCase().includes('boca'))) {
+        toast({
+          title: "Feature not available",
+          description: "Google sign-in is currently only available for The Bridges community.",
+          variant: "destructive"
+        });
+        setLoading(false);
+        return;
+      }
+      
+      const redirectUrl = communityContext
+        ? `${window.location.origin}/auth/callback?context=${communityContext}&intent=signin`
+        : `${window.location.origin}/auth/callback?intent=signin`;
+      
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: redirectUrl,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'select_account',
+          }
+        }
+      });
+      
+      if (error) {
+        console.error('Google signin error:', error);
+        toast({
+          title: "Sign in failed",
+          description: error.message || "Could not sign in with Google. Please try magic link instead.",
+          variant: "destructive"
+        });
+        setLoading(false);
+      }
+    } catch (error) {
+      console.error('Google signin error:', error);
+      toast({
+        title: "Sign in failed",
+        description: "Could not sign in with Google. Please try magic link instead.",
+        variant: "destructive"
+      });
+      setLoading(false);
     }
   };
 
@@ -166,6 +221,13 @@ const SignIn = () => {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
+              <GoogleSignInButton 
+                onClick={handleGoogleSignIn}
+                loading={loading}
+                label="Sign in with Google"
+                community={community || ""}
+              />
+              
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
