@@ -144,8 +144,8 @@ export default function Community() {
         {/* Welcome toolbar for new users */}
         <WelcomeToolbar communitySlug={slug} />
         
-        {/* Hero Card - Desktop/Tablet Only */}
-        <div className="hidden md:block mb-6">
+        {/* Hero Card - Now Visible on Mobile */}
+        <div className="mb-6">
           <Card className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 border-none shadow-md">
             <CardContent className="p-6">
               <div className="flex items-center gap-6">
@@ -164,8 +164,8 @@ export default function Community() {
                   <p className="text-sm text-muted-foreground">Neighbor-recommended service providers</p>
                 </div>
                 
-                {/* Stats Grid */}
-                <div className="grid grid-cols-4 gap-6">
+                {/* Stats Grid - Responsive */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
                   {/* Total Homes */}
                   <div className="text-center">
                     <Home className="w-5 h-5 mx-auto mb-1 text-blue-600" />
