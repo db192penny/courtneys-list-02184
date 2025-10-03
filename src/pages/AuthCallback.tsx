@@ -8,42 +8,14 @@ const AuthCallback = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [communityName, setCommunityName] = useState<string>("");
-  const [communityPhotoUrl, setCommunityPhotoUrl] = useState<string>("");
   const { toast } = useToast();
 
   useEffect(() => {
     const handleCallback = async () => {
-        // Define contextParam at the top so it's available in catch block
-        const contextParam = searchParams.get("context") || searchParams.get("community");
-
-        // Prefetch community image from context so the loader shows the real photo immediately
-        if (contextParam) {
-          const displayFromContext = contextParam
-            .replace(/-/g, " ")
-            .trim()
-            .replace(/\b\w/g, (c) => c.toUpperCase());
-          setCommunityName(displayFromContext);
-          // Fire-and-forget prefetch (don't block auth flow)
-          void (async () => {
-            try {
-              const { data } = await supabase
-                .from("community_assets")
-                .select("photo_path")
-                .eq("hoa_name", displayFromContext)
-                .maybeSingle();
-              if (data?.photo_path) {
-                const { data: urlData } = supabase.storage
-                  .from("community-photos")
-                  .getPublicUrl(data.photo_path);
-                setCommunityPhotoUrl(urlData.publicUrl);
-              }
-            } catch (_) {
-              // ignore
-            }
-          })();
-        }
-        
-        try {
+      // Define contextParam at the top so it's available in catch block
+      const contextParam = searchParams.get("context") || searchParams.get("community");
+      
+      try {
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
         if (sessionError) {
@@ -123,57 +95,15 @@ const AuthCallback = () => {
 
         // User is valid - proceed with navigation
         if (existingUser.signup_source && existingUser.signup_source.startsWith("community:")) {
-          const rawCommunity = existingUser.signup_source.replace("community:", "");
-          // Normalize to display name (title case) and slug
-          const displayCommunity = rawCommunity
-            .replace(/-/g, " ")
-            .replace(/\s+/g, " ")
-            .trim()
-            .replace(/\b\w/g, (c) => c.toUpperCase());
-          const communitySlug = rawCommunity
-            .toLowerCase()
-            .replace(/\s+/g, '-');
-          setCommunityName(displayCommunity);
-          
-          // Fetch community photo by HOA name
-          const { data: communityAssets } = await supabase
-            .from("community_assets")
-            .select("photo_path")
-            .eq("hoa_name", displayCommunity)
-            .maybeSingle();
-          
-          if (communityAssets?.photo_path) {
-            const { data: urlData } = supabase.storage
-              .from("community-photos")
-              .getPublicUrl(communityAssets.photo_path);
-            setCommunityPhotoUrl(urlData.publicUrl);
-          }
-          
-          // Brief delay to show loader with community image before navigating
-          await new Promise(resolve => setTimeout(resolve, 800));
+          const userCommunity = existingUser.signup_source.replace("community:", "");
+          const communitySlug = userCommunity.toLowerCase().replace(/\s+/g, '-');
+          setCommunityName(userCommunity);
           navigate(`/communities/${communitySlug}?welcome=true`, { replace: true });
           return;
         }
 
         // Fallback
         setCommunityName("Boca Bridges");
-        
-        // Fetch Boca Bridges photo
-        const { data: bbAssets } = await supabase
-          .from("community_assets")
-          .select("photo_path")
-          .eq("hoa_name", "Boca Bridges")
-          .maybeSingle();
-        
-        if (bbAssets?.photo_path) {
-          const { data: urlData } = supabase.storage
-            .from("community-photos")
-            .getPublicUrl(bbAssets.photo_path);
-          setCommunityPhotoUrl(urlData.publicUrl);
-        }
-        
-        // Brief delay to show loader with community image before navigating
-        await new Promise(resolve => setTimeout(resolve, 800));
         navigate(`/communities/boca-bridges?welcome=true`, { replace: true });
         
       } catch (error) {
@@ -186,7 +116,7 @@ const AuthCallback = () => {
     handleCallback();
   }, [navigate, searchParams, toast]);
 
-  return <MagicLinkLoader communityName={communityName || undefined} communityPhotoUrl={communityPhotoUrl || undefined} />;
+  return <MagicLinkLoader communityName={communityName || undefined} />;
 };
 
 export default AuthCallback;
