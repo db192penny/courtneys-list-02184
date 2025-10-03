@@ -173,8 +173,8 @@ const SubmitVendor = () => {
         toast({ title: "Rating required", description: "Please select a rating from 1 to 5.", variant: "destructive" });
         return;
       }
-      if (!comments || comments.trim().split(/\s+/).length < 5) {
-        toast({ title: "Comments required", description: "Please provide at least 5 words describing your experience with this vendor.", variant: "destructive" });
+      if (!comments.trim()) {
+        toast({ title: "Comments required", description: "Please share your experience with this provider", variant: "destructive" });
         return;
       }
     }
