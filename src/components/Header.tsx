@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -131,6 +131,16 @@ const Header = () => {
   const location = useLocation();
   const isMobile = useIsMobile();
 
+  // Dynamic Service Providers link based on stored community
+  const serviceProvidersLink = useMemo(() => {
+    const storedCommunity = localStorage.getItem('selected_community');
+    if (storedCommunity) {
+      const slug = storedCommunity.toLowerCase().replace(/\s+/g, '-');
+      return `/communities/${slug}`;
+    }
+    return "/communities/boca-bridges";
+  }, [location.pathname]);
+
   // Determine if we're on homepage to set default community context
   const isHomepage = location.pathname === "/";
   const isAuthPage = location.pathname === "/auth" || location.pathname === "/signin";
@@ -193,7 +203,7 @@ const Header = () => {
   };
 
   const navigationItems = authed ? [
-    { to: "/communities/boca-bridges", label: "Service Providers" },
+    { to: serviceProvidersLink, label: "Service Providers" },
     { to: "/neighborhood-cred", label: "Points & Rewards" },
     { to: "/settings", label: "Settings" },
     ...(isAdmin ? [{ to: "/admin", label: "Admin" }] : []),
