@@ -22,6 +22,7 @@ interface NeighborReviewPreviewProps {
   className?: string;
   communityName?: string;
   isAuthenticated?: boolean;
+  communityPhotoUrl?: string | null;
 }
 
 interface Review {
@@ -40,7 +41,8 @@ export function NeighborReviewPreview({
   onSignUp,
   className,
   communityName,
-  isAuthenticated = false
+  isAuthenticated = false,
+  communityPhotoUrl
 }: NeighborReviewPreviewProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const isMobile = useIsMobile();
@@ -169,7 +171,7 @@ export function NeighborReviewPreview({
         {/* Header with Rating Summary */}
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-3">
-            <ReviewSourceIcon source="bb" size="md" />
+            <ReviewSourceIcon source="bb" size="md" communityPhotoUrl={communityPhotoUrl} />
             <div>
               <div className="text-sm font-bold text-blue-800">{communityName || 'Community'} Reviews</div>
               <div className="text-xs text-blue-600">From your neighbors</div>
@@ -210,7 +212,7 @@ export function NeighborReviewPreview({
       {/* Header with Rating Summary */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-3">
-          <ReviewSourceIcon source="bb" size="md" />
+          <ReviewSourceIcon source="bb" size="md" communityPhotoUrl={communityPhotoUrl} />
           <div>
             <div className="text-sm font-bold text-blue-800">{communityName || 'Community'} Reviews</div>
             <div className="text-xs text-blue-600">From your neighbors</div>

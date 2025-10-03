@@ -41,6 +41,7 @@ interface VendorMobileCardProps {
   isAuthenticated?: boolean;
   isVerified?: boolean;
   communityName?: string;
+  communityPhotoUrl?: string | null;
 }
 
 export default function VendorMobileCard({
@@ -56,6 +57,7 @@ export default function VendorMobileCard({
   isAuthenticated = false,
   isVerified = false,
   communityName,
+  communityPhotoUrl,
 }: VendorMobileCardProps) {
   // Use a combined query that works for both authenticated and preview users
   const { data: vendorCosts, isLoading: costsLoading } = useQuery({
@@ -235,6 +237,7 @@ export default function VendorMobileCard({
             }}
             communityName={communityName}
             isAuthenticated={isAuthenticated}
+            communityPhotoUrl={communityPhotoUrl}
           />
           
           {vendor.google_rating_count > 0 && (

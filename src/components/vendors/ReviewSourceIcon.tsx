@@ -4,12 +4,14 @@ interface ReviewSourceIconProps {
   source: "bb" | "google";
   size?: "sm" | "md";
   className?: string;
+  communityPhotoUrl?: string | null;
 }
 
 export function ReviewSourceIcon({ 
   source, 
   size = "sm", 
-  className 
+  className,
+  communityPhotoUrl 
 }: ReviewSourceIconProps) {
   const sizeClasses = {
     sm: "h-4 w-4",
@@ -17,6 +19,27 @@ export function ReviewSourceIcon({
   };
 
   if (source === "bb") {
+    // If community photo exists, show it as a circular logo with purple border
+    if (communityPhotoUrl) {
+      return (
+        <div 
+          className={cn(
+            "rounded-full overflow-hidden ring-2 ring-purple-500/50 shadow-sm",
+            sizeClasses[size],
+            className
+          )}
+          aria-label="Community Review"
+        >
+          <img 
+            src={communityPhotoUrl} 
+            alt="Community logo"
+            className="w-full h-full object-cover"
+          />
+        </div>
+      );
+    }
+    
+    // Fallback to BB badge if no photo
     return (
       <div 
         className={cn(

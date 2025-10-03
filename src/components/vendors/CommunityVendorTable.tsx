@@ -138,6 +138,33 @@ export default function CommunityVendorTable({
     enabled: !!communityName,
   });
 
+  // Fetch community photo for the review source icon
+  const { data: communityAssets } = useQuery({
+    queryKey: ["community-assets", communityName],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("community_assets")
+        .select("photo_path")
+        .ilike("hoa_name", communityName)
+        .maybeSingle();
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!communityName,
+  });
+
+  // Generate public URL for community photo
+  const communityPhotoUrl = useMemo(() => {
+    if (!communityAssets?.photo_path) return null;
+    
+    const { data } = supabase.storage
+      .from("community-photos")
+      .getPublicUrl(communityAssets.photo_path);
+    
+    return data.publicUrl;
+  }, [communityAssets]);
+
   const { data: userHomeVendors } = useUserHomeVendors();
   const { data: userReviews } = useUserReviews();
   const userCosts = useUserCosts();
@@ -284,6 +311,7 @@ export default function CommunityVendorTable({
               isAuthenticated={isAuthenticated}
               isVerified={isVerified}
               communityName={communityName}
+              communityPhotoUrl={communityPhotoUrl}
             />
           ))}
         </div>
