@@ -92,20 +92,25 @@ const CompleteProfile = () => {
       const streetName = extractStreetName(address.trim());
       const communitySlug = searchParams.get('community') || 'boca-bridges';
 
-      // Update user profile with address and auto-approve Google sign-ups
-      const { error: updateError } = await supabase
+      // UPSERT user profile - creates record for Google OAuth users or updates existing
+      const { error: upsertError } = await supabase
         .from("users")
-        .update({
+        .upsert({
+          id: user.id,
+          email: user.email,
           name: name.trim(),
           address: address.trim(),
           street_name: streetName,
           is_verified: true, // Auto-approve Google sign-ups
-          signup_source: `community:${communitySlug}`
-        })
-        .eq("id", user.id);
+          signup_source: `community:${communitySlug}`,
+          points: 5,
+          created_at: new Date().toISOString()
+        }, {
+          onConflict: 'id'
+        });
 
-      if (updateError) {
-        console.error("Profile update error:", updateError);
+      if (upsertError) {
+        console.error("Profile upsert error:", upsertError);
         toast({ 
           title: "Update failed", 
           description: "Could not update your profile. Please try again.", 
