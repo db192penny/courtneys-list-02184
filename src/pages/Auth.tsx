@@ -18,6 +18,7 @@ import { Info, Crown, PartyPopper, ArrowLeft, Mail, AlertTriangle, Loader2, Spar
 import { handleSignupInvite } from '@/lib/handle-signup-invite';
 import { MagicLinkLoader } from "@/components/MagicLinkLoader";
 import { WelcomeBackModal } from "@/components/WelcomeBackModal";
+import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
 
 const Auth = () => {
   const [name, setName] = useState("");
@@ -204,6 +205,56 @@ const Auth = () => {
     window.scrollTo(0, 0);
   }, []);
 
+  const handleGoogleSignUp = async () => {
+    try {
+      setLoading(true);
+      
+      // MUST have community for signup
+      const communityContext = communityName || 'boca-bridges';
+      
+      // Double-check this is The Bridges
+      if (!communityContext.toLowerCase().includes('bridges') || 
+          communityContext.toLowerCase().includes('boca')) {
+        toast({
+          title: "Feature not available",
+          description: "Google sign-up is currently only available for The Bridges community.",
+          variant: "destructive"
+        });
+        setLoading(false);
+        return;
+      }
+      
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback?context=${communityContext}&intent=signup`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          }
+        }
+      });
+      
+      if (error) {
+        console.error('Google signup error:', error);
+        toast({
+          title: "Sign up failed",
+          description: error.message || "Could not sign up with Google. Please try email instead.",
+          variant: "destructive"
+        });
+        setLoading(false);
+      }
+    } catch (error) {
+      console.error('Google signup error:', error);
+      toast({
+        title: "Sign up failed",
+        description: "Could not sign up with Google. Please try email instead.",
+        variant: "destructive"
+      });
+      setLoading(false);
+    }
+  };
+
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
@@ -389,6 +440,13 @@ const Auth = () => {
         <Card>
           <CardContent className="space-y-4 pt-6">
             <form onSubmit={onSubmit} className="space-y-4">
+              <GoogleSignInButton 
+                onClick={handleGoogleSignUp}
+                loading={loading}
+                label="Sign up with Google"
+                community={communityName}
+              />
+
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="name">Name <span className="text-foreground" aria-hidden>*</span></Label>
