@@ -50,12 +50,19 @@ const Settings = () => {
   };
 
   const handleSignOut = async () => {
+    // Get user's community before signing out
+    let userCommunity = 'boca-bridges';
+    
+    try {
+      if (userData?.communityName) {
+        userCommunity = userData.communityName.toLowerCase().replace(/\s+/g, '-');
+      }
+    } catch (error) {
+      console.log('Using default community for sign-out redirect');
+    }
+    
     await supabase.auth.signOut();
-    // Preserve community context when signing out
-    const currentPath = window.location.pathname;
-    const communityMatch = currentPath.match(/\/communities\/([^\/]+)/);
-    const communitySlug = communityMatch ? communityMatch[1] : 'boca-bridges';
-    navigate(`/signin?community=${communitySlug}`);
+    navigate(`/signin?community=${userCommunity}`);
   };
 
   const handleRequestAddressChange = () => {
