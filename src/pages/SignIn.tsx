@@ -54,24 +54,8 @@ const SignIn = () => {
     setResendLoading(true);
 
     try {
-      // Get the user's assigned community from their profile
-      let redirectUrl = `${window.location.origin}/communities/boca-bridges?welcome=true`; // default
-      
-      const { data: userData } = await supabase
-        .from('users')
-        .select('signup_source')
-        .eq('email', targetEmail)
-        .single();
-      
-      if (userData?.signup_source) {
-        // Extract community from signup_source (e.g., "community:the-bridges" -> "the-bridges")
-        const userCommunity = userData.signup_source.replace('community:', '');
-        const communitySlug = userCommunity.toLowerCase().replace(/\s+/g, '-');
-        redirectUrl = `${window.location.origin}/communities/${communitySlug}?welcome=true`;
-      }
-      
-      console.log("[SignIn] resendMagicLink redirectUrl:", redirectUrl);
-      
+      const communitySlug = community ? toSlug(community) : 'boca-bridges';
+      const redirectUrl = `${window.location.origin}/communities/${communitySlug}?welcome=true`;
       const { error: signInError } = await supabase.auth.signInWithOtp({
         email: targetEmail,
         options: { emailRedirectTo: redirectUrl },
@@ -114,24 +98,8 @@ const SignIn = () => {
       }
 
       if (statusResult === "approved") {
-        // Get the user's assigned community from their profile
-        let redirectUrl = `${window.location.origin}/communities/boca-bridges?welcome=true`; // default
-        
-        const { data: userData } = await supabase
-          .from('users')
-          .select('signup_source')
-          .eq('email', targetEmail)
-          .single();
-        
-        if (userData?.signup_source) {
-          // Extract community from signup_source (e.g., "community:the-bridges" -> "the-bridges")
-          const userCommunity = userData.signup_source.replace('community:', '');
-          const communitySlug = userCommunity.toLowerCase().replace(/\s+/g, '-');
-          redirectUrl = `${window.location.origin}/communities/${communitySlug}?welcome=true`;
-        }
-        
-        console.log("[SignIn] handleSubmit redirectUrl:", redirectUrl);
-        
+        const communitySlug = community ? toSlug(community) : 'boca-bridges';
+        const redirectUrl = `${window.location.origin}/communities/${communitySlug}?welcome=true`;
         const { error: signInError } = await supabase.auth.signInWithOtp({
           email: targetEmail,
           options: { emailRedirectTo: redirectUrl },

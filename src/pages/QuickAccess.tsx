@@ -8,7 +8,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import SEO from "@/components/SEO";
 import { toast } from "@/hooks/use-toast";
 import { Loader2, Mail } from "lucide-react";
-import { toSlug } from "@/utils/slug";
 
 const QuickAccess = () => {
   const [searchParams] = useSearchParams();
@@ -16,7 +15,6 @@ const QuickAccess = () => {
   const [isLoading, setIsLoading] = useState(false);
   
   const email = searchParams.get("email") || "";
-  const community = searchParams.get("community");
 
   const handleSendAccess = async () => {
     if (!email) {
@@ -31,13 +29,10 @@ const QuickAccess = () => {
     setIsLoading(true);
     
     try {
-      const communitySlug = community ? toSlug(community) : 'boca-bridges';
-      const redirectUrl = `${window.location.origin}/communities/${communitySlug}?welcome=true`;
-      
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          emailRedirectTo: redirectUrl
+          emailRedirectTo: `${window.location.origin}/communities/boca-bridges?welcome=true`
         }
       });
 
