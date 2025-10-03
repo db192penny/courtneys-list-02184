@@ -142,9 +142,12 @@ const Header = () => {
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
-    // Preserve community context when signing out
-    const communityMatch = location.pathname.match(/\/communities\/([^\/]+)/);
-    const communitySlug = communityMatch ? communityMatch[1] : 'boca-bridges';
+    
+    // Try to get community from current URL path
+    const currentPath = location.pathname;
+    const communityMatch = currentPath.match(/\/communities\/([^\/\?]+)/);
+    const communitySlug = communityMatch?.[1] || 'boca-bridges';
+    
     navigate(`/signin?community=${communitySlug}`);
   };
 
