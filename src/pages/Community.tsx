@@ -144,8 +144,8 @@ export default function Community() {
         {/* Welcome toolbar for new users */}
         <WelcomeToolbar communitySlug={slug} />
         
-        {/* Hero Card - Now Visible on Mobile */}
-        <div className="mb-6">
+        {/* Hero Card - Desktop/Tablet Only */}
+        <div className="hidden md:block mb-6">
           <Card className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 border-none shadow-md">
             <CardContent className="p-6">
               <div className="flex items-center gap-6">
