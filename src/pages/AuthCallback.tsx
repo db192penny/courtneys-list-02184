@@ -122,6 +122,8 @@ const AuthCallback = () => {
             setCommunityPhotoUrl(urlData.publicUrl);
           }
           
+          // Brief delay to show loader with community image before navigating
+          await new Promise(resolve => setTimeout(resolve, 800));
           navigate(`/communities/${communitySlug}?welcome=true`, { replace: true });
           return;
         }
@@ -143,6 +145,8 @@ const AuthCallback = () => {
           setCommunityPhotoUrl(urlData.publicUrl);
         }
         
+        // Brief delay to show loader with community image before navigating
+        await new Promise(resolve => setTimeout(resolve, 800));
         navigate(`/communities/boca-bridges?welcome=true`, { replace: true });
         
       } catch (error) {
