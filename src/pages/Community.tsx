@@ -132,19 +132,21 @@ export default function Community() {
     ? (data?.reduce((sum, v) => sum + (v.hoa_rating || 0), 0) || 0) / ratedVendorsCount 
     : 0;
 
+  const seoTitle = communityName === "The Bridges" 
+    ? "The Bridges Community | Trusted Service Providers" 
+    : `${communityName} Overview`;
+
   const seoDescription = useMemo(() => {
     if (communityName === "The Bridges") {
-      return "Find trusted service providers recommended by The Bridges residents in Boca Raton. Pool service, landscaping, HVAC, and more - all vetted by your neighbors.";
-    } else if (communityName === "Boca Bridges") {
-      return "Boca Bridges' trusted vendor list. See which plumbers, electricians, landscapers, and contractors your neighbors recommend. Real reviews from real residents.";
+      return "Find home service providers recommended by The Bridges residents. Pool service, landscaping, HVAC repairs - all vetted by your neighbors.";
     }
-    return `Trusted service providers recommended by ${communityName} residents. View ratings, costs, and contact information.`;
+    return `Trusted vendors recommended by ${communityName} residents. View ratings, costs, and contact information.`;
   }, [communityName]);
 
   return (
     <main className="min-h-screen bg-background overflow-x-hidden">
       <SEO
-        title={communityName === "The Bridges" ? "The Bridges Service Provider List | Courtney's List" : pageTitle}
+        title={seoTitle}
         description={seoDescription}
         canonical={canonical}
       />

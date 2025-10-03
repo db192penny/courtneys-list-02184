@@ -4,16 +4,16 @@ type SEOProps = {
   title: string;
   description?: string;
   canonical?: string;
+  image?: string;
 };
 
-const SEO = ({ title, description, canonical }: SEOProps) => {
+const SEO = ({ title, description, canonical, image }: SEOProps) => {
   useEffect(() => {
     document.title = title;
 
+    // Regular meta description
     if (description) {
-      let meta = document.querySelector(
-        'meta[name="description"]'
-      ) as HTMLMetaElement | null;
+      let meta = document.querySelector('meta[name="description"]') as HTMLMetaElement | null;
       if (!meta) {
         meta = document.createElement("meta");
         meta.name = "description";
@@ -22,17 +22,26 @@ const SEO = ({ title, description, canonical }: SEOProps) => {
       meta.content = description;
     }
 
-    // Open Graph tags for social sharing
-    if (description) {
-      // OG Description
-      let ogDesc = document.querySelector('meta[property="og:description"]') as HTMLMetaElement | null;
-      if (!ogDesc) {
-        ogDesc = document.createElement("meta");
-        ogDesc.setAttribute("property", "og:description");
-        document.head.appendChild(ogDesc);
+    // Canonical URL
+    if (canonical) {
+      let link = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
+      if (!link) {
+        link = document.createElement("link");
+        link.rel = "canonical";
+        document.head.appendChild(link);
       }
-      ogDesc.content = description;
+      link.href = canonical;
     }
+
+    // Open Graph Tags
+    // OG URL
+    let ogUrl = document.querySelector('meta[property="og:url"]') as HTMLMetaElement | null;
+    if (!ogUrl) {
+      ogUrl = document.createElement("meta");
+      ogUrl.setAttribute("property", "og:url");
+      document.head.appendChild(ogUrl);
+    }
+    ogUrl.content = canonical || window.location.href;
 
     // OG Title
     let ogTitle = document.querySelector('meta[property="og:title"]') as HTMLMetaElement | null;
@@ -43,6 +52,17 @@ const SEO = ({ title, description, canonical }: SEOProps) => {
     }
     ogTitle.content = title;
 
+    // OG Description
+    if (description) {
+      let ogDesc = document.querySelector('meta[property="og:description"]') as HTMLMetaElement | null;
+      if (!ogDesc) {
+        ogDesc = document.createElement("meta");
+        ogDesc.setAttribute("property", "og:description");
+        document.head.appendChild(ogDesc);
+      }
+      ogDesc.content = description;
+    }
+
     // OG Type
     let ogType = document.querySelector('meta[property="og:type"]') as HTMLMetaElement | null;
     if (!ogType) {
@@ -52,29 +72,17 @@ const SEO = ({ title, description, canonical }: SEOProps) => {
     }
     ogType.content = "website";
 
-    // OG URL
-    if (canonical) {
-      let ogUrl = document.querySelector('meta[property="og:url"]') as HTMLMetaElement | null;
-      if (!ogUrl) {
-        ogUrl = document.createElement("meta");
-        ogUrl.setAttribute("property", "og:url");
-        document.head.appendChild(ogUrl);
+    // OG Image (optional)
+    if (image) {
+      let ogImage = document.querySelector('meta[property="og:image"]') as HTMLMetaElement | null;
+      if (!ogImage) {
+        ogImage = document.createElement("meta");
+        ogImage.setAttribute("property", "og:image");
+        document.head.appendChild(ogImage);
       }
-      ogUrl.content = canonical;
+      ogImage.content = image;
     }
-
-    if (canonical) {
-      let link = document.querySelector(
-        'link[rel="canonical"]'
-      ) as HTMLLinkElement | null;
-      if (!link) {
-        link = document.createElement("link");
-        link.rel = "canonical";
-        document.head.appendChild(link);
-      }
-      link.href = canonical;
-    }
-  }, [title, description, canonical]);
+  }, [title, description, canonical, image]);
 
   return null;
 };
