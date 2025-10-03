@@ -9,6 +9,7 @@ import CommunityVendorTable from "@/components/vendors/CommunityVendorTable";
 import { usePreviewSession } from "@/hooks/usePreviewSession";
 import EmailManagementPanel from "@/components/preview/EmailManagementPanel";
 import { useScrollDirection } from "@/hooks/useScrollDirection";
+import { BackToTopButton } from "@/components/ui/BackToTopButton";
 
 
 function slugToName(slug: string): string {
@@ -184,6 +185,9 @@ const CommunityPreview = () => {
         </div>
 
       </div>
+
+      {/* Back to Top Button */}
+      <BackToTopButton />
     </main>
   );
 };

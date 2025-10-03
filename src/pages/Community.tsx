@@ -12,6 +12,7 @@ import { useUserProfile } from "@/hooks/useUserProfile";
 import { useAuth } from "@/hooks/useAuth";
 import { WelcomeToolbar } from "@/components/WelcomeToolbar";
 import { useScrollDirection } from "@/hooks/useScrollDirection";
+import { BackToTopButton } from "@/components/ui/BackToTopButton";
 
 function slugToName(slug: string) {
   const cleaned = (slug || "")
@@ -171,6 +172,9 @@ export default function Community() {
           </div>
         )}
       </section>
+
+      {/* Back to Top Button */}
+      <BackToTopButton />
 
       {/* Sticky Join Now Bar - Bottom */}
       {showSignUpPrompt && (
