@@ -111,12 +111,26 @@ export default function Community() {
   const homesCount = (asset as any)?.total_homes ?? 500;
   const homesLabel = typeof homesCount === "number" ? homesCount.toLocaleString() : "500";
 
-  // Calculate stats from vendor data
+  // Fetch real community stats
+  const { data: communityStats } = useQuery({
+    queryKey: ["community-stats", communityName],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('get_community_stats', { _hoa_name: communityName });
+      if (error) throw error;
+      return data?.[0] || { total_reviews: 0, active_users: 0 };
+    },
+    enabled: !!communityName,
+  });
+
+  // Use real stats from database
+  const totalReviews = communityStats?.total_reviews || 0;
+  const activeUsers = communityStats?.active_users || 0;
+  
+  // Calculate average rating from vendor data
   const ratedVendorsCount = data?.filter(v => (v.hoa_rating_count || 0) > 0).length || 0;
   const avgRating = ratedVendorsCount > 0 
     ? (data?.reduce((sum, v) => sum + (v.hoa_rating || 0), 0) || 0) / ratedVendorsCount 
     : 0;
-  const activeNeighbors = data?.reduce((sum, v) => sum + (v.homes_serviced || 0), 0) || 0;
 
   return (
     <main className="min-h-screen bg-background overflow-x-hidden">
@@ -159,11 +173,11 @@ export default function Community() {
                     <div className="text-xs text-muted-foreground">Homes</div>
                   </div>
                   
-                  {/* Rated Vendors */}
+                  {/* Total Reviews */}
                   <div className="text-center">
                     <Star className="w-5 h-5 mx-auto mb-1 text-amber-500" />
-                    <div className="text-xl font-bold">{ratedVendorsCount}</div>
-                    <div className="text-xs text-muted-foreground">Rated</div>
+                    <div className="text-xl font-bold">{totalReviews}</div>
+                    <div className="text-xs text-muted-foreground">Reviews</div>
                   </div>
                   
                   {/* Average Rating */}
@@ -173,11 +187,11 @@ export default function Community() {
                     <div className="text-xs text-muted-foreground">Avg Rating</div>
                   </div>
                   
-                  {/* Active Neighbors */}
+                  {/* Active Users */}
                   <div className="text-center">
                     <Users className="w-5 h-5 mx-auto mb-1 text-purple-600" />
-                    <div className="text-xl font-bold">{activeNeighbors}</div>
-                    <div className="text-xs text-muted-foreground">Active</div>
+                    <div className="text-xl font-bold">{activeUsers}</div>
+                    <div className="text-xs text-muted-foreground">Members</div>
                   </div>
                 </div>
               </div>
