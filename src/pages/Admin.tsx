@@ -10,6 +10,7 @@ import { Link } from "react-router-dom";
 import { AdminQuickAccess } from "@/components/admin/AdminQuickAccess";
 import EmailTemplatePanel from "@/components/admin/EmailTemplatePanel";
 import WeeklyEmailSender from "@/components/admin/WeeklyEmailSender";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 
 interface PendingRow {
@@ -41,6 +42,8 @@ const [householdLoading, setHouseholdLoading] = useState<Record<string, boolean>
 
   // Community Branding state
   const [hoaName, setHoaName] = useState<string | null>(null);
+  const [availableCommunities, setAvailableCommunities] = useState<string[]>([]);
+  const [selectedCommunity, setSelectedCommunity] = useState<string | null>(null);
   const [brandingAddr, setBrandingAddr] = useState<string>("");
   const [brandingPhone, setBrandingPhone] = useState<string>("");
   const [brandingPhotoPath, setBrandingPhotoPath] = useState<string | null>(null);
@@ -72,10 +75,11 @@ const [householdLoading, setHouseholdLoading] = useState<Record<string, boolean>
   };
 
   const handleBrandingUpload = async (file: File) => {
-    if (!hoaName) return;
+    const community = selectedCommunity || hoaName;
+    if (!community) return;
     setBrandingUploading(true);
     const ext = file.name.split(".").pop() || "jpg";
-    const uploadPath = `${hoaName}/${Date.now()}.${ext}`;
+    const uploadPath = `${community}/${Date.now()}.${ext}`;
     const { error } = await supabase.storage.from("community-photos").upload(uploadPath, file, { upsert: true });
     if (error) {
       console.error("[Admin] upload branding photo error:", error);
@@ -90,13 +94,14 @@ const [householdLoading, setHouseholdLoading] = useState<Record<string, boolean>
   };
 
   const saveBranding = async () => {
-    if (!hoaName) return;
+    const community = selectedCommunity || hoaName;
+    if (!community) return;
     setBrandingSaving(true);
     try {
       const { data: existing, error: selErr } = await supabase
         .from("community_assets")
         .select("hoa_name")
-        .eq("hoa_name", hoaName)
+        .eq("hoa_name", community)
         .maybeSingle();
       if (selErr && (selErr as any).code !== "PGRST116") throw selErr;
 
@@ -111,13 +116,13 @@ const [householdLoading, setHouseholdLoading] = useState<Record<string, boolean>
             photo_path: brandingPhotoPath || null,
             total_homes: totalHomes === "" ? null : Number(totalHomes),
           })
-          .eq("hoa_name", hoaName);
+          .eq("hoa_name", community);
         opError = updErr;
       } else {
         const { error: insErr } = await supabase
           .from("community_assets")
           .insert({
-            hoa_name: hoaName,
+            hoa_name: community,
             address_line: brandingAddr || null,
             contact_phone: brandingPhone || null,
             photo_path: brandingPhotoPath || null,
@@ -170,7 +175,30 @@ const [householdLoading, setHouseholdLoading] = useState<Record<string, boolean>
           const hoa = (Array.isArray(myHoa) ? (myHoa as any[])[0]?.hoa_name : (myHoa as any)?.hoa_name) as string | undefined;
           if (hoa) {
             setHoaName(hoa);
+            setAvailableCommunities([hoa]);
+            setSelectedCommunity(hoa);
             await refreshBranding(hoa);
+          }
+        }
+      }
+      
+      // Fetch all communities for site admins
+      if (siteFlag) {
+        const { data: communitiesData } = await supabase
+          .from("household_hoa")
+          .select("hoa_name")
+          .order("hoa_name");
+        
+        if (communitiesData) {
+          const uniqueCommunities = Array.from(new Set(communitiesData.map(c => c.hoa_name)));
+          if (!cancelled) {
+            setAvailableCommunities(uniqueCommunities);
+            // If no HOA admin community set, default to first available
+            if (!hoaName && uniqueCommunities.length > 0) {
+              const firstCommunity = uniqueCommunities[0];
+              setSelectedCommunity(firstCommunity);
+              await refreshBranding(firstCommunity);
+            }
           }
         }
       }
@@ -479,10 +507,14 @@ const [householdLoading, setHouseholdLoading] = useState<Record<string, boolean>
                   </div>
 
                   <div className="flex gap-2">
-                    <Button onClick={saveBranding} disabled={brandingSaving || !hoaName}>
+                    <Button onClick={saveBranding} disabled={brandingSaving || !selectedCommunity}>
                       {brandingSaving ? "Saving…" : "Save Branding"}
                     </Button>
-                    <Button variant="secondary" onClick={() => hoaName && refreshBranding(hoaName)} disabled={!hoaName}>
+                    <Button 
+                      variant="secondary" 
+                      onClick={() => selectedCommunity && refreshBranding(selectedCommunity)} 
+                      disabled={!selectedCommunity}
+                    >
                       Refresh
                     </Button>
                   </div>
