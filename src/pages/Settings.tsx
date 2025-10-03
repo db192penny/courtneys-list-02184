@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import SEO from "@/components/SEO";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,42 +9,16 @@ import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import AddressChangeRequestModal from "@/components/profile/AddressChangeRequestModal";
 import { Settings as SettingsIcon, User, Home, LogOut } from "lucide-react";
+import { useUserData } from "@/hooks/useUserData";
 
 const Settings = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [showAddressChangeModal, setShowAddressChangeModal] = useState(false);
+  const { data: userData, isLoading: loading } = useUserData();
 
-  const [name, setName] = useState("");
-  const [address, setAddress] = useState("");
-
-  useEffect(() => {
-    let cancel = false;
-    (async () => {
-      const { data: auth } = await supabase.auth.getUser();
-      if (!auth.user) {
-        setLoading(false);
-        return;
-      }
-      const { data, error } = await supabase
-        .from("users")
-        .select("name, address")
-        .eq("id", auth.user.id)
-        .single();
-
-      if (error) {
-        console.warn("[Settings] load error:", error);
-      }
-      if (!cancel) {
-        setName(data?.name ?? "");
-        setAddress(data?.address ?? "");
-        setLoading(false);
-      }
-    })();
-    return () => { cancel = true; };
-  }, []);
+  const [name, setName] = useState(userData?.name || "");
 
   const onSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -129,11 +103,18 @@ const Settings = () => {
                   placeholder="Your name"
                 />
               </div>
+
+              <div className="space-y-2">
+                <Label>Community</Label>
+                <div className="p-3 bg-muted rounded-md text-sm min-h-[40px] flex items-center">
+                  {userData?.communityName || "No community assigned"}
+                </div>
+              </div>
               
               <div className="space-y-2">
                 <Label htmlFor="address">Current Address</Label>
                 <div className="p-3 bg-muted rounded-md text-sm min-h-[40px] flex items-center">
-                  {address || "No address on file"}
+                  {userData?.address || "No address on file"}
                 </div>
                 <Button 
                   type="button" 
@@ -214,7 +195,7 @@ const Settings = () => {
         <AddressChangeRequestModal
           open={showAddressChangeModal}
           onOpenChange={setShowAddressChangeModal}
-          currentAddress={address}
+          currentAddress={userData?.address || ""}
           onSuccess={handleAddressChangeSuccess}
         />
       </section>
