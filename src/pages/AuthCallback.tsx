@@ -7,7 +7,17 @@ import { useToast } from "@/hooks/use-toast";
 const AuthCallback = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const [communityName, setCommunityName] = useState<string>("");
+  
+  // Extract community name synchronously from URL to avoid flash
+  const contextParam = searchParams.get("context") || searchParams.get("community");
+  const initialCommunityName = contextParam
+    ? contextParam
+        .split('-')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ')
+    : "";
+  
+  const [communityName, setCommunityName] = useState<string>(initialCommunityName);
   const { toast } = useToast();
 
   useEffect(() => {
