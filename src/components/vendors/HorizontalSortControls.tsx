@@ -30,7 +30,7 @@ export const HorizontalSortControls: React.FC<HorizontalSortControlsProps> = ({
     },
     {
       key: 'homes',
-      label: 'Most Used',
+      label: 'Most Reviewed',
       icon: <Users className="h-4 w-4" />,
       description: 'Popular with neighbors'
     }
