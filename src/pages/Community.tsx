@@ -132,16 +132,27 @@ export default function Community() {
     ? (data?.reduce((sum, v) => sum + (v.hoa_rating || 0), 0) || 0) / ratedVendorsCount 
     : 0;
 
-  const seoTitle = communityName === "The Bridges" 
-    ? "The Bridges Community | Trusted Service Providers" 
-    : `${communityName} Overview`;
+  // Dynamic SEO based on community
+  const seoTitle = useMemo(() => {
+    if (slug === "the-bridges") {
+      return "The Bridges Community | Trusted Service Providers";
+    } else if (slug === "boca-bridges") {
+      return "Boca Bridges | Verified Vendor Recommendations";
+    }
+    return `${communityName} | Courtney's List`;
+  }, [slug, communityName]);
 
   const seoDescription = useMemo(() => {
-    if (communityName === "The Bridges") {
-      return "Find home service providers recommended by The Bridges residents. Pool service, landscaping, HVAC repairs - all vetted by your neighbors.";
+    if (slug === "the-bridges") {
+      return "Find home service providers recommended by The Bridges residents. Pool service, landscaping, HVAC repairs - all vetted by your neighbors in The Bridges community.";
+    } else if (slug === "boca-bridges") {
+      return "See which plumbers, HVAC, pool, pest, and landscapers your Boca Bridges neighbors actually use. Add your ratings and make homeownership less stressful.";
     }
     return `Trusted vendors recommended by ${communityName} residents. View ratings, costs, and contact information.`;
-  }, [communityName]);
+  }, [slug, communityName]);
+
+  // Add default image for social sharing
+  const seoImage = "https://www.courtneys-list.com/lovable-uploads/fa4d554f-323c-4bd2-b5aa-7cd1f2289c3c.png";
 
   return (
     <main className="min-h-screen bg-background overflow-x-hidden">
@@ -149,6 +160,7 @@ export default function Community() {
         title={seoTitle}
         description={seoDescription}
         canonical={canonical}
+        image={seoImage}
       />
 
       <section className="container pt-0 sm:py-10 pb-2 space-y-2 sm:space-y-6">
