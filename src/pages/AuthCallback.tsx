@@ -13,10 +13,37 @@ const AuthCallback = () => {
 
   useEffect(() => {
     const handleCallback = async () => {
-      // Define contextParam at the top so it's available in catch block
-      const contextParam = searchParams.get("context") || searchParams.get("community");
-      
-      try {
+        // Define contextParam at the top so it's available in catch block
+        const contextParam = searchParams.get("context") || searchParams.get("community");
+
+        // Prefetch community image from context so the loader shows the real photo immediately
+        if (contextParam) {
+          const displayFromContext = contextParam
+            .replace(/-/g, " ")
+            .trim()
+            .replace(/\b\w/g, (c) => c.toUpperCase());
+          setCommunityName(displayFromContext);
+          // Fire-and-forget prefetch (don't block auth flow)
+          void (async () => {
+            try {
+              const { data } = await supabase
+                .from("community_assets")
+                .select("photo_path")
+                .eq("hoa_name", displayFromContext)
+                .maybeSingle();
+              if (data?.photo_path) {
+                const { data: urlData } = supabase.storage
+                  .from("community-photos")
+                  .getPublicUrl(data.photo_path);
+                setCommunityPhotoUrl(urlData.publicUrl);
+              }
+            } catch (_) {
+              // ignore
+            }
+          })();
+        }
+        
+        try {
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
         if (sessionError) {
