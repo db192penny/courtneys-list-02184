@@ -96,15 +96,23 @@ const AuthCallback = () => {
 
         // User is valid - proceed with navigation
         if (existingUser.signup_source && existingUser.signup_source.startsWith("community:")) {
-          const userCommunity = existingUser.signup_source.replace("community:", "");
-          const communitySlug = userCommunity.toLowerCase().replace(/\s+/g, '-');
-          setCommunityName(userCommunity);
+          const rawCommunity = existingUser.signup_source.replace("community:", "");
+          // Normalize to display name (title case) and slug
+          const displayCommunity = rawCommunity
+            .replace(/-/g, " ")
+            .replace(/\s+/g, " ")
+            .trim()
+            .replace(/\b\w/g, (c) => c.toUpperCase());
+          const communitySlug = rawCommunity
+            .toLowerCase()
+            .replace(/\s+/g, '-');
+          setCommunityName(displayCommunity);
           
-          // Fetch community photo
+          // Fetch community photo by HOA name
           const { data: communityAssets } = await supabase
             .from("community_assets")
             .select("photo_path")
-            .eq("hoa_name", userCommunity)
+            .eq("hoa_name", displayCommunity)
             .maybeSingle();
           
           if (communityAssets?.photo_path) {
