@@ -1,7 +1,7 @@
 import { useMemo, useEffect, useState } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { Plus } from "lucide-react";
+import { Plus, UserPlus } from "lucide-react";
 import SEO from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import VendorCard from "@/components/vendors/VendorCard";
@@ -172,12 +172,12 @@ export default function Community() {
         )}
       </section>
 
-      {/* Sticky Request Access Bar - Bottom */}
+      {/* Sticky Join Now Bar - Bottom */}
       {showSignUpPrompt && (
-        <div className="fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 shadow-2xl shadow-purple-500/30">
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-r from-purple-600 via-purple-500 to-indigo-600 shadow-2xl shadow-purple-500/30">
           <div className="container py-3 sm:py-4 flex flex-col sm:flex-row items-center justify-between gap-2">
             <p className="text-sm sm:text-base font-semibold text-white text-center sm:text-left">
-              Join 150+ neighbors sharing reviews
+              Join 150+ {communityName} neighbors
             </p>
             <Button
               onClick={() => {
@@ -191,9 +191,10 @@ export default function Community() {
                 }
               }}
               size="sm"
-              className="bg-white text-purple-600 hover:bg-gray-100 font-bold px-6 shadow-lg"
+              className="bg-white text-purple-600 hover:bg-gray-100 font-bold px-6 shadow-lg flex items-center gap-2"
             >
-              Request Access
+              <UserPlus className="h-4 w-4" />
+              Join Now
             </Button>
           </div>
         </div>
