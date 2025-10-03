@@ -9,12 +9,15 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { User } from '@supabase/supabase-js';
+import { useUserData } from '@/hooks/useUserData';
+import { toSlug } from '@/utils/slug';
 
 export default function ActivityGuide() {
   const navigate = useNavigate();
   const { data: rewards = [] } = usePointRewards();
   const { toast } = useToast();
   const isMobile = useIsMobile();
+  const { data: userData } = useUserData();
   
   // Invite functionality state
   const [inviteUrl, setInviteUrl] = useState('');
@@ -79,8 +82,9 @@ export default function ActivityGuide() {
       if (error) throw error;
 
       const baseUrl = window.location.origin;
+      const communitySlug = toSlug(userData?.communityName || 'Boca Bridges');
       // FIXED: Include inviter parameter in URL
-      const url = `${baseUrl}/communities/boca-bridges?invite=${code}&inviter=${user.id}&welcome=true`;
+      const url = `${baseUrl}/communities/${communitySlug}?invite=${code}&inviter=${user.id}&welcome=true`;
       setInviteUrl(url);
 
       // Try to copy automatically
@@ -132,7 +136,10 @@ export default function ActivityGuide() {
       title: "Rate a Vendor",
       description: "Share your experience with a vendor (unique per vendor)",
       points: rewards.find(r => r.activity === "rate_vendor")?.points || 5,
-      action: () => navigate("/communities/boca-bridges"),
+      action: () => {
+        const communitySlug = toSlug(userData?.communityName || 'Boca Bridges');
+        navigate(`/communities/${communitySlug}`);
+      },
       buttonText: "Rate",
       buttonIcon: <ArrowRight className="w-4 h-4" />
     },
@@ -141,7 +148,10 @@ export default function ActivityGuide() {
       title: "Submit a New Vendor",
       description: "Add a new service provider to help your community",
       points: rewards.find(r => r.activity === "vendor_submission")?.points || 5,
-      action: () => navigate("/submit?community=Boca%20Bridges"),
+      action: () => {
+        const communityName = userData?.communityName || 'Boca Bridges';
+        navigate(`/submit?community=${encodeURIComponent(communityName)}`);
+      },
       buttonText: "Add",
       buttonIcon: <ArrowRight className="w-4 h-4" />
     }
