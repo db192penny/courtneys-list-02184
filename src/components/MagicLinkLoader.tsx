@@ -1,49 +1,50 @@
-import { useState, useEffect } from "react";
-import { Loader2 } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
 
 interface MagicLinkLoaderProps {
   communityName?: string;
 }
 
-export function MagicLinkLoader({ communityName }: MagicLinkLoaderProps = {}) {
-  const marketingMessages = [
-    "Finding you a reliable landscaper that doesn't ghost you",
-    "Running background checks faster than your neighbor runs rumor checks",
-    "Debugging your HOA problems, one contractor at a time",
-    "Optimizing your sanity with reliable service providers",
-    "Loading community insights..."
-  ];
+export function MagicLinkLoader({ communityName: propsCommunityName }: MagicLinkLoaderProps = {}) {
+  const [searchParams] = useSearchParams();
   
-  const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
+  // Extract from URL as fallback
+  const contextFromUrl = searchParams.get("context") || searchParams.get("community");
+  const urlCommunityName = contextFromUrl ? 
+    contextFromUrl.split('-')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ') 
+    : "";
   
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentMessageIndex((prev) => (prev + 1) % marketingMessages.length);
-    }, 2500); // Change message every 2.5 seconds
-    
-    return () => clearInterval(interval);
-  }, []);
+  // Use props first, then URL extraction, then default
+  const displayName = propsCommunityName || urlCommunityName || "Courtney's List";
+  
+  console.log("🎯 MagicLinkLoader Debug:");
+  console.log("- Props community name:", propsCommunityName);
+  console.log("- URL community name:", urlCommunityName);
+  console.log("- Final display name:", displayName);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-background">
-      <div className="text-center space-y-6 p-8">
-        {/* Logo or Brand Name */}
-        <h1 className="text-3xl font-bold text-primary mb-8">
-          {communityName ? `Hi ${communityName}!` : "Courtney's List"}
-        </h1>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 via-white to-accent-50">
+      <div className="text-center space-y-8 p-8">
+        <div className="relative">
+          <div className="w-24 h-24 mx-auto rounded-full bg-gradient-to-r from-primary-500 to-accent-500 animate-pulse" />
+          <div className="absolute inset-0 w-24 h-24 mx-auto rounded-full bg-gradient-to-r from-primary-500 to-accent-500 animate-ping opacity-30" />
+        </div>
         
-        {/* Spinner */}
-        <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto" />
+        <div className="space-y-3">
+          <h2 className="text-3xl font-bold text-gray-900">
+            Hi {displayName}!
+          </h2>
+          <p className="text-lg text-gray-600 animate-pulse">
+            Setting up your experience...
+          </p>
+        </div>
         
-        {/* Dynamic Message */}
-        <p className="text-lg text-foreground font-medium animate-pulse max-w-md">
-          {marketingMessages[currentMessageIndex]}
-        </p>
-        
-        {/* Subtle subtext */}
-        <p className="text-sm text-muted-foreground mt-4">
-          Authenticating your access...
-        </p>
+        <div className="flex justify-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-primary-500 animate-bounce" style={{ animationDelay: '0ms' }} />
+          <div className="w-2 h-2 rounded-full bg-primary-500 animate-bounce" style={{ animationDelay: '150ms' }} />
+          <div className="w-2 h-2 rounded-full bg-primary-500 animate-bounce" style={{ animationDelay: '300ms' }} />
+        </div>
       </div>
     </div>
   );

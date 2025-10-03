@@ -20,6 +20,12 @@ const AuthCallback = () => {
   const [communityName, setCommunityName] = useState<string>(initialCommunityName);
   const { toast } = useToast();
 
+  console.log("🔍 AuthCallback Debug:");
+  console.log("- URL search params:", searchParams.toString());
+  console.log("- Context param:", contextParam);
+  console.log("- Initial community name:", initialCommunityName);
+  console.log("- State community name:", communityName);
+
   useEffect(() => {
     const handleCallback = async () => {
       // Define contextParam at the top so it's available in catch block
