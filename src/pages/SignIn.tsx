@@ -54,7 +54,8 @@ const SignIn = () => {
     setResendLoading(true);
 
     try {
-      const redirectUrl = `${window.location.origin}/communities/boca-bridges?welcome=true`;
+      const communitySlug = community ? toSlug(community) : 'boca-bridges';
+      const redirectUrl = `${window.location.origin}/communities/${communitySlug}?welcome=true`;
       const { error: signInError } = await supabase.auth.signInWithOtp({
         email: targetEmail,
         options: { emailRedirectTo: redirectUrl },
@@ -97,7 +98,8 @@ const SignIn = () => {
       }
 
       if (statusResult === "approved") {
-        const redirectUrl = `${window.location.origin}/communities/boca-bridges?welcome=true`;
+        const communitySlug = community ? toSlug(community) : 'boca-bridges';
+        const redirectUrl = `${window.location.origin}/communities/${communitySlug}?welcome=true`;
         const { error: signInError } = await supabase.auth.signInWithOtp({
           email: targetEmail,
           options: { emailRedirectTo: redirectUrl },
