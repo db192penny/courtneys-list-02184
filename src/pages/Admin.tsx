@@ -443,7 +443,7 @@ const [householdLoading, setHouseholdLoading] = useState<Record<string, boolean>
               <h2 className="font-medium mb-3">Community Branding</h2>
               <p className="text-sm text-muted-foreground mb-4">Set your HOA's public photo and address shown on the community page.</p>
               
-              {availableCommunities.length > 1 && (
+              {isSiteAdmin && availableCommunities.length > 0 && (
                 <div className="grid gap-2 mb-4">
                   <Label htmlFor="community-select">Select Community</Label>
                   <Select
