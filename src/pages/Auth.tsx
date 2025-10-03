@@ -209,12 +209,12 @@ const Auth = () => {
     try {
       setLoading(true);
       
-      // MUST have community for signup
+      // Get community context
       const communityContext = communityName || 'boca-bridges';
       
-      // Double-check this is The Bridges
-      if (!communityContext.toLowerCase().includes('bridges') || 
-          communityContext.toLowerCase().includes('boca')) {
+      // Safety check - only allow for The Bridges
+      if (!communityContext.toLowerCase().includes('the-bridges') && 
+          !(communityContext.toLowerCase().includes('bridges') && !communityContext.toLowerCase().includes('boca'))) {
         toast({
           title: "Feature not available",
           description: "Google sign-up is currently only available for The Bridges community.",
