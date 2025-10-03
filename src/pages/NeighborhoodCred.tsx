@@ -17,27 +17,12 @@ import { Gift, Trophy } from "lucide-react";
 const NeighborhoodCred = () => {
   const [loading, setLoading] = useState(true);
   const [points, setPoints] = useState<number>(0);
-  const [reviewsThisMonth, setReviewsThisMonth] = useState<number>(0);
   
   const { data: badgeLevels = [] } = useBadgeLevels();
   const { data: isAdmin = false } = useIsAdmin();
   
   const currentBadge = getUserCurrentBadge(points, badgeLevels);
   const nextBadge = getUserNextBadge(points, badgeLevels);
-
-  // Calculate raffle entries based on total points
-  const calculateRaffleEntries = (totalPoints: number, reviews: number) => {
-    if (reviews === 0) return 0;
-    
-    const baseEntries = 1;
-    const multiplier = totalPoints >= 100 ? 5 : 
-                     totalPoints >= 50 ? 3 : 
-                     totalPoints >= 20 ? 2 : 1;
-    
-    return baseEntries * multiplier;
-  };
-
-  const raffleEntries = calculateRaffleEntries(points, reviewsThisMonth);
 
   useEffect(() => {
     let cancel = false;
@@ -55,20 +40,8 @@ const NeighborhoodCred = () => {
         .eq("id", auth.user.id)
         .single();
 
-      // Get reviews this month for raffle eligibility
-      const startOfMonth = new Date();
-      startOfMonth.setDate(1);
-      startOfMonth.setHours(0, 0, 0, 0);
-
-      const { data: reviewsData } = await supabase
-        .from("reviews")
-        .select("id")
-        .eq("user_id", auth.user.id)
-        .gte("created_at", startOfMonth.toISOString());
-
       if (!cancel) {
         setPoints(userData?.points ?? 0);
-        setReviewsThisMonth(reviewsData?.length ?? 0);
         setLoading(false);
       }
     })();
@@ -124,43 +97,13 @@ const NeighborhoodCred = () => {
                 />
               </div>
               
-              {points < 20 && (
-                <div className="text-sm text-muted-foreground">
-                  Need {pointsToStarbucks} more points: Invite a neighbor (10 pts) or leave reviews (5 pts each)
-                </div>
-              )}
-            </div>
-
-            {/* Service Raffle */}
-            <div className="space-y-3 pt-4 border-t">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="text-2xl">🎟️</div>
-                  <div>
-                    <h3 className="font-semibold">Service Raffle</h3>
-                    <p className="text-sm text-muted-foreground">$200 toward any community provider</p>
-                  </div>
-                </div>
-                {reviewsThisMonth > 0 ? (
-                  <div className="text-green-600 font-semibold">✅ Entered</div>
-                ) : (
-                  <div className="text-sm text-muted-foreground">Need 1 review</div>
-                )}
+            {points < 20 && (
+              <div className="text-sm text-muted-foreground">
+                Need {pointsToStarbucks} more points: Invite a neighbor (10 pts) or leave reviews (5 pts each)
               </div>
-              
-              {reviewsThisMonth > 0 && (
-                <div className="bg-blue-50 p-3 rounded-lg">
-                  <div className="text-sm">
-                    <div className="font-medium">Your Entries: {raffleEntries}</div>
-                    <div className="text-muted-foreground">
-                      Base entry (1) + {raffleEntries - 1}x multiplier from {points} total points
-                    </div>
-                  </div>
-                </div>
-              )}
-              
-            </div>
-          </CardContent>
+            )}
+          </div>
+        </CardContent>
         </Card>
 
         {/* Current Status Card */}
