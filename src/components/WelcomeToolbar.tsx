@@ -104,26 +104,26 @@ export function WelcomeToolbar({ communitySlug }: WelcomeToolbarProps) {
 
   return (
     <div 
-      className={`mb-6 transition-all duration-400 ease-out ${
+      className={`fixed bottom-4 left-4 right-4 sm:left-auto sm:right-8 sm:max-w-2xl sm:ml-auto z-50 transition-all duration-400 ease-out ${
         isExiting 
-          ? "opacity-0 transform translate-y-[-10px]" 
+          ? "opacity-0 transform translate-y-4" 
           : "opacity-100 transform translate-y-0 animate-fade-in"
       }`}
       role="status"
       aria-live="polite"
     >
-      <Alert className="border-green-500 bg-green-50 relative shadow-md">
-        <PartyPopper className="h-5 w-5 text-green-600" />
+      <Alert className="border-none bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 relative shadow-2xl shadow-purple-500/50">
+        <PartyPopper className="h-5 w-5 text-white" />
         <div className="pr-8">
-          <AlertDescription className="text-sm leading-relaxed text-green-900">
-            <strong>Welcome aboard!</strong> Start rating providers to help neighbors and for a limited time, three reviews will earn you points for a $10 Starbucks gift card - coffee on us!
+          <AlertDescription className="text-sm leading-relaxed text-white font-medium">
+            <strong className="font-bold">Welcome aboard!</strong> Start rating providers to help neighbors and for a limited time, three reviews will earn you points for a $10 Starbucks gift card - coffee on us!
           </AlertDescription>
         </div>
         <Button
           variant="ghost"
           size="sm"
           onClick={() => handleDismiss(true)}
-          className="absolute right-2 top-2 h-8 w-8 p-0 hover:bg-green-100 text-green-700 focus:ring-2 focus:ring-green-400"
+          className="absolute right-2 top-2 h-8 w-8 p-0 hover:bg-white/20 text-white focus:ring-2 focus:ring-white/40"
           aria-label="Dismiss welcome message"
         >
           <X className="h-4 w-4" />
