@@ -298,7 +298,7 @@ const [householdLoading, setHouseholdLoading] = useState<Record<string, boolean>
   return (
     <main className="min-h-screen bg-background">
       <SEO
-        title="Courtney’s List | Admin"
+        title="Courtney's List | Admin"
         description="Approve users and households; manage community access."
         canonical={canonical}
       />
@@ -310,7 +310,7 @@ const [householdLoading, setHouseholdLoading] = useState<Record<string, boolean>
         {loading && <p className="text-sm text-muted-foreground">Loading…</p>}
         {authed === false && <p className="text-sm text-muted-foreground">Please sign in to access admin tools.</p>}
         {authed && !isHoaAdmin && !isSiteAdmin && (
-          <p className="text-sm text-muted-foreground">You don’t have admin access.</p>
+          <p className="text-sm text-muted-foreground">You don't have admin access.</p>
         )}
 
         {authed && isSiteAdmin && (
@@ -441,15 +441,40 @@ const [householdLoading, setHouseholdLoading] = useState<Record<string, boolean>
 
             <div className="rounded-md border border-border p-4">
               <h2 className="font-medium mb-3">Community Branding</h2>
-              <p className="text-sm text-muted-foreground mb-4">Set your HOA’s public photo and address shown on the community page.</p>
-              {!hoaName ? (
+              <p className="text-sm text-muted-foreground mb-4">Set your HOA's public photo and address shown on the community page.</p>
+              
+              {availableCommunities.length > 1 && (
+                <div className="grid gap-2 mb-4">
+                  <Label htmlFor="community-select">Select Community</Label>
+                  <Select
+                    value={selectedCommunity || undefined}
+                    onValueChange={(value) => {
+                      setSelectedCommunity(value);
+                      refreshBranding(value);
+                    }}
+                  >
+                    <SelectTrigger id="community-select">
+                      <SelectValue placeholder="Choose a community..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableCommunities.map((community) => (
+                        <SelectItem key={community} value={community}>
+                          {community}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+              
+              {!selectedCommunity && !hoaName ? (
                 <p className="text-sm text-muted-foreground">Loading HOA info…</p>
               ) : (
                 <div className="grid gap-4">
                   <div className="flex items-center gap-4">
                     <img
                       src={brandingPhotoUrl || "/lovable-uploads/fa4d554f-323c-4bd2-b5aa-7cd1f2289c3c.png"}
-                      alt={`${hoaName} community photo`}
+                      alt={`${selectedCommunity || hoaName} community photo`}
                       className="h-16 w-16 rounded-md object-cover border"
                       loading="lazy"
                     />
@@ -465,7 +490,7 @@ const [householdLoading, setHouseholdLoading] = useState<Record<string, boolean>
                         }}
                         disabled={brandingUploading}
                       />
-                      <p className="text-xs text-muted-foreground">First upload stores to “{hoaName}/…” in the community-photos bucket.</p>
+                      <p className="text-xs text-muted-foreground">First upload stores to "{selectedCommunity || hoaName}/…" in the community-photos bucket.</p>
                     </div>
                   </div>
 
