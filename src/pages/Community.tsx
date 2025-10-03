@@ -143,30 +143,6 @@ export default function Community() {
                     )}
                  </div>
 
-                {/* For logged out users - compact call to action */}
-                {showSignUpPrompt && (
-                  <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg py-2 px-4 text-center text-white mb-2">
-                    <p className="text-sm font-medium mb-1">
-                      Join 150+ neighbors sharing reviews
-                    </p>
-                    <Button
-                      onClick={() => {
-                        const inviteCode = localStorage.getItem('pending_invite_code');
-                        const inviterId = localStorage.getItem('pending_inviter_id');
-                        
-                        if (inviteCode && inviterId) {
-                          navigate(`/auth?community=${communityName}&invite=${inviteCode}&inviter=${inviterId}`);
-                        } else {
-                          navigate(`/auth?community=${communityName}`);
-                        }
-                      }}
-                      size="sm"
-                      className="bg-white text-blue-600 hover:bg-gray-100 font-semibold px-5"
-                    >
-                      Request Access
-                    </Button>
-                  </div>
-                )}
 
                 {/* For logged in users - no actions needed, removed submit provider button */}
               </div>
@@ -195,6 +171,33 @@ export default function Community() {
           </div>
         )}
       </section>
+
+      {/* Sticky Request Access Bar - Bottom */}
+      {showSignUpPrompt && (
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 shadow-2xl shadow-purple-500/30">
+          <div className="container py-3 sm:py-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+            <p className="text-sm sm:text-base font-semibold text-white text-center sm:text-left">
+              Join 150+ neighbors sharing reviews
+            </p>
+            <Button
+              onClick={() => {
+                const inviteCode = localStorage.getItem('pending_invite_code');
+                const inviterId = localStorage.getItem('pending_inviter_id');
+                
+                if (inviteCode && inviterId) {
+                  navigate(`/auth?community=${communityName}&invite=${inviteCode}&inviter=${inviterId}`);
+                } else {
+                  navigate(`/auth?community=${communityName}`);
+                }
+              }}
+              size="sm"
+              className="bg-white text-purple-600 hover:bg-gray-100 font-bold px-6 shadow-lg"
+            >
+              Request Access
+            </Button>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
