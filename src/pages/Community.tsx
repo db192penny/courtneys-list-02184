@@ -1,7 +1,8 @@
 import { useMemo, useEffect, useState } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { Plus, UserPlus } from "lucide-react";
+import { Plus, UserPlus, Home, Star, TrendingUp, Users } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import SEO from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import VendorCard from "@/components/vendors/VendorCard";
@@ -110,6 +111,13 @@ export default function Community() {
   const homesCount = (asset as any)?.total_homes ?? 500;
   const homesLabel = typeof homesCount === "number" ? homesCount.toLocaleString() : "500";
 
+  // Calculate stats from vendor data
+  const ratedVendorsCount = data?.filter(v => (v.hoa_rating_count || 0) > 0).length || 0;
+  const avgRating = ratedVendorsCount > 0 
+    ? (data?.reduce((sum, v) => sum + (v.hoa_rating || 0), 0) || 0) / ratedVendorsCount 
+    : 0;
+  const activeNeighbors = data?.reduce((sum, v) => sum + (v.homes_serviced || 0), 0) || 0;
+
   return (
     <main className="min-h-screen bg-background overflow-x-hidden">
       <SEO
@@ -122,6 +130,61 @@ export default function Community() {
         {/* Welcome toolbar for new users */}
         <WelcomeToolbar communitySlug={slug} />
         
+        {/* Hero Card - Desktop/Tablet Only */}
+        <div className="hidden md:block mb-6">
+          <Card className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 border-none shadow-md">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-6">
+                {/* Community Logo */}
+                <div className="flex-shrink-0">
+                  <img
+                    src={photoUrl}
+                    alt={`${communityName} logo`}
+                    className="w-16 h-16 rounded-full object-cover border-2 border-white shadow-lg"
+                  />
+                </div>
+                
+                {/* Community Info */}
+                <div className="flex-1">
+                  <h1 className="text-2xl font-bold text-foreground mb-1">{communityName}</h1>
+                  <p className="text-sm text-muted-foreground">Neighbor-recommended service providers</p>
+                </div>
+                
+                {/* Stats Grid */}
+                <div className="grid grid-cols-4 gap-6">
+                  {/* Total Homes */}
+                  <div className="text-center">
+                    <Home className="w-5 h-5 mx-auto mb-1 text-blue-600" />
+                    <div className="text-xl font-bold">{homesLabel}</div>
+                    <div className="text-xs text-muted-foreground">Homes</div>
+                  </div>
+                  
+                  {/* Rated Vendors */}
+                  <div className="text-center">
+                    <Star className="w-5 h-5 mx-auto mb-1 text-amber-500" />
+                    <div className="text-xl font-bold">{ratedVendorsCount}</div>
+                    <div className="text-xs text-muted-foreground">Rated</div>
+                  </div>
+                  
+                  {/* Average Rating */}
+                  <div className="text-center">
+                    <TrendingUp className="w-5 h-5 mx-auto mb-1 text-green-600" />
+                    <div className="text-xl font-bold">{avgRating > 0 ? `${avgRating.toFixed(1)}★` : '-'}</div>
+                    <div className="text-xs text-muted-foreground">Avg Rating</div>
+                  </div>
+                  
+                  {/* Active Neighbors */}
+                  <div className="text-center">
+                    <Users className="w-5 h-5 mx-auto mb-1 text-purple-600" />
+                    <div className="text-xl font-bold">{activeNeighbors}</div>
+                    <div className="text-xs text-muted-foreground">Active</div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
         {/* Sticky Community Header */}
         <div className={`sticky ${hideHeader ? 'top-0 sm:top-2' : 'top-8 sm:top-14'} z-40 backdrop-blur-md bg-background/95 border-b border-border/40 shadow-sm transition-transform duration-300 ease-in-out -mx-4 sm:mx-0 px-4 sm:px-0 pb-1.5 sm:py-4 ${isScrollingDown ? '-translate-y-full' : 'translate-y-0'}`}>
           <header className="space-y-4">

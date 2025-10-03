@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import SEO from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import CommunityVendorTable from "@/components/vendors/CommunityVendorTable";
 import { usePreviewSession } from "@/hooks/usePreviewSession";
@@ -131,13 +132,35 @@ const CommunityPreview = () => {
       </div>
 
       <div className="container py-8 space-y-8">
-        {/* Logo and Header with Text Overlay */}
+        {/* Hero Card - Desktop/Tablet Only */}
         {!hideHeader && (
-          <header className="text-center space-y-4">
-            <p className="text-muted-foreground">
-              Neighbor-recommended service providers
-            </p>
-          </header>
+          <div className="hidden md:block">
+            <Card className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 border-none shadow-md">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-6">
+                  {/* Community Logo */}
+                  <div className="flex-shrink-0">
+                    <img
+                      src={photoUrl}
+                      alt={`${communityName} logo`}
+                      className="w-16 h-16 rounded-full object-cover border-2 border-white shadow-lg"
+                    />
+                  </div>
+                  
+                  {/* Community Info */}
+                  <div className="flex-1">
+                    <h1 className="text-2xl font-bold text-foreground mb-1">{communityName}</h1>
+                    <p className="text-sm text-muted-foreground">Early preview - Help us rate these providers</p>
+                  </div>
+                  
+                  {/* Preview badge instead of stats */}
+                  <div className="px-4 py-2 bg-primary/10 rounded-lg border border-primary/20">
+                    <p className="text-sm font-medium text-primary">Preview Mode</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         )}
 
         {/* Community Info */}
