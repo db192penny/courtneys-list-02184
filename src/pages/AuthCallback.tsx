@@ -15,6 +15,15 @@ const AuthCallback = () => {
       // Define contextParam at the top so it's available in catch block
       const contextParam = searchParams.get("context") || searchParams.get("community");
       
+      // SET COMMUNITY NAME IMMEDIATELY for the loader
+      if (contextParam) {
+        const displayName = contextParam
+          .split('-')
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(' ');
+        setCommunityName(displayName);
+      }
+      
       try {
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
