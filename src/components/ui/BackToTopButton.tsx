@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ChevronUp } from "lucide-react";
+import { ArrowUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface BackToTopButtonProps {
@@ -31,10 +31,10 @@ export function BackToTopButton({ threshold = 800 }: BackToTopButtonProps) {
     <Button
       onClick={scrollToTop}
       size="icon"
-      className="fixed bottom-20 right-4 z-50 h-12 w-12 rounded-full bg-gradient-to-r from-cta-primary to-cta-primary-glow text-white shadow-lg transition-all duration-300 hover:scale-110 hover:shadow-xl hover:shadow-cta-primary/50 animate-fade-in"
+      className="fixed bottom-24 right-4 z-50 h-12 w-12 rounded-full bg-gradient-to-r from-cta-primary to-cta-primary-glow text-white shadow-lg transition-all duration-300 hover:scale-110 hover:shadow-xl hover:shadow-cta-primary/50 animate-fade-in"
       aria-label="Back to top"
     >
-      <ChevronUp className="h-5 w-5" />
+      <ArrowUp className="h-6 w-6" />
     </Button>
   );
 }
