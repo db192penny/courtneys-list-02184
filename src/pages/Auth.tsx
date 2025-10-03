@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Info, Crown, PartyPopper, ArrowLeft, Mail, AlertTriangle, Loader2 } from "lucide-react";
+import { Info, Crown, PartyPopper, ArrowLeft, Mail, AlertTriangle, Loader2, Sparkles } from "lucide-react";
 import { handleSignupInvite } from '@/lib/handle-signup-invite';
 import { MagicLinkLoader } from "@/components/MagicLinkLoader";
 import { WelcomeBackModal } from "@/components/WelcomeBackModal";
@@ -465,8 +465,9 @@ const Auth = () => {
                 </Select>
               </div>
 
-              <Button type="submit" size="lg" className="w-full">
-                Request Access
+              <Button type="submit" size="lg" className="w-full flex items-center justify-center gap-2">
+                <Sparkles className="h-4 w-4" />
+                I'm VIP - Let Me In!
               </Button>
 
               <p className="text-xs text-muted-foreground text-center">* Required fields</p>
