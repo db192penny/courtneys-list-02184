@@ -161,7 +161,7 @@ export default function Community() {
                 {/* Community Info */}
                 <div className="flex-1">
                   <h1 className="text-2xl font-bold text-foreground mb-1">{communityName}</h1>
-                  <p className="text-sm text-muted-foreground">Neighbor-recommended service providers</p>
+                  <p className="text-sm text-muted-foreground">{addressLine || 'Trusted local service providers'}</p>
                 </div>
                 
                 {/* Stats Grid - Responsive */}
