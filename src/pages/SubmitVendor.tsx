@@ -502,7 +502,7 @@ const SubmitVendor = () => {
 
     // Navigate back to the community page with the category
     const communitySlug = toSlug(communityParam);
-    navigate(`/pool/${communitySlug}?category=${category}`);
+    navigate(`/communities/${communitySlug}?category=${category}`);
   };
 
   return (
