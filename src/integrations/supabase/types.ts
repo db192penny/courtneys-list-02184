@@ -293,7 +293,7 @@ export type Database = {
           admin_modified: boolean | null
           admin_modified_at: string | null
           admin_modified_by: string | null
-          amount: number
+          amount: number | null
           anonymous: boolean
           cost_kind: string | null
           created_at: string
@@ -315,7 +315,7 @@ export type Database = {
           admin_modified?: boolean | null
           admin_modified_at?: string | null
           admin_modified_by?: string | null
-          amount: number
+          amount?: number | null
           anonymous?: boolean
           cost_kind?: string | null
           created_at?: string
@@ -337,7 +337,7 @@ export type Database = {
           admin_modified?: boolean | null
           admin_modified_at?: string | null
           admin_modified_by?: string | null
-          amount?: number
+          amount?: number | null
           anonymous?: boolean
           cost_kind?: string | null
           created_at?: string
@@ -549,7 +549,7 @@ export type Database = {
       }
       preview_costs: {
         Row: {
-          amount: number
+          amount: number | null
           anonymous: boolean
           cost_kind: string | null
           created_at: string
@@ -564,7 +564,7 @@ export type Database = {
           vendor_id: string
         }
         Insert: {
-          amount: number
+          amount?: number | null
           anonymous?: boolean
           cost_kind?: string | null
           created_at?: string
@@ -579,7 +579,7 @@ export type Database = {
           vendor_id: string
         }
         Update: {
-          amount?: number
+          amount?: number | null
           anonymous?: boolean
           cost_kind?: string | null
           created_at?: string
@@ -760,6 +760,76 @@ export type Database = {
         }
         Relationships: []
       }
+      rating_history: {
+        Row: {
+          change_type: string
+          changed_at: string
+          id: string
+          new_comments: string | null
+          new_rating: number
+          old_comments: string | null
+          old_rating: number | null
+          review_id: string | null
+          user_email: string | null
+          user_id: string | null
+          vendor_category: string | null
+          vendor_id: string | null
+          vendor_name: string | null
+        }
+        Insert: {
+          change_type: string
+          changed_at?: string
+          id?: string
+          new_comments?: string | null
+          new_rating: number
+          old_comments?: string | null
+          old_rating?: number | null
+          review_id?: string | null
+          user_email?: string | null
+          user_id?: string | null
+          vendor_category?: string | null
+          vendor_id?: string | null
+          vendor_name?: string | null
+        }
+        Update: {
+          change_type?: string
+          changed_at?: string
+          id?: string
+          new_comments?: string | null
+          new_rating?: number
+          old_comments?: string | null
+          old_rating?: number | null
+          review_id?: string | null
+          user_email?: string | null
+          user_id?: string | null
+          vendor_category?: string | null
+          vendor_id?: string | null
+          vendor_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rating_history_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rating_history_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rating_history_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reviews: {
         Row: {
           anonymous: boolean
@@ -832,6 +902,30 @@ export type Database = {
           inviter_id?: string | null
           used_at?: string | null
           used_by?: string | null
+        }
+        Relationships: []
+      }
+      street_name_fix_backup: {
+        Row: {
+          address: string | null
+          email: string | null
+          id: string | null
+          name: string | null
+          street_name: string | null
+        }
+        Insert: {
+          address?: string | null
+          email?: string | null
+          id?: string | null
+          name?: string | null
+          street_name?: string | null
+        }
+        Update: {
+          address?: string | null
+          email?: string | null
+          id?: string | null
+          name?: string | null
+          street_name?: string | null
         }
         Relationships: []
       }
@@ -1030,7 +1124,6 @@ export type Database = {
           google_place_id: string | null
           id: string
           invited_by: string | null
-          is_anonymous: boolean | null
           is_verified: boolean | null
           name: string | null
           pending_invite_code: string | null
@@ -1050,7 +1143,6 @@ export type Database = {
           google_place_id?: string | null
           id?: string
           invited_by?: string | null
-          is_anonymous?: boolean | null
           is_verified?: boolean | null
           name?: string | null
           pending_invite_code?: string | null
@@ -1070,7 +1162,6 @@ export type Database = {
           google_place_id?: string | null
           id?: string
           invited_by?: string | null
-          is_anonymous?: boolean | null
           is_verified?: boolean | null
           name?: string | null
           pending_invite_code?: string | null
@@ -1184,7 +1275,19 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      weekly_rating_changes: {
+        Row: {
+          avg_change: number | null
+          avg_rating: number | null
+          downgrades: number | null
+          new_ratings: number | null
+          total_changes: number | null
+          upgrades: number | null
+          vendor_category: string | null
+          vendor_name: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       admin_approve_household: {
@@ -1388,11 +1491,32 @@ export type Database = {
           unique_users: number
         }[]
       }
+      get_category_summary_simple: {
+        Args: { p_category: string; p_community?: string }
+        Returns: string
+      }
       get_community_leaderboard: {
         Args: { _community_name: string; _limit?: number }
         Returns: {
           name: string
           points: number
+        }[]
+      }
+      get_community_rating_movements: {
+        Args: { _days?: number; _hoa_name: string }
+        Returns: {
+          avg_rating: number
+          category: string
+          count: number
+          movement_type: string
+          vendor_name: string
+        }[]
+      }
+      get_community_stats: {
+        Args: { _hoa_name: string }
+        Returns: {
+          active_users: number
+          total_reviews: number
         }[]
       }
       get_email_status: {
@@ -1419,6 +1543,13 @@ export type Database = {
           points: number
           rank_position: number
           total_users: number
+        }[]
+      }
+      get_weekly_email_recipients: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          email: string
+          name: string
         }[]
       }
       has_role: {
@@ -1464,7 +1595,16 @@ export type Database = {
       list_vendor_reviews: {
         Args: { _vendor_id: string }
         Returns: {
-          anonymous: boolean
+          author_label: string
+          comments: string
+          created_at: string
+          id: string
+          rating: number
+        }[]
+      }
+      list_vendor_reviews_preview: {
+        Args: { _vendor_id: string }
+        Returns: {
           author_label: string
           comments: string
           created_at: string
