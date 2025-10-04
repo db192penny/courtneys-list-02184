@@ -272,7 +272,7 @@ export function NeighborReviewPreview({
         <div className="flex items-center justify-center gap-2">
           <span className="text-2xl">👀</span>
           <span className="text-sm font-bold text-blue-900">
-            {totalReviews > 1 ? `View all ${totalReviews} reviews` : 'View full review'}
+            {totalReviews === 1 ? 'Read this review' : `Read all ${totalReviews} reviews`}
           </span>
           <span className="text-blue-800">→</span>
         </div>

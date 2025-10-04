@@ -256,7 +256,7 @@ export default function VendorMobileCard({
               setIsReviewsModalOpen(true);
             }}
           >
-            📝 Reviews ({vendor.hoa_rating_count || 0})
+            📝 All Reviews ({vendor.hoa_rating_count || 0})
           </Button>
 
           {/* Costs Button */}
