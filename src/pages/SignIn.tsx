@@ -26,24 +26,39 @@ const SignIn = () => {
   const community = searchParams.get("community");
 
   useEffect(() => {
-    // Redirect to Boca Bridges if no community parameter in URL
+    // Don't auto-redirect if we have a valid community
     if (!community) {
-      console.log('⚠️ No community in signin URL, redirecting to Boca Bridges');
-      navigate('/communities/boca-bridges', { replace: true });
+      // Try to detect community from referrer or default to the-bridges
+      const referrer = document.referrer;
+      if (referrer.includes('/communities/the-bridges')) {
+        navigate('/signin?community=the-bridges', { replace: true });
+      } else if (referrer.includes('/communities/boca-bridges')) {
+        navigate('/signin?community=boca-bridges', { replace: true });
+      } else {
+        // Default to The Bridges instead of Boca Bridges
+        navigate('/signin?community=the-bridges', { replace: true });
+      }
     }
   }, [community, navigate]);
   const communityName = community ? community.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : null;
 
   const handleBack = () => {
-    // Try to go back in history first
-    if (window.history.length > 1) {
-      navigate(-1);
+    // Check if we have a community parameter
+    if (community) {
+      // Always go to the correct community page
+      const communitySlug = community.toLowerCase();
+      navigate(`/communities/${communitySlug}`, { replace: true });
     } else {
-      // Fallback to community page or home
-      const fallbackUrl = community 
-        ? `/communities/${toSlug(community)}`
-        : "/communities/boca-bridges";
-      navigate(fallbackUrl);
+      // Try to detect from browser history or use The Bridges as default
+      if (window.history.length > 1 && document.referrer) {
+        if (document.referrer.includes('/communities/')) {
+          navigate(-1);
+        } else {
+          navigate('/communities/the-bridges', { replace: true });
+        }
+      } else {
+        navigate('/communities/the-bridges', { replace: true });
+      }
     }
   };
 
