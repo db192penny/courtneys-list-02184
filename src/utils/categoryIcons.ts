@@ -28,6 +28,7 @@ import {
   Sprout,
   Square,
   Tv,
+  Plug,
   LucideIcon 
 } from "lucide-react";
 import { Category } from "@/data/categories";
@@ -35,7 +36,7 @@ import { Category } from "@/data/categories";
 export const categoryIconMap: Record<Category, LucideIcon> = {
   "Pool": Waves,
   "HVAC": Thermometer,
-  "Electrician": Zap,
+  "Electrician": Plug,
   "Grill Cleaning": Flame,
   "Plumbing": Droplets,
   "Painters": PaintBucket,
