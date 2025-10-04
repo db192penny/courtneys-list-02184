@@ -54,14 +54,12 @@ const Dashboard = () => {
       <section className="container py-10">
         <header className="mb-8">
           <h1 className="text-3xl font-bold tracking-tight">Vendor Dashboard</h1>
-          {!loading && !isVerified && (
+          {!loading && (
             <p className="text-muted-foreground mt-2">
-              Submit your first trusted vendor to unlock full access.
-            </p>
-          )}
-          {!loading && isVerified && (
-            <p className="text-muted-foreground mt-2">
-              Full access unlocked. Thanks for contributing! Submissions: {submissionsCount}. Points: {points}.
+              {points === 0 
+                ? "Start contributing to earn points and unlock rewards! 🎯"
+                : `You've earned ${points} points through ${submissionsCount} contributions! Keep going! 🌟`
+              }
             </p>
           )}
         </header>

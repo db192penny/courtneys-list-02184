@@ -351,9 +351,22 @@ const SubmitVendor = () => {
         }
       }
 
+      // Calculate Starbucks progress
+      const { data: currentUser } = await supabase
+        .from("users")
+        .select("points")
+        .eq("id", userId)
+        .single();
+      
+      const currentPoints = currentUser?.points ?? 0;
+      const newPointsTotal = currentPoints + 5;
+      const pointsToStarbucks = Math.max(20 - newPointsTotal, 0);
+
       toast({ 
-        title: "🎉 Review Added!", 
-        description: "You earned 5 points! Help neighbors with more reviews!" 
+        title: "🎉 Review Added! +5 Points", 
+        description: pointsToStarbucks > 0 
+          ? `${pointsToStarbucks} more points until your free Starbucks! ☕ Keep reviewing!`
+          : "You've earned your Starbucks reward! Check your Neighborhood Cred page! 🎉☕"
       });
       navigate("/dashboard");
       return;
@@ -497,7 +510,7 @@ const SubmitVendor = () => {
     // DB trigger will mark the user as verified and increment submission count
     toast({
       title: "🎉 Provider Submitted!",
-      description: "You earned 5 points! Thanks for contributing - your full access should be unlocked now.",
+      description: "You earned 5 points! Keep contributing to level up your badge and earn rewards! ☕",
     });
 
     // Navigate back to the community page with the category

@@ -116,7 +116,7 @@ export function WelcomeToolbar({ communitySlug }: WelcomeToolbarProps) {
         <PartyPopper className="h-5 w-5 text-green-600" />
         <div className="pr-8">
           <AlertDescription className="text-sm leading-relaxed text-green-900">
-            <strong>Welcome aboard!</strong> Start rating providers to help neighbors and for a limited time, three reviews will earn you points for a $10 Starbucks gift card - coffee on us!
+            <strong>Welcome aboard!</strong> Start rating providers to help neighbors and earn points! Just 20 points gets you a $10 Starbucks gift card - coffee on us! ☕
           </AlertDescription>
         </div>
         <Button
