@@ -264,23 +264,32 @@ export default function Community() {
             <p className="text-sm sm:text-base font-semibold text-white text-center sm:text-left">
               Join 150+ {communityName} neighbors
             </p>
-            <Button
-              onClick={() => {
-                const inviteCode = localStorage.getItem('pending_invite_code');
-                const inviterId = localStorage.getItem('pending_inviter_id');
-                
-                if (inviteCode && inviterId) {
-                  navigate(`/auth?community=${communityName}&invite=${inviteCode}&inviter=${inviterId}`);
-                } else {
-                  navigate(`/auth?community=${communityName}`);
-                }
-              }}
-              size="sm"
-              className="bg-white text-blue-600 hover:bg-gray-100 font-bold px-6 shadow-lg flex items-center gap-2"
-            >
-              <UserPlus className="h-4 w-4" />
-              Request Access
-            </Button>
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => navigate('/sign-in')}
+                className="text-white/90 hover:text-white text-sm underline underline-offset-4 hidden sm:inline transition-colors"
+              >
+                Already a member? Sign in
+              </button>
+              <Button
+                onClick={() => {
+                  const inviteCode = localStorage.getItem('pending_invite_code');
+                  const inviterId = localStorage.getItem('pending_inviter_id');
+                  
+                  if (inviteCode && inviterId) {
+                    navigate(`/auth?community=${communityName}&invite=${inviteCode}&inviter=${inviterId}`);
+                  } else {
+                    navigate(`/auth?community=${communityName}`);
+                  }
+                }}
+                size="sm"
+                variant="cta"
+                className="font-bold px-6 shadow-lg flex items-center gap-2"
+              >
+                <UserPlus className="h-4 w-4" />
+                Request Access
+              </Button>
+            </div>
           </div>
         </div>
       )}
