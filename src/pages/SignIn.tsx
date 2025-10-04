@@ -100,12 +100,11 @@ const SignIn = () => {
       // Get community context
       const communityContext = community || "";
       
-      // Safety check - only allow for The Bridges
-      if (!communityContext.toLowerCase().includes('the-bridges') && 
-          !(communityContext.toLowerCase().includes('bridges') && !communityContext.toLowerCase().includes('boca'))) {
+      // Allow Google OAuth for all Bridges communities
+      if (!communityContext.toLowerCase().includes('bridges')) {
         toast({
           title: "Feature not available",
-          description: "Google sign-in is currently only available for The Bridges community.",
+          description: "Google sign-in is currently only available for Bridges communities.",
           variant: "destructive"
         });
         setLoading(false);
