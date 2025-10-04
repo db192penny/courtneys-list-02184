@@ -64,8 +64,7 @@ export function MobileGoogleReviewsModal({
 
   return (
     <div className="p-4">
-      <div className="flex items-center justify-between mb-4">
-        <h4 className="text-sm font-medium">Google Reviews</h4>
+      <div className="flex items-center justify-end mb-4">
         <Button
           size="sm"
           variant="ghost"
