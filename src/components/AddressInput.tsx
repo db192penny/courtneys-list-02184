@@ -68,6 +68,7 @@ export default function AddressInput({
   const inputRef = useRef<HTMLInputElement | null>(null);
   const autocompleteRef = useRef<any>(null);
   const onSelectedRef = useRef<AddressInputProps["onSelected"]>();
+  const typedInputRef = useRef<string>(""); // Store user's typed input
   onSelectedRef.current = onSelected;
 
   const initAutocomplete = useCallback(async () => {
@@ -87,6 +88,12 @@ export default function AddressInput({
         input.placeholder = placeholder;
         input.className = "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50";
         if (defaultValue) input.value = defaultValue;
+        
+        // Capture user's typed input before Google processes it
+        input.addEventListener("input", () => {
+          typedInputRef.current = input.value;
+        });
+        
         containerRef.current.innerHTML = "";
         containerRef.current.appendChild(input);
         inputRef.current = input;
@@ -141,7 +148,32 @@ export default function AddressInput({
             const comps = place.address_components || [];
             const formatted = place.formatted_address || "";
             const { oneLine, parts } = toOneLineFromFlexible(comps);
-            const normalizedAddress = normalizeLowerTrim(oneLine || formatted);
+            
+            // Validate street number presence
+            let finalFormattedAddress = formatted || oneLine;
+            const hasStreetNumber = /^\d+/.test(finalFormattedAddress.trim());
+            
+            if (!hasStreetNumber) {
+              // Try to extract street number from what user typed
+              const typedInput = typedInputRef.current || "";
+              const typedNumberMatch = typedInput.match(/^\d+/);
+              
+              if (typedNumberMatch) {
+                // Prepend the typed number to the Google-returned address
+                finalFormattedAddress = `${typedNumberMatch[0]} ${finalFormattedAddress}`;
+                console.log("[AddressInput] Prepended street number from typed input:", finalFormattedAddress);
+              } else {
+                // No street number found anywhere - reject this address
+                console.warn("[AddressInput] No street number found in address");
+                setHelper("Please select an address that includes your house/building number");
+                if (inputRef.current) {
+                  inputRef.current.value = "";
+                }
+                return;
+              }
+            }
+            
+            const normalizedAddress = normalizeLowerTrim(oneLine || finalFormattedAddress);
 
             const loc = place.geometry?.location;
             let lat: number | null = null;
@@ -153,7 +185,7 @@ export default function AddressInput({
 
             const payload: AddressSelectedPayload = {
               household_address: normalizedAddress,
-              formatted_address: formatted || oneLine,
+              formatted_address: finalFormattedAddress,
               place_id: place.place_id,
               components: { parts, raw: comps },
               location: { lat, lng },
@@ -164,7 +196,7 @@ export default function AddressInput({
 
             // Keep the selected value visible in the field
             if (inputRef.current) {
-              inputRef.current.value = payload.formatted_address || payload.household_address;
+              inputRef.current.value = finalFormattedAddress;
             }
           } catch (err) {
             console.error("[AddressInput] place_changed handler failed:", err);

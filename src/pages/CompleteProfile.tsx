@@ -74,18 +74,34 @@ const CompleteProfile = () => {
 
     const fieldErrors = {
       name: !name.trim(),
-      address: !address.trim(),
+      address: !address.trim() || !/^\d+/.test(address.trim()),
       resident: !resident,
     };
 
     const missingKeys = (Object.keys(fieldErrors) as Array<keyof typeof fieldErrors>).filter((k) => fieldErrors[k]);
     if (missingKeys.length > 0) {
       setErrors(fieldErrors);
-      toast({
-        title: "Incomplete form",
-        description: "Please complete all required fields",
-        variant: "destructive",
-      });
+      
+      // Show specific error for missing street number
+      if (!address.trim()) {
+        toast({
+          title: "Incomplete form",
+          description: "Please enter your address",
+          variant: "destructive",
+        });
+      } else if (!/^\d+/.test(address.trim())) {
+        toast({
+          title: "Invalid address",
+          description: "Your address must include a house or unit number",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Incomplete form",
+          description: "Please complete all required fields",
+          variant: "destructive",
+        });
+      }
       return;
     }
 
@@ -243,6 +259,9 @@ const CompleteProfile = () => {
                     </Tooltip>
                   </TooltipProvider>
                 </div>
+                <p className="text-sm text-muted-foreground">
+                  Please ensure your full address includes your house/building number
+                </p>
                 <AddressInput
                   id="address"
                   defaultValue={address}
