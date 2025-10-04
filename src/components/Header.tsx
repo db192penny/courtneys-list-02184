@@ -312,7 +312,10 @@ const Header = () => {
                 <Button 
                   variant="ghost" 
                   size="sm" 
-                  onClick={() => navigate('/signin')}
+                  onClick={() => {
+                    const communitySlug = communityDisplayName.toLowerCase().replace(/\s+/g, '-');
+                    navigate(`/signin?community=${communitySlug}`);
+                  }}
                   className="text-sm"
                 >
                   Sign In
@@ -361,7 +364,10 @@ const Header = () => {
               <div className="flex items-center gap-2">
                 <Button 
                   variant="ghost" 
-                  onClick={() => navigate('/signin')}
+                  onClick={() => {
+                    const communitySlug = communityDisplayName.toLowerCase().replace(/\s+/g, '-');
+                    navigate(`/signin?community=${communitySlug}`);
+                  }}
                 >
                   Sign In
                 </Button>
