@@ -45,14 +45,14 @@ const AuthCallback = () => {
         
         if (sessionError) {
           console.error("Session error:", sessionError);
-          const authUrl = contextParam ? `/auth?community=${contextParam}` : '/communities/boca-bridges';
+          const authUrl = contextParam ? `/auth?community=${contextParam}` : '/auth';
           navigate(authUrl, { replace: true });
           return;
         }
 
         if (!session) {
           console.error("No session found");
-          const authUrl = contextParam ? `/auth?community=${contextParam}` : '/communities/boca-bridges';
+          const authUrl = contextParam ? `/auth?community=${contextParam}` : '/auth';
           navigate(authUrl, { replace: true });
           return;
         }
@@ -128,7 +128,7 @@ const AuthCallback = () => {
             variant: "destructive"
           });
           
-          const authUrl = contextParam ? `/auth?community=${contextParam}` : '/communities/boca-bridges';
+          const authUrl = contextParam ? `/auth?community=${contextParam}` : '/auth';
           navigate(authUrl, { replace: true });
           return;
         }
@@ -162,7 +162,7 @@ const AuthCallback = () => {
         
       } catch (error) {
         console.error("Callback error:", error);
-        const authUrl = contextParam ? `/auth?community=${contextParam}` : '/communities/boca-bridges';
+        const authUrl = contextParam ? `/auth?community=${contextParam}` : '/auth';
         navigate(authUrl, { replace: true });
       }
     };
