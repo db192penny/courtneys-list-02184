@@ -1,6 +1,5 @@
 import React from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectScrollUpButton, SelectScrollDownButton } from "@/components/ui/select";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { getCategoryEmoji } from "@/utils/categoryEmojis";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ChevronUp, ChevronDown } from "lucide-react";
@@ -45,30 +44,28 @@ export const HorizontalCategoryPills: React.FC<HorizontalCategoryPillsProps> = (
             </span>
           </SelectValue>
         </SelectTrigger>
-        <SelectContent className="max-h-[50vh]">
-          <SelectScrollUpButton className="flex items-center justify-center h-6 bg-background cursor-pointer">
+        <SelectContent className={isMobile ? "max-h-[60vh]" : "max-h-[70vh]"}>
+          <SelectScrollUpButton>
             <ChevronUp className="h-4 w-4" />
           </SelectScrollUpButton>
-          <ScrollArea className="h-[40vh]">
-            {sortedCategories.map((category) => {
-              const displayName = category === 'all' ? 'All Categories' : category;
-              const emoji = getCategoryEmoji(category);
-              
-              return (
-                <SelectItem 
-                  key={category} 
-                  value={category} 
-                  className={isMobile ? "h-10 cursor-pointer" : "h-11 cursor-pointer"}
-                >
-                  <span className="flex items-center gap-2">
-                    <span className={isMobile ? "text-base" : "text-lg"}>{emoji}</span>
-                    <span className={isMobile ? "text-sm" : "text-base"}>{displayName}</span>
-                  </span>
-                </SelectItem>
-              );
-            })}
-          </ScrollArea>
-          <SelectScrollDownButton className="flex items-center justify-center h-6 bg-background cursor-pointer">
+          {sortedCategories.map((category) => {
+            const displayName = category === 'all' ? 'All Categories' : category;
+            const emoji = getCategoryEmoji(category);
+            
+            return (
+              <SelectItem 
+                key={category} 
+                value={category} 
+                className={isMobile ? "h-10 cursor-pointer" : "h-11 cursor-pointer"}
+              >
+                <span className="flex items-center gap-2">
+                  <span className={isMobile ? "text-base" : "text-lg"}>{emoji}</span>
+                  <span className={isMobile ? "text-sm" : "text-base"}>{displayName}</span>
+                </span>
+              </SelectItem>
+            );
+          })}
+          <SelectScrollDownButton>
             <ChevronDown className="h-4 w-4" />
           </SelectScrollDownButton>
         </SelectContent>
