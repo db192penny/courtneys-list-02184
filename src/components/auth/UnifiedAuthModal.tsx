@@ -1,12 +1,15 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { GoogleSignInButton } from "./GoogleSignInButton";
 
 interface UnifiedAuthModalProps {
@@ -20,164 +23,64 @@ interface UnifiedAuthModalProps {
 export function UnifiedAuthModal({ 
   open, 
   onOpenChange, 
-  communityName = "",
-  context = "rate",
-  onSuccess
+  communityName = "your community",
+  context,
+  onSuccess 
 }: UnifiedAuthModalProps) {
-  const [email, setEmail] = useState("");
-  const [name, setName] = useState("");
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<"signup" | "signin">("signup");
-  const { toast } = useToast();
-
-  const contextMessages = {
-    rate: "rate vendors and share your experience",
-    reviews: "see full neighbor reviews",
-    costs: "view detailed cost information"
-  };
 
   const handleGoogleAuth = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      const redirectUrl = `${window.location.origin}/auth-callback`;
-      
+      const redirectUrl = `${window.location.origin}/auth/callback`;
       const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
+        provider: "google",
         options: {
           redirectTo: redirectUrl,
           queryParams: {
             access_type: 'offline',
             prompt: 'consent',
-          }
-        }
+          },
+        },
       });
 
       if (error) throw error;
+      onSuccess?.();
     } catch (error: any) {
-      console.error('Google auth error:', error);
-      toast({
-        title: "Authentication failed",
-        description: error.message,
-        variant: "destructive"
-      });
-      setLoading(false);
-    }
-  };
-
-  const handleEmailSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!email || !name) {
-      toast({
-        title: "Missing information",
-        description: "Please enter your name and email",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    try {
-      setLoading(true);
-      
-      // Check if user already exists
-      const { data: statusData } = await supabase.rpc("get_email_status", {
-        _email: email,
-      });
-
-      if (statusData === "approved") {
-        // Existing approved user - send magic link
-        const redirectUrl = `${window.location.origin}/auth-callback`;
-        const { error } = await supabase.auth.signInWithOtp({
-          email,
-          options: {
-            emailRedirectTo: redirectUrl,
-          },
-        });
-
-        if (error) throw error;
-
-        toast({
-          title: "Check your email!",
-          description: "We've sent you a magic link to sign in.",
-        });
-        onOpenChange(false);
-      } else if (statusData === "pending") {
-        toast({
-          title: "Account pending approval",
-          description: "Your account is awaiting admin approval. You'll receive an email once approved.",
-        });
-      } else {
-        // New user - redirect to full signup
-        const signupUrl = `/auth?community=${encodeURIComponent(communityName)}&email=${encodeURIComponent(email)}&name=${encodeURIComponent(name)}`;
-        window.location.href = signupUrl;
-      }
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive"
-      });
+      console.error("Google auth error:", error);
+      toast.error("Failed to sign in with Google. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleEmailSignIn = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!email) {
-      toast({
-        title: "Email required",
-        description: "Please enter your email address",
-        variant: "destructive"
-      });
-      return;
-    }
+  const handleEmailSignUp = () => {
+    const currentPath = window.location.pathname;
+    const communityMatch = currentPath.match(/\/communities\/([^\/]+)/);
+    const community = communityMatch ? communityMatch[1] : 'boca-bridges';
+    navigate(`/auth?community=${community}`);
+    onOpenChange(false);
+  };
 
-    try {
-      setLoading(true);
-      
-      const { data: statusData } = await supabase.rpc("get_email_status", {
-        _email: email,
-      });
+  const handleSignIn = () => {
+    const currentPath = window.location.pathname;
+    const communityMatch = currentPath.match(/\/communities\/([^\/]+)/);
+    const community = communityMatch ? communityMatch[1] : 'boca-bridges';
+    navigate(`/signin?community=${community}`);
+    onOpenChange(false);
+  };
 
-      if (statusData === "approved") {
-        const redirectUrl = `${window.location.origin}/auth-callback`;
-        const { error } = await supabase.auth.signInWithOtp({
-          email,
-          options: {
-            emailRedirectTo: redirectUrl,
-          },
-        });
-
-        if (error) throw error;
-
-        toast({
-          title: "Check your email!",
-          description: "We've sent you a magic link to sign in.",
-        });
-        onOpenChange(false);
-      } else if (statusData === "pending") {
-        toast({
-          title: "Account pending approval",
-          description: "Your account is awaiting admin approval.",
-        });
-      } else {
-        toast({
-          title: "Account not found",
-          description: "Please sign up first to join your community.",
-          variant: "destructive"
-        });
-        setActiveTab("signup");
-      }
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
+  const getContextMessage = () => {
+    switch (context) {
+      case "rate":
+        return `Join ${communityName} to rate vendors and share your experience`;
+      case "reviews":
+        return `Join ${communityName} to see full neighbor reviews`;
+      case "costs":
+        return `Join ${communityName} to view and share cost information`;
+      default:
+        return `Join ${communityName} to rate vendors, see reviews, and view costs`;
     }
   };
 
@@ -185,83 +88,49 @@ export function UnifiedAuthModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Join {communityName || "the community"}</DialogTitle>
-          <DialogDescription>
-            Sign in or create an account to {contextMessages[context]}
+          <DialogTitle className="text-center text-xl">Welcome to {communityName}</DialogTitle>
+          <DialogDescription className="text-center pt-2">
+            {getContextMessage()}
           </DialogDescription>
         </DialogHeader>
 
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "signup" | "signin")} className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="signup">Sign Up</TabsTrigger>
-            <TabsTrigger value="signin">Sign In</TabsTrigger>
-          </TabsList>
+        <div className="space-y-3 pt-2">
+          <GoogleSignInButton 
+            onClick={handleGoogleAuth}
+            loading={loading}
+            label="Continue with Google"
+            community={communityName}
+          />
 
-          <TabsContent value="signup" className="space-y-4 mt-4">
-            <GoogleSignInButton 
-              onClick={handleGoogleAuth}
-              loading={loading}
-              label="Continue with Google"
-              community={communityName}
-            />
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">Or</span>
+            </div>
+          </div>
 
-            <form onSubmit={handleEmailSignUp} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="signup-name">Name</Label>
-                <Input
-                  id="signup-name"
-                  type="text"
-                  placeholder="Your name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  disabled={loading}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="signup-email">Email</Label>
-                <Input
-                  id="signup-email"
-                  type="email"
-                  placeholder="your@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  disabled={loading}
-                />
-              </div>
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Continue with Email
-              </Button>
-            </form>
-          </TabsContent>
+          <Button 
+            variant="outline" 
+            className="w-full" 
+            onClick={handleEmailSignUp}
+            disabled={loading}
+          >
+            Sign Up with Email
+          </Button>
 
-          <TabsContent value="signin" className="space-y-4 mt-4">
-            <GoogleSignInButton 
-              onClick={handleGoogleAuth}
-              loading={loading}
-              label="Continue with Google"
-              community={communityName}
-            />
-
-            <form onSubmit={handleEmailSignIn} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="signin-email">Email</Label>
-                <Input
-                  id="signin-email"
-                  type="email"
-                  placeholder="your@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  disabled={loading}
-                />
-              </div>
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Send Magic Link
-              </Button>
-            </form>
-          </TabsContent>
-        </Tabs>
+          <div className="text-center pt-2">
+            <button
+              type="button"
+              onClick={handleSignIn}
+              className="text-sm text-muted-foreground hover:text-foreground underline-offset-4 hover:underline"
+              disabled={loading}
+            >
+              Already a member? Sign in here
+            </button>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   );

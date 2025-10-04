@@ -10,6 +10,7 @@ import { useUserProfile } from "@/hooks/useUserProfile";
 import { useBadgeLevels, getUserCurrentBadge, getUserNextBadge } from "@/hooks/useBadgeLevels";
 import { Badge } from "@/components/ui/badge";
 import { useUserData } from "@/hooks/useUserData";
+import { UnifiedAuthModal } from "@/components/auth/UnifiedAuthModal";
 
 // New Logo Components
 function NewLogoDesktop() {
@@ -127,6 +128,7 @@ function MobilePointsDisplay() {
 const Header = () => {
   const [authed, setAuthed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
   const { data: isAdmin } = useIsAdmin();
   const { data: userData } = useUserData();
   const navigate = useNavigate();
@@ -150,7 +152,12 @@ const Header = () => {
   // Extract community from current URL path to preserve context
   const communityMatch = location.pathname.match(/\/communities\/([^\/]+)/);
   const communitySlug = communityMatch ? communityMatch[1] : 'boca-bridges';
-  const signInLink = `/signin?community=${communitySlug}`;
+  
+  // Convert slug to display name
+  const communityDisplayName = communitySlug
+    .split('-')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
 
   const handleSignOut = async () => {
     // Get user's community before signing out
@@ -303,8 +310,13 @@ const Header = () => {
                 </SheetContent>
               </Sheet>
             ) : !isAuthPage ? (
-              <Button asChild variant="ghost" size="sm" className="text-sm">
-                <Link to={signInLink}>Sign in</Link>
+              <Button 
+                variant="default" 
+                size="sm" 
+                onClick={() => setAuthModalOpen(true)}
+                className="text-sm"
+              >
+                Get Access
               </Button>
             ) : null}
           </div>
@@ -335,13 +347,22 @@ const Header = () => {
                 </div>
               </div>
             ) : !isAuthPage ? (
-              <Button asChild variant="ghost">
-                <Link to={signInLink}>Sign in</Link>
+              <Button 
+                variant="default" 
+                onClick={() => setAuthModalOpen(true)}
+              >
+                Get Access
               </Button>
             ) : null}
           </div>
         )}
       </nav>
+
+      <UnifiedAuthModal 
+        open={authModalOpen} 
+        onOpenChange={setAuthModalOpen}
+        communityName={communityDisplayName}
+      />
     </header>
   );
 };
