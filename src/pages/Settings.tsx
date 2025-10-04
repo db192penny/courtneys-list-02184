@@ -51,14 +51,32 @@ const Settings = () => {
 
   const handleSignOut = async () => {
     // Get user's community before signing out
-    let userCommunity = 'boca-bridges';
+    let userCommunity = 'the-bridges'; // Default to The Bridges instead of Boca Bridges
     
     try {
       if (userData?.communityName) {
-        userCommunity = userData.communityName.toLowerCase().replace(/\s+/g, '-');
+        const communityName = userData.communityName.toLowerCase();
+        
+        // Handle The Bridges specifically
+        if (communityName.includes('the bridges') || communityName === 'the bridges') {
+          userCommunity = 'the-bridges';
+        } else if (communityName.includes('boca bridges')) {
+          userCommunity = 'boca-bridges';
+        } else {
+          // For other communities, convert spaces to hyphens
+          userCommunity = communityName.replace(/\s+/g, '-');
+        }
+      } else {
+        // If no community data, try to detect from current URL
+        const currentPath = window.location.pathname;
+        if (currentPath.includes('/communities/the-bridges')) {
+          userCommunity = 'the-bridges';
+        } else if (currentPath.includes('/communities/boca-bridges')) {
+          userCommunity = 'boca-bridges';
+        }
       }
     } catch (error) {
-      console.log('Using default community for sign-out redirect');
+      console.log('Using default community for sign-out redirect:', userCommunity);
     }
     
     await supabase.auth.signOut();
