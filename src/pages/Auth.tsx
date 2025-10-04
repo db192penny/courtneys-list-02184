@@ -48,21 +48,28 @@ const Auth = () => {
   }, [params]);
 
   useEffect(() => {
-    // Redirect to Boca Bridges community page if no community in URL and not processing magic link
+    // Redirect to default community page if no community in URL and not processing magic link
     if (!communityName && !hasMagicLink) {
-      console.log('⚠️ No community parameter in URL, redirecting to Boca Bridges');
-      navigate('/communities/boca-bridges', { replace: true });
+      // Try to detect community from referrer
+      const referrer = document.referrer;
+      if (referrer.includes('/communities/the-bridges')) {
+        navigate('/auth?community=the-bridges', { replace: true });
+      } else if (referrer.includes('/communities/boca-bridges')) {
+        navigate('/auth?community=boca-bridges', { replace: true });
+      } else {
+        // Default to The Bridges
+        console.log('⚠️ No community parameter in URL, defaulting to The Bridges');
+        navigate('/communities/the-bridges', { replace: true });
+      }
     }
   }, [communityName, hasMagicLink, navigate]);
 
   const handleBack = () => {
-    if (window.history.length > 1) {
-      navigate(-1);
+    if (communityName) {
+      const fallbackUrl = `/communities/${toSlug(communityName)}`;
+      navigate(fallbackUrl, { replace: true });
     } else {
-      const fallbackUrl = communityName 
-        ? `/communities/${toSlug(communityName)}`
-        : "/communities/boca-bridges";
-      navigate(fallbackUrl);
+      navigate('/communities/the-bridges', { replace: true });
     }
   };
 
