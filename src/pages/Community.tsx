@@ -266,7 +266,7 @@ export default function Community() {
             </p>
             <div className="flex items-center gap-4">
               <button
-                onClick={() => navigate('/sign-in')}
+                onClick={() => navigate('/signin')}
                 className="text-white/90 hover:text-white text-sm underline underline-offset-4 inline transition-colors"
               >
                 Already a member? Sign in
