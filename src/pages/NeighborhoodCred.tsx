@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useBadgeLevels, getUserCurrentBadge, getUserNextBadge } from "@/hooks/useBadgeLevels";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
+import { useUserData } from "@/hooks/useUserData";
+import { formatBadgeName } from "@/utils/badgeNameFormatter";
 import UserBadge from "@/components/badges/UserBadge";
 import AdminBadge from "@/components/badges/AdminBadge";
 import BadgeProgress from "@/components/badges/BadgeProgress";
@@ -20,9 +22,11 @@ const NeighborhoodCred = () => {
   
   const { data: badgeLevels = [] } = useBadgeLevels();
   const { data: isAdmin = false } = useIsAdmin();
+  const { data: userData } = useUserData();
   
   const currentBadge = getUserCurrentBadge(points, badgeLevels);
   const nextBadge = getUserNextBadge(points, badgeLevels);
+  const communityName = userData?.communityName;
 
   useEffect(() => {
     let cancel = false;
@@ -117,7 +121,7 @@ const NeighborhoodCred = () => {
               <div className="flex items-center gap-3 flex-wrap">
                 {currentBadge && (
                   <UserBadge
-                    name={currentBadge.name}
+                    name={formatBadgeName(currentBadge.name, communityName)}
                     color={currentBadge.color}
                     icon={currentBadge.icon}
                     size="lg"

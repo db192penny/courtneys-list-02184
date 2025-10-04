@@ -3,6 +3,8 @@ import { Trophy } from "lucide-react";
 import { useBadgeLevels, getUserCurrentBadge, getUserNextBadge } from "@/hooks/useBadgeLevels";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useUserData } from "@/hooks/useUserData";
+import { formatBadgeName } from "@/utils/badgeNameFormatter";
 import UserBadge from "./UserBadge";
 
 type BadgeLevelChartProps = {
@@ -11,9 +13,12 @@ type BadgeLevelChartProps = {
 
 export default function BadgeLevelChart({ currentPoints }: BadgeLevelChartProps) {
   const { data: badgeLevels = [] } = useBadgeLevels();
+  const { data: userData } = useUserData();
   const currentBadge = getUserCurrentBadge(currentPoints, badgeLevels);
   const nextBadge = getUserNextBadge(currentPoints, badgeLevels);
   const isMobile = useIsMobile();
+  
+  const communityName = userData?.communityName;
 
   return (
     <Card>
@@ -56,7 +61,7 @@ export default function BadgeLevelChart({ currentPoints }: BadgeLevelChartProps)
                 )}>
                   <div className="relative">
                     <UserBadge 
-                      name={badge.name}
+                      name={formatBadgeName(badge.name, communityName)}
                       color={badge.color}
                       icon={badge.icon}
                       showName={false}
@@ -75,7 +80,7 @@ export default function BadgeLevelChart({ currentPoints }: BadgeLevelChartProps)
                         "font-medium text-base transition-colors",
                         isEarned ? "text-foreground" : "text-muted-foreground"
                       )}>
-                        {badge.name}
+                        {formatBadgeName(badge.name, communityName)}
                       </h4>
                       {isCurrent && (
                         <span className="text-xs bg-primary text-primary-foreground px-2 py-1 rounded font-medium animate-pulse-glow">
