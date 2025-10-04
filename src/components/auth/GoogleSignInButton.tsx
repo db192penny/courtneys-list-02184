@@ -23,6 +23,16 @@ export function GoogleSignInButton({
   if (!shouldShow) {
     return null;
   }
+
+  // Format community name for display
+  const formattedCommunity = community
+    .replace(/-/g, ' ')
+    .replace(/\b\w/g, l => l.toUpperCase());
+  
+  // Create custom label with community context
+  const buttonLabel = formattedCommunity 
+    ? `Sign in to Courtney's List - ${formattedCommunity}`
+    : label;
   
   return (
     <>
@@ -55,7 +65,7 @@ export function GoogleSignInButton({
             />
           </svg>
         )}
-        {label}
+        {buttonLabel}
       </Button>
       
       <div className="relative my-4">
