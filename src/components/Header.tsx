@@ -30,9 +30,9 @@ function NewLogoDesktop() {
 
 function NewLogoMobile() {
   return (
-    <div className="flex items-center gap-2">
-      <span className="text-lg">🏘️</span>
-      <span className="font-bold text-base bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+    <div className="flex items-center gap-1.5">
+      <span className="text-base">🏘️</span>
+      <span className="font-bold text-sm bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
         Courtney's List
       </span>
     </div>
@@ -245,7 +245,7 @@ const Header = () => {
         {isMobile ? <NewLogoMobile /> : <NewLogoDesktop />}
         
         {isMobile ? (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             {authed && <PointsBadge />}
             {authed ? (
               <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
@@ -308,7 +308,7 @@ const Header = () => {
                 </SheetContent>
               </Sheet>
             ) : !isAuthPage ? (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 <Button 
                   variant="ghost" 
                   size="sm" 
@@ -324,7 +324,7 @@ const Header = () => {
                     const communitySlug = communityDisplayName.toLowerCase().replace(/\s+/g, '-');
                     navigate(`/auth?community=${communitySlug}`);
                   }}
-                  className="text-sm"
+                  className="text-sm whitespace-nowrap"
                 >
                   Request Access
                 </Button>

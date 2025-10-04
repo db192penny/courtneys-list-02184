@@ -100,6 +100,7 @@ All colors MUST be HSL.
 
     /* CTA action colors */
     --cta-primary: 270 95% 65%;
+    --cta-secondary: 250 90% 60%;
     --cta-primary-glow: 280 90% 70%;
     --cta-success: 142 76% 36%;
   }
@@ -113,6 +114,7 @@ All colors MUST be HSL.
 
     /* CTA action colors */
     --cta-primary: 270 95% 65%;
+    --cta-secondary: 250 90% 60%;
     --cta-primary-glow: 280 90% 70%;
     --cta-success: 142 76% 36%;
   }
