@@ -163,7 +163,7 @@ export default function Community() {
         image={seoImage}
       />
 
-      <section className="container pt-0 sm:py-10 pb-2 space-y-2 sm:space-y-6">
+      <section className="container pt-0 sm:py-10 pb-40 md:pb-2 space-y-2 sm:space-y-6">
         {/* Welcome toolbar for new users */}
         <WelcomeToolbar communitySlug={slug} />
         
