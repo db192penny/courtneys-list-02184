@@ -303,7 +303,7 @@ const Header = () => {
                 </SheetContent>
               </Sheet>
             ) : !isAuthPage ? (
-              <Button asChild size="sm" className="text-sm">
+              <Button asChild variant="ghost" size="sm" className="text-sm">
                 <Link to={signInLink}>Sign in</Link>
               </Button>
             ) : null}
@@ -335,7 +335,7 @@ const Header = () => {
                 </div>
               </div>
             ) : !isAuthPage ? (
-              <Button asChild>
+              <Button asChild variant="ghost">
                 <Link to={signInLink}>Sign in</Link>
               </Button>
             ) : null}
