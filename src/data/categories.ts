@@ -11,6 +11,7 @@ export const CATEGORIES = [
   "Grill Cleaning",
   "Handyman",
   "Holiday Lighting",
+  "Home Theater & AV",
   "House Cleaning",
   "House Manager",
   "HVAC",

@@ -27,6 +27,7 @@ import {
   Scroll,
   Sprout,
   Square,
+  Tv,
   LucideIcon 
 } from "lucide-react";
 import { Category } from "@/data/categories";
@@ -60,6 +61,7 @@ export const categoryIconMap: Record<Category, LucideIcon> = {
   "Carpet/Upholstery Cleaning": Sofa,
   "Patio Screening": Grid3x3,
   "Holiday Lighting": Star,
+  "Home Theater & AV": Tv,
   "Tile Installation": Layers,
   "Turf Installation": Sprout,
   "Wallpaper Installation": Scroll,
