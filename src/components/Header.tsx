@@ -10,7 +10,6 @@ import { useUserProfile } from "@/hooks/useUserProfile";
 import { useBadgeLevels, getUserCurrentBadge, getUserNextBadge } from "@/hooks/useBadgeLevels";
 import { Badge } from "@/components/ui/badge";
 import { useUserData } from "@/hooks/useUserData";
-import { UnifiedAuthModal } from "@/components/auth/UnifiedAuthModal";
 
 // New Logo Components
 function NewLogoDesktop() {
@@ -128,7 +127,6 @@ function MobilePointsDisplay() {
 const Header = () => {
   const [authed, setAuthed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [authModalOpen, setAuthModalOpen] = useState(false);
   const { data: isAdmin } = useIsAdmin();
   const { data: userData } = useUserData();
   const navigate = useNavigate();
@@ -310,14 +308,27 @@ const Header = () => {
                 </SheetContent>
               </Sheet>
             ) : !isAuthPage ? (
-              <Button 
-                variant="default" 
-                size="sm" 
-                onClick={() => setAuthModalOpen(true)}
-                className="text-sm"
-              >
-                Get Access
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => navigate('/signin')}
+                  className="text-sm"
+                >
+                  Sign In
+                </Button>
+                <Button 
+                  variant="cta" 
+                  size="sm" 
+                  onClick={() => {
+                    const communitySlug = communityDisplayName.toLowerCase().replace(/\s+/g, '-');
+                    navigate(`/auth?community=${communitySlug}`);
+                  }}
+                  className="text-sm"
+                >
+                  Request Access
+                </Button>
+              </div>
             ) : null}
           </div>
         ) : (
@@ -347,22 +358,27 @@ const Header = () => {
                 </div>
               </div>
             ) : !isAuthPage ? (
-              <Button 
-                variant="default" 
-                onClick={() => setAuthModalOpen(true)}
-              >
-                Get Access
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button 
+                  variant="ghost" 
+                  onClick={() => navigate('/signin')}
+                >
+                  Sign In
+                </Button>
+                <Button 
+                  variant="cta" 
+                  onClick={() => {
+                    const communitySlug = communityDisplayName.toLowerCase().replace(/\s+/g, '-');
+                    navigate(`/auth?community=${communitySlug}`);
+                  }}
+                >
+                  Request Access
+                </Button>
+              </div>
             ) : null}
           </div>
         )}
       </nav>
-
-      <UnifiedAuthModal 
-        open={authModalOpen} 
-        onOpenChange={setAuthModalOpen}
-        communityName={communityDisplayName}
-      />
     </header>
   );
 };

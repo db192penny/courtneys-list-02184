@@ -42,29 +42,6 @@ export function MobileReviewsModal({ open, onOpenChange, vendor, onRate }) {
     enabled: !!vendor?.id,
   });
 
-  if (!isVerified) {
-    return (
-      <div className="space-y-4 p-4">
-        <div className="text-sm text-muted-foreground">
-          Full reviews are shared just within our neighborhood circle. Sign up to view them.
-        </div>
-        <Button 
-          onClick={() => {
-            const currentPath = window.location.pathname;
-            const communityMatch = currentPath.match(/\/communities\/([^\/]+)/);
-            const community = communityMatch 
-              ? communityMatch[1].split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
-              : 'Boca Bridges';
-            navigate(`/auth?community=${community}`);
-          }}
-          className="w-full"
-        >
-          Sign Up to View Reviews
-        </Button>
-      </div>
-    );
-  }
-
   if (isLoading) {
     return (
       <div className="space-y-3 p-4">

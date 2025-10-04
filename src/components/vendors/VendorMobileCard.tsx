@@ -26,7 +26,7 @@ import { MobileCostsModal } from "./MobileCostsModal";
 import type { CommunityVendorRow } from "@/components/vendors/CommunityVendorTable";
 import React, { useState } from "react";
 import { GATracking } from "@/components/analytics/GoogleAnalytics";
-import { UnifiedAuthModal } from "@/components/auth/UnifiedAuthModal";
+import { AccessGateModal } from "@/components/vendors/AccessGateModal";
 
 
 interface VendorMobileCardProps {
@@ -120,8 +120,8 @@ export default function VendorMobileCard({
   const [googleReviewsModalOpen, setGoogleReviewsModalOpen] = useState(false);
   const [isReviewsModalOpen, setIsReviewsModalOpen] = useState(false);
   const [contactPopoverOpen, setContactPopoverOpen] = useState(false);
-  const [authModalOpen, setAuthModalOpen] = useState(false);
-  const [authContext, setAuthContext] = useState<"rate" | "reviews" | "costs">("rate");
+  const [accessGateOpen, setAccessGateOpen] = useState(false);
+  const [accessGateType, setAccessGateType] = useState<"rate" | "reviews" | "costs">("rate");
 
   const handleCall = () => {
     window.location.href = `tel:${vendor.contact_info}`;
@@ -190,8 +190,8 @@ export default function VendorMobileCard({
               if (isAuthenticated) {
                 onRate(vendor);
               } else {
-                setAuthContext("rate");
-                setAuthModalOpen(true);
+                setAccessGateType("rate");
+                setAccessGateOpen(true);
               }
             }}
             className={`rounded-lg px-3 py-1.5 font-medium shrink-0 flex items-center gap-1.5 transition-colors duration-200 ${
@@ -232,12 +232,24 @@ export default function VendorMobileCard({
                 vendor_id: vendor.id,
                 vendor_name: vendor.name 
               });
-              setIsReviewsModalOpen(true);
+              if (isAuthenticated) {
+                setIsReviewsModalOpen(true);
+              } else {
+                setAccessGateType("reviews");
+                setAccessGateOpen(true);
+              }
             }}
-            onRate={() => onRate(vendor)}
+            onRate={() => {
+              if (isAuthenticated) {
+                onRate(vendor);
+              } else {
+                setAccessGateType("rate");
+                setAccessGateOpen(true);
+              }
+            }}
             onSignUp={() => {
-              const communitySlug = communityName?.toLowerCase().replace(/\s+/g, '-');
-              window.location.href = `/auth?community=${communityName}`;
+              setAccessGateType("reviews");
+              setAccessGateOpen(true);
             }}
             communityName={communityName}
             isAuthenticated={isAuthenticated}
@@ -260,8 +272,8 @@ export default function VendorMobileCard({
               if (isAuthenticated) {
                 setIsReviewsModalOpen(true);
               } else {
-                setAuthContext("reviews");
-                setAuthModalOpen(true);
+                setAccessGateType("reviews");
+                setAccessGateOpen(true);
               }
             }}
           >
@@ -281,8 +293,8 @@ export default function VendorMobileCard({
               if (isAuthenticated) {
                 setCostModalOpen(true);
               } else {
-                setAuthContext("costs");
-                setAuthModalOpen(true);
+                setAccessGateType("costs");
+                setAccessGateOpen(true);
               }
             }}
           >
@@ -395,12 +407,13 @@ export default function VendorMobileCard({
       </DialogContent>
     </Dialog>
 
-    {/* Unified Auth Modal */}
-    <UnifiedAuthModal
-      open={authModalOpen}
-      onOpenChange={setAuthModalOpen}
-      communityName={communityName}
-      context={authContext}
+    {/* Access Gate Modal */}
+    <AccessGateModal
+      open={accessGateOpen}
+      onOpenChange={setAccessGateOpen}
+      contentType={accessGateType}
+      communityName={communityName || "Boca Bridges"}
+      vendorName={vendor.name}
     />
   </>
   );

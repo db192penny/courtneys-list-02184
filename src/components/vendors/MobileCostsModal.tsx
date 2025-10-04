@@ -62,29 +62,6 @@ export function MobileCostsModal({ vendorId }: Props) {
     staleTime: 0,
   });
 
-  if (!isVerified) {
-    return (
-      <div className="space-y-4 p-4">
-        <div className="text-sm text-muted-foreground">
-          Full cost information is shared just within our neighborhood circle. Sign up to view it.
-        </div>
-        <Button 
-          onClick={() => {
-            const currentPath = window.location.pathname;
-            const communityMatch = currentPath.match(/\/communities\/([^\/]+)/);
-            const community = communityMatch 
-              ? communityMatch[1].split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
-              : 'Boca Bridges';
-            navigate(`/auth?community=${community}`);
-          }}
-          className="w-full"
-        >
-          Sign Up to View Costs
-        </Button>
-      </div>
-    );
-  }
-
   if (isLoading) {
     return <div className="text-sm text-muted-foreground p-4">Loading cost details…</div>;
   }
