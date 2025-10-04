@@ -26,6 +26,7 @@ import { MobileCostsModal } from "./MobileCostsModal";
 import type { CommunityVendorRow } from "@/components/vendors/CommunityVendorTable";
 import React, { useState } from "react";
 import { GATracking } from "@/components/analytics/GoogleAnalytics";
+import { UnifiedAuthModal } from "@/components/auth/UnifiedAuthModal";
 
 
 interface VendorMobileCardProps {
@@ -119,6 +120,8 @@ export default function VendorMobileCard({
   const [googleReviewsModalOpen, setGoogleReviewsModalOpen] = useState(false);
   const [isReviewsModalOpen, setIsReviewsModalOpen] = useState(false);
   const [contactPopoverOpen, setContactPopoverOpen] = useState(false);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [authContext, setAuthContext] = useState<"rate" | "reviews" | "costs">("rate");
 
   const handleCall = () => {
     window.location.href = `tel:${vendor.contact_info}`;
@@ -187,7 +190,8 @@ export default function VendorMobileCard({
               if (isAuthenticated) {
                 onRate(vendor);
               } else {
-                window.location.href = `/auth?community=${encodeURIComponent(communityName || '')}`;
+                setAuthContext("rate");
+                setAuthModalOpen(true);
               }
             }}
             className={`rounded-lg px-3 py-1.5 font-medium shrink-0 flex items-center gap-1.5 transition-colors duration-200 ${
@@ -253,7 +257,12 @@ export default function VendorMobileCard({
                 vendor_id: vendor.id,
                 vendor_name: vendor.name 
               });
-              setIsReviewsModalOpen(true);
+              if (isAuthenticated) {
+                setIsReviewsModalOpen(true);
+              } else {
+                setAuthContext("reviews");
+                setAuthModalOpen(true);
+              }
             }}
           >
             📝 Reviews ({vendor.hoa_rating_count || 0})
@@ -269,7 +278,12 @@ export default function VendorMobileCard({
                 vendor_id: vendor.id,
                 vendor_name: vendor.name 
               });
-              setCostModalOpen(true);
+              if (isAuthenticated) {
+                setCostModalOpen(true);
+              } else {
+                setAuthContext("costs");
+                setAuthModalOpen(true);
+              }
             }}
           >
             💰 {(() => {
@@ -338,51 +352,34 @@ export default function VendorMobileCard({
       </CardContent>
     </Card>
 
-   {/* Reviews Modal - Pass correct props */}
-<Dialog open={isReviewsModalOpen} onOpenChange={setIsReviewsModalOpen}>
-  <DialogContent className="max-w-md mx-auto">
-    <DialogHeader>
-      <DialogTitle>Boca Bridges</DialogTitle>
-    </DialogHeader>
-    <MobileReviewsModal 
-      open={true}
-      onOpenChange={() => {}}
-      vendor={vendor}
-      onRate={() => onRate(vendor)}
-    />
-  </DialogContent>
-</Dialog>
+   {/* Reviews Modal - Only for authenticated users */}
+    {isAuthenticated && (
+      <Dialog open={isReviewsModalOpen} onOpenChange={setIsReviewsModalOpen}>
+        <DialogContent className="max-w-md mx-auto">
+          <DialogHeader>
+            <DialogTitle>{communityName || "Boca Bridges"}</DialogTitle>
+          </DialogHeader>
+          <MobileReviewsModal 
+            open={true}
+            onOpenChange={() => {}}
+            vendor={vendor}
+            onRate={() => onRate(vendor)}
+          />
+        </DialogContent>
+      </Dialog>
+    )}
 
-    {/* Cost Details Modal */}
-    <Dialog open={costModalOpen} onOpenChange={setCostModalOpen}>
-      <DialogContent className="max-w-md mx-auto">
-        <DialogHeader>
-          <DialogTitle>Cost Details</DialogTitle>
-        </DialogHeader>
-        {isAuthenticated && isVerified ? (
+    {/* Cost Details Modal - Only for authenticated users */}
+    {isAuthenticated && (
+      <Dialog open={costModalOpen} onOpenChange={setCostModalOpen}>
+        <DialogContent className="max-w-md mx-auto">
+          <DialogHeader>
+            <DialogTitle>Cost Details</DialogTitle>
+          </DialogHeader>
           <MobileCostsModal vendorId={vendor.id} />
-        ) : (
-          <div className="space-y-4">
-            <div className="text-center space-y-2">
-              <h3 className="text-lg font-semibold">{communityName || "Boca Bridges"}</h3>
-              <p className="text-sm text-muted-foreground">
-                Full cost details are shared just within our neighborhood circle. Sign up to view them.
-              </p>
-            </div>
-            <Button 
-              onClick={() => {
-                const communitySlug = communityName?.toLowerCase().replace(/\s+/g, '-');
-                window.location.href = `/auth?community=${communityName}`;
-                setCostModalOpen(false);
-              }}
-              className="w-full"
-            >
-              Sign Up to View Costs
-            </Button>
-          </div>
-        )}
-      </DialogContent>
-    </Dialog>
+        </DialogContent>
+      </Dialog>
+    )}
 
     {/* Google Reviews Modal */}
     <Dialog open={googleReviewsModalOpen} onOpenChange={setGoogleReviewsModalOpen}>
@@ -397,6 +394,14 @@ export default function VendorMobileCard({
         />
       </DialogContent>
     </Dialog>
+
+    {/* Unified Auth Modal */}
+    <UnifiedAuthModal
+      open={authModalOpen}
+      onOpenChange={setAuthModalOpen}
+      communityName={communityName}
+      context={authContext}
+    />
   </>
   );
 }
