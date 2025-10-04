@@ -9,6 +9,7 @@ import useIsAdmin from "@/hooks/useIsAdmin";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useBadgeLevels, getUserCurrentBadge, getUserNextBadge } from "@/hooks/useBadgeLevels";
 import { Badge } from "@/components/ui/badge";
+import { useUserData } from "@/hooks/useUserData";
 
 // New Logo Components
 function NewLogoDesktop() {
@@ -127,6 +128,7 @@ const Header = () => {
   const [authed, setAuthed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { data: isAdmin } = useIsAdmin();
+  const { data: userData } = useUserData();
   const navigate = useNavigate();
   const location = useLocation();
   const isMobile = useIsMobile();
@@ -151,14 +153,37 @@ const Header = () => {
   const signInLink = `/signin?community=${communitySlug}`;
 
   const handleSignOut = async () => {
+    // Get user's community before signing out
+    let userCommunity = 'the-bridges'; // Default to The Bridges instead of Boca Bridges
+    
+    try {
+      if (userData?.communityName) {
+        const communityName = userData.communityName.toLowerCase();
+        
+        // Handle The Bridges specifically
+        if (communityName.includes('the bridges') || communityName === 'the bridges') {
+          userCommunity = 'the-bridges';
+        } else if (communityName.includes('boca bridges')) {
+          userCommunity = 'boca-bridges';
+        } else {
+          // For other communities, convert spaces to hyphens
+          userCommunity = communityName.replace(/\s+/g, '-');
+        }
+      } else {
+        // If no community data, try to detect from current URL
+        const currentPath = window.location.pathname;
+        if (currentPath.includes('/communities/the-bridges')) {
+          userCommunity = 'the-bridges';
+        } else if (currentPath.includes('/communities/boca-bridges')) {
+          userCommunity = 'boca-bridges';
+        }
+      }
+    } catch (error) {
+      console.log('Using default community for sign-out redirect:', userCommunity);
+    }
+    
     await supabase.auth.signOut();
-    
-    // Try to get community from current URL path
-    const currentPath = location.pathname;
-    const communityMatch = currentPath.match(/\/communities\/([^\/\?]+)/);
-    const communitySlug = communityMatch?.[1] || 'boca-bridges';
-    
-    navigate(`/signin?community=${communitySlug}`);
+    navigate(`/signin?community=${userCommunity}`);
   };
 
   useEffect(() => {
