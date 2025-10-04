@@ -146,6 +146,22 @@ const CompleteProfile = () => {
         return;
       }
 
+      // Log the signup bonus points to history
+      // This is needed because Google OAuth bypasses the normal trigger
+      const { error: pointHistoryError } = await supabase
+        .from("user_point_history")
+        .insert({
+          user_id: user.id,
+          activity_type: 'join_site',
+          points_earned: 5,
+          description: 'Welcome bonus for joining Courtney\'s List'
+        });
+
+      if (pointHistoryError) {
+        console.error('Failed to log signup points:', pointHistoryError);
+        // Don't block the flow - user creation was successful
+      }
+
       // Create household-HOA mapping
       try {
         const { data: normalizedAddr } = await supabase.rpc("normalize_address", { 
