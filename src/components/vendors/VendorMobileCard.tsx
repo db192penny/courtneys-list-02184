@@ -369,8 +369,7 @@ export default function VendorMobileCard({
       <Dialog open={isReviewsModalOpen} onOpenChange={setIsReviewsModalOpen}>
         <DialogContent className="max-w-md mx-auto">
           <DialogHeader>
-            <DialogTitle className="text-xl font-bold">{communityName || "Boca Bridges"}</DialogTitle>
-            <p className="text-sm text-muted-foreground">Vendor Reviews</p>
+            <DialogTitle>{communityName || "Boca Bridges"}</DialogTitle>
           </DialogHeader>
           <MobileReviewsModal 
             open={true}
@@ -387,8 +386,7 @@ export default function VendorMobileCard({
       <Dialog open={costModalOpen} onOpenChange={setCostModalOpen}>
         <DialogContent className="max-w-md mx-auto">
           <DialogHeader>
-            <DialogTitle className="text-xl font-bold">{communityName || "Boca Bridges"}</DialogTitle>
-            <p className="text-sm text-muted-foreground">Cost Details</p>
+            <DialogTitle>Cost Details</DialogTitle>
           </DialogHeader>
           <MobileCostsModal vendorId={vendor.id} />
         </DialogContent>
@@ -399,8 +397,7 @@ export default function VendorMobileCard({
     <Dialog open={googleReviewsModalOpen} onOpenChange={setGoogleReviewsModalOpen}>
       <DialogContent className="max-w-md mx-auto">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold">{communityName || "Boca Bridges"}</DialogTitle>
-          <p className="text-sm text-muted-foreground">Google Reviews</p>
+          <DialogTitle>Google Reviews</DialogTitle>
         </DialogHeader>
         <MobileGoogleReviewsModal 
           vendorId={vendor.id}
