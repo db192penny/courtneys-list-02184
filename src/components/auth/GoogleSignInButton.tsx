@@ -15,10 +15,8 @@ export function GoogleSignInButton({
   community = ""
 }: GoogleSignInButtonProps) {
   
-  // ONLY show for The Bridges community (not Boca Bridges)
-  const shouldShow = community.toLowerCase().includes('the-bridges') || 
-                     (community.toLowerCase().includes('bridges') && 
-                      !community.toLowerCase().includes('boca'));
+  // Show for all Bridges communities
+  const shouldShow = community.toLowerCase().includes('bridges');
   
   if (!shouldShow) {
     return null;
