@@ -90,7 +90,7 @@ const CompleteProfile = () => {
       }
 
       const streetName = extractStreetName(address.trim());
-      const communitySlug = searchParams.get('community') || 'boca-bridges';
+      const communitySlug = searchParams.get('community') || 'the-bridges';
 
       // UPSERT user profile - creates record for Google OAuth users or updates existing
       const { error: upsertError } = await supabase
@@ -138,6 +138,26 @@ const CompleteProfile = () => {
       } catch (mappingError) {
         console.error("Mapping creation error:", mappingError);
         // Don't fail the whole process if mapping fails
+      }
+
+      // Send admin notification for Google OAuth signup
+      try {
+        const displayCommunity = communityName === "The Bridges" ? "The Bridges" : communityName;
+        
+        await supabase.functions.invoke('send-admin-notification', {
+          body: {
+            userEmail: user.email,
+            userName: name.trim(),
+            userAddress: address.trim(),
+            community: displayCommunity,
+            signupSource: `google_oauth:${communitySlug}`
+          }
+        });
+        
+        console.log('Admin notification sent for Google OAuth signup');
+      } catch (notificationError) {
+        console.error('Failed to send admin notification:', notificationError);
+        // Don't fail the signup if notification fails
       }
 
       toast({
