@@ -19,22 +19,22 @@ const getContent = (type: 'reviews' | 'costs' | 'rate', communityName: string) =
   switch (type) {
     case 'reviews':
       return {
-        title: "Full Reviews",
-        subtitle: communityName,
+        title: communityName,
+        subtitle: "Full Reviews",
         message: "Full neighbor reviews are shared just within our neighborhood circle.",
         cta: "Sign in or request access to view them."
       };
     case 'costs':
       return {
-        title: "Cost Details",
-        subtitle: communityName,
+        title: communityName,
+        subtitle: "Cost Details",
         message: "Full cost details are shared just within our neighborhood circle.",
         cta: "Sign in or request access to view them."
       };
     case 'rate':
       return {
-        title: "Rate This Vendor",
-        subtitle: communityName,
+        title: communityName,
+        subtitle: "Rate This Vendor",
         message: "Sign in or request access for the rating fun! One step away from helping your neighbors!",
         cta: ""
       };
