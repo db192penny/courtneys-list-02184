@@ -279,7 +279,7 @@ export default function Community() {
               className="bg-white text-blue-600 hover:bg-gray-100 font-bold px-6 shadow-lg flex items-center gap-2"
             >
               <UserPlus className="h-4 w-4" />
-              Join Now
+              Request Access
             </Button>
           </div>
         </div>
