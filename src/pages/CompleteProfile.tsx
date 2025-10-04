@@ -24,11 +24,22 @@ const CompleteProfile = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  const communityParam = searchParams.get("community") || "boca-bridges";
-  const communityName = communityParam
-    .split('-')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
+  const getCommunityDisplayName = (slug: string): string => {
+    const normalized = slug.toLowerCase();
+    if (normalized === 'the-bridges' || normalized === 'bridges') {
+      return 'The Bridges';
+    }
+    if (normalized === 'boca-bridges') {
+      return 'Boca Bridges';
+    }
+    // Default formatting for other communities
+    return slug.split('-').map(word => 
+      word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(' ');
+  };
+
+  const communitySlug = searchParams.get("community") || "the-bridges";
+  const communityName = getCommunityDisplayName(communitySlug);
 
   useEffect(() => {
     // Check if user is authenticated and pre-fill name from Google
@@ -90,7 +101,6 @@ const CompleteProfile = () => {
       }
 
       const streetName = extractStreetName(address.trim());
-      const communitySlug = searchParams.get('community') || 'the-bridges';
 
       // UPSERT user profile - creates record for Google OAuth users or updates existing
       const { error: upsertError } = await supabase
