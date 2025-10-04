@@ -121,7 +121,7 @@ const SignIn = () => {
           redirectTo: redirectUrl,
           queryParams: {
             access_type: 'offline',
-            prompt: 'consent select_account',
+            prompt: 'consent',
           }
         }
       });
