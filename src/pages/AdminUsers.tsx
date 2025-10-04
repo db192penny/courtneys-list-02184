@@ -135,7 +135,7 @@ const AdminUsers = () => {
     setLoadingAction(prev => ({ ...prev, [userId]: action }));
 
     try {
-      if (action === "delete") {
+      if (action === "delete" || action === "cleanup") {
         const confirmed = confirm("This will permanently delete the user and all their data. Continue?");
         if (!confirmed) {
           setLoadingAction(prev => {
@@ -146,38 +146,38 @@ const AdminUsers = () => {
           return;
         }
 
-        // Use the database function that handles everything properly
-        const { error } = await supabase.rpc("admin_soft_delete_user", {
-          _user_id: userId,
-          _reason: "admin_panel_delete"
-        });
+        // Get user email for the success message
+        const user = users.find(u => u.id === userId);
+        const userEmail = user?.email || "User";
 
-        if (error) {
-          // If the function fails, show the actual error
-          throw error;
-        }
-
-        toast({ 
-          title: "User deleted successfully", 
-          description: "User and all their data have been completely removed." 
-        });
-      } else if (action === "cleanup") {
-        const confirmed = confirm("This will permanently remove this orphaned user from the system. Continue?");
-        if (!confirmed) {
-          setLoadingAction(prev => {
-            const next = { ...prev };
-            delete next[userId];
-            return next;
-          });
-          return;
-        }
-
-        const { error } = await supabase.rpc("admin_cleanup_orphaned_user", {
+        // Use the complete deletion function that handles everything properly
+        const { data, error } = await supabase.rpc("admin_complete_delete_user" as any, {
           _user_id: userId
         });
 
-        if (error) throw error;
-        toast({ title: "Orphaned user cleaned up", description: "The orphaned user has been removed from the system." });
+        if (error) {
+          throw error;
+        }
+
+        // Parse deletion counts from the returned jsonb
+        const counts = (data || {
+          reviews_deleted: 0,
+          costs_deleted: 0,
+          vendors_deleted: 0,
+          point_history_deleted: 0,
+          hoa_mappings_deleted: 0
+        }) as any;
+
+        const deletionDetails = [
+          counts.reviews_deleted > 0 ? `${counts.reviews_deleted} reviews` : null,
+          counts.costs_deleted > 0 ? `${counts.costs_deleted} costs` : null,
+          counts.vendors_deleted > 0 ? `${counts.vendors_deleted} vendors` : null,
+        ].filter(Boolean).join(", ");
+
+        toast({ 
+          title: "User deleted successfully", 
+          description: `Successfully deleted ${userEmail}${deletionDetails ? ` and removed ${deletionDetails}` : ""}` 
+        });
       } else {
         const isVerified = action === "verify";
         const { error } = await supabase
