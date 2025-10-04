@@ -219,7 +219,7 @@ export default function VendorMobileCard({
 
 
         {/* Reviews Section */}
-        <div className="space-y-4">
+        <div className="space-y-3">
           <NeighborReviewPreview 
             vendorId={vendor.id} 
             vendor={vendor}
@@ -239,128 +239,66 @@ export default function VendorMobileCard({
             isAuthenticated={isAuthenticated}
             communityPhotoUrl={communityPhotoUrl}
           />
-          
-          {vendor.google_rating_count > 0 && (
-            <button 
-              onClick={() => {
-                GATracking.trackButtonClick('google_reviews', { 
-                  vendor_id: vendor.id,
-                  vendor_name: vendor.name 
-                });
-                setGoogleReviewsModalOpen(true);
-              }}
-              className="text-sm text-blue-600 hover:text-blue-800 hover:underline cursor-pointer transition-colors"
-            >
-              See Google Reviews ⭐ {vendor.google_rating?.toFixed(1)} ({vendor.google_rating_count} reviews)
-            </button>
-          )}
         </div>
 
-        {/* Cost Information */}
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h4 className="font-semibold text-foreground">Cost Information</h4>
-            {isVerified && (
-              <Button
-                variant={userCosts?.has(vendor.id) ? "secondary" : "outline"}
-                size="sm"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  GATracking.trackModalOpen('cost_modal', { 
-                    vendor_id: vendor.id,
-                    vendor_name: vendor.name 
-                  });
-                  onCosts(vendor);
-                }}
-                className={userCosts?.has(vendor.id) ? "bg-green-100 text-green-700 border-green-200" : ""}
-              >
-                {userCosts?.has(vendor.id) ? "✓ Added" : "+ Add Cost"}
-              </Button>
-            )}
-          </div>
+        {/* Action Buttons */}
+        <div className="flex gap-2 pt-2">
+          {/* Reviews Button */}
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex-1 text-xs"
+            onClick={() => {
+              GATracking.trackModalOpen('reviews_modal', { 
+                vendor_id: vendor.id,
+                vendor_name: vendor.name 
+              });
+              setIsReviewsModalOpen(true);
+            }}
+          >
+            📝 Reviews ({vendor.hoa_rating_count || 0})
+          </Button>
 
-{vendorCosts && vendorCosts.length > 0 ? (
-  <div className="space-y-2">
-    {(() => {
-      const costsWithAmounts = vendorCosts.filter(c => 
-        c.amount !== null && 
-        c.amount !== undefined && 
-        c.amount > 0
-      );
-      
-      const hasValidAmounts = costsWithAmounts.length > 0;
-      const firstComment = vendorCosts.find(c => c.notes && c.notes.trim())?.notes;
-      
-      if (!hasValidAmounts && !firstComment) {
-        return (
-          <div className="text-center py-3 text-sm text-gray-500">
-            No cost information yet
-          </div>
-        );
-      }
-      
-      return (
-        <>
-          {hasValidAmounts && (
-            <div className="text-xl mb-2">
-              <span className="font-normal">
-                {(() => {
-                  const amounts = costsWithAmounts.map(c => c.amount);
-                  const minAmount = Math.min(...amounts);
-                  const maxAmount = Math.max(...amounts);
-                  const period = costsWithAmounts[0]?.period ? `/${costsWithAmounts[0].period}` : '';
-                  
-                  // If all costs are the same, show single value
-                  if (minAmount === maxAmount) {
-                    return `💰 $${minAmount}${period}`;
-                  }
-                  
-                  // Otherwise show range
-                  return `💰 $${minAmount} - $${maxAmount}${period}`;
-                })()}
-              </span>
-            </div>
-          )}
-          
-          {firstComment && (
-            <p className="text-sm text-muted-foreground italic">
-              "{firstComment.length > 100 ? firstComment.substring(0, 100) + '...' : firstComment}"
-            </p>
-          )}
-          
-          <div className="text-left mt-2">
-            <button
-              onClick={() => {
-                GATracking.trackModalOpen('cost_details_modal', { 
-                  vendor_id: vendor.id,
-                  vendor_name: vendor.name 
-                });
-                setCostModalOpen(true);
-              }}
-              className="text-sm text-blue-600 hover:text-blue-700 underline decoration-dotted underline-offset-4"
-            >
-              See details
-            </button>
-          </div>
-        </>
-      );
-    })()}
-  </div>
-) : (
-  <div className="text-center py-3 text-sm text-gray-500">
-    No cost information yet
-  </div>
-)}
-        </div>
+          {/* Costs Button */}
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex-1 text-xs"
+            onClick={() => {
+              GATracking.trackModalOpen('cost_details_modal', { 
+                vendor_id: vendor.id,
+                vendor_name: vendor.name 
+              });
+              setCostModalOpen(true);
+            }}
+          >
+            💰 {(() => {
+              const costsWithAmounts = vendorCosts?.filter(c => 
+                c.amount !== null && 
+                c.amount !== undefined && 
+                c.amount > 0
+              ) || [];
+              
+              if (costsWithAmounts.length === 0) return 'Costs';
+              
+              const amounts = costsWithAmounts.map(c => c.amount);
+              const minAmount = Math.min(...amounts);
+              const maxAmount = Math.max(...amounts);
+              
+              return minAmount === maxAmount ? `$${minAmount}` : `$${minAmount}-${maxAmount}`;
+            })()}
+          </Button>
 
-        {/* Contact Section */}
-        {showContact && vendor.contact_info && (
-          <div className="bg-gray-50 rounded-lg p-4">
+          {/* Contact Button */}
+          {showContact && vendor.contact_info && (
             <Popover open={contactPopoverOpen} onOpenChange={setContactPopoverOpen}>
               <PopoverTrigger asChild>
-                <Button variant="outline" className="text-base font-medium flex items-center gap-2">
-                  <Phone size={16} />
-                  {formatUSPhoneDisplay(vendor.contact_info)}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 text-xs"
+                >
+                  📞 Contact
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-2">
@@ -395,8 +333,8 @@ export default function VendorMobileCard({
                 </div>
               </PopoverContent>
             </Popover>
-          </div>
-        )}
+          )}
+        </div>
       </CardContent>
     </Card>
 

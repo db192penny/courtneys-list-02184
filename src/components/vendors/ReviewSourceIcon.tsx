@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 
 interface ReviewSourceIconProps {
   source: "bb" | "google";
-  size?: "sm" | "md";
+  size?: "sm" | "md" | "lg";
   className?: string;
   communityPhotoUrl?: string | null;
 }
@@ -15,7 +15,8 @@ export function ReviewSourceIcon({
 }: ReviewSourceIconProps) {
   const sizeClasses = {
     sm: "h-4 w-4",
-    md: "h-5 w-5"
+    md: "h-5 w-5",
+    lg: "h-12 w-12"
   };
 
   if (source === "bb") {
@@ -24,7 +25,8 @@ export function ReviewSourceIcon({
       return (
         <div 
           className={cn(
-            "rounded-full overflow-hidden ring-2 ring-purple-500/50 shadow-sm",
+            "rounded-full overflow-hidden shadow-sm",
+            size === "lg" ? "ring-2 ring-white" : "ring-2 ring-purple-500/50",
             sizeClasses[size],
             className
           )}
