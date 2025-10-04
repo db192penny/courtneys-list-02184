@@ -442,7 +442,18 @@ const Auth = () => {
       />
       
       <section className="container max-w-xl py-4 sm:py-6 px-4 sm:px-6">
-        <h1 className="text-3xl font-semibold mb-4 sm:mb-6">{communityName ? `Join ${communityName.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}` : "Join Boca Bridges"}</h1>
+        <div className="flex items-center justify-between mb-4 sm:mb-6">
+          <h1 className="text-3xl font-semibold">{communityName ? `Join ${communityName.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}` : "Join Boca Bridges"}</h1>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleBack}
+            className="text-muted-foreground hover:text-foreground"
+          >
+            <ArrowLeft className="h-4 w-4 mr-1" />
+            Back
+          </Button>
+        </div>
         <Card>
           <CardContent className="space-y-4 pt-6">
             <form onSubmit={onSubmit} className="space-y-4">
@@ -454,18 +465,7 @@ const Auth = () => {
               />
 
               <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="name">Name <span className="text-foreground" aria-hidden>*</span></Label>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleBack}
-                    className="text-muted-foreground hover:text-foreground"
-                  >
-                    <ArrowLeft className="h-4 w-4 mr-1" />
-                    Back
-                  </Button>
-                </div>
+                <Label htmlFor="name">Name <span className="text-foreground" aria-hidden>*</span></Label>
                 <Input
                   id="name"
                   value={name}
