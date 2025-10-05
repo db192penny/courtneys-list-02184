@@ -262,7 +262,12 @@ export default function Community() {
         <div className="fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 shadow-2xl shadow-blue-500/30">
           <div className="container py-3 sm:py-4 flex flex-col sm:flex-row items-center justify-between gap-2">
             <p className="text-sm sm:text-base font-semibold text-white text-center sm:text-left">
-              Join 150+ {communityName} neighbors
+              {communityName === "Boca Bridges" 
+                ? `Join 150+ ${communityName} neighbors` 
+                : communityName === "The Bridges"
+                ? "Join your Bridges neighbors"
+                : `Join your ${communityName} neighbors`
+              }
             </p>
             <div className="flex items-center gap-4">
               <button
