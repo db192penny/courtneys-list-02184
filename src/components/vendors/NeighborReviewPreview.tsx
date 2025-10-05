@@ -267,17 +267,14 @@ export function NeighborReviewPreview({
         </div>
       )}
       
-      {/* Footer with CTA - Enhanced */}
-      <div className="mt-3 bg-gradient-to-r from-blue-200 to-indigo-200 rounded-lg p-3 border border-blue-300 hover:from-blue-300 hover:to-indigo-300 transition-all duration-200 shadow-sm">
-        <div className="flex items-center justify-center gap-2">
-          <span className="text-2xl">👀</span>
-          <span className="text-sm font-bold text-blue-900">
+      {/* Footer with CTA - Compact Inline */}
+      <div className="mt-3 bg-white/40 border border-blue-300 rounded-lg px-3 py-2 hover:bg-white/60 hover:border-blue-400 transition-all duration-200">
+        <div className="flex items-center justify-center gap-2 text-sm">
+          <span className="text-lg">👀</span>
+          <span className="font-semibold text-blue-900">
             {totalReviews === 1 ? 'Read this review' : `Read all ${totalReviews} reviews`}
           </span>
-          <span className="text-blue-800">→</span>
-        </div>
-        <div className="text-xs text-blue-700 text-center mt-1 font-medium">
-          See what neighbors are saying
+          <span className="text-base font-bold text-blue-700">→</span>
         </div>
       </div>
     </div>
