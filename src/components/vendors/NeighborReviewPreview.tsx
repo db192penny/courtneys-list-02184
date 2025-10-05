@@ -143,6 +143,18 @@ export function NeighborReviewPreview({
 
   const selectedReview = selectBestReview(reviews || []);
   const totalReviews = reviews?.length || 0;
+  
+  // Calculate if we should show the CTA box
+  const shouldShowCTA = (() => {
+    if (totalReviews > 1) return true; // Multiple reviews
+    if (totalReviews === 1 && selectedReview) {
+      const hasComments = selectedReview.comments && selectedReview.comments.trim();
+      if (!hasComments) return false; // Rating-only
+      const { wasTruncated } = truncateComment(selectedReview.comments);
+      return wasTruncated; // Show only if truncated
+    }
+    return false;
+  })();
 
   if (!selectedReview) {
     return (
@@ -235,18 +247,7 @@ export function NeighborReviewPreview({
       {selectedReview.comments && selectedReview.comments.trim() ? (
         <div className="bg-white/60 rounded-lg p-3 mb-3 border border-blue-100">
           <p className="text-base text-blue-800 font-medium leading-snug mb-2 italic">
-            "{truncateComment(selectedReview.comments).text}
-            {truncateComment(selectedReview.comments).wasTruncated && (
-              <button 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleInteraction(e);
-                }}
-                className="inline text-blue-600 hover:text-blue-800 hover:underline cursor-pointer transition-colors ml-1"
-              >
-                read more →
-              </button>
-            )}"
+            "{truncateComment(selectedReview.comments).text}{truncateComment(selectedReview.comments).wasTruncated && '...'}"
           </p>
           {/* Right-aligned attribution */}
           <div className="flex justify-end">
@@ -268,15 +269,17 @@ export function NeighborReviewPreview({
       )}
       
       {/* Footer with CTA - Compact Inline */}
-      <div className="mt-3 bg-white/40 border border-blue-300 rounded-lg px-3 py-2 hover:bg-white/60 hover:border-blue-400 transition-all duration-200">
-        <div className="flex items-center justify-center gap-2 text-sm">
-          <span className="text-lg">👀</span>
-          <span className="font-semibold text-blue-900">
-            {totalReviews === 1 ? 'Read this review' : `Read all ${totalReviews} reviews`}
-          </span>
-          <span className="text-base font-bold text-blue-700">→</span>
+      {shouldShowCTA && (
+        <div className="mt-3 bg-white/40 border border-blue-300 rounded-lg px-3 py-2 hover:bg-white/60 hover:border-blue-400 transition-all duration-200">
+          <div className="flex items-center justify-center gap-2 text-sm">
+            <span className="text-lg">👀</span>
+            <span className="font-semibold text-blue-900">
+              {totalReviews === 1 ? 'Read this review' : `Read all ${totalReviews} reviews`}
+            </span>
+            <span className="text-base font-bold text-blue-700">→</span>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 
