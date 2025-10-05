@@ -236,7 +236,7 @@ const Auth = () => {
           redirectTo: `${window.location.origin}/auth/callback?context=${communityContext}&intent=signup`,
           queryParams: {
             access_type: 'offline',
-            prompt: 'consent',
+            prompt: 'consent select_account',
           }
         }
       });
