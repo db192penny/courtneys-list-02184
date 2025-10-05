@@ -14,6 +14,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { WelcomeToolbar } from "@/components/WelcomeToolbar";
 import { useScrollDirection } from "@/hooks/useScrollDirection";
 import { BackToTopButton } from "@/components/ui/BackToTopButton";
+import { CommunityNavigationNotice } from "@/components/CommunityNavigationNotice";
 
 function slugToName(slug: string) {
   const cleaned = (slug || "")
@@ -164,6 +165,8 @@ export default function Community() {
       />
 
       <section className="container pt-0 sm:py-10 pb-40 md:pb-2 space-y-2 sm:space-y-6">
+        <CommunityNavigationNotice />
+        
         {/* Welcome toolbar for new users */}
         <WelcomeToolbar communitySlug={slug} />
         
