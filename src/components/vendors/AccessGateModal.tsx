@@ -21,22 +21,19 @@ const getContent = (type: 'reviews' | 'costs' | 'rate', communityName: string) =
       return {
         title: communityName,
         subtitle: "Full Reviews",
-        message: "Full neighbor reviews are shared just within our neighborhood circle.",
-        cta: "Sign in or request access to view them."
+        message: "Neighbor reviews are exclusive to our community. Sign in or request access to continue."
       };
     case 'costs':
       return {
         title: communityName,
         subtitle: "Cost Details",
-        message: "Full cost details are shared just within our neighborhood circle.",
-        cta: "Sign in or request access to view them."
+        message: "Cost details are exclusive to our community. Sign in or request access to continue."
       };
     case 'rate':
       return {
         title: communityName,
         subtitle: "Rate This Vendor",
-        message: "Sign in or request access for the rating fun! One step away from helping your neighbors!",
-        cta: ""
+        message: "Sign in or request access to rate this vendor and help your neighbors."
       };
   }
 };
@@ -74,15 +71,10 @@ export function AccessGateModal({
         </DialogHeader>
         
         <div className="space-y-6 py-4">
-          <div className="text-center space-y-2">
-            <p className="text-sm text-foreground">
+          <div className="text-center">
+            <p className="text-base text-foreground leading-relaxed">
               {content.message}
             </p>
-            {content.cta && (
-              <p className="text-sm font-medium text-foreground">
-                {content.cta}
-              </p>
-            )}
           </div>
           
           <div className="flex gap-3">
