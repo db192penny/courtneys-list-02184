@@ -97,30 +97,44 @@ const AdminVendorManagement = () => {
   };
 
 
-  // Delete vendor
+  // Delete vendor with cascading delete
   const deleteVendor = async (vendor: Vendor) => {
-    const confirmed = confirm(`Are you sure you want to delete "${vendor.name}"? This will also delete all associated reviews and cost data.`);
+    const confirmed = window.confirm(
+      `Are you sure you want to delete "${vendor.name}"?\n\n` +
+      `This will also delete:\n` +
+      `• All reviews for this vendor\n` +
+      `• All cost reports\n` +
+      `• All home vendor associations\n` +
+      `• All market pricing data\n\n` +
+      `This action cannot be undone.`
+    );
+    
     if (!confirmed) return;
-
+    
     try {
-      const { error } = await supabase
-        .from("vendors")
-        .delete()
-        .eq("id", vendor.id);
-
+      const { data, error } = await supabase
+        .rpc('admin_delete_vendor_cascade' as any, { vendor_uuid: vendor.id });
+      
       if (error) throw error;
-
-      toast({
-        title: "Success",
-        description: "Vendor deleted successfully",
-      });
-
-      loadVendors(); // Refresh the list
-    } catch (error) {
-      console.error("Failed to delete vendor:", error);
+      
+      const result = data as { success: boolean; error?: string };
+      
+      if (result?.success) {
+        toast({
+          title: "Vendor Deleted",
+          description: `Successfully deleted ${vendor.name} and all related data`,
+        });
+        
+        // Refresh the vendor list
+        await loadVendors();
+      } else {
+        throw new Error(result?.error || "Failed to delete vendor");
+      }
+    } catch (error: any) {
+      console.error("Error deleting vendor:", error);
       toast({
         title: "Error",
-        description: "Failed to delete vendor",
+        description: `Failed to delete vendor: ${error.message}`,
         variant: "destructive",
       });
     }
