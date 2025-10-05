@@ -30,13 +30,13 @@ export function CommunityNavigationNotice() {
       setCurrentCommunity(current);
 
       try {
-        // Get user's primary community
         const { data: userData } = await supabase.auth.getUser();
         if (!userData.user) {
           setLoading(false);
           return;
         }
 
+        // Get user's community from household_hoa
         const { data: userProfile } = await supabase
           .from('users')
           .select('address')
@@ -44,10 +44,13 @@ export function CommunityNavigationNotice() {
           .single();
 
         if (userProfile?.address) {
+          const normalizedAddress = userProfile.address.toLowerCase().trim();
+          
           const { data: household } = await supabase
             .from('household_hoa')
             .select('hoa_name')
-            .eq('normalized_address', userProfile.address.toLowerCase().trim())
+            .or(`household_address.eq.${userProfile.address},normalized_address.eq.${normalizedAddress}`)
+            .limit(1)
             .single();
             
           if (household) {
@@ -76,14 +79,14 @@ export function CommunityNavigationNotice() {
       <Info className="h-4 w-4 text-amber-600" />
       <AlertDescription className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <span className="text-sm">
-          <strong>Note:</strong> You're viewing <strong>{currentCommunity}</strong>'s vendors. 
-          You're a member of <strong>{userCommunity}</strong>.
+          <strong>Note:</strong> You're viewing <strong>{currentCommunity}</strong> vendors. 
+          Any reviews or costs you add will automatically appear in your community: <strong>{userCommunity}</strong>
         </span>
         <Button 
           variant="outline" 
           size="sm" 
           asChild
-          className="gap-1 whitespace-nowrap"
+          className="gap-1 whitespace-nowrap border-amber-300 hover:bg-amber-100"
         >
           <Link to={`/communities/${communitySlug}`}>
             <Home className="h-3 w-3" />
