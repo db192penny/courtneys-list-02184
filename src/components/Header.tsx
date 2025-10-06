@@ -308,30 +308,17 @@ const Header = () => {
                 </SheetContent>
               </Sheet>
             ) : !isAuthPage ? (
-              <div className="flex items-center gap-3">
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={() => {
-                    const communitySlug = communityDisplayName.toLowerCase().replace(/\s+/g, '-');
-                    navigate(`/signin?community=${communitySlug}`);
-                  }}
-                  className="text-sm"
-                >
-                  Sign In
-                </Button>
-                <Button 
-                  variant="cta" 
-                  size="sm" 
-                  onClick={() => {
-                    const communitySlug = communityDisplayName.toLowerCase().replace(/\s+/g, '-');
-                    navigate(`/auth?community=${communitySlug}`);
-                  }}
-                  className="text-sm whitespace-nowrap"
-                >
-                  Request Access
-                </Button>
-              </div>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => {
+                  const communitySlug = communityDisplayName.toLowerCase().replace(/\s+/g, '-');
+                  navigate(`/signin?community=${communitySlug}`);
+                }}
+                className="text-sm"
+              >
+                Sign In
+              </Button>
             ) : null}
           </div>
         ) : (
@@ -361,26 +348,15 @@ const Header = () => {
                 </div>
               </div>
             ) : !isAuthPage ? (
-              <div className="flex items-center gap-2">
-                <Button 
-                  variant="ghost" 
-                  onClick={() => {
-                    const communitySlug = communityDisplayName.toLowerCase().replace(/\s+/g, '-');
-                    navigate(`/signin?community=${communitySlug}`);
-                  }}
-                >
-                  Sign In
-                </Button>
-                <Button 
-                  variant="cta" 
-                  onClick={() => {
-                    const communitySlug = communityDisplayName.toLowerCase().replace(/\s+/g, '-');
-                    navigate(`/auth?community=${communitySlug}`);
-                  }}
-                >
-                  Request Access
-                </Button>
-              </div>
+              <Button 
+                variant="ghost" 
+                onClick={() => {
+                  const communitySlug = communityDisplayName.toLowerCase().replace(/\s+/g, '-');
+                  navigate(`/signin?community=${communitySlug}`);
+                }}
+              >
+                Sign In
+              </Button>
             ) : null}
           </div>
         )}

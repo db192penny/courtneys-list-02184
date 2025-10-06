@@ -295,7 +295,7 @@ export default function Community() {
                 className="font-bold px-6 shadow-lg flex items-center gap-2"
               >
                 <UserPlus className="h-4 w-4" />
-                Request Access
+                Join Now
               </Button>
             </div>
           </div>
