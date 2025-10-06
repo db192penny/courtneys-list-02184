@@ -276,8 +276,8 @@ export default function Community() {
               <Button
                 onClick={() => navigate(`/signin?community=${communityName}`)}
                 size="sm"
-                variant="ghost"
-                className="flex-1 sm:flex-initial text-white hover:bg-white/20 transition-colors"
+                variant="outline"
+                className="flex-1 sm:flex-initial border-white text-white hover:bg-white/10 transition-colors"
               >
                 Log In
               </Button>
