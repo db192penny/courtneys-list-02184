@@ -33,7 +33,7 @@ const getContent = (type: 'reviews' | 'costs' | 'rate', communityName: string) =
       return {
         title: communityName,
         subtitle: "Rate This Vendor",
-        message: "Join your neighbors first to share ratings"
+        message: "Want to rate? Join your neighbors first"
       };
   }
 };
