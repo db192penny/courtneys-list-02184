@@ -217,7 +217,7 @@ export default function Community() {
                   <div className="text-center">
                     <Users className="w-5 h-5 mx-auto mb-1 text-purple-600" />
                     <div className="text-xl font-bold">{activeUsers}</div>
-                    <div className="text-xs text-muted-foreground">Members</div>
+                    <div className="text-xs text-muted-foreground">Neighbors</div>
                   </div>
                 </div>
               </div>
