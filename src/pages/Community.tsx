@@ -272,13 +272,15 @@ export default function Community() {
                 : `Join your ${communityName} neighbors`
               }
             </p>
-            <div className="flex items-center gap-4">
-              <button
+            <div className="flex items-center gap-3 w-full sm:w-auto">
+              <Button
                 onClick={() => navigate(`/signin?community=${communityName}`)}
-                className="text-white/90 hover:text-white text-sm underline underline-offset-4 inline transition-colors"
+                size="sm"
+                variant="outline"
+                className="flex-1 sm:flex-initial border-white text-white hover:bg-white hover:text-blue-600 transition-colors"
               >
-                Already a member? Sign in
-              </button>
+                Log In
+              </Button>
               <Button
                 onClick={() => {
                   const inviteCode = localStorage.getItem('pending_invite_code');
@@ -292,10 +294,9 @@ export default function Community() {
                 }}
                 size="sm"
                 variant="cta"
-                className="font-bold px-6 shadow-lg flex items-center gap-2"
+                className="flex-1 sm:flex-initial font-bold shadow-lg"
               >
-                <UserPlus className="h-4 w-4" />
-                Join Now
+                Sign Up
               </Button>
             </div>
           </div>
