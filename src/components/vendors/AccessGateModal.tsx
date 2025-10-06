@@ -21,19 +21,19 @@ const getContent = (type: 'reviews' | 'costs' | 'rate', communityName: string) =
       return {
         title: communityName,
         subtitle: "Full Reviews",
-        message: "See what your neighbors say"
+        message: "Your neighbors have opinions. Lots of them."
       };
     case 'costs':
       return {
         title: communityName,
         subtitle: "Cost Details",
-        message: "Verified neighbors share pricing"
+        message: "Find out who got the deal and who got... the other thing"
       };
     case 'rate':
       return {
         title: communityName,
         subtitle: "Rate This Vendor",
-        message: "Join your neighbors to share ratings"
+        message: "Join your neighbors first to share ratings"
       };
   }
 };
