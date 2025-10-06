@@ -109,8 +109,8 @@ export default function Community() {
   const contactPhone = asset?.contact_phone || null;
   const phoneDigits = contactPhone?.replace(/\D/g, "");
   const e164Phone = phoneDigits ? (phoneDigits.length === 10 ? `+1${phoneDigits}` : `+${phoneDigits}`) : null;
-  const homesCount = (asset as any)?.total_homes ?? 500;
-  const homesLabel = typeof homesCount === "number" ? homesCount.toLocaleString() : "500";
+  const homesCount = (asset as any)?.total_homes ?? 591;
+  const homesLabel = typeof homesCount === "number" ? homesCount.toLocaleString() : "591";
 
   // Fetch real community stats
   const { data: communityStats } = useQuery({
