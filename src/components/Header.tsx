@@ -317,7 +317,7 @@ const Header = () => {
                 }}
                 className="text-sm"
               >
-                Sign In
+                Log In
               </Button>
             ) : null}
           </div>
@@ -355,7 +355,7 @@ const Header = () => {
                   navigate(`/signin?community=${communitySlug}`);
                 }}
               >
-                Sign In
+                Log In
               </Button>
             ) : null}
           </div>
