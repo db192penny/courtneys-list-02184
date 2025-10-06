@@ -21,19 +21,19 @@ const getContent = (type: 'reviews' | 'costs' | 'rate', communityName: string) =
       return {
         title: communityName,
         subtitle: "Full Reviews",
-        message: "Neighbor reviews are exclusive to our community. Sign in or request access to continue."
+        message: "See what your neighbors say"
       };
     case 'costs':
       return {
         title: communityName,
         subtitle: "Cost Details",
-        message: "Cost details are exclusive to our community. Sign in or request access to continue."
+        message: "Verified neighbors share pricing"
       };
     case 'rate':
       return {
         title: communityName,
         subtitle: "Rate This Vendor",
-        message: "Sign in or request access to rate this vendor and help your neighbors."
+        message: "Join your neighbors to share ratings"
       };
   }
 };
@@ -83,14 +83,14 @@ export function AccessGateModal({
               onClick={handleSignIn}
               className="flex-1"
             >
-              Sign In
+              Log In
             </Button>
             <Button 
               variant="cta" 
               onClick={handleRequestAccess}
               className="flex-1"
             >
-              Request Access
+              Sign Up
             </Button>
           </div>
         </div>

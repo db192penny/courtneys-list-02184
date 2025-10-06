@@ -127,7 +127,7 @@ export function UnifiedAuthModal({
               className="text-sm text-muted-foreground hover:text-foreground underline-offset-4 hover:underline"
               disabled={loading}
             >
-              Already a member? Sign in here
+              Already a member? Log in here
             </button>
           </div>
         </div>

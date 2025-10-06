@@ -211,8 +211,8 @@ const SignIn = () => {
   return (
     <main>
       <SEO
-        title={`Sign In to ${communityName || "Courtney's List"} | Private Community Access`}
-        description="Sign in with your email to access your community's trusted vendor list."
+        title={`Log In to ${communityName || "Courtney's List"} | Private Community Access`}
+        description="Log in with your email to access your community's trusted vendor list."
         canonical={`${window.location.origin}/signin`}
       />
       <section className="container max-w-lg py-12">
@@ -220,7 +220,7 @@ const SignIn = () => {
           <CardHeader>
             <div className="flex items-center justify-between">
             <div>
-                <CardTitle>Sign In to {communityName || "Courtney's List"}</CardTitle>
+                <CardTitle>Log In to {communityName || "Courtney's List"}</CardTitle>
               </div>
               <Button
                 variant="ghost"
@@ -254,7 +254,7 @@ const SignIn = () => {
                 />
               </div>
               <Button type="submit" disabled={loading} className="w-full">
-                {loading ? "Checking..." : "Sign In"}
+                {loading ? "Checking..." : "Log In"}
               </Button>
 
               <div className="text-sm text-muted-foreground">
@@ -268,7 +268,7 @@ const SignIn = () => {
                   to={community ? `/auth?community=${community}` : "/communities/boca-bridges"} 
                   className="underline underline-offset-4"
                 >
-                  New to {communityName || "Courtney's List"}? Sign Up
+                  New to {communityName || "Courtney's List"}? Join Us
                 </Link>
               </div>
             </form>
