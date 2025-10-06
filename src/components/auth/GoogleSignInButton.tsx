@@ -27,7 +27,7 @@ export function GoogleSignInButton({
       <Button
         onClick={onClick}
         variant="outline"
-        className="w-full"
+        className="w-full border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950"
         type="button"
         disabled={loading}
       >
@@ -60,9 +60,9 @@ export function GoogleSignInButton({
         <div className="absolute inset-0 flex items-center">
           <span className="w-full border-t" />
         </div>
-        <div className="relative flex justify-center text-xs uppercase">
+        <div className="relative flex justify-center text-sm font-medium uppercase">
           <span className="bg-background px-2 text-muted-foreground">
-            Or continue with email
+            Or use email
           </span>
         </div>
       </div>
