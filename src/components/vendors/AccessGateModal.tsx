@@ -21,7 +21,7 @@ const getContent = (type: 'reviews' | 'costs' | 'rate', communityName: string) =
       return {
         title: communityName,
         subtitle: "Full Reviews",
-        message: "Your neighbors have opinions. Lots of them."
+        message: `Join ${communityName} to see full neighbor reviews`
       };
     case 'costs':
       return {
