@@ -2,15 +2,10 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { GoogleSignInButton } from "./GoogleSignInButton";
+import { storeAuthReturnPath } from "@/utils/authRedirect"; // NEW IMPORT
 
 interface UnifiedAuthModalProps {
   open: boolean;
@@ -20,12 +15,12 @@ interface UnifiedAuthModalProps {
   onSuccess?: () => void;
 }
 
-export function UnifiedAuthModal({ 
-  open, 
-  onOpenChange, 
+export function UnifiedAuthModal({
+  open,
+  onOpenChange,
   communityName = "your community",
   context,
-  onSuccess 
+  onSuccess,
 }: UnifiedAuthModalProps) {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -33,14 +28,16 @@ export function UnifiedAuthModal({
   const handleGoogleAuth = async () => {
     setLoading(true);
     try {
+      storeAuthReturnPath(); // NEW LINE - Store current page
+
       const redirectUrl = `${window.location.origin}/auth/callback`;
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
           redirectTo: redirectUrl,
           queryParams: {
-            access_type: 'offline',
-            prompt: 'consent',
+            access_type: "offline",
+            prompt: "consent",
           },
         },
       });
@@ -56,17 +53,21 @@ export function UnifiedAuthModal({
   };
 
   const handleEmailSignUp = () => {
+    storeAuthReturnPath(); // NEW LINE - Store current page
+
     const currentPath = window.location.pathname;
     const communityMatch = currentPath.match(/\/communities\/([^\/]+)/);
-    const community = communityMatch ? communityMatch[1] : 'boca-bridges';
+    const community = communityMatch ? communityMatch[1] : "boca-bridges";
     navigate(`/auth?community=${community}`);
     onOpenChange(false);
   };
 
   const handleSignIn = () => {
+    storeAuthReturnPath(); // NEW LINE - Store current page
+
     const currentPath = window.location.pathname;
     const communityMatch = currentPath.match(/\/communities\/([^\/]+)/);
-    const community = communityMatch ? communityMatch[1] : 'boca-bridges';
+    const community = communityMatch ? communityMatch[1] : "boca-bridges";
     navigate(`/signin?community=${community}`);
     onOpenChange(false);
   };
@@ -89,13 +90,11 @@ export function UnifiedAuthModal({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-center text-xl">Welcome to {communityName}</DialogTitle>
-          <DialogDescription className="text-center pt-2">
-            {getContextMessage()}
-          </DialogDescription>
+          <DialogDescription className="text-center pt-2">{getContextMessage()}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3 pt-2">
-          <GoogleSignInButton 
+          <GoogleSignInButton
             onClick={handleGoogleAuth}
             loading={loading}
             label="Continue with Google"
@@ -111,12 +110,7 @@ export function UnifiedAuthModal({
             </div>
           </div>
 
-          <Button 
-            variant="outline" 
-            className="w-full" 
-            onClick={handleEmailSignUp}
-            disabled={loading}
-          >
+          <Button variant="outline" className="w-full" onClick={handleEmailSignUp} disabled={loading}>
             Sign Up with Email
           </Button>
 
