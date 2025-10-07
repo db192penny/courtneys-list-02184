@@ -270,19 +270,21 @@ export default function Community() {
               {/* Left: Value Proposition + Social Proof */}
               <div className="flex-1 text-center sm:text-left space-y-1">
                 <p className="text-base sm:text-lg font-semibold text-foreground">
-                  See what your neighbors paid & who they recommend
+                  See who your neighbors recommend (and who they don't) + what they paid
                 </p>
-                <div className="flex items-center justify-center sm:justify-start gap-3 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-1.5">
-                    <Users className="h-4 w-4 text-primary" />
-                    <span className="font-medium">{activeUsers > 0 ? `${activeUsers}+ active` : '150+ active'} neighbors</span>
+                {activeUsers >= 100 && (
+                  <div className="flex items-center justify-center sm:justify-start gap-3 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-1.5">
+                      <Users className="h-4 w-4 text-primary" />
+                      <span className="font-medium">{activeUsers}+ active neighbors</span>
+                    </div>
+                    <span className="text-border">•</span>
+                    <div className="flex items-center gap-1.5">
+                      <Star className="h-4 w-4 text-amber-500" />
+                      <span className="font-medium">{totalReviews}+ reviews</span>
+                    </div>
                   </div>
-                  <span className="text-border">•</span>
-                  <div className="flex items-center gap-1.5">
-                    <Star className="h-4 w-4 text-amber-500" />
-                    <span className="font-medium">{totalReviews > 0 ? `${totalReviews}+` : '450+'} reviews</span>
-                  </div>
-                </div>
+                )}
               </div>
 
               {/* Right: CTAs */}
