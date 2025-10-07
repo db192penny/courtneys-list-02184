@@ -270,7 +270,7 @@ export default function Community() {
               {/* Left: Value Proposition + Social Proof */}
               <div className="flex-1 text-center sm:text-left space-y-1">
                 <p className="text-base sm:text-lg font-semibold text-foreground">
-                  See who your neighbors recommend (and who they don't) + what they paid
+                  See who your neighbors recommend (and who they don't)
                 </p>
                 {activeUsers >= 100 && (
                   <div className="flex items-center justify-center sm:justify-start gap-3 text-sm text-muted-foreground">
