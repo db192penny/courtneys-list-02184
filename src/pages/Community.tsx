@@ -15,6 +15,7 @@ import { WelcomeToolbar } from "@/components/WelcomeToolbar";
 import { useScrollDirection } from "@/hooks/useScrollDirection";
 import { BackToTopButton } from "@/components/ui/BackToTopButton";
 import { CommunityNavigationNotice } from "@/components/CommunityNavigationNotice";
+import { storeAuthReturnPath } from "@/utils/authRedirect";
 
 function slugToName(slug: string) {
   const cleaned = (slug || "")
@@ -283,6 +284,8 @@ export default function Community() {
               </Button>
               <Button
                 onClick={() => {
+                  storeAuthReturnPath(); // Store current page for post-auth redirect
+                  
                   const inviteCode = localStorage.getItem('pending_invite_code');
                   const inviterId = localStorage.getItem('pending_inviter_id');
                   
