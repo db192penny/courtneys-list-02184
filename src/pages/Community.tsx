@@ -261,47 +261,60 @@ export default function Community() {
       {/* Back to Top Button */}
       <BackToTopButton />
 
-      {/* Sticky Join Now Bar - Bottom */}
+      {/* Sticky Split Action Bar - Bottom */}
       {showSignUpPrompt && (
-        <div className="fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 shadow-2xl shadow-blue-500/30">
-          <div className="container py-3 sm:py-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-            <p className="text-sm sm:text-base font-semibold text-white text-center sm:text-left">
-              {communityName === "Boca Bridges" 
-                ? `Join 150+ ${communityName} neighbors` 
-                : communityName === "The Bridges"
-                ? "Join your Bridges neighbors"
-                : `Join your ${communityName} neighbors`
-              }
-            </p>
-            <div className="flex items-center gap-3 w-full sm:w-auto">
-              <Button
-                onClick={() => navigate(`/signin?community=${communityName}`)}
-                size="sm"
-                variant="outline"
-                className="flex-1 sm:flex-initial bg-transparent border-white text-white hover:bg-white/20 transition-colors"
-              >
-                Log In
-              </Button>
-              <Button
-                onClick={() => {
-                  storeAuthReturnPath(); // Store current page for post-auth redirect
-                  
-                  const inviteCode = localStorage.getItem('pending_invite_code');
-                  const inviterId = localStorage.getItem('pending_inviter_id');
-                  
-                  if (inviteCode && inviterId) {
-                    navigate(`/auth?community=${communityName}&invite=${inviteCode}&inviter=${inviterId}`);
-                  } else {
-                    navigate(`/auth?community=${communityName}`);
-                  }
-                }}
-                size="sm"
-                variant="cta"
-                className="flex-1 sm:flex-initial font-bold shadow-lg flex items-center gap-2"
-              >
-                <UserPlus className="h-4 w-4" />
-                Sign Up
-              </Button>
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-lg border-t border-border shadow-2xl animate-fade-in">
+          <div className="container py-4">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              
+              {/* Left: Value Proposition + Social Proof */}
+              <div className="flex-1 text-center sm:text-left space-y-1">
+                <p className="text-base sm:text-lg font-semibold text-foreground">
+                  See what your neighbors paid & who they recommend
+                </p>
+                <div className="flex items-center justify-center sm:justify-start gap-3 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-1.5">
+                    <Users className="h-4 w-4 text-primary" />
+                    <span className="font-medium">{activeUsers > 0 ? `${activeUsers}+ active` : '150+ active'} neighbors</span>
+                  </div>
+                  <span className="text-border">•</span>
+                  <div className="flex items-center gap-1.5">
+                    <Star className="h-4 w-4 text-amber-500" />
+                    <span className="font-medium">{totalReviews > 0 ? `${totalReviews}+` : '450+'} reviews</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right: CTAs */}
+              <div className="flex items-center gap-3 w-full sm:w-auto">
+                <Button
+                  onClick={() => navigate(`/signin?community=${communityName}`)}
+                  size="default"
+                  variant="ghost"
+                  className="flex-1 sm:flex-initial text-muted-foreground hover:text-foreground"
+                >
+                  Log In
+                </Button>
+                <Button
+                  onClick={() => {
+                    storeAuthReturnPath();
+                    
+                    const inviteCode = localStorage.getItem('pending_invite_code');
+                    const inviterId = localStorage.getItem('pending_inviter_id');
+                    
+                    if (inviteCode && inviterId) {
+                      navigate(`/auth?community=${communityName}&invite=${inviteCode}&inviter=${inviterId}`);
+                    } else {
+                      navigate(`/auth?community=${communityName}`);
+                    }
+                  }}
+                  size="default"
+                  className="flex-1 sm:flex-initial font-semibold shadow-lg flex items-center gap-2 bg-primary hover:bg-primary/90"
+                >
+                  <UserPlus className="h-4 w-4" />
+                  Sign Up Free
+                </Button>
+              </div>
             </div>
           </div>
         </div>
